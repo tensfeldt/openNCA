@@ -1,6 +1,6 @@
-#' Run M2 SD Computation 
+#' Run M3 SD Computation 
 #'
-#' This function will compute all the relevant parameters for a M2 model Single Dose (SD).\cr
+#' This function will compute all the relevant parameters for a M3 model Single Dose (SD).\cr
 #' 
 #' @details
 #' \strong{Linear Method} \cr  
@@ -29,8 +29,6 @@
 #' You can specify the options to subset the list of parameters that are returned: \cr
 #' \strong{Return List options} \cr  
 #' \enumerate{
-#'  \item \strong{c0}: Refer to \code{\link{c0}} for more details
-#'  \item \strong{v0}: Refer to \code{\link{v0}} for more details
 #'  \item \strong{cmax}: Refer to \code{\link{cmax}} for more details
 #'  \item \strong{cmax_c}: Refer to \code{\link{cmaxc}} for more details
 #'  \item \strong{cmax_dn}: Refer to \code{\link{cmax_dn}} for more details
@@ -140,7 +138,7 @@
 #'  \item Kevin McConnell
 #' }
 #' @export
-run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model = "M2", parameter = "SD", return = list()){
+run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model = "M3", parameter = "SD", return = list()){
   if(is.null(data)){
     stop("Please provide a valid path for the 'data' parameter")
   } else {
@@ -166,7 +164,7 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model = "
     stop("Values provided via 'map' are not present in the dataset provided via 'data'")
   }
   
-  computation_list <- list("c0", "v0", "cmax", "clast", "cmax_c", "cmax_dn", "tmax", "tlast", "kel", "kelr", "lasttime",
+  computation_list <- list("cmax", "clast", "cmax_c", "cmax_dn", "tmax", "tlast", "kel", "kelr", "lasttime",
                            "auc_all", "auc_dn", "auc_last", "auc_last_c", "auc_last_dn", "aumc_last", "auc_t1_t2", 
                            "auc_inf_o", "auc_inf_o_c", "auc_inf_p", "auc_inf_p_c", "auc_inf_o_dn", "auc_inf_p_dn", 
                            "aumc_inf_p", "aumc_inf_p", "mrt_last", "mrto", "mrtp", "auc_xpct_o", "auc_xcpt_p", 
@@ -174,9 +172,9 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model = "
 
   if(tolower(return) == 'all' ||  (typeof(return) == 'list' && length(return) == 0)){
     auc_col <- length(unique(data_data[,map_data$NOMTIME]))-1
-    col <- 45 + 2*auc_col + 1
+    col <- 43 + 2*auc_col + 1
     computation_df <- data.frame(matrix(ncol = col, nrow = 0)) 
-    names(computation_df) <- c("SDEID", "C0", "V0", "CMAX", "CLAST", "CMAXC", "CMAXDN", "TMAX", "TLAST", "KEL", "KELTMLO", "KELTHMI", "KELNOPT", 
+    names(computation_df) <- c("SDEID", "CMAX", "CLAST", "CMAXC", "CMAXDN", "TMAX", "TLAST", "KEL", "KELTMLO", "KELTHMI", "KELNOPT", 
                                "KELR", "KELRSQ", "KELRSQA", "THALF", "LASTTIME", "AUCALL", "AUCDN", "AUCLAST", "AUCLASTC", "AUCLASTDN", 
                                "AUMCLAST", rep(paste0("AUC",1:auc_col)), rep(paste0("AUCINT",1:auc_col)), "AUCINFO", "AUCINFP", "AUCINFOC", 
                                "AUCINFPC", "AUCINFODN", "AUCINFPDN","AUMCINFO", "AUMCINFP", "MRTLAST", "MRTO", "MRTP", "AUCXPCTO",
@@ -186,7 +184,6 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model = "
       tmp_df <- data_data[data_data[,map_data$SDEID] == unique(data_data[,map_data$SDEID])[i],]
       
       c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
-      v_0 <- v0(c0 = c_0, dose = tmp_df[,map_data$DOSE][i])
       c_max <- cmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
       c_last <- clast(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
       cmaxdn <- cmax_dn(cmax = c_max, dose = tmp_df[,map_data$DOSE][i])
@@ -248,7 +245,7 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model = "
       vz_p <- vzp(kel = kel_v[["KEL"]], aucinfp = aucinf_p, dose = tmp_df[,map_data$DOSE][i])
       vz_pw <- vzpw(vzp = vz_p, normbs = tmp_df[,map_data$NORMBS][i])
       
-      computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], c_0, v_0, c_max, c_last, c_max_c, cmaxdn, t_max, t_last,
+      computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], c_max, c_last, c_max_c, cmaxdn, t_max, t_last,
                               kel_v[["KEL"]], kel_v[["KELTMLO"]], kel_v[["KELTMHI"]], kel_v[["KELNOPT"]], kelr_v[["KELR"]], 
                               kelr_v[["KELRSQ"]], kelr_v[["KELRSQA"]], kel_v[["THALF"]], last_time, aucall, aucdn, auclast, 
                               auclast_c, auclastdn, aumclast, auct, auc_int, aucinf_o, aucinf_p, aucinf_oc, aucinf_pc, 
@@ -261,14 +258,6 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model = "
       col_names <- c("SDEID")
       count <- count + 1
       
-      if("c0" %in% return){
-        col_names[count] <- "C0"
-        count <- count + 1
-      }
-      if("v0" %in% return){
-        col_names[count] <- "V0"
-        count <- count + 1
-      }
       if("cmax" %in% return){
         col_names[count] <- "CMAX"
         count <- count + 1
@@ -447,19 +436,12 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model = "
       
       computation_df <- data.frame(matrix(ncol = count-1, nrow = 0)) 
       names(computation_df) <- col_names
+      c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
       
       for(i in 1:length(unique(data_data[,map_data$SDEID]))){
         tmp_df <- data_data[data_data[,map_data$SDEID] == unique(data_data[,map_data$SDEID])[i],]
         row_data <- c(unique(data_data[,map_data$SDEID])[i])
         
-        if("c0" %in% return){
-          c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
-          row_data <- append(row_data, c_0)
-        }
-        if("v0" %in% return){
-          v_0 <- v0(c0 = c_0, dose = tmp_df[,map_data$DOSE][i])
-          row_data <- append(row_data, v_0)
-        }
         if("cmax" %in% return){
           c_max <- cmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
           row_data <- append(row_data, c_max)

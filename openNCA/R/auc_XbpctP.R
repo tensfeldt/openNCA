@@ -109,7 +109,7 @@
 #'  \item Kevin McConnell
 #' }
 #' @export
-auc_XpctP <- function(conc = NULL, time = NULL, method = 1){
+auc_XbpctP <- function(conc = NULL, time = NULL, method = 1){
   if(is.null(conc) && is.null(time)){
     stop("Error in auc_XpctP: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {

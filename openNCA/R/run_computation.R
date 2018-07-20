@@ -1,47 +1,87 @@
 #' Run Computation 
 #'
-#' This function gets the terminal or elimination phase rate constant, which is described as the absolute
-#' value of the slope of a least-squares linear regression during the terminal phase of the natural-logarithm
-#' (ln) transformed concentration-time profile.
-#' 
-#' @aliases kel_tmlo kel_tmhi kel_nopt
+#' This function will compute all the relevant parameters for a specified model.\cr
 #' 
 #' @details
-#' \strong{First calculate slope} \cr  
-#' \figure{kel_eq1.png} \cr
-#' \figure{kel_eq2.png} \cr
-#' \figure{kel_eq3.png} \cr
-#' \eqn{S = Slope} \cr
-#' \eqn{C_{i} = i^{th} concentration}{Ci = ith concentration} \cr
-#' \eqn{T_{i} = i^{th} time}{Ti = ith time} \cr
-#' \eqn{n = the number of data points} \cr \cr
-#' \strong{Terminal log-linear phase} = The phase in the natural-log transformed concentration-time profile selected
-#' by user at the time of primary parameter computaitons via interactive concentration-time plots(refer to KEL
-#' tab on the front end) \cr \cr  
-#' Set time of last dose TDOSE to 0 and shift T accordingly in calculation of KEL. This impacts the C0 the intercept
-#' used in other paramerter calculations AUCINF \cr \cr
-#' \strong{Equation for KEL}\cr \eqn{KEL = S x -1} \cr
+#' \strong{Linear Method} \cr  
+#' \figure{auc_1.png} \cr
+#' \strong{Log Method} \cr  
+#' \figure{auc_2.png} \cr
+#' \eqn{AUC = Area under the cruve} \cr
+#' \eqn{C_{i} = Concentration 1}{Ci = Concentration 1} \cr
+#' \eqn{C_{i+1} = Concentration 2}{Ci+1 = Concentration 2} \cr
+#' \eqn{T_{i} = Time 1}{Ti = Time 1} \cr
+#' \eqn{T_{i+1} = Time 2}{Ti+1 = Time 2} \cr
+#' \eqn{ln = Natural Logarithm} \cr \cr
+#' \strong{Methods:} You can use the following methods to calculate AUC: \cr
+#' \enumerate{
+#'  \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the 
+#'  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
+#'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
+#'  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
+#'  \item \strong{Log Trapazoidal Rule}: The log trapezoidal method is used for the entire profile. If
+#'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
+#'  \item \strong{Linear Up - Log Down Trapazoidal Rule}: Linear trapezoidal while the concentrations
+#'  are increasing and log trapezoidal while the concentration are decreasing, the assessment is made on
+#'  a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear 
+#'  trapezoidal rule is used.
+#' }
+#' You can specify the options to subset the list of parameters that are returned: \cr
+#' \strong{Return List options} \cr  
+#' \enumerate{
+#'  \item \strong{cmax}: Refer to \code{\link{cmax}} for more details
+#'  \item \strong{cmax_c}: Refer to \code{\link{cmaxc}} for more details
+#'  \item \strong{cmax_dn}: Refer to \code{\link{cmax_dn}} for more details
+#'  \item \strong{clast}: Refer to \code{\link{clast}} for more details
+#'  \item \strong{tmax}: Refer to \code{\link{tmax}} for more details
+#'  \item \strong{tlast}: Refer to \code{\link{tlast}} for more details
+#'  \item \strong{kel}: Refer to \code{\link{kel}} for more details
+#'  \item \strong{kelr}: Refer to \code{\link{kel_r}} for more details
+#'  \item \strong{lasttime}: Refer to \code{\link{lasttime}} for more details
+#'  \item \strong{auc_dn}: Refer to \code{\link{auc_dn}} for more details
+#'  \item \strong{auc_all}: Refer to \code{\link{auc_all}} for more details
+#'  \item \strong{auc_last}: Refer to \code{\link{auc_last}} for more details
+#'  \item \strong{auc_last_c}: Refer to \code{\link{auc_lastc}} for more details
+#'  \item \strong{auc_last_dn}: Refer to \code{\link{auc_dn}} for more details
+#'  \item \strong{aumc_last}: Refer to \code{\link{aumc_last}} for more details
+#'  \item \strong{auc_t1_t2}: Refer to \code{\link{auc_t1_t2}} for more details
+#'  \item \strong{auc_inf_o}: Refer to \code{\link{auc_inf_o}} for more details
+#'  \item \strong{auc_inf_p}: Refer to \code{\link{auc_inf_p}} for more details
+#'  \item \strong{aumc_inf_o}: Refer to \code{\link{aumc_inf_o}} for more details
+#'  \item \strong{auc_inf_o_c}: Refer to \code{\link{auc_inf_oc}} for more details
+#'  \item \strong{auc_inf_p}: Refer to \code{\link{auc_inf_p}} for more details
+#'  \item \strong{auc_inf_p_c}: Refer to \code{\link{auc_inf_pc}} for more details
+#'  \item \strong{auc_inf_o_dn}: Refer to \code{\link{auc_dn}} for more details
+#'  \item \strong{auc_inf_p_dn}: Refer to \code{\link{auc_dn}} for more details
+#'  \item \strong{mrt_last}: Refer to \code{\link{mrt_last}} for more details
+#'  \item \strong{mrto}: Refer to \code{\link{mrt_evif_o}} for more details
+#'  \item \strong{mrtp}: Refer to \code{\link{mrt_evif_p}} for more details
+#'  \item \strong{auc_xpct_o}: Refer to \code{\link{auc_XpctO}} for more details
+#'  \item \strong{auc_xpct_p}: Refer to \code{\link{auc_XpctP}} for more details
+#'  \item \strong{aumc_xpct_o}: Refer to \code{\link{aumc_XpctO}} for more details
+#'  \item \strong{aumc_xpct_p}: Refer to \code{\link{aumc_XpctP}} for more details
+#'  \item \strong{clo}: Refer to \code{\link{clo}} for more details
+#'  \item \strong{clfo}: Refer to \code{\link{clfo}} for more details
+#'  \item \strong{clfow}: Refer to \code{\link{clfow}} for more details
+#'  \item \strong{clfp}: Refer to \code{\link{clfp}} for more details
+#'  \item \strong{clfpw}: Refer to \code{\link{clfpw}} for more details
+#'  \item \strong{vzfo}: Refer to \code{\link{vzfo}} for more details
+#'  \item \strong{vzfow}: Refer to \code{\link{vzfow}} for more details
+#'  \item \strong{vzfp}: Refer to \code{\link{vzfp}} for more details
+#'  \item \strong{vzfpw}: Refer to \code{\link{vzfpw}} for more details
+#' }
 #' 
 #' @section Note:
-#' If concentrations are less than or equal to zero or 'NA' for a data point, that data point is not used
-#' in calculations. There needs to be atleast 2 data points in the data. If KEL is less than 0 then the function
-#' will return 'ND' for Not Determined. And also you must provide a valid sid with respect to the data. 
+#' By default all the return list options are selected and calculated
 #' 
-#' @param data The model data that was generated by \code{\link{model}} 
-#' @param sid The subject ID (either can be the id number or 'all' to get kel for all the subjects)
+#' @param data The dataframe that contians the raw data and flag data
+#' @param map The dataframe that contians the map data and flag data
+#' @param flag The dataframe that contians the flag data (optional)
+#' @param return The list of parameters to return (by defualt it is empty, which means it will retunr all parameters)
+#' 
 #' @section Returns:
 #' \strong{Dataset} \cr 
-#' \itemize{
-#'  \item SID: subject identification number
-#'  \item KEL: maximum observed concentration
-#'  \item TMLO: intial timepoint used in the calculation of KEL
-#'  \item TMHI: final timepoint used in the calculation of KEL
-#'  \item NOPT: number of time points used in the calculation of KEL
-#' }
-#' @section Additional Details:
-#' If KEL returns 'ND' or 'Not Determined' then TMHI and TMLO both are set to 'ND' as well. If TMLO is greater
-#' than or equal to TMHI, then TMLO is set to 'ND. If TMHI is less than or equal to TMLO, then TMHI is set
-#' to 'ND'.
+#' 
 #' @examples 
 #' ##########
 #' ## Data ##
@@ -96,7 +136,7 @@
 #'  \item Kevin McConnell
 #' }
 #' @export
-run_computation <- function(data = NULL, map = NULL, return = list()){
+run_computation <- function(data = NULL, map = NULL, flag = NULL, return = list()){
   if(is.null(data)){
     stop("Please provide a valid path for the 'data' parameter")
   } else {
@@ -123,6 +163,17 @@ run_computation <- function(data = NULL, map = NULL, return = list()){
       }
     }
   }
+  if(!is.null(flag)){
+    if(is.data.frame(flag)){
+      flag_data <- as.data.frame(lapply(flag, as.character), stringsAsFactors = FALSE)
+    } else {
+      if(file.exists(flag)){
+        flag_data <- read.csv(file = flag, stringsAsFactors = FALSE)
+      } else {
+        stop("Invalid path provided for 'flag'! Please provide a valid path for the 'flag' parameter")
+      }
+    }
+  }
   if(!("SDEID" %in% names(map_data) && "NOMTIME" %in% names(map_data) && "CONC" %in% names(map_data))){
     stop("Dataset provided via 'map' does not contain the required columns")
   }
@@ -130,118 +181,35 @@ run_computation <- function(data = NULL, map = NULL, return = list()){
     stop("Values provided via 'map' are not present in the dataset provided via 'data'")
   }
   
-  computation_list <- list("cmax", "cmin", "clast", "tmax", "tmin", "tlast", "kel", "kelr")
-
-  if(tolower(return) == 'all' ||  (typeof(return) == 'list' && length(return) == 0)){
-    computation_df <- data.frame(matrix(ncol = 14, nrow = 0)) 
-    names(computation_df) <- c("SDEID", "CMAX", "CMIN", "CLAST", "TMAX", "TMIN", "TLAST", "KEL", "KELTMLO", "KELTHMI", "KELNOPT", "KELR", "KELRSQ", "KELSQADJ")
-    
-    cmax_df <- cmax_i(data, map)
-    cmin_df <- cmin_i(data, map)
-    clast_df <- clast_i(data, map)
-    tmax_df <- tmax_i(data, map)
-    tmin_df <- tmin_i(data, map)
-    tlast_df <- tlast(data, map)
-    kel_df <- kel(data, map)
-    kelr_df <- kel_rsq(data, map)
-    
-    for(i in 1:length(unique(data_data[,map_data$SDEID]))){
-      computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], cmax_df$CMAX[i], cmin_df$CMIN[i], clast_df$CLAST[i], tmax_df$TMAX[i], tmin_df$TMIN[i], tlast_df$TLAST[i], 
-                             kel_df$KEL[i], kel_df$KELTMLO[i], kel_df$KELTHMI[i], kel_df$KELNOPT[i], kelr_df$KELR[i], kelr_df$KELRSQ[i], kelr_df$KELSQADJ[i])
-    }
-  } else {
-    if(typeof(return) == "list" && !any(!return %in% computation_list)) {
-      count <- 1
-      col_names <- c("SDEID")
-      
-      if("cmax" %in% return){
-        count <- count + 1
-        col_names[count] <- "CMAX"
-        cmax_df <- cmax_i(data, map)
-      }
-      if("cmin" %in% return){
-        count <- count + 1
-        col_names[count] <- "CMIN"
-        cmin_df <- cmin_i(data, map)
-      }
-      if("clast" %in% return){
-        count <- count + 1
-        col_names[count] <- "CLAST"
-        clast_df <- clast_i(data, map)
-      }
-      if("tmax" %in% return){
-        count <- count + 1
-        col_names[count] <- "TMAX"
-        tmax_df <- tmax_i(data, map)
-      }
-      if("tmin" %in% return){
-        count <- count + 1
-        col_names[count] <- "TMIN"
-        tmin_df <- tmin_i(data, map)
-      }
-      if("tlast" %in% return){
-        count <- count + 1
-        col_names[count] <- "TLAST"
-        tlast_df <- tlast(data, map)
-      }
-      if("kel" %in% return){
-        col_names[count+1] <- "KEL"
-        col_names[count+2] <- "KELTMLO"
-        col_names[count+3] <- "KELTMHI"
-        col_names[count+4] <- "KELNOPT"
-        count <- count + 4
-        kel_df <- kel(data, map)
-      }
-      if("kelr" %in% return){
-        col_names[count+1] <- "KELR"
-        col_names[count+2] <- "KELRSQ"
-        col_names[count+3] <- "KELRSQADJ"
-        count <- count + 3
-        kelr_df <- kel_rsq(data, map)
-      }
-      
-      computation_df <- data.frame(matrix(ncol = count, nrow = 0)) 
-      names(computation_df) <- col_names
-      
-      for(i in 1:length(unique(data_data[,map_data$SDEID]))){
-        row_data <- c(unique(data_data[,map_data$SDEID])[i])
-        if("cmax" %in% return){
-          row_data <- append(row_data, cmax_df$CMAX[i], length(row_data))
-        }
-        if("cmin" %in% return){
-          row_data <- append(row_data, cmin_df$CMIN[i], length(row_data))
-        }
-        if("clast" %in% return){
-          row_data <- append(row_data, clast_df$CLAST[i], length(row_data))
-        }
-        if("tmax" %in% return){
-          row_data <- append(row_data, tmax_df$TMAX[i], length(row_data))
-        }
-        if("tmin" %in% return){
-          row_data <- append(row_data, tmin_df$TMIN[i], length(row_data))
-        }
-        if("tlast" %in% return){
-          row_data <- append(row_data, tlast_df$TLAST[i], length(row_data))
-        }
-        if("kel" %in% return){
-          row_data <- append(row_data, kel_df$KEL[i], length(row_data))
-          row_data <- append(row_data, kel_df$KELTMLO[i], length(row_data))
-          row_data <- append(row_data, kel_df$KELTHMI[i], length(row_data))
-          row_data <- append(row_data, kel_df$KELNOPT[i], length(row_data))
-        }
-        if("kelr" %in% return){
-          row_data <- append(row_data, kelr_df$KELR[i], length(row_data))
-          row_data <- append(row_data, kelr_df$KELRSQ[i], length(row_data))
-          row_data <- append(row_data, kelr_df$KELSQADJ[i], length(row_data))
-        }
-        
-        computation_df[i,] <- row_data
-      }
-    } else {
-      stop("Values provided via 'return' are not valid or cannot be calculated! Please provide valid inputs")
-    }
+  merged_data <- merge(x = data_data, y = flag_data, by = map_data$FLGMERGE)
+  colnames(merged_data) <- gsub('.x','.dataset',names(merged_data))
+  colnames(merged_data) <- gsub('.y','',names(merged_data))
+  merged_data[,map_data$NOMTIME] <- as.numeric(merged_data[,map_data$NOMTIME])
+  
+  if(toupper(map_data$AUCMETHOD) == "LINLOG"){
+    method <- 1
+  } else if(toupper(map_data$AUCMETHOD) == "LIN"){
+    method <- 2
+  } else if(toupper(map_data$AUCMETHOD) == "LOG"){
+    method <- 3
+  } else if(toupper(map_data$AUCMETHOD) == "LINUPLOGDOWN"){
+    method <- 4
   }
   
-  return(computation_df)
+  data_out <- NULL
+  if(toupper(map_data$MODEL) == 'M1' && toupper(map_data$DOSINGTYPE) == 'SD'){
+    data_out <- run_M1_SD_computation(data = merged_data, map = map_data, method = method, model = toupper(map_data$MODEL), 
+                          parameter = toupper(map_data$DOSINGTYPE), return = return) 
+  } else if (toupper(map_data$MODEL) == 'M2' && toupper(map_data$DOSINGTYPE) == 'SD'){
+    data_out <- run_M2_SD_computation(data = merged_data, map = map_data, method = method, model = toupper(map_data$MODEL), 
+                          parameter = toupper(map_data$DOSINGTYPE), return = return) 
+  } else if (toupper(map_data$MODEL) == 'M3' && toupper(map_data$DOSINGTYPE) == 'SD'){
+    data_out <- run_M3_SD_computation(data = merged_data, map = map_data, method = method, model = toupper(map_data$MODEL), 
+                          parameter = toupper(map_data$DOSINGTYPE), return = return) 
+  } else if (toupper(map_data$MODEL) == 'M4' && toupper(map_data$DOSINGTYPE) == 'SD'){
+    data_out <- run_M4_SD_computation(data = merged_data, map = map_data, method = method, model = toupper(map_data$MODEL), 
+                          parameter = toupper(map_data$DOSINGTYPE), return = return) 
+  }
+  return(data_out)
 }
 

@@ -3,6 +3,19 @@
 #' This function will compute all the relevant parameters for a M1 model Single Dose (SD).\cr
 #' 
 #' @details
+#' \strong{Methods:} You can use the following methods to calculate AUC: \cr
+#' \enumerate{
+#'  \item \strong{1: Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the 
+#'  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
+#'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
+#'  \item \strong{2: Linear Trapazoidal Rule}: The linear method is used for the entire profile.
+#'  \item \strong{3: Log Trapazoidal Rule}: The log trapezoidal method is used for the entire profile. If
+#'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
+#'  \item \strong{4: Linear Up - Log Down Trapazoidal Rule}: Linear trapezoidal while the concentrations
+#'  are increasing and log trapezoidal while the concentration are decreasing, the assessment is made on
+#'  a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear 
+#'  trapezoidal rule is used.
+#' }
 #' You can specify the options to subset the list of parameters that are returned: \cr
 #' \strong{Return List options} \cr  
 #' \enumerate{
@@ -56,8 +69,7 @@
 #' 
 #' @param data The dataframe that contians the raw data
 #' @param map The dataframe that contians the map data 
-#' @param flag The dataframe that contians the flag data (optional)
-#' @param method The dataframe that contians the map data and flag data
+#' @param method The AUC method to use 
 #' @param model This is the model type
 #' @param parameter This is either single dose (SD) or steady state (SS)
 #' @param return The list of parameters to return (by defualt it is empty, which means it will retunr all parameters)
@@ -112,18 +124,14 @@
 #'  \item Kevin McConnell
 #' }
 #' @export
-run_computation <- function(data = NULL, map = NULL, flag = NULL, method = 1, model = "M1", parameter = "SD", return = list()){
+run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model = "M1", parameter = "SD", return = list()){
   if(is.null(data)){
     stop("Please provide a valid path for the 'data' parameter")
   } else {
     if(is.data.frame(data)){
       data_data <- data
     } else {
-      if(file.exists(data)){
-        data_data <- read.csv(file = data)
-      } else {
-        stop("Invalid path provided for 'data'! Please provide a valid path for the 'data' parameter")
-      } 
+      stop("Invalid data frame provided for 'data'! Please provide a valid data frame")
     }
   }
   if(is.null(map)){
@@ -132,22 +140,7 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, method = 1, mo
     if(is.data.frame(map)){
       map_data <- as.data.frame(lapply(map, as.character), stringsAsFactors = FALSE)
     } else {
-      if(file.exists(map)){
-        map_data <- read.csv(file = map, stringsAsFactors = FALSE)
-      } else {
-        stop("Invalid path provided for 'map'! Please provide a valid path for the 'map' parameter")
-      }
-    }
-  }
-  if(!is.null(flag)){
-    if(is.data.frame(flag)){
-      flag_data <- as.data.frame(lapply(flag, as.character), stringsAsFactors = FALSE)
-    } else {
-      if(file.exists(flag)){
-        flag_data <- read.csv(file = flag, stringsAsFactors = FALSE)
-      } else {
-        stop("Invalid path provided for 'flag'! Please provide a valid path for the 'flag' parameter")
-      }
+      stop("Invalid data frame provided for 'map'! Please provide a valid data frame")
     }
   }
   if(!("SDEID" %in% names(map_data) && "NOMTIME" %in% names(map_data) && "CONC" %in% names(map_data))){

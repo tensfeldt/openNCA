@@ -1,15 +1,12 @@
-#' Percentage of AUCINFO obtained by forward extrapolation
+#' Area under the urinary excretion rate curve from time 0 to the last rate. 
 #'
-#' Percentage of AUCINFO obtained by forward extrapolation.\cr
+#' This function gets the area under urinary excretion rate curve from time 0 until the last
+#' time point. As illustrated in the following figure, AUC_ALL includes the trapezoidal area from the 
+#' time of the last measurable concentration to the next time point. Although there may be additional
+#' time points, there is no additonal AUC since by defination all subsequent concentrations are zero.\cr
+#' \figure{auc_all.png}
 #' 
 #' @details
-#' \strong{Equation}
-#' \enumerate{
-#'  \tabular{rl}{
-#'   \tab \figure{auc_XpctO1.png} \cr
-#'  }
-#' }
-#' @section Additional Details:
 #' \strong{Linear Method} \cr  
 #' \figure{auc_1.png} \cr
 #' \strong{Log Method} \cr  
@@ -33,6 +30,9 @@
 #'  a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear 
 #'  trapezoidal rule is used.
 #' }
+#' \strong{Equation} \cr
+#' If the user selects the option to have dose normalized AUC then the following equation is applied: \cr 
+#' \figure{auc_dn.png} \cr 
 #' 
 #' @param conc The concentration data (given in a vector form) 
 #' @param time The time data (given in a vector form)
@@ -48,7 +48,7 @@
 #' @section Returns:
 #' \strong{Value} \cr 
 #' \itemize{
-#'  \item AUC_PER: percentage of area under the curve
+#'  \item AURC: area under the curve
 #' }
 #' 
 #' @examples 
@@ -72,14 +72,14 @@
 #' )
 #' #Same data as above, just represented as a dataframe
 #' 
-#' auc_XpctO()   
+#' auc_all()   
 #' #Error in auc_all: 'conc' and 'time' vectors are NULL
 #' 
 #' conc_vector <- data$CONC
 #' time_vector <- data$TIME
 #' 
-#' auc_XpctO(conc = conc_vector, time = time_vector)
-#' #81.96408
+#' auc_all(conc = conc_vector, time = time_vector)
+#' #12.23956
 #'  
 #' ############
 #' ## Data 2 ##
@@ -101,49 +101,67 @@
 #' conc_vector <- data2$CONC
 #' time_vector <- data2$TIME
 #' 
-#' auc_XpctO(conc = conc_vector, time = time_vector)
-#' #0
+#' auc_all(conc = conc_vector, time = time_vector)
+#' #Error in auc_lin_log(conc, time) : 
+#' #  Error in auc_lin_log: 'tmax' is NA
+#' 
+#' ############
+#' ## Data 3 ##
+#' #################################
+#' ##  SID  ##  TIME  ##   CONC   ## 
+#' #################################
+#' ##   32  ##    0   ##   1.19   ## 
+#' ##   32  ##    1   ##   1.23   ##
+#' ##   32  ##    2   ##   1.34   ##
+#' #################################
+#' 
+#' data3 <- data.frame(
+#'     SID = ...,
+#'     TIME = ...,
+#'     RESULT = ...
+#' )
+#' #Same data as above, just represented as a dataframe
+#' 
+#' conc_vector <- data3$CONC
+#' time_vector <- data3$TIME
+#' 
+#' auc_all(conc = conc_vector, time = time_vector)
+#' #2.494215
 #' 
 #' @author
 #' \itemize{
 #'  \item Kevin McConnell
 #' }
 #' @export
-auc_XbpctO <- function(conc = NULL, time = NULL, method = 1){
+aurc_all <- function(conc = NULL, time = NULL, method = 1){
   if(is.null(conc) && is.null(time)){
-    stop("Error in auc_XbpctO: 'conc' and 'time' vectors are NULL")
+    stop("Error in auc_all: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
-    stop("Error in auc_XbpctO: 'conc' vector is NULL")
+    stop("Error in auc_all: 'conc' vector is NULL")
   } else if(is.null(time)) {
-    stop("Error in auc_XbpctO: 'time' vectors is NULL")
+    stop("Error in auc_all: 'time' vectors is NULL")
   }
   
   if(!(is.numeric(conc) && is.vector(conc)) ){
-    stop("Error in auc_XbpctO: 'conc' is not a numeric vector")
+    stop("Error in auc_all: 'conc' is not a numeric vector")
   }
   if(!(is.numeric(time) && is.vector(time)) ){
-    stop("Error in auc_XbpctO: 'time' is not a numeric vector")
+    stop("Error in auc_all: 'time' is not a numeric vector")
   }
   if(length(time) != length(conc)){
-    stop("Error in auc_XbpctO: length of 'time' and 'conc' vectors are not equal")
+    stop("Error in auc_all: length of 'time' and 'conc' vectors are not equal")
   }
   if(method != 1 && method != 2 && method != 3 && method != 4){
-    stop("Error in auc_XbpctO: the value provided for 'method' is not correct")
+    stop("Error in auc_all: the value provided for 'method' is not correct")
   }
   
-  if(sum(conc, na.rm=T) == 0){
-    auc_xbpcto <- 0
-    return(auc_xpcto)
-  } else {
-    auc_info <- auc_inf_o(conc = conc, time = time, method = method)
-    auclast <- auc_last(conc = conc, time = time, method = method)
-    
-    if(is.na(auc_info) || auc_info == 0 || is.na(auclast)){
-      auc_xbpcto <- NA
-      return(auc_xbpcto)
-    } else {
-      auc_xbpcto <- ((auc_info - auclast)/auc_info)*100
-      return(auc_xbpcto)
-    }
+  if(method == 1){
+    return(auc_lin_log(conc = conc, time = time))
+  } else if(method == 2){
+    return(auc_lin(conc = conc, time = time))
+  } else if(method == 3){
+    return(auc_log(conc = conc, time = time))
+  } else if(method == 4){
+    return(auc_lin_up_log_down(conc = conc, time = time))
   }
 }
