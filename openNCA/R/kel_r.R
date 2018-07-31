@@ -119,7 +119,7 @@
 #'  \item Kevin McConnell
 #' } 
 #' @export
-kel_r <- function(conc = NULL, time = NULL){
+kel_r <- function(conc = NULL, time = NULL, exflag = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in kel_r: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -137,8 +137,13 @@ kel_r <- function(conc = NULL, time = NULL){
   if(length(time) != length(conc) ){
     stop("Error in kel_r: length of 'time' and 'conc' vectors are not equal")
   }
+  if(!is.null(exflag)){
+    if(!(is.logical(exflag) || is.numeric(exflag))){
+      stop("Error in kel_r: 'exflag' is not a logical vector")
+    } 
+  }
   
-  kel_val <- kel(conc = conc, time = time)
+  kel_val <- kel(conc = conc, time = time, exflag = exflag)
   if(is.na(kel_val[["KEL"]])){
     kel_r_val <- c(NA, NA, NA)
     names(kel_r_val) <- c("KELR", "KELRSQ", "KELRSQA")
@@ -148,6 +153,12 @@ kel_r <- function(conc = NULL, time = NULL){
     conc <- conc[!is.na(conc)]
     time <- time[conc > 0]
     conc <- conc[conc > 0]
+    
+    if(!is.null(exflag)) {
+      exflag <- !as.logical(exflag)
+      time <- time[exflag]
+      conc <- conc[exflag]
+    }
     
     if(length(time) < 2 || length(conc) < 2){
       kel_r_val <- c(NA, NA, NA)

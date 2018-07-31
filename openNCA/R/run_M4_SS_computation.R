@@ -1,6 +1,6 @@
-#' Run M3 SD Computation 
+#' Run M4 SS Computation 
 #'
-#' This function will compute all the relevant parameters for a M3 model Single Dose (SD).\cr
+#' This function will compute all the relevant parameters for a M4 model Stedy State (SS).\cr
 #' 
 #' @details
 #' \strong{Linear Method} \cr  
@@ -138,7 +138,7 @@
 #'  \item Kevin McConnell
 #' }
 #' @export
-run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model = "M3", parameter = "SD", return = list()){
+run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model = "M4", parameter = "SS", return = list()){
   if(is.null(data)){
     stop("Please provide a valid path for the 'data' parameter")
   } else {
@@ -164,93 +164,42 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model = "
     stop("Values provided via 'map' are not present in the dataset provided via 'data'")
   }
   
-  computation_list <- list("cmax", "clast", "cmax_c", "cmax_dn", "tmax", "tlast", "kel", "kelr", "lasttime",
-                           "auc_all", "auc_dn", "auc_last", "auc_last_c", "auc_last_dn", "aumc_last", "auc_t1_t2", 
-                           "auc_inf_o", "auc_inf_o_c", "auc_inf_p", "auc_inf_p_c", "auc_inf_o_dn", "auc_inf_p_dn", 
-                           "aumc_inf_p", "aumc_inf_p", "mrt_last", "mrto", "mrtp", "auc_xpct_o", "auc_xcpt_p", 
-                           "aumc_xpct_o", "aumc_xpct_p", "clow", "clp", "clpw", "vzo", "vzow", "vzp", "vzpw")
+  computation_list <- list("kel", "kelr", "amt", "aet", "ae")
 
   if(tolower(return) == 'all' ||  (typeof(return) == 'list' && length(return) == 0)){
-    auc_col <- length(unique(data_data[,map_data$NOMTIME]))-1
-    col <- 43 + 2*auc_col + 1
+    aet_col <- length(unique(data_data[,map_data$NOMENDTIME]))
+    col <- 10 + 2*aet_col
     computation_df <- data.frame(matrix(ncol = col, nrow = 0)) 
-    names(computation_df) <- c("SDEID", "CMAX", "CLAST", "CMAXC", "CMAXDN", "TMAX", "TLAST", "KEL", "KELTMLO", "KELTHMI", "KELNOPT", 
-                               "KELR", "KELRSQ", "KELRSQA", "THALF", "LASTTIME", "AUCALL", "AUCDN", "AUCLAST", "AUCLASTC", "AUCLASTDN", 
-                               "AUMCLAST", rep(paste0("AUC",1:auc_col)), rep(paste0("AUCINT",1:auc_col)), "AUCINFO", "AUCINFP", "AUCINFOC", 
-                               "AUCINFPC", "AUCINFODN", "AUCINFPDN","AUMCINFO", "AUMCINFP", "MRTLAST", "MRTO", "MRTP", "AUCXPCTO",
-                               "AUCXPCTP", "AUMCXPCTO", "AUMCXPCTP", "CLOW", "CLP", "CLPW", "VZO", "VZOW", "VZP", "VZPW")
+    names(computation_df) <- c("SDEID", rep(paste0("AMT", unique(data_data[,map_data$NOMENDTIME])[1:aet_col])),
+                               rep(paste0("AE", unique(data_data[,map_data$NOMENDTIME])[1:aet_col])), "AE",
+                               "KEL", "KELTMLO", "KELTHMI", "KELNOPT", "KELR", "KELRSQ", "KELRSQA", "THALF")
     
     for(i in 1:length(unique(data_data[,map_data$SDEID]))){
       tmp_df <- data_data[data_data[,map_data$SDEID] == unique(data_data[,map_data$SDEID])[i],]
       
       c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
-      c_max <- cmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
-      c_last <- clast(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
-      cmaxdn <- cmax_dn(cmax = c_max, dose = tmp_df[,map_data$DOSE][i])
-      t_max <- tmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
-      t_last <- tlast(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
-      kel_v <- kel(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], tmp_df[,map_data$FLGEXKEL])
+      kel_v <- kel(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
       kelr_v <- kel_r(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
-      last_time <- lasttime(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
-      c_max_c <- cmaxc(kel = kel_v[["KEL"]], cmax = c_max, c0 = c_0, tmax = t_max)
-      aucall <- auc_all(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method)
-      aucdn <- auc_dn(auc = aucall, dose = tmp_df[,map_data$DOSE][i])
-      auclast <- auc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method)
-      auclast_c <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclast, c0 = c_0, tlast = t_last)
-      auclastdn <- auc_dn(auc = auclast, dose = tmp_df[,map_data$DOSE][i])
-      aumclast <- aumc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method)
+      amt <- at(time = tmp_df[,map_data$NOMTIME], conc = tmp_df[,map_data$CONC], amt = tmp_df[,map_data$AMOUNT], amt_units = tmp_df[,map_data$AMOUNTU])
+      a_e <- ae(time = tmp_df[,map_data$NOMTIME], amt = amt)
       
-      auct <- NULL
-      auc_int <- NULL
-      for(t in 2:length(unique(tmp_df[,map_data$NOMTIME]))){
-        tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$NOMTIME]), t1 = tmp_df[,map_data$NOMTIME][1], t2 = tmp_df[,map_data$NOMTIME][t], method = method)
-        tmp_int <- paste0(unique(data_data[,map_data$NOMTIME])[1], "_", unique(data_data[,map_data$NOMTIME])[t])
+      ae_t <- NULL 
+      for(t in 1:length(unique(tmp_df[,map_data$NOMTIME]))){
+        tmp <- aet(time = na.omit(tmp_df[,map_data$NOMTIME]), amt = amt, t = na.omit(tmp_df[,map_data$NOMTIME])[t])
         
         if(is.null(auc_t)){
-          auct <- tmp
-          auc_int <- tmp_int
+          ae_t <- tmp
         } else {
-          auct <- c(auct, tmp)
-          auc_int <- c(auc_int, tmp_int)
+          ae_t <- c(ae_t, tmp)
         }
       }
-      if(length(auct) < auc_col) {
-        auct <- c(auct, rep(NA, (auc_col - length(auct))))
-      }
-      if(length(auc_int) < auc_col) {
-        auc_int <- c(auc_int, rep(NA, (auc_col - length(auc_int))))
+      if(length(ae_t) < aet_col) {
+        ae_t <- c(ae_t, rep(NA, (aet_col - length(ae_t))))
       }
       
-      aucinf_o <- auc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method)
-      aucinf_oc <- auc_inf_oc(kel = kel_v[["KEL"]], aucinfo = aucinf_o, c0 = c_0)
-      aucinfo_dn <- auc_dn(auc = aucinf_o, dose = tmp_df[,map_data$DOSE][i])
-      aucinf_p <- auc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method)
-      aucinf_pc <- auc_inf_pc(kel = kel_v[["KEL"]], aucinfp = aucinf_p, c0 = c_0)
-      aucinfp_dn <- auc_dn(auc = aucinf_p, dose = tmp_df[,map_data$DOSE][i])
-      aumcinf_o <- aumc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method)
-      aumcinf_p <- aumc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method)
-      mrtlast <- mrt_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, model = model)
-      mrto <- mrt_ivif_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, model = model, parameter = parameter)
-      mrtp <- mrt_ivif_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, model = model, parameter = parameter)
-      aucxpcto <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method)
-      aucxpctp <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method)
-      aumcxpcto <- aumc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method)
-      aumcxpctp <- aumc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method)
-      cl_o <- clo(aucinfo = aucinf_o, dose = tmp_df[,map_data$DOSE][i])
-      cl_ow <- clow(clo = cl_o, normbs = tmp_df[,map_data$NORMBS][i])
-      cl_p <- clp(aucinfp = aucinf_p, dose = tmp_df[,map_data$DOSE][i])
-      cl_pw <- clpw(clp = cl_p, normbs = tmp_df[,map_data$NORMBS][i])
-      vz_o <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinf_o, dose = tmp_df[,map_data$DOSE][i])
-      vz_ow <- vzow(vzo = vz_o, normbs = tmp_df[,map_data$NORMBS][i])
-      vz_p <- vzp(kel = kel_v[["KEL"]], aucinfp = aucinf_p, dose = tmp_df[,map_data$DOSE][i])
-      vz_pw <- vzpw(vzp = vz_p, normbs = tmp_df[,map_data$NORMBS][i])
-      
-      computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], c_max, c_last, c_max_c, cmaxdn, t_max, t_last,
-                              kel_v[["KEL"]], kel_v[["KELTMLO"]], kel_v[["KELTMHI"]], kel_v[["KELNOPT"]], kelr_v[["KELR"]], 
-                              kelr_v[["KELRSQ"]], kelr_v[["KELRSQA"]], kel_v[["THALF"]], last_time, aucall, aucdn, auclast, 
-                              auclast_c, auclastdn, aumclast, auct, auc_int, aucinf_o, aucinf_p, aucinf_oc, aucinf_pc, 
-                              aucinfo_dn, aucinfp_dn, aumcinf_o, aumcinf_p, mrtlast, mrto, mrtp, aucxpcto, aucxpctp, 
-                              aumcxpcto, aumcxpctp, cl_ow, cl_p, cl_pw, vz_o, vz_ow, vz_p, vz_pw)
+      computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], amt, ae_t, a_e, kel_v[["KEL"]], kel_v[["KELTMLO"]], 
+                              kel_v[["KELTMHI"]], kel_v[["KELNOPT"]], kelr_v[["KELR"]], kelr_v[["KELRSQ"]], 
+                              kelr_v[["KELRSQA"]], kel_v[["THALF"]])
     }
   } else {
     if(typeof(return) == "list" && !any(!return %in% computation_list)) {
@@ -258,34 +207,6 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model = "
       col_names <- c("SDEID")
       count <- count + 1
       
-      if("cmax" %in% return){
-        col_names[count] <- "CMAX"
-        count <- count + 1
-      }
-      if("clast" %in% return){
-        col_names[count] <- "CLAST"
-        count <- count + 1
-      }
-      if("cmax_c" %in% return){
-        if("cmax" %in% return){
-          col_names[count] <- "CMAXC"
-          count <- count + 1
-        }
-      }
-      if("cmax_dn" %in% return){
-        if("cmax" %in% return){
-          col_names[count] <- "CMAXDN"
-          count <- count + 1
-        }
-      }
-      if("tmax" %in% return){
-        col_names[count] <- "TMAX"
-        count <- count + 1
-      }
-      if("tlast" %in% return){
-        col_names[count] <- "TLAST"
-        count <- count + 1
-      }
       if("kel" %in% return){
         col_names[count] <- "KEL"
         col_names[count+1] <- "KELTMLO"
@@ -308,34 +229,6 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model = "
           count <- count + 3
         }
       }
-      if("lasttime" %in% return){
-        col_names[count] <- "LASTTIME"
-        count <- count + 1
-      }
-      if("auc_all" %in% return){
-        col_names[count] <- "AUCALL"
-        count <- count + 1
-      }
-      if("auc_dn" %in% return){
-        col_names[count] <- "AUCDN"
-        count <- count + 1
-      }
-      if("auc_last" %in% return){
-        col_names[count] <- "AUCLAST"
-        count <- count + 1
-      }
-      if("auc_last_c" %in% return){
-        col_names[count] <- "AUCLASTC"
-        count <- count + 1
-      }
-      if("auc_last_dn" %in% return){
-        col_names[count] <- "AUCLASTDN"
-        count <- count + 1
-      }
-      if("aumc_last" %in% return){
-        col_names[count] <- "AUMCLAST"
-        count <- count + 1
-      }
       if("auc_t1_t2" %in% return){
         auc_col <- length(unique(data_data[,map_data$NOMTIME]))-1
         for(x in 1:auc_col){
@@ -344,94 +237,6 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model = "
           count <- count + 1
         }
         count <- count + auc_col
-      } 
-      if("auc_inf_o" %in% return){
-        col_names[count] <- "AUCINFO"
-        count <- count + 1
-      }
-      if("auc_inf_p" %in% return){
-        col_names[count] <- "AUCINFP"
-        count <- count + 1
-      }
-      if("auc_inf_o_c" %in% return){
-        col_names[count] <- "AUCINFOC"
-        count <- count + 1
-      }
-      if("auc_inf_p_c" %in% return){
-        col_names[count] <- "AUCINFPC"
-        count <- count + 1
-      }
-      if("auc_inf_o_dn" %in% return){
-        col_names[count] <- "AUCINFODN"
-        count <- count + 1
-      }
-      if("auc_inf_p_dn" %in% return){
-        col_names[count] <- "AUCINFPDN"
-        count <- count + 1
-      }
-      if("aumc_inf_o" %in% return){
-        col_names[count] <- "AUMCINFO"
-        count <- count + 1
-      }
-      if("aumc_inf_p" %in% return){
-        col_names[count] <- "AUMCINFP"
-        count <- count + 1
-      }
-      if("mrt_last" %in% return){
-        col_names[count] <- "MRTLAST"
-        count <- count + 1
-      }
-      if("mrto" %in% return){
-        col_names[count] <- "MRTO"
-        count <- count + 1
-      }
-      if("mrtp" %in% return){
-        col_names[count] <- "MRTP"
-        count <- count + 1
-      }
-      if("auc_xpct_o" %in% return){
-        col_names[count] <- "AUCXPCTO"
-        count <- count + 1
-      }
-      if("auc_xpct_p" %in% return){
-        col_names[count] <- "AUCXPCTP"
-        count <- count + 1
-      }
-      if("aumc_xpct_o" %in% return){
-        col_names[count] <- "AUMCXPCTO"
-        count <- count + 1
-      }
-      if("aumc_xpct_p" %in% return){
-        col_names[count] <- "AUMCXPCTP"
-        count <- count + 1
-      }
-      if("clow" %in% return){
-        col_names[count] <- "CLOW"
-        count <- count + 1
-      }
-      if("clp" %in% return){
-        col_names[count] <- "CLP"
-        count <- count + 1
-      }
-      if("clpw" %in% return){
-        col_names[count] <- "CLPW"
-        count <- count + 1
-      }
-      if("vzo" %in% return){
-        col_names[count] <- "VZO"
-        count <- count + 1
-      }
-      if("vzow" %in% return){
-        col_names[count] <- "VZOW"
-        count <- count + 1
-      }
-      if("vzp" %in% return){
-        col_names[count] <- "VZP"
-        count <- count + 1
-      }
-      if("vzpw" %in% return){
-        col_names[count] <- "VZPW"
-        count <- count + 1
       }
       
       computation_df <- data.frame(matrix(ncol = count-1, nrow = 0)) 

@@ -136,7 +136,7 @@
 #'  \item Kevin McConnell
 #' }
 #' @export
-kel <- function(conc = NULL, time = NULL){
+kel <- function(conc = NULL, time = NULL, exflag = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in kel: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -154,12 +154,23 @@ kel <- function(conc = NULL, time = NULL){
   if(length(time) != length(conc) ){
     stop("Error in kel: length of 'time' and 'conc' vectors are not equal")
   }
+  if(!is.null(exflag)){
+    if(!(is.logical(exflag) || is.numeric(exflag))){
+      stop("Error in kel: 'exflag' is not a logical vector")
+    } 
+  }
   
   #Formatting data to remove any NA or less than 0 concentration values and corresponding time values 
   time <- time[!is.na(conc)]
   conc <- conc[!is.na(conc)]
   time <- time[conc > 0]
   conc <- conc[conc > 0]
+  
+  if(!is.null(exflag)) {
+    exflag <- !as.logical(exflag)
+    time <- time[exflag]
+    conc <- conc[exflag]
+  }
   
   if(length(time) < 2 || length(conc) < 2){
     kel_val <- c(NA, NA, NA, NA, 0, NA)

@@ -9,7 +9,7 @@
 \alias{thalf}
 \title{Terminal or Elimination phase rate constant}
 \usage{
-kel(conc = NULL, time = NULL)
+kel(conc = NULL, time = NULL, exflag = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

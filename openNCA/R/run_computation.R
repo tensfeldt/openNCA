@@ -185,6 +185,54 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, return = list(
   colnames(merged_data) <- gsub('.x','.dataset',names(merged_data))
   colnames(merged_data) <- gsub('.y','',names(merged_data))
   merged_data[,map_data$NOMTIME] <- as.numeric(merged_data[,map_data$NOMTIME])
+
+  if(toupper(map_data$DOSINGTYPE) == 'SS'){
+    ss_dose <- c("DOSE1", "DOSE2", "DOSE3", "DOSE4", "DOSE5")
+    ss_tau <- c("TAU1", "TAU2","TAU3", "TAU4","TAU5")
+    ss_told <- c("TOLD1", "TOLD2", "TOLD3","TOLD4", "TOLD5")
+    
+    if(any(ss_dose %in% names(map_data) || ss_tau %in% names(map_data) || ss_told %in% names(map_data))){
+      for(i in 1:length(ss_dose)){
+        if(ss_dose[i] %in% names(map_data) & ss_tau[i] %in% names(map_data) & ss_told[i] %in% names(map_data)) {
+          merged_data[c(paste0("DI", i, "F"))] <- NA
+          
+          for(j in 1:length(unique(merged_data[,map_data$SDEID]))){
+            tmp_df <- merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],]
+            time <- tmp_df[, map_data$NOMTIME]
+            
+            told <- unique(tmp_df[,as.character(map_data[,ss_told[i]])])[[1]]
+            tau <- unique(tmp_df[,as.character(map_data[,ss_tau[i]])])[[1]]
+            print(paste("SDEID", i, unique(merged_data[,map_data$SDEID])[j]))
+            print(time)
+            print(paste("TOLD:", told))
+            print(paste("TAU:", tau))
+            if(is.na(told) || is.na(tau)){
+              merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][c(paste0("DI", i, "F"))][1:nrow(tmp_df),] <- rep(0, nrow(tmp_df))
+            } else {
+              told_i <- match(told, time)
+              tau_i <- match(tau, time)
+              tend_i <- match(tau+told, time)
+              #print(nrow(tmp_df))
+              #print(paste("TOLD index:", told_i))
+              #print(paste("TAU index:", tau_i))
+              #print(paste("TEND index:", tend_i))
+              start_i <-  1
+              end_i <- ifelse(tau_i < nrow(tmp_df), nrow(tmp_df), tau_i)
+              #print(paste("Start:", start_i))
+              #print(paste("End:", end_i))
+              #print(c(rep(0, told_i-1), rep(1, tau_i), rep(0, (nrow(tmp_df) - tend_i))))
+              
+              if(is.numeric(told_i) & is.numeric(tau_i)) {
+                merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][c(paste0("DI", i, "F"))][start_i:end_i,] <- c(rep(0, told_i-1), rep(1, tau_i), rep(0, (nrow(tmp_df) - tend_i)))
+              }
+            }
+          }   
+        }
+      }
+    } else {
+      stop("Unable to generate dosing interval for Stedy State data! Please provide a valid data parameters")
+    }
+  }
   
   if(toupper(map_data$AUCMETHOD) == "LINLOG"){
     method <- 1
@@ -196,13 +244,21 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, return = list(
     method <- 4
   }
   
+  return(merged_data)
+  
   data_out <- NULL
   if(toupper(map_data$MODEL) == 'M1' && toupper(map_data$DOSINGTYPE) == 'SD'){
     data_out <- run_M1_SD_computation(data = merged_data, map = map_data, method = method, model = toupper(map_data$MODEL), 
                           parameter = toupper(map_data$DOSINGTYPE), return = return) 
+  } else if(toupper(map_data$MODEL) == 'M1' && toupper(map_data$DOSINGTYPE) == 'SS'){
+    data_out <- run_M1_SS_computation(data = merged_data, map = map_data, method = method, model = toupper(map_data$MODEL), 
+                                      parameter = toupper(map_data$DOSINGTYPE), return = return) 
   } else if (toupper(map_data$MODEL) == 'M2' && toupper(map_data$DOSINGTYPE) == 'SD'){
     data_out <- run_M2_SD_computation(data = merged_data, map = map_data, method = method, model = toupper(map_data$MODEL), 
                           parameter = toupper(map_data$DOSINGTYPE), return = return) 
+  } else if (toupper(map_data$MODEL) == 'M2' && toupper(map_data$DOSINGTYPE) == 'SS'){
+    data_out <- run_M2_SS_computation(data = merged_data, map = map_data, method = method, model = toupper(map_data$MODEL), 
+                                      parameter = toupper(map_data$DOSINGTYPE), return = return) 
   } else if (toupper(map_data$MODEL) == 'M3' && toupper(map_data$DOSINGTYPE) == 'SD'){
     data_out <- run_M3_SD_computation(data = merged_data, map = map_data, method = method, model = toupper(map_data$MODEL), 
                           parameter = toupper(map_data$DOSINGTYPE), return = return) 
