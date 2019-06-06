@@ -1,0 +1,705 @@
+#' Run M1 SD Computation 
+#'
+#' This function will compute all the relevant parameters for a M1 model Single Dose (SD).\cr
+#' 
+#' @details
+#' \strong{Methods:} You can use the following methods to calculate AUC: \cr
+#' \enumerate{
+#'  \item \strong{1: Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the 
+#'  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
+#'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
+#'  \item \strong{2: Linear Trapazoidal Rule}: The linear method is used for the entire profile.
+#'  \item \strong{3: Log Trapazoidal Rule}: The log trapezoidal method is used for the entire profile. If
+#'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
+#'  \item \strong{4: Linear Up - Log Down Trapazoidal Rule}: Linear trapezoidal while the concentrations
+#'  are increasing and log trapezoidal while the concentration are decreasing, the assessment is made on
+#'  a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear 
+#'  trapezoidal rule is used.
+#' }
+#' You can specify the options to subset the list of parameters that are returned: \cr
+#' \strong{Return List options} \cr  
+#' \enumerate{
+#'  \item \strong{cmax}: Refer to \code{\link{cmax}} for more details
+#'  \item \strong{cmin}: Refer to \code{\link{cmin}} for more details
+#'  \item \strong{clast}: Refer to \code{\link{clast}} for more details
+#'  \item \strong{cmax_c}: Refer to \code{\link{cmaxc}} for more details
+#'  \item \strong{cmax_dn}: Refer to \code{\link{cmax_dn}} for more details
+#'  \item \strong{tmax}: Refer to \code{\link{tmax}} for more details
+#'  \item \strong{tmin}: Refer to \code{\link{tmin}} for more details
+#'  \item \strong{tlast}: Refer to \code{\link{tlast}} for more details
+#'  \item \strong{tlag}: Refer to \code{\link{tlag}} for more details
+#'  \item \strong{kel}: Refer to \code{\link{kel}} for more details
+#'  \item \strong{kelr}: Refer to \code{\link{kel_r}} for more details
+#'  \item \strong{lasttime}: Refer to \code{\link{lasttime}} for more details
+#'  \item \strong{auc_dn}: Refer to \code{\link{auc_dn}} for more details
+#'  \item \strong{auc_all}: Refer to \code{\link{auc_all}} for more details
+#'  \item \strong{auc_last}: Refer to \code{\link{auc_last}} for more details
+#'  \item \strong{auc_last_c}: Refer to \code{\link{auc_lastc}} for more details
+#'  \item \strong{auc_last_dn}: Refer to \code{\link{auc_dn}} for more details
+#'  \item \strong{aumc_last}: Refer to \code{\link{aumc_last}} for more details
+#'  \item \strong{auc_t1_t2}: Refer to \code{\link{auc_t1_t2}} for more details
+#'  \item \strong{auc_inf_o}: Refer to \code{\link{auc_inf_o}} for more details
+#'  \item \strong{auc_inf_o_c}: Refer to \code{\link{auc_inf_oc}} for more details
+#'  \item \strong{auc_inf_p}: Refer to \code{\link{auc_inf_p}} for more details
+#'  \item \strong{auc_inf_p_c}: Refer to \code{\link{auc_inf_pc}} for more details
+#'  \item \strong{auc_inf_o_dn}: Refer to \code{\link{auc_dn}} for more details
+#'  \item \strong{auc_inf_p_dn}: Refer to \code{\link{auc_dn}} for more details
+#'  \item \strong{aumc_inf_o}: Refer to \code{\link{aumc_inf_o}} for more details
+#'  \item \strong{aumc_inf_p}: Refer to \code{\link{aumc_inf_p}} for more details
+#'  \item \strong{mrt_last}: Refer to \code{\link{mrt_last}} for more details
+#'  \item \strong{mrto}: Refer to \code{\link{mrt_evif_o}} for more details
+#'  \item \strong{mrtp}: Refer to \code{\link{mrt_evif_p}} for more details
+#'  \item \strong{auc_xpct_o}: Refer to \code{\link{auc_XpctO}} for more details
+#'  \item \strong{auc_xpct_p}: Refer to \code{\link{auc_XpctP}} for more details
+#'  \item \strong{aumc_xpct_o}: Refer to \code{\link{aumc_XpctO}} for more details
+#'  \item \strong{aumc_xpct_p}: Refer to \code{\link{aumc_XpctP}} for more details
+#'  \item \strong{clo}: Refer to \code{\link{clo}} for more details
+#'  \item \strong{clfo}: Refer to \code{\link{clfo}} for more details
+#'  \item \strong{clfow}: Refer to \code{\link{clfow}} for more details
+#'  \item \strong{clfp}: Refer to \code{\link{clfp}} for more details
+#'  \item \strong{clfpw}: Refer to \code{\link{clfpw}} for more details
+#'  \item \strong{vzfo}: Refer to \code{\link{vzfo}} for more details
+#'  \item \strong{vzfow}: Refer to \code{\link{vzfow}} for more details
+#'  \item \strong{vzfp}: Refer to \code{\link{vzfp}} for more details
+#'  \item \strong{vzfpw}: Refer to \code{\link{vzfpw}} for more details
+#' }
+#' 
+#' @section Note:
+#' By default all the return list options are selected and calculated
+#' 
+#' @param data The dataframe that contians the raw data
+#' @param map The dataframe that contians the map data 
+#' @param method The AUC method to use 
+#' @param model This is the model type
+#' @param parameter This is either single dose (SD) or steady state (SS)
+#' @param return_list The list of parameters to return (by defualt it is empty, which means it will retunr all parameters)
+#' 
+#' @section Returns:
+#' \strong{Dataset} \cr 
+#' 
+#' @examples 
+#' ##########
+#' ## Data ##
+#' ########################################
+#' ##  SID  ##  TIME  ##  RESULT  ## ... ##
+#' ########################################
+#' ##   30  ##    0   ##   2.89   ##     ##
+#' ##   30  ##    1   ##   2.49   ##     ##
+#' ##   30  ##    2   ##   2.47   ##     ##
+#' ##   31  ##    0   ##      0   ##     ##
+#' ##   31  ##    1   ##   1.00   ##     ##
+#' ##   31  ##    2   ##      0   ##     ##
+#' ##   32  ##    0   ##   1.19   ##     ##
+#' ##   32  ##    1   ##   1.23   ##     ##
+#' ##   32  ##    2   ##   1.34   ##     ##
+#' ##   32  ##    4   ##   1.32   ##     ##
+#' ########################################
+#' 
+#' data <- data.frame(
+#'     SID = ...,
+#'     TIME = ...,
+#'     RESULT = ...
+#' )
+#' #Same data as above, just represented as a dataframe
+#' 
+#' #########
+#' ## Map ## 
+#' ##################################################
+#' ##  PARAMETER  ##  MODEL  ##  DOSINGTYPE ## ... ##
+#' ##################################################
+#' ##    VALUE    ##    M1   ##     SD      ##     ##
+#' ##################################################
+#' 
+#' map <- data.frame(...)
+#' #Same map as above, just represented as a dataframe
+#' 
+#' run_computation(data = data, map = map)
+#' #Generates the M1 SD computation results
+#' 
+#' run_computation(data = data, map = map, flag = flag)
+#' #Generates the M1 SD computation results
+#' 
+#' @author
+#' \itemize{
+#'  \item Kevin McConnell
+#' }
+#' @export
+run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model = "M1", parameter = "SD", return_list = list()){
+  if(is.null(data)){
+    stop("Please provide a valid path for the 'data' parameter")
+  } else {
+    if(is.data.frame(data)){
+      data_data <- data
+    } else {
+      stop("Invalid data frame provided for 'data'! Please provide a valid data frame")
+    }
+  }
+  if(is.null(map)){
+    stop("Please provide a valid path for the 'map' parameter")
+  } else {
+    if(is.data.frame(map)){
+      map_data <- as.data.frame(lapply(map, as.character), stringsAsFactors = FALSE)
+    } else {
+      stop("Invalid data frame provided for 'map'! Please provide a valid data frame")
+    }
+  }
+  if(!("SDEID" %in% names(map_data) && "NOMTIME" %in% names(map_data) && "CONC" %in% names(map_data))){
+    stop("Dataset provided via 'map' does not contain the required columns")
+  }
+  if(!(map_data$SDEID %in% names(data_data) && map_data$NOMTIME %in% names(data_data) && map_data$CONC %in% names(data_data))){
+    stop("Values provided via 'map' are not present in the dataset provided via 'data'")
+  }
+  
+  auc_list <- c("AUCT1_T2")
+  regular_list <- c("CMAXi", "CMINi", "CLASTi", "CMAXCi", "CMAXiDN", "TMAXi", "TMINi", "TLAST", "TLAG", "KEL", 
+                    "KELTMLO", "KELTMHI", "KELNOPT", "KELRSQ", "KELRSQA", "THALF", "LASTTIME", "AUCALL", "AUCDN", "AUCLASTi",
+                    "AUCLASTCi", "AUCLASTiDN", "AUMCLAST", "AUCINFO", "AUCINFP", "AUCINFOC", "AUCINFPC", "AUCINFODN", 
+                    "AUCINFPDN", "AUMCINFO", "AUMCINFP", "MRTLAST", "MRTEVIFOi", "MRTEVIFPi", "AUCXPCTO", "AUCXPCTP", 
+                    "AUMCXPCTO", "AUMCXPCTP", "CLO", "CLFO", "CLFOW", "CLFP", "CLFPW", "VZFO", "VZFOW", "VZFP", "VZFPW")
+
+  #auc_col <- length(unique(data_data[,map_data$NOMTIME]))-1
+  #col <- 48 + 2*auc_col + 1
+  auc_len <- length(unique(data_data[,map_data$NOMTIME]))-1
+  reg_col <- sum(regular_list %in% return_list) + ifelse(any(c("KELRSQ","KELRSQA") %in% return_list), 1, 0)
+  auc_col <- ifelse(sum(auc_list %in% return_list) == 1, 2, 0)
+  col <- reg_col + (auc_col * auc_len) + 1 + (2 * (auc_len+1))
+  
+  if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% return_list && "KELNOPT" %in% return_list) || "KELRSQ" %in% return_list)) {
+    if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
+      col <- col + 1
+    }
+  }
+  if("FLGEMSIS" %in% names(map_data) && ("TMAXi" %in% return_list)){
+    col <- col + 1
+  }
+  computation_df <- data.frame(matrix(ncol = col, nrow = 0)) 
+  
+  col_names <- c("SDEID")
+  if("CMAXi" %in% return_list) {
+    col_names <- c(col_names, "CMAX")
+  }
+  if("CMINi" %in% return_list) {
+    col_names <- c(col_names, "CMIN")
+  }
+  if("CLASTi" %in% return_list) {
+    col_names <- c(col_names, "CLAST")
+  }
+  if("CMAXCi" %in% return_list && "CMAXi" %in% return_list && "KEL" %in% return_list) {
+    col_names <- c(col_names, "CMAXC")
+  }
+  if("CMAXiDN" %in% return_list && "CMAXi" %in% return_list) {
+    col_names <- c(col_names, "CMAXDN")
+  }
+  if("TMAXi" %in% return_list) {
+    col_names <- c(col_names, "TMAX")
+  }
+  if("TMINi" %in% return_list) {
+    col_names <- c(col_names, "TMIN")
+  }
+  if("TLAST" %in% return_list) {
+    col_names <- c(col_names, "TLAST")
+  }
+  if("FLGEMSIS" %in% names(map_data) && ("TMAXi" %in% return_list)){
+    col_names <- c(col_names, "FLGACCEPTTMAX")
+  }
+  if("TLAG" %in% return_list) {
+    col_names <- c(col_names, "TLAG")
+  }
+  if("KEL" %in% return_list) {
+    col_names <- c(col_names, "KEL")
+  }
+  if("KELTMLO" %in% return_list) {
+    col_names <- c(col_names, "KELTMLO")
+  }
+  if("KELTMHI" %in% return_list) {
+    col_names <- c(col_names, "KELTMHI")
+  }
+  if("KELNOPT" %in% return_list) {
+    col_names <- c(col_names, "KELNOPT")
+  }
+  if("KELRSQ" %in% return_list || "KELRSQA" %in% return_list){
+    col_names <- c(col_names, "KELR")
+  }
+  if("KELRSQ" %in% return_list){
+    col_names <- c(col_names, "KELRSQ")
+  }
+  if("KELRSQA" %in% return_list){
+    col_names <- c(col_names, "KELRSQA")
+  }
+  if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% return_list && "KELNOPT" %in% return_list) || "KELRSQ" %in% return_list)) {
+    if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
+      col_names <- c(col_names, "FLGACCEPTKEL") 
+    }
+  }
+  if("THALF" %in% return_list) {
+    col_names <- c(col_names, "THALF")
+  }
+  if("LASTTIME" %in% return_list) {
+    col_names <- c(col_names, "LASTTIME")
+  }
+  if("AUCALL" %in% return_list) {
+    col_names <- c(col_names, "AUCALL")
+  }
+  if("AUCDN" %in% return_list && "AUCALL" %in% return_list) {
+    col_names <- c(col_names, "AUCDN")
+  }
+  if("AUCLASTi" %in% return_list) {
+    col_names <- c(col_names, "AUCLAST")
+  }
+  if("AUCLASTCi" %in% return_list && "AUCLASTi" %in% return_list && "KEL" %in% return_list && "TLAST" %in% return_list) {
+    col_names <- c(col_names, "AUCLASTC")
+  }
+  if("AUCLASTiDN" %in% return_list && "AUCLASTi" %in% return_list) {
+    col_names <- c(col_names, "AUCLASTDN")
+  }
+  if("AUMCLAST" %in% return_list) {
+    col_names <- c(col_names, "AUMCLAST")
+  }
+  if("AUCT1_T2" %in% return_list) {
+    col_names <- c(col_names, rep(paste0("AUC",1:auc_len)), rep(paste0("AUCINT",1:auc_len)))
+  }
+  if("AUCINFO" %in% return_list) {
+    col_names <- c(col_names, "AUCINFO")
+  }
+  if("AUCINFP" %in% return_list) {
+    col_names <- c(col_names, "AUCINFP")
+  }
+  if("AUCINFOC" %in% return_list && "KEL" %in% return_list && "AUCINFO" %in% return_list) {
+    col_names <- c(col_names, "AUCINFOC")
+  }
+  if("AUCINFPC" %in% return_list && "KEL" %in% return_list && "AUCINFP" %in% return_list) {
+    col_names <- c(col_names, "AUCINFPC")
+  }
+  if("AUCINFODN" %in% return_list && "AUCINFO" %in% return_list) {
+    col_names <- c(col_names, "AUCINFODN")
+  }
+  if("AUCINFPDN" %in% return_list && "AUCINFP" %in% return_list) {
+    col_names <- c(col_names, "AUCINFPDN")
+  }
+  if("AUMCINFO" %in% return_list) {
+    col_names <- c(col_names, "AUMCINFO")
+  }
+  if("AUMCINFP" %in% return_list) {
+    col_names <- c(col_names, "AUMCINFP")
+  }
+  if("MRTLAST" %in% return_list){
+    col_names <- c(col_names, "MRTLAST")
+  }
+  if("MRTEVIFOi" %in% return_list){
+    col_names <- c(col_names, "MRTO")
+  }
+  if("MRTEVIFPi" %in% return_list){
+    col_names <- c(col_names, "MRTP")
+  }
+  if("AUCXPCTO" %in% return_list){
+    col_names <- c(col_names, "AUCXPCTO")
+  }
+  if("AUCXPCTP" %in% return_list){
+    col_names <- c(col_names, "AUCXPCTP")
+  }
+  if("AUMCXPCTO" %in% return_list){
+    col_names <- c(col_names, "AUMCXPCTO")
+  }
+  if("AUMCXPCTP" %in% return_list){
+    col_names <- c(col_names, "AUMCXPCTP")
+  }
+  if("CLO" %in% return_list && "AUCINFO" %in% return_list) {
+    col_names <- c(col_names, "CLO")
+  }
+  if("CLFO" %in% return_list && "AUCINFO" %in% return_list) {
+    col_names <- c(col_names, "CLFO")
+  }
+  if("CLFOW" %in% return_list && "CLFO" %in% return_list) {
+    col_names <- c(col_names, "CLFOW")
+  }
+  if("CLFP" %in% return_list && "AUCINFP" %in% return_list) {
+    col_names <- c(col_names, "CLFP")
+  }
+  if("CLFPW" %in% return_list && "CLFP" %in% return_list) {
+    col_names <- c(col_names, "CLFPW")
+  }
+  if("VZFO" %in% return_list && "AUCINFO" %in% return_list && "KEL" %in% return_list) {
+    col_names <- c(col_names, "VZFO")
+  }
+  if("VZFOW" %in% return_list && "VZFO" %in% return_list) {
+    col_names <- c(col_names, "VZFOW")
+  }
+  if("VZFP" %in% return_list && "AUCINFP" %in% return_list && "KEL" %in% return_list) {
+    col_names <- c(col_names, "VZFP")
+  }
+  if("VZFPW" %in% return_list && "VZFP" %in% return_list) {
+    col_names <- c(col_names, "VZFPW")
+  }
+  col_names <- c(col_names, rep(paste0("CONC",1:(auc_len+1))), rep(paste0("CONCTIME",1:(auc_len+1))))
+  
+  names(computation_df) <- col_names
+  #names(computation_df) <- c("SDEID", "CMAX", "CMIN", "CLAST", "CMAXC", "CMAXDN", "TMAX", "TMIN", "TLAST", "TLAG", "KEL", "KELTMLO", "KELTHMI", 
+  #                           "KELNOPT", "KELR", "KELRSQ", "KELRSQA", "THALF", "LASTTIME", "AUCALL", "AUCDN", "AUCLAST", "AUCLASTC", "AUCLASTDN", "AUMCLAST", 
+  #                           rep(paste0("AUC",1:auc_col)), rep(paste0("AUCINT",1:auc_col)), "AUCINFO", "AUCINFP", "AUCINFOC", "AUCINFPC", 
+  #                           "AUCINFODN", "AUCINFPDN","AUMCINFO", "AUMCINFP", "MRTLAST", "MRTO", "MRTP", "AUCXPCTO", "AUCXPCTP", "AUMCXPCTO", 
+  #                           "AUMCXPCTP", "CLO", "CLFO", "CLFOW", "CLFP", "CLFPW", "VZFO", "VZFOW", "VZFP", "VZFPW")
+  
+  if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% return_list && "KELNOPT" %in% return_list) || "KELRSQ" %in% return_list)) {
+    kel_crit <- unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))
+    
+    if(length(kel_crit) > 0){
+      x <- regexpr("^[[:space:]]*?([[:alnum:]_.+]+?)([<>=!]+?)([[:digit:].]+?)$", kel_crit, ignore.case=TRUE, perl=TRUE)
+      flag_df <- data.frame(matrix(ncol = 3, nrow = 0))
+      names(flag_df) <- c("VAR", "OPR", "CRIT")    
+      flag_subset <- NA
+      
+      for(j in 1:length(kel_crit)){
+        index <-  as.numeric(attributes(x)$capture.start[j,])
+        flag_df[j,] <- c(substr(kel_crit[j], index[1], index[2]-1), substr(kel_crit[j], index[2], index[3]-1), substr(kel_crit[j], index[3], nchar(kel_crit[j])))
+        
+        if(as.character(flag_df$VAR[j]) %in% return_list){
+          if(j == 1 || is.na(flag_subset)) {
+            flag_subset <-  paste(paste0("computation_df", "$", flag_df$VAR[j]), flag_df$OPR[j], flag_df$CRIT[j])
+          } else {
+            flag_subset <-  paste(flag_subset, "&", paste0("computation_df", "$", flag_df$VAR[j]), flag_df$OPR[j], flag_df$CRIT[j])
+          } 
+        }
+      }
+    }
+  }
+  
+  for(i in 1:length(unique(data_data[,map_data$SDEID]))){
+    tmp_df <- data_data[data_data[,map_data$SDEID] == unique(data_data[,map_data$SDEID])[i],]
+    kel_flag <- as.numeric(tmp_df[,map_data$FLGEXKEL])
+    auc_flag <- as.numeric(tmp_df[,map_data$FLGEXAUC])
+    
+    c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
+    if("CMAXi" %in% return_list) {
+      c_max <- cmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
+    }
+    if("CMINi" %in% return_list) {
+      c_min <- cmin(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
+    }
+    if("CLASTi" %in% return_list) {
+      c_last <- clast(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
+    }
+    if("CMAXiDN" %in% return_list && "CMAXi" %in% return_list) {
+      cmaxdn <- cmax_dn(cmax = c_max, dose = tmp_df[,map_data$DOSE][i]) 
+    }
+    if("TMAXi" %in% return_list) {
+      t_max <- tmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
+    }  
+    if("TMINi" %in% return_list) {
+      t_min <- tmin(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
+    }
+    if("TLAST" %in% return_list) {
+      t_last <- tlast(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
+    }
+    if("TLAG" %in% return_list) {
+      t_lag <- tlag(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME]) 
+    }
+    if("KEL" %in% return_list || "KELTMLO" %in% return_list || "KELTMHI" %in% return_list || "KELNOPT" %in% return_list || "THALF" %in% return_list) {
+      kel_v <- kel(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], exflag = kel_flag)
+    }
+    if("KELRSQ" %in% return_list || "KELRSQA" %in% return_list) {
+      kelr_v <- kel_r(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], exflag = kel_flag)
+    }
+    if("LASTTIME" %in% return_list) {
+      last_time <- lasttime(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME])
+    }
+    if("CMAXCi" %in% return_list && "CMAXi" %in% return_list && "KEL" %in% return_list) {
+      c_max_c <- cmaxc(kel = kel_v[["KEL"]], cmax = c_max, c0 = c_0, tmax = t_max)
+    }
+    if("AUCALL" %in% return_list) {
+      aucall <- auc_all(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, exflag = auc_flag)
+    }
+    if("AUCDN" %in% return_list && "AUCALL" %in% return_list) {
+      aucdn <- auc_dn(auc = aucall, dose = tmp_df[,map_data$DOSE][i])
+    }
+    if("AUCLASTi" %in% return_list) {
+      auclast <- auc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, exflag = auc_flag)
+    }
+    if("AUCLASTCi" %in% return_list && "AUCLASTi" %in% return_list && "KEL" %in% return_list && "TLAST" %in% return_list) {
+      auclast_c <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclast, c0 = c_0, tlast = t_last)
+    }
+    if("AUCLASTiDN" %in% return_list && "AUCLASTi" %in% return_list) {
+      auclastdn <- auc_dn(auc = auclast, dose = tmp_df[,map_data$DOSE][i])
+    }
+    if("AUMCLAST" %in% return_list) {
+      aumclast <- aumc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, exflag = auc_flag)
+    }
+    
+    if("AUCT1_T2" %in% return_list) {
+      auct <- NULL
+      auc_int <- NULL
+      for(t in 2:(auc_len+1)){
+        tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$NOMTIME]), t1 = tmp_df[,map_data$NOMTIME][1], t2 = tmp_df[,map_data$NOMTIME][t], method = method, exflag = auc_flag)
+        tmp_int <- paste0(unique(data_data[,map_data$NOMTIME])[1], "_", unique(data_data[,map_data$NOMTIME])[t])
+        
+        if(is.null(auct)){
+          auct <- tmp
+          auc_int <- tmp_int
+        } else {
+          auct <- c(auct, tmp)
+          auc_int <- c(auc_int, tmp_int)
+        }
+      }
+      if(length(auct) < auc_col) {
+        auct <- c(auct, rep(NA, (auc_col - length(auct))))
+      }
+      if(length(auc_int) < auc_col) {
+        auc_int <- c(auc_int, rep(NA, (auc_col - length(auc_int))))
+      }
+    }
+      
+    if("AUCINFO" %in% return_list) {
+      aucinf_o <- auc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
+    }
+    if("AUCINFOC" %in% return_list && "KEL" %in% return_list && "AUCINFO" %in% return_list) {
+      aucinf_oc <- auc_inf_oc(kel = kel_v[["KEL"]], aucinfo = aucinf_o, c0 = c_0)
+    }
+    if("AUCINFODN" %in% return_list && "AUCINFO" %in% return_list) {
+      aucinfo_dn <- auc_dn(auc = aucinf_o, dose = tmp_df[,map_data$DOSE][i])
+    }
+    if("AUCINFP" %in% return_list) {
+      aucinf_p <- auc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
+    }
+    if("AUCINFPC" %in% return_list && "KEL" %in% return_list && "AUCINFP" %in% return_list) {
+      aucinf_pc <- auc_inf_pc(kel = kel_v[["KEL"]], aucinfp = aucinf_p, c0 = c_0)
+    }
+    if("AUCINFPDN" %in% return_list && "AUCINFP" %in% return_list) {
+      aucinfp_dn <- auc_dn(auc = aucinf_p, dose = tmp_df[,map_data$DOSE][i])
+    }
+    if("AUMCINFO" %in% return_list) {
+      aumcinf_o <- aumc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
+    }
+    if("AUMCINFP" %in% return_list) {
+      aumcinf_p <- aumc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
+    }
+    if("MRTLAST" %in% return_list) {
+      mrtlast <- mrt_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, model = model)
+    }
+    if("MRTEVIFOi" %in% return_list){
+      mrto <- mrt_evif_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, parameter = parameter)
+    }
+    if("MRTEVIFPi" %in% return_list){
+      mrtp <- mrt_evif_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, parameter = parameter)
+    }
+    if("AUCXPCTO" %in% return_list){
+      aucxpcto <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
+    }
+    if("AUCXPCTP" %in% return_list){
+      aucxpctp <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
+    }
+    if("AUMCXPCTO" %in% return_list){
+      aumcxpcto <- aumc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
+    }
+    if("AUMCXPCTP" %in% return_list){
+      aumcxpctp <- aumc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$NOMTIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
+    }
+    if("CLO" %in% return_list && "AUCINFO" %in% return_list) {
+      cl_o <- clo(aucinfo = aucinf_o, dose = tmp_df[,map_data$DOSE][i])
+    }
+    if("CLFO" %in% return_list && "AUCINFO" %in% return_list) {
+      clf_o <- clfo(aucinfo = aucinf_o, dose = tmp_df[,map_data$DOSE][i])
+    }
+    if("CLFOW" %in% return_list && "CLFO" %in% return_list) {
+      clf_ow <- clfow(clfo = clf_o, normbs = tmp_df[,map_data$NORMBS][i])
+    }
+    if("CLFP" %in% return_list && "AUCINFP" %in% return_list) {
+      clf_p <- clfp(aucinfp = aucinf_p, dose = tmp_df[,map_data$DOSE][i])
+    }
+    if("CLFPW" %in% return_list && "CLFP" %in% return_list) {
+      clf_pw <- clfpw(clfp = clf_p, normbs = tmp_df[,map_data$NORMBS][i])
+    }
+    if("VZFO" %in% return_list && "AUCINFO" %in% return_list && "KEL" %in% return_list) {
+      vzf_o <- vzfo(kel = kel_v[["KEL"]], aucinfo = aucinf_o, dose = tmp_df[,map_data$DOSE][i])
+    }
+    if("VZFOW" %in% return_list && "VZFO" %in% return_list) {
+      vzf_ow <- vzfow(vzfo = vzf_o, normbs = tmp_df[,map_data$NORMBS][i])
+    }
+    if("VZFP" %in% return_list && "AUCINFP" %in% return_list && "KEL" %in% return_list) {
+      vzf_p <- vzfp(kel = kel_v[["KEL"]], aucinfp = aucinf_p, dose = tmp_df[,map_data$DOSE][i])
+    }
+    if("VZFPW" %in% return_list && "VZFP" %in% return_list) {
+      vzf_pw <- vzfpw(vzfp = vzf_p, normbs = tmp_df[,map_data$NORMBS][i])
+    }
+    
+    #computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], c_max, c_min, c_last, c_max_c, cmaxdn, t_max, t_min, t_last, 
+    #                        t_lag, kel_v[["KEL"]], kel_v[["KELTMLO"]], kel_v[["KELTMHI"]], kel_v[["KELNOPT"]], kelr_v[["KELR"]], 
+    #                        kelr_v[["KELRSQ"]], kelr_v[["KELRSQA"]], kel_v[["THALF"]], last_time, aucall, aucdn, auclast, auclast_c, 
+    #                        auclastdn, aumclast, auct, auc_int, aucinf_o, aucinf_p, aucinf_oc, aucinf_pc, aucinfo_dn, aucinfp_dn, 
+    #                        aumcinf_o, aumcinf_p, mrtlast, mrto, mrtp, aucxpcto, aucxpctp, aumcxpcto, aumcxpctp, cl_o, clf_o, 
+    #                        clf_ow, clf_p, clf_pw, vzf_o, vzf_ow, vzf_p, vzf_pw)
+    
+    row_data <- c(unique(data_data[,map_data$SDEID])[i])
+    if("CMAXi" %in% return_list) {
+      row_data <- c(row_data, c_max)
+    }
+    if("CMINi" %in% return_list) {
+      row_data <- c(row_data, c_min)
+    }
+    if("CLASTi" %in% return_list) {
+      row_data <- c(row_data, c_last)
+    }
+    if("CMAXCi" %in% return_list && "CMAXi" %in% return_list && "KEL" %in% return_list) {
+      row_data <- c(row_data, c_max_c)
+    }
+    if("CMAXiDN" %in% return_list && "CMAXi" %in% return_list) {
+      row_data <- c(row_data, cmaxdn)
+    }
+    if("TMAXi" %in% return_list) {
+      row_data <- c(row_data, t_max)
+    }
+    if("TMINi" %in% return_list) {
+      row_data <- c(row_data, t_min)
+    }
+    if("TLAST" %in% return_list) {
+      row_data <- c(row_data, t_last)
+    }
+    if("FLGEMSIS" %in% names(map_data) && ("TMAXi" %in% return_list)){
+      row_data <- c(row_data, "FALSE")
+    }
+    if("TLAG" %in% return_list) {
+      row_data <- c(row_data, t_lag) 
+    }
+    if("KEL" %in% return_list) {
+      row_data <- c(row_data, kel_v[["KEL"]])
+    }
+    if("KELTMLO" %in% return_list) {
+      row_data <- c(row_data, kel_v[["KELTMLO"]])
+    }
+    if("KELTMHI" %in% return_list) {
+      row_data <- c(row_data, kel_v[["KELTMHI"]])
+    }
+    if("KELNOPT" %in% return_list) {
+      row_data <- c(row_data, kel_v[["KELNOPT"]])
+    }
+    if("KELRSQ" %in% return_list || "KELRSQA" %in% return_list){
+      row_data <- c(row_data, kelr_v[["KELR"]])
+    }
+    if("KELRSQ" %in% return_list){
+      row_data <- c(row_data, kelr_v[["KELRSQ"]])
+    }
+    if("KELRSQA" %in% return_list){
+      row_data <- c(row_data, kelr_v[["KELRSQA"]])
+    }
+    if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% return_list && "KELNOPT" %in% return_list) || "KELRSQ" %in% return_list)) {
+      if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
+        row_data <- c(row_data, "FALSE")
+      }
+    }
+    if("THALF" %in% return_list) {
+      row_data <- c(row_data, kel_v[["THALF"]])
+    }
+    if("LASTTIME" %in% return_list) {
+      row_data <- c(row_data, last_time)
+    }
+    if("AUCALL" %in% return_list) {
+      row_data <- c(row_data, aucall)
+    }
+    if("AUCDN" %in% return_list && "AUCALL" %in% return_list) {
+      row_data <- c(row_data, aucdn)
+    }
+    if("AUCLASTi" %in% return_list) {
+      row_data <- c(row_data, auclast)
+    }
+    if("AUCLASTCi" %in% return_list && "AUCLASTi" %in% return_list && "KEL" %in% return_list && "TLAST" %in% return_list) {
+      row_data <- c(row_data, auclast_c)
+    }
+    if("AUCLASTiDN" %in% return_list && "AUCLASTi" %in% return_list) {
+      row_data <- c(row_data, auclastdn)
+    }
+    if("AUMCLAST" %in% return_list) {
+      row_data <- c(row_data, aumclast)
+    }
+    if("AUCT1_T2" %in% return_list) {
+      row_data <- c(row_data, auct, auc_int)
+    }
+    if("AUCINFO" %in% return_list) {
+      row_data <- c(row_data, aucinf_o)
+    }
+    if("AUCINFP" %in% return_list) {
+      row_data <- c(row_data, aucinf_p)
+    }
+    if("AUCINFOC" %in% return_list && "KEL" %in% return_list && "AUCINFO" %in% return_list) {
+      row_data <- c(row_data, aucinf_oc)
+    }
+    if("AUCINFPC" %in% return_list && "KEL" %in% return_list && "AUCINFP" %in% return_list) {
+      row_data <- c(row_data, aucinf_pc)
+    }
+    if("AUCINFODN" %in% return_list && "AUCINFO" %in% return_list) {
+      row_data <- c(row_data, aucinfo_dn)
+    }
+    if("AUCINFPDN" %in% return_list && "AUCINFP" %in% return_list) {
+      row_data <- c(row_data, aucinfp_dn)
+    }
+    if("AUMCINFO" %in% return_list) {
+      row_data <- c(row_data, aucinf_o)
+    }
+    if("AUMCINFP" %in% return_list) {
+      row_data <- c(row_data, aucinf_o)
+    }
+    if("MRTLAST" %in% return_list){
+      row_data <- c(row_data, mrtlast)
+    }
+    if("MRTEVIFOi" %in% return_list){
+      row_data <- c(row_data, mrto)
+    }
+    if("MRTEVIFPi" %in% return_list){
+      row_data <- c(row_data, mrtp)
+    }
+    if("AUCXPCTO" %in% return_list){
+      row_data <- c(row_data, aucxpcto)
+    }
+    if("AUCXPCTP" %in% return_list){
+      row_data <- c(row_data, aucxpctp)
+    }
+    if("AUMCXPCTO" %in% return_list){
+      row_data <- c(row_data, aumcxpcto)
+    }
+    if("AUMCXPCTP" %in% return_list){
+      row_data <- c(row_data, aumcxpctp)
+    }
+    if("CLO" %in% return_list && "AUCINFO" %in% return_list) {
+      row_data <- c(row_data, cl_o)
+    }
+    if("CLFO" %in% return_list && "AUCINFO" %in% return_list) {
+      row_data <- c(row_data, clf_o)
+    }
+    if("CLFOW" %in% return_list && "CLFO" %in% return_list) {
+      row_data <- c(row_data, clf_ow)
+    }
+    if("CLFP" %in% return_list && "AUCINFP" %in% return_list) {
+      row_data <- c(row_data, clf_p)
+    }
+    if("CLFPW" %in% return_list && "CLFP" %in% return_list) {
+      row_data <- c(row_data, clf_pw)
+    }
+    if("VZFO" %in% return_list && "AUCINFO" %in% return_list && "KEL" %in% return_list) {
+      row_data <- c(row_data, vzf_o)
+    }
+    if("VZFOW" %in% return_list && "VZFO" %in% return_list) {
+      row_data <- c(row_data, vzf_ow)
+    }
+    if("VZFP" %in% return_list && "AUCINFP" %in% return_list && "KEL" %in% return_list) {
+      row_data <- c(row_data, vzf_p)
+    }
+    if("VZFPW" %in% return_list && "VZFP" %in% return_list) {
+      row_data <- c(row_data, vzf_pw)
+    }
+    row_data <- c(row_data, 
+                  c(tmp_df[,map_data$CONC], rep(NA, ((auc_len+1) - length(tmp_df[,map_data$CONC])))),
+                  c(tmp_df[,map_data$NOMTIME], rep(NA, ((auc_len+1) - length(tmp_df[,map_data$NOMTIME]))))
+                 )
+    computation_df[i,] <- row_data  
+  }
+  
+  if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% return_list && "KELNOPT" %in% return_list) || "KELRSQ" %in% return_list)) {
+    if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
+      suppressWarnings(computation_df$FLGACCEPTKEL <- as.logical(computation_df$FLGACCEPTKEL)) 
+      computation_df[eval(parse(text=flag_subset)), "FLGACCEPTKEL"] <- TRUE
+    }
+  }
+  if("FLGEMSIS" %in% names(map_data) && ("TMAXi" %in% return_list)){
+    comutation_df$FLGACCEPTTMAX <- ifelse(computation_df$FLGEMESIS == 1 & computation_df$TMAX < 2 * median(computation_df$TMAX), TRUE, FALSE)
+  }
+  
+  return(computation_df)
+}
+
