@@ -1,16 +1,16 @@
-#' Corrected AUCLASTi  
+#' Corrected AUCLASTi
 #'
-#' AUCLAST corrected using estimates of KEL and C0. i refers to the value of NDOSEI. \cr 
-#' 
+#' AUCLAST corrected using estimates of KEL and C0. i refers to the value of NDOSEI. \cr
+#'
 #' @details
-#' \strong{Equation}
+#' \strong{Equation} \cr
 #' CLAST(res) is the predicted residual concentration at TLAST
 #' \enumerate{
 #'  \tabular{rl}{
 #'   \tab \figure{auc_lastc2.png} \cr
 #'  }
 #' }
-#' AUCLAST corrected using estimates of KEL and C0 
+#' AUCLAST corrected using estimates of KEL and C0
 #' \enumerate{
 #'  \tabular{rl}{
 #'   \tab \figure{auc_lastc1.png} \cr
@@ -18,72 +18,83 @@
 #'  \eqn{C0 = the residual plasma concentration observed at time zero (i.e. the predose concentraton)} \cr
 #'  \eqn{KEL = the terminal phase rate constant for the concentration-time profile of interest} \cr
 #' }
-#' 
-#' @param conc The concentration data (given in a vector form) 
-#' @param time The time data (given in a vector form)
-#' 
+#'
+#' @section Note:
+#' \strong{auc_last}: Refer to \code{\link{auc_last}} for more details \cr
+#' \strong{kel}: Refer to \code{\link{kel}} for more details \cr
+#' \strong{tlast}: Refer to \code{\link{tlast}} for more details \cr
+#'
+#' @param kel The terminal phase rate constant for the concentration-time profile of interest (numeric value)
+#' @param auclast The area under the concentration versus time cruve from time 0 to time of the last mesurable concentration (numeric value)
+#' @param c0 The residual plasma concentration observed at time zero (numeric value)
+#' @param tlast The time of Last Measurable (non-zero) Plasma Concentration (numeric value)
+#'
 #' @section Returns:
-#' \strong{Value} \cr 
+#' \strong{Value} \cr
 #' \itemize{
-#'  \item AUCINFPC: area under the curve corrected
+#'  \item AUCLASTC: area under the curve corrected
 #' }
-#' 
-#' @examples 
+#'
+#' @examples
 #' ##########
 #' ## Data ##
-#' #################################
-#' ##  SID  ##  TIME  ##   CONC   ## 
-#' #################################
-#' ##   30  ##    0   ##   2.89   ##
-#' ##   30  ##    1   ##   2.49   ##
-#' ##   30  ##    2   ##   2.47   ##
-#' ##   30  ##    3   ##   2.38   ##
-#' ##   30  ##    4   ##   2.32   ##
-#' ##   30  ##    5   ##   2.28   ##
-#' #################################
-#' 
-#' data <- data.frame(
-#'     SID = ...,
-#'     TIME = ...,
-#'     RESULT = ...
-#' )
-#' #Same data as above, just represented as a dataframe
-#' 
-#' auc_inf_o()   
-#' #Error in auc_all: 'conc' and 'time' vectors are NULL
-#' 
-#' conc_vector <- data$CONC
-#' time_vector <- data$TIME
-#' 
-#' auc_inf_o(conc = conc_vector, time = time_vector)
-#' #67.86212
-#'  
-#' ############
-#' ## Data 2 ##
-#' #################################
-#' ##  SID  ##  TIME  ##   CONC   ## 
-#' #################################
-#' ##   31  ##    0   ##      0   ## 
-#' ##   31  ##    1   ##      0   ##
-#' ##   31  ##    2   ##      0   ##
-#' #################################
-#' 
-#' data2 <- data.frame(
-#'     SID = ...,
-#'     TIME = ...,
-#'     RESULT = ...
-#' )
-#' #Same data as above, just represented as a dataframe
-#' 
-#' conc_vector <- data2$CONC
-#' time_vector <- data2$TIME
-#' 
-#' auc_inf_o(conc = conc_vector, time = time_vector)
-#' #NA
-#' 
+#' #############################################
+#' ##  SID  ##  TIME  ##   CONC   ##  EXFLAG  ##
+#' #############################################
+#' ##   30  ##    0   ##   1.01   ##     0    ##
+#' ##   30  ##    1   ##   1.16   ##     1    ##
+#' ##   30  ##    2   ##   1.17   ##     0    ##
+#' ##   30  ##    3   ##   1.13   ##     0    ##
+#' ##   30  ##    4   ##   1.21   ##     0    ##
+#' ##   30  ##    5   ##   0.976  ##     1    ##
+#' ##   30  ##    6   ##   0.785  ##     1    ##
+#' ##   30  ##    7   ##   0.55   ##     0    ##
+#' ##   30  ##    8   ##   0.368  ##     0    ##
+#' ##   30  ##    9   ##   0.289  ##     0    ##
+#' ##   30  ##    10  ##   0.118  ##     1    ##
+#' ##   30  ##    11  ##   0.0608 ##     1    ##
+#' ##   30  ##    12  ##   0      ##     1    ##
+#' #############################################
+#'
+#' #Data mentioned will be used for the following example
+#'
+#' auc_lastc()
+#' #Error in auc_lastc: 'kel', 'auclast', 'c0', 'tlast' vectors are NULL
+#'
+#' conc_vector <- c(1.01, 1.16, 1.17, 1.13, 1.21, 0.976, 0.785, 0.55, 0.368, 0.289, 0.118, 0.0608, 0)
+#' time_vector <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
+#' exflag_vector <- c(0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1)
+#'
+#' kel(conc = conc_vector, time = time_vector)
+#' #      KEL      KELC0    KELTMLO    KELTMHI    KELNOPT      THALF     THALFF
+#' #0.2428728  2.0502221  0.0000000 11.0000000 12.0000000  2.8539516         NA
+#'
+#' tlast(conc = conc_vector, time = time_vector)
+#' #11
+#'
+#' auc_last(conc = conc_vector, time = time_vector, method = 2)
+#' #8.2914
+#'
+#' auc_lastc(auclast = 8.2914, kel = 0.2428728, c0 = 1.01, tlast = 11)
+#' #3.845316
+#'
+#' auc_last(conc = conc_vector, time = time_vector, method = 1, exflag = exflag_vector)
+#' #8.099598
+#'
+#' auc_lastc(auclast = 8.099598, kel = 0.2428728, c0 = 1.01, tlast = 11)
+#' #3.653514
+#'
+#' auc_last(conc = conc_vector, time = time_vector, method = 3,  exflag = exflag_vector)
+#' #8.095106
+#'
+#' auc_lastc(auclast = 8.095106, kel = 0.2428728, c0 = 1.01, tlast = 11)
+#' #3.649022
+#'
 #' @author
 #' \itemize{
-#'  \item Kevin McConnell
+#'  \item \strong{Rudraya Technical Team}
+#'  \item website: \url{www.rudraya.com}
+#'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
 auc_lastc <- function(kel = NULL, auclast = NULL, c0 = NULL, tlast = NULL){
@@ -93,26 +104,26 @@ auc_lastc <- function(kel = NULL, auclast = NULL, c0 = NULL, tlast = NULL){
     if(is.null(kel)){
       err <- paste0(err, "'kel'")
       count <- count + 1
-    } 
+    }
     if(is.null(auclast)){
       err <- paste0(err, ifelse(is.null(kel), ", ", ""), "'auclast'")
       count <- count + 1
-    } 
+    }
     if(is.null(c0)){
       err <- paste0(err, ifelse((is.null(kel) || is.null(auclast)), ", ", ""), "'c0'")
       count <- count + 1
-    } 
+    }
     if(is.null(tlast)){
       err <- paste0(err, ifelse((is.null(kel) || is.null(auclast) || is.null(c0)), ", ", ""), "'tlast'")
       count <- count + 1
     }
     if(count > 1){
-      stop(paste0("Error in auc_lastc: ", err, " vectors are NULL")) 
+      stop(paste0("Error in auc_lastc: ", err, " vectors are NULL"))
     } else {
       stop(paste0("Error in auc_lastc: ", err, " vector is NULL"))
     }
-  } 
-  
+  }
+
   if(is.na(kel) || is.na(c0) || is.na(auclast) || is.na(tlast)) {
     auclastc <- NA
   } else {
