@@ -7,14 +7,18 @@
 cmaxc(kel = NULL, cmax = NULL, c0 = NULL, tmax = NULL)
 }
 \arguments{
-\item{conc}{The concentration data (given in a vector form)}
+\item{kel}{The terminal phase rate constant for the concentration-time profile of interest (numeric value)}
 
-\item{time}{The time data (given in a vector form)}
+\item{cmax}{The cmax data (numeric value)}
+
+\item{c0}{The c0 data (numeric value)}
+
+\item{t_max}{The first time at which CMAXi is observed within the dosing interval (numeric value)}
 }
 \description{
-CMAXi corrected using estimates of KEL and C0. i refers to the value of NDOSEI. The correct 
-CMAXCi (and the other corrections below) should be triggered for computation when the FLAG 
-for predose concentrations >5% of Cmax are observed has been set. This would ordinarily apply 
+CMAXi corrected using estimates of KEL and C0. i refers to the value of NDOSEI. The correct
+CMAXCi (and the other corrections below) should be triggered for computation when the FLAG
+for predose concentrations >5% of Cmax are observed has been set. This would ordinarily apply
 to CMAXC1, i.e. the first dosing interval of a concentration time profile. \cr
 }
 \details{
@@ -27,20 +31,28 @@ to CMAXC1, i.e. the first dosing interval of a concentration time profile. \cr
  \eqn{KEL = the terminal phase rate constant for the concentration-time profile of interest} \cr
 }
 }
+\section{Note}{
+
+\strong{cmax}: Refer to \code{\link{cmax}} for more details
+\strong{tmax}: Refer to \code{\link{tmax}} for more details
+\strong{kel}: Refer to \code{\link{kel}} for more details
+}
+
 \section{Returns}{
 
-\strong{Value} \cr 
+\strong{Value} \cr
 \itemize{
- \item AUCINFPC: area under the curve corrected
+ \item CMAXC: corrected CMAX
 }
 }
 
 \examples{
-Will add some soon!!
 
 }
 \author{
 \itemize{
- \item Kevin McConnell
+ \item \strong{Rudraya Technical Team}
+ \item website: \url{www.rudraya.com}
+ \item email: \url{support@rudraya.com}
 }
 }

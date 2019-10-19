@@ -2,7 +2,7 @@
 % Please edit documentation in R/tmax.R
 \name{tmax}
 \alias{tmax}
-\title{Time at Maximum Observed Concentration}
+\title{First Time at Maximum Observed Concentration}
 \usage{
 tmax(conc = NULL, time = NULL)
 }
@@ -12,17 +12,19 @@ tmax(conc = NULL, time = NULL)
 \item{time}{The time data (given in a vector form)}
 }
 \description{
-This function gets the first time at which CMAXi is observed within a dosing interval 
+This function gets the first time at which CMAXi is observed within a dosing interval
 and is obtained by the inspection of the data. In the case of multiple dosing, TMAXi is obtained
 by inspection of the data during the dose inteval i.
 }
 \details{
-If all the concentrations are 0's then TMAXi will return NA. 
-Also the interval must be in the range of the times listed in the data.
+If all the concentrations are 0's then TMAXi will return NA.
+Also the interval must be in the range of the times listed in the data. \cr
+The function will ensure that the concentration data and the time data provided are numeric vectors and
+are also of the same length. \cr
 }
 \section{Returns}{
 
-\strong{Value} \cr 
+\strong{Value} \cr
 \itemize{
  \item TMAX: time at maximum observed concentration
 }
@@ -31,73 +33,58 @@ Also the interval must be in the range of the times listed in the data.
 \examples{
 ##########
 ## Data ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   30  ##    0   ##   2.89   ##
-##   30  ##    1   ##   2.49   ##
-##   30  ##    2   ##   2.47   ##
-#################################
+###################################
+##  SDEID  ##  TIME  ##   CONC   ##
+###################################
+##   30    ##    0   ##   2.89   ##
+##   30    ##    1   ##   2.49   ##
+##   30    ##    2   ##   2.47   ##
+###################################
 
-data <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-tmax()   
+tmax()
 #Error in tmax: 'conc' and 'time' vectors are NULL
 
-conc_vector <- data$CONC
-time_vector <- data$TIME
+conc_vector <- c(2.89, 2.49, 2.47)
+time_vector <- c(0, 1, 2)
 
 tmax(conc = conc_vector, time = time_vector)
 #0
- 
+
 ############
 ## Data 2 ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   31  ##    0   ##      0   ## 
-##   31  ##    1   ##      0   ##
-##   31  ##    2   ##      0   ##
-#################################
+###################################
+##  SDEID  ##  TIME  ##   CONC   ##
+###################################
+##   31    ##    0   ##     0    ##
+##   31    ##    1   ##     0    ##
+##   31    ##    2   ##     0    ##
+###################################
 
-data2 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-conc_vector <- data2$CONC
-time_vector <- data2$TIME
+conc_vector <- c(0, 0, 0)
+time_vector <- c(0, 1, 2)
 
 tmax(conc = conc_vector, time = time_vector)
 #NA
 
 ############
 ## Data 3 ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   32  ##    0   ##   1.19   ## 
-##   32  ##    1   ##   1.27   ##
-##   32  ##    2   ##   1.24   ##
-##   32  ##    3   ##   1.27   ##
-#################################
+###################################
+##  SDEID  ##  TIME  ##   CONC   ##
+###################################
+##   32    ##    0   ##   1.19   ##
+##   32    ##    1   ##   1.27   ##
+##   32    ##    2   ##   1.24   ##
+##   32    ##    3   ##   1.27   ##
+###################################
 
-data3 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-conc_vector <- data3$CONC
-time_vector <- data3$TIME
+conc_vector <- c(1.19, 1.27, 1.24, 1.27)
+time_vector <- c(0, 1, 2, 3)
 
 tmax(conc = conc_vector, time = time_vector)
 #1
@@ -105,6 +92,8 @@ tmax(conc = conc_vector, time = time_vector)
 }
 \author{
 \itemize{
- \item Kevin McConnell
+ \item \strong{Rudraya Technical Team}
+ \item website: \url{www.rudraya.com}
+ \item email: \url{support@rudraya.com}
 }
 }

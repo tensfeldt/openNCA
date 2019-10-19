@@ -4,7 +4,8 @@
 \alias{auc_XpctP}
 \title{Percentage of AUCINFP obtained by forward extrapolation}
 \usage{
-auc_XpctP(conc = NULL, time = NULL, method = 1)
+auc_XpctP(conc = NULL, time = NULL, method = 1, kelflag = NULL,
+  aucflag = NULL, auc_infp = NULL, auclast = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}
@@ -14,11 +15,19 @@ auc_XpctP(conc = NULL, time = NULL, method = 1)
 \item{method}{The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr
 \enumerate{
 \item Linear-Log Trapazoidal Rule (default)
-\item Linear Trapazoidal Rule 
-\item Log Trapazoidal Rule 
-\item Linear Up - Log DownTrapazoidal Rule 
-} 
+\item Linear Trapazoidal Rule
+\item Log Trapazoidal Rule
+\item Linear Up - Log DownTrapazoidal Rule
+}
 Note: check 'Methods' section below for more details \cr}
+
+\item{kelflag}{The KEL exclude flag data (given in a numeric vector)}
+
+\item{aucflag}{The AUC exclude flag data (given in a numeric vector)}
+
+\item{auclast}{The area under the concentration versus time curve from zero time until the time (TLAST) of the last measurable concentration (CLASTi) during the ith dosing interval (numeric value)}
+
+\item{aucinfp}{The area under the concentration versus time curve from zero time to infinity (Predicted) (numeric value)}
 }
 \description{
 Percentage of AUCINFP obtained by forward extrapolation.\cr
@@ -33,9 +42,9 @@ Percentage of AUCINFP obtained by forward extrapolation.\cr
 }
 \section{Additional Details}{
 
-\strong{Linear Method} \cr  
+\strong{Linear Method} \cr
 \figure{auc_1.png} \cr
-\strong{Log Method} \cr  
+\strong{Log Method} \cr
 \figure{auc_2.png} \cr
 \eqn{AUC = Area under the cruve} \cr
 \eqn{C_{i} = Concentration 1}{Ci = Concentration 1} \cr
@@ -45,7 +54,7 @@ Percentage of AUCINFP obtained by forward extrapolation.\cr
 \eqn{ln = Natural Logarithm} \cr \cr
 \strong{Methods:} You can use the following methods to calculate AUC: \cr
 \enumerate{
- \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the 
+ \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
@@ -53,14 +62,22 @@ Percentage of AUCINFP obtained by forward extrapolation.\cr
  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
  \item \strong{Linear Up - Log Down Trapazoidal Rule}: Linear trapezoidal while the concentrations
  are increasing and log trapezoidal while the concentration are decreasing, the assessment is made on
- a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear 
+ a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear
  trapezoidal rule is used.
 }
 }
 
+\section{Note}{
+
+The inputs 'kelflag', 'auclast', 'aucinfp' and 'auclast' are optional. If 'aucinfp' input is not provided then it will generate the AUCINFP using the concentration and time data provided. \cr
+If 'auclast' input is not provided then it will generate the AUCLASTi using the concentration and time data provided.
+\strong{auc_inf_p}: Refer to \code{\link{auc_inf_p}} for more details \cr
+\strong{auc_last}: Refer to \code{\link{auc_last}} for more details \cr
+}
+
 \section{Returns}{
 
-\strong{Value} \cr 
+\strong{Value} \cr
 \itemize{
  \item AUC_PER: percentage of area under the curve
 }
@@ -70,7 +87,7 @@ Percentage of AUCINFP obtained by forward extrapolation.\cr
 ##########
 ## Data ##
 #################################
-##  SID  ##  TIME  ##   CONC   ## 
+##  SID  ##  TIME  ##   CONC   ##
 #################################
 ##   30  ##    0   ##   2.89   ##
 ##   30  ##    1   ##   2.49   ##
@@ -80,41 +97,31 @@ Percentage of AUCINFP obtained by forward extrapolation.\cr
 ##   30  ##    5   ##   2.28   ##
 #################################
 
-data <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-auc_XpctP()   
-#Error in auc_all: 'conc' and 'time' vectors are NULL
+#auc_XpctP()
+#Error in auc_XpctP: 'conc' and 'time' vectors are NULL
 
-conc_vector <- data$CONC
-time_vector <- data$TIME
+conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28)
+time_vector <- c(0, 1, 2, 3, 4, 5)
 
 auc_XpctP(conc = conc_vector, time = time_vector)
 #61.98759
- 
+
 ############
 ## Data 2 ##
 #################################
-##  SID  ##  TIME  ##   CONC   ## 
+##  SID  ##  TIME  ##   CONC   ##
 #################################
-##   31  ##    0   ##      0   ## 
+##   31  ##    0   ##      0   ##
 ##   31  ##    1   ##      0   ##
 ##   31  ##    2   ##      0   ##
 #################################
 
-data2 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-conc_vector <- data2$CONC
-time_vector <- data2$TIME
+conc_vector <- c(0, 0, 0)
+time_vector <- c(0, 1, 2)
 
 auc_XpctP(conc = conc_vector, time = time_vector)
 #0
@@ -122,6 +129,8 @@ auc_XpctP(conc = conc_vector, time = time_vector)
 }
 \author{
 \itemize{
- \item Kevin McConnell
+ \item \strong{Rudraya Technical Team}
+ \item website: \url{www.rudraya.com}
+ \item email: \url{support@rudraya.com}
 }
 }

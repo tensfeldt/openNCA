@@ -12,15 +12,17 @@ clast(conc = NULL, time = NULL)
 \item{time}{The time data (given in a vector form)}
 }
 \description{
-This function gets the last measurable plasma concentration that is obtained by the 
+This function gets the last measurable plasma concentration that is obtained by the
 inspection of the data.
 }
 \details{
-If all the concentrations are 0's then CLAST will return NA.
+If all the concentrations are 0's then CLAST will return NA. \cr
+The function will ensure that the concentration data and the time data provided are numeric vectors and
+are also of the same length. \cr
 }
 \section{Returns}{
 
-\strong{Value} \cr 
+\strong{Value} \cr
 \itemize{
  \item CLAST: last measureable plasma concentration
 }
@@ -29,73 +31,57 @@ If all the concentrations are 0's then CLAST will return NA.
 \examples{
 ##########
 ## Data ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   30  ##    0   ##   2.89   ##
-##   30  ##    1   ##   2.49   ##
-##   30  ##    2   ##   2.47   ##
-#################################
+###################################
+##  SDEID  ##  TIME  ##   CONC   ##
+###################################
+##   30    ##    0   ##   2.89   ##
+##   30    ##    1   ##   2.49   ##
+##   30    ##    2   ##   2.47   ##
+###################################
 
-data <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-clast()   
+clast()
 #Error in clast: 'conc' and 'time' vectors are NULL
 
-conc_vector <- data$CONC
+conc_vector <- c(2.89, 2.49, 2.47)
 time_vector <- data$TIME
 
 clast(conc = conc_vector, time = time_vector)
 #2.47
- 
+
 ############
 ## Data 2 ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   31  ##    0   ##      0   ## 
-##   31  ##    1   ##      0   ##
-##   31  ##    2   ##      0   ##
-#################################
+###################################
+##  SDEID  ##  TIME  ##   CONC   ##
+###################################
+##   31    ##    0   ##      0   ##
+##   31    ##    1   ##      0   ##
+##   31    ##    2   ##      0   ##
+###################################
 
-data2 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-conc_vector <- data2$CONC
-time_vector <- data2$TIME
+conc_vector <- c(0, 0, 0)
+time_vector <- c(0, 1, 2)
 
 clast(conc = conc_vector, time = time_vector)
 #NA
 
 ############
 ## Data 3 ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   32  ##    0   ##   1.19   ## 
-##   32  ##    1   ##   1.23   ##
-##   32  ##    2   ##   1.34   ##
-##   32  ##    3   ##   BLQ    ##
-#################################
+###################################
+##  SDEID  ##  TIME  ##   CONC   ##
+###################################
+##   32    ##    0   ##   1.19   ##
+##   32    ##    1   ##   1.23   ##
+##   32    ##    2   ##   1.34   ##
+##   32    ##    3   ##   NA     ##
+###################################
 
-data3 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
-
-conc_vector <- data3$CONC
-time_vector <- data3$TIME
+#Data mentioned will be used for the following example
+conc_vector <- c(1.19, 1.23, 1.34, NA)
+time_vector <- c(0, 1, 2, 3)
 
 clast(conc = conc_vector, time = time_vector)
 #1.34
@@ -103,6 +89,8 @@ clast(conc = conc_vector, time = time_vector)
 }
 \author{
 \itemize{
- \item Kevin McConnell
+ \item \strong{Rudraya Technical Team}
+ \item website: \url{www.rudraya.com}
+ \item email: \url{support@rudraya.com}
 }
 }

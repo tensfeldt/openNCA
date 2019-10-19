@@ -13,19 +13,18 @@ cmax(conc = NULL, time = NULL)
 }
 \description{
 This function gets the maxiumum observed concentration that is obtained by the inspection of the data.
-It is designed as the first occurance within a dosing interval. In the case of multiple dosing, CMAXi 
+It is designed as the first occurance within a dosing interval. In the case of multiple dosing, CMAXi
 is obtained by inspection of the data during each dosing interval i.
 }
 \details{
 If all the concentrations are 0's then CMAXi will be 0. Also the interval must be in the
-range of the times listed in the data. \cr \cr
-\strong{Equation} \cr
-If the user selects the option to have dose normalized CMAXi then the following equation is applied: \cr 
-\figure{auc_dn_cmax.png} \cr
+range of the times listed in the data. \cr
+The function will ensure that the concentration data and the time data provided are numeric vectors and
+are also of the same length. \cr
 }
 \section{Returns}{
 
-\strong{Value} \cr 
+\strong{Value} \cr
 \itemize{
  \item CMAX: maximum observed concentration
 }
@@ -34,49 +33,39 @@ If the user selects the option to have dose normalized CMAXi then the following 
 \examples{
 ##########
 ## Data ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   30  ##    0   ##   2.89   ##
-##   30  ##    1   ##   2.49   ##
-##   30  ##    2   ##   2.47   ##
-#################################
+###################################
+##  SDEID  ##  TIME  ##   CONC   ##
+###################################
+##   30    ##    0   ##   2.89   ##
+##   30    ##    1   ##   2.49   ##
+##   30    ##    2   ##   2.47   ##
+###################################
 
-data <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-cmax()   
+cmax()
 #Error in cmax: 'conc' and 'time' vectors are NULL
 
-conc_vector <- data$CONC
-time_vector <- data$TIME
+conc_vector <- c(2.89, 2.49, 2.47)
+time_vector <- c(0, 1, 2)
 
 cmax(conc = conc_vector, time = time_vector)
 #2.89
- 
+
 ############
 ## Data 2 ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   31  ##    0   ##      0   ## 
-##   31  ##    1   ##      0   ##
-##   31  ##    2   ##      0   ##
-#################################
+###################################
+##  SDEID  ##  TIME  ##   CONC   ##
+###################################
+##    31   ##    0   ##     0    ##
+##    31   ##    1   ##     0    ##
+##    31   ##    2   ##     0    ##
+###################################
 
-data2 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-conc_vector <- data2$CONC
-time_vector <- data2$TIME
+conc_vector <- c(0, 0, 0)
+time_vector <- c(0, 1, 2)
 
 cmax(conc = conc_vector, time = time_vector)
 #0
@@ -84,23 +73,18 @@ cmax(conc = conc_vector, time = time_vector)
 ############
 ## Data 3 ##
 #################################
-##  SID  ##  TIME  ##   CONC   ## 
+##  SID  ##  TIME  ##   CONC   ##
 #################################
-##   32  ##    0   ##   1.19   ## 
+##   32  ##    0   ##   1.19   ##
 ##   32  ##    1   ##   1.23   ##
 ##   32  ##    2   ##   1.34   ##
 ##   32  ## "None" ##   1.32   ##
 #################################
 
-data3 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-conc_vector <- data3$CONC
-time_vector <- data3$TIME
+conc_vector <- c(1.19, 1.23, 1.34, 1.32)
+time_vector <- c(0, 1, 2, "None")
 
 cmax(conc = conc_vector, time = time_vector)
 #Error in cmax: 'time' is not a numeric vector
@@ -108,6 +92,8 @@ cmax(conc = conc_vector, time = time_vector)
 }
 \author{
 \itemize{
- \item Kevin McConnell
+ \item \strong{Rudraya Technical Team}
+ \item website: \url{www.rudraya.com}
+ \item email: \url{support@rudraya.com}
 }
 }

@@ -4,7 +4,8 @@
 \alias{auc_last}
 \title{Area under the concentration versus time cruve from time 0 to time of the last mesurable concentration}
 \usage{
-auc_last(conc = NULL, time = NULL, method = 1)
+auc_last(conc = NULL, time = NULL, method = 1, exflag = NULL,
+  t_last = NULL, t_max = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}
@@ -14,23 +15,29 @@ auc_last(conc = NULL, time = NULL, method = 1)
 \item{method}{The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr
 \enumerate{
 \item Linear-Log Trapazoidal Rule (default)
-\item Linear Trapazoidal Rule 
-\item Log Trapazoidal Rule 
-\item Linear Up - Log DownTrapazoidal Rule 
-} 
+\item Linear Trapazoidal Rule
+\item Log Trapazoidal Rule
+\item Linear Up - Log DownTrapazoidal Rule
+}
 Note: check 'Methods' section below for more details \cr}
+
+\item{exflag}{The exclude flag data (given in a numeric vector)}
+
+\item{t_last}{The time of last measureable (non-zero) plasma concentration (numeric value)}
+
+\item{t_max}{The first time at which CMAXi is observed within the dosing interval (numeric value)}
 }
 \description{
-This function gets the area under the concentration versus time curve from time 0 to time (TLAST) of the 
-last mesuarable concentraation (CLAST). As illustrated in the following figure, AUC_LAST includes the 
+This function gets the area under the concentration versus time curve from time 0 to time (TLAST) of the
+last mesuarable concentraation (CLAST). As illustrated in the following figure, AUC_LAST includes the
 trapezoidal area upto the time of the last measurable concentration. Although there may be additional
 time points, there is no additonal AUC since by defination all subsequent concentrations are zero.\cr
 \figure{auc_last.png}
 }
 \details{
-\strong{Linear Method} \cr  
+\strong{Linear Method} \cr
 \figure{auc_1.png} \cr
-\strong{Log Method} \cr  
+\strong{Log Method} \cr
 \figure{auc_2.png} \cr
 \eqn{AUC = Area under the cruve} \cr
 \eqn{C_{i} = Concentration 1}{Ci = Concentration 1} \cr
@@ -40,7 +47,7 @@ time points, there is no additonal AUC since by defination all subsequent concen
 \eqn{ln = Natural Logarithm} \cr \cr
 \strong{Methods:} You can use the following methods to calculate AUC: \cr
 \enumerate{
- \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the 
+ \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
@@ -48,102 +55,111 @@ time points, there is no additonal AUC since by defination all subsequent concen
  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
  \item \strong{Linear Up - Log Down Trapazoidal Rule}: Linear trapezoidal while the concentrations
  are increasing and log trapezoidal while the concentration are decreasing, the assessment is made on
- a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear 
+ a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear
  trapezoidal rule is used.
 }
-\strong{Equation} \cr
-If the user selects the option to have dose normalized AUC then the following equation is applied: \cr 
-\figure{auc_dn.png} \cr
 }
+\section{Note}{
+
+The inputs 'exflag', 't_last' and 't_max' are optional. If 't_last' input is not provided then it will generate the TLAST using the concentration and time data provided. \cr
+If 't_max' input is not provided then it will generate the TMAXi using the concentration and time data provided. \cr \cr
+\strong{tlast}: Refer to \code{\link{tlast}} for more details \cr
+\strong{tmax}: Refer to \code{\link{tmax}} for more details \cr
+}
+
 \section{Returns}{
 
-\strong{Value} \cr 
+\strong{Value} \cr
 \itemize{
- \item AUC: area under the curve until time of last mesurable concentration 
+ \item AUCLAST: area under the curve until time of last mesurable concentration
 }
 }
 
 \examples{
 ##########
 ## Data ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   30  ##    0   ##   2.89   ##
-##   30  ##    1   ##   2.49   ##
-##   30  ##    2   ##   2.47   ##
-##   30  ##    3   ##   2.38   ##
-##   30  ##    4   ##   2.32   ##
-##   30  ##    5   ##   2.28   ##
-#################################
+#############################################
+##  SID  ##  TIME  ##   CONC   ##  EXFLAG  ##
+#############################################
+##   30  ##    0   ##   2.89   ##    0     ##
+##   30  ##    1   ##   2.49   ##    1     ##
+##   30  ##    2   ##   2.47   ##    0     ##
+##   30  ##    3   ##   2.38   ##    0     ##
+##   30  ##    4   ##   2.32   ##    0     ##
+##   30  ##    5   ##   2.28   ##    1     ##
+##   30  ##    6   ##   0      ##    1     ##
+#############################################
 
-data <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-auc_last()   
+auc_last()
 #Error in auc_last: 'conc' and 'time' vectors are NULL
 
-conc_vector <- data$CONC
-time_vector <- data$TIME
+conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28, 0)
+time_vector <- c(0, 1, 2, 3, 4, 5, 6)
+exflag_vector <- c(0, 1, 0, 0, 0, 1, 1)
 
-auc_last(conc = conc_vector, time = time_vector)
+auc_last(conc = conc_vector, time = time_vector, method = NA)
+#Error in auc_last: the value provided for 'method' is not correct
+
+auc_last(conc = conc_vector, time = time_vector, method = 2)
+#12.245
+
+auc_last(conc = conc_vector, time = time_vector, method = 1)
 #12.23956
- 
+
+auc_last(conc = conc_vector, time = time_vector, method = 1, exflag = exflag_vector)
+#10.12361
+
+auc_last(conc = conc_vector, time = time_vector, method = 1, t_max = 2)
+#12.24454
+
 ############
 ## Data 2 ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   31  ##    0   ##      0   ## 
-##   31  ##    1   ##      0   ##
-##   31  ##    2   ##      0   ##
-#################################
+#############################################
+##  SID  ##  TIME  ##   CONC   ##  EXFLAG  ##
+#############################################
+##   31  ##    0   ##      0   ##    0     ##
+##   31  ##    1   ##      0   ##    0     ##
+##   31  ##    2   ##      0   ##    0     ##
+#############################################
 
-data2 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-conc_vector <- data2$CONC
-time_vector <- data2$TIME
+conc_vector <- c(0, 0, 0)
+time_vector <- c(0, 1, 2)
+exflag_vector <- c(0, 0, 0)
 
-auc_all(conc = conc_vector, time = time_vector)
-#NA
+auc_last(conc = conc_vector, time = time_vector, method = 1)
+#0
 
 ############
 ## Data 3 ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   32  ##    0   ##   1.19   ## 
-##   32  ##    1   ##   1.23   ##
-##   32  ##    2   ##   1.34   ##
-##   30  ##    3   ##   1.29   ##
-##   30  ##    4   ##    NA    ##
-#################################
+#############################################
+##  SID  ##  TIME  ##   CONC   ##  EXFLAG  ##
+#############################################
+##   32  ##    0   ##   1.19   ##    0     ##
+##   32  ##    1   ##   1.23   ##    1     ##
+##   32  ##    2   ##   1.34   ##    1     ##
+#############################################
 
-data3 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-conc_vector <- data3$CONC
-time_vector <- data3$TIME
+conc_vector <- c(1.19, 1.23, 1.34)
+time_vector <- c(0, 1, 2)
+exflag_vector <- c(0, 1, 1)
 
-auc_all(conc = conc_vector, time = time_vector)
-#3.809056
+auc_last(conc = conc_vector, time = time_vector)
+#2.495
+
+auc_last(conc = conc_vector, time = time_vector, exflag = exflag_vector)
+#NA
 
 }
 \author{
 \itemize{
- \item Kevin McConnell
+ \item \strong{Rudraya Technical Team}
+ \item website: \url{www.rudraya.com}
+ \item email: \url{support@rudraya.com}
 }
 }

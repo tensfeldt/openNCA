@@ -2,7 +2,7 @@
 % Please edit documentation in R/aetpct.R
 \name{aetpct}
 \alias{aetpct}
-\title{Cumulative amount of drug recovered unchanged in the urine up to time T post-dose, where t 
+\title{Cumulative amount of drug recovered unchanged in the urine up to time T post-dose, where t
 can have a numerical value, expressed as percentage of administered dose.}
 \usage{
 aetpct(aet = NULL, dose = NULL)
@@ -13,7 +13,7 @@ aetpct(aet = NULL, dose = NULL)
 \item{dose}{The dose data (given in a vector form)}
 }
 \description{
-Cumulative amount of drug recovered unchanged in the urine up to time T post-dose, where t 
+Cumulative amount of drug recovered unchanged in the urine up to time T post-dose, where t
 can have a numerical value, expressed as percentage of administered dose.
 }
 \details{
@@ -27,9 +27,14 @@ can have a numerical value, expressed as percentage of administered dose.
  \eqn{Dose = administered dose  (wt)} \cr
 }
 }
+\section{Note}{
+
+\strong{aet}: Refer to \code{\link{aet}} for more details
+}
+
 \section{Returns}{
 
-\strong{Value} \cr 
+\strong{Value} \cr
 \itemize{
  \item AETPCT: Cumulative amount of drug in percentage
 }
@@ -38,80 +43,99 @@ can have a numerical value, expressed as percentage of administered dose.
 \examples{
 ##########
 ## Data ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   30  ##    0   ##   2.89   ##
-##   30  ##    1   ##   2.49   ##
-##   30  ##    2   ##   2.47   ##
-#################################
+############################################
+##  SID  ##  TIME  ##  AMOUNT  ##   DOSE  ##
+############################################
+##   30  ##    0   ##   2.89   ##   400   ##
+##   30  ##    1   ##   2.49   ##   450   ##
+##   30  ##    2   ##   2.47   ##   500   ##
+############################################
 
-data <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-cmax()   
-#Error in cmax: 'conc' and 'time' vectors are NULL
+#aetpct()
+#Error in aetpct: 'aet' and 'dose' vectors are NULL
 
-conc_vector <- data$CONC
-time_vector <- data$TIME
+amt_vector <- c(2.89, 2.49, 2.47)
+time_vector <- c(0, 1, 2)
+dose_vector <- c(400, 450, 500)
 
-cmax(conc = conc_vector, time = time_vector)
+aet(amt = amt_vector, time = time_vector, t = 1)
 #2.89
- 
+
+aet(amt = amt_vector, time = time_vector, t = 1)
+#5.38
+
+aet(amt = amt_vector, time = time_vector, t = 2)
+#7.85
+
+aet_vector <- c(2.89, 5.38, 7.85)
+
+aetpct(aet = aet_vector, dose = dose_vector)
+#0.722500 1.195556 1.570000
+
 ############
 ## Data 2 ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   31  ##    0   ##      0   ## 
-##   31  ##    1   ##      0   ##
-##   31  ##    2   ##      0   ##
-#################################
+############################################
+##  SID  ##  TIME  ##  AMOUNT  ##   DOSE  ##
+############################################
+##   31  ##    0   ##     0    ##   400   ##
+##   31  ##    1   ##     0    ##   450   ##
+##   31  ##    2   ##     0    ##   500   ##
+############################################
 
-data2 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-conc_vector <- data2$CONC
-time_vector <- data2$TIME
+amt_vector <- c(0, 0, 0)
+time_vector <- c(0, 1, 2)
+dose_vector <- c(400, 450, 500)
+aet_vector <- c(0, 0, 0)
 
-cmax(conc = conc_vector, time = time_vector)
-#0
+aetpct(aet = aet_vector, dose = dose_vector)
+#0 0 0
 
 ############
 ## Data 3 ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   32  ##    0   ##   1.19   ## 
-##   32  ##    1   ##   1.23   ##
-##   32  ##    2   ##   1.34   ##
-##   32  ## "None" ##   1.32   ##
-#################################
+############################################
+##  SID  ##  TIME  ##  AMOUNT  ##   DOSE  ##
+############################################
+##   32  ##    0   ##   1.19   ##   400   ##
+##   32  ##    1   ##   1.23   ##   450   ##
+##   32  ##    2   ##   1.34   ##   500   ##
+##   32  ## "None" ##   1.32   ##   520   ##
+############################################
 
-data3 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-conc_vector <- data3$CONC
-time_vector <- data3$TIME
+amt_vector <- c(1.19, 1.23, 1.34, 1.32)
+time_vector <- c(0, 1, 2, "None")
+dose_vector <- c(400, 450, 500, 520)
 
-cmax(conc = conc_vector, time = time_vector)
-#Error in cmax: 'time' is not a numeric vector
+aet(amt = amt_vector, time = time_vector, t = 0)
+#1.19
+
+aet(amt = amt_vector, time = time_vector, t = 1)
+#2.42
+
+aet(amt = amt_vector, time = time_vector, t = 2)
+#3.76
+
+#aet(amt = amt_vector, time = time_vector, t = 3)
+#Error in aet: value 't' is not present in 'time' vector
+
+aet_vector <- c(1.19, 2.42, 3.76, NA)
+
+aet(amt = amt_vector, time = time_vector, t = 2)
+#3.76
+
+#aetpct(aet = aet_vector, dose = dose_vector)
+#0.2975000 0.5377778 0.7520000 NA
 
 }
 \author{
 \itemize{
- \item Kevin McConnell
+ \item \strong{Rudraya Technical Team}
+ \item website: \url{www.rudraya.com}
+ \item email: \url{support@rudraya.com}
 }
 }

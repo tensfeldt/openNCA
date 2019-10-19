@@ -4,7 +4,9 @@
 \alias{auc_inf_o}
 \title{Area under the concentration versus time cruve from time 0 to infinity (Observed)}
 \usage{
-auc_inf_o(conc = NULL, time = NULL, method = 1)
+auc_inf_o(conc = NULL, time = NULL, method = 1, kelflag = NULL,
+  aucflag = NULL, auclast = NULL, c_last = NULL, spanratio = NULL,
+  kel = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}
@@ -14,28 +16,36 @@ auc_inf_o(conc = NULL, time = NULL, method = 1)
 \item{method}{The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr
 \enumerate{
 \item Linear-Log Trapazoidal Rule (default)
-\item Linear Trapazoidal Rule 
-\item Log Trapazoidal Rule 
-\item Linear Up - Log DownTrapazoidal Rule 
-} 
+\item Linear Trapazoidal Rule
+\item Log Trapazoidal Rule
+\item Linear Up - Log DownTrapazoidal Rule
+}
 Note: check 'Methods' section below for more details \cr}
+
+\item{kelflag}{The KEL exclude flag data (given in a numeric vector)}
+
+\item{aucflag}{The AUC exclude flag data (given in a numeric vector)}
+
+\item{auclast}{The area under the concentration versus time curve from zero time until the time (TLAST) of the last measurable concentration (CLASTi) during the ith dosing interval (numeric value)}
+
+\item{c_last}{The last measurable (non-zero) plasma concentration (numeric value)}
 }
 \description{
-This function gets the area under the concentration versus time curve from time 0 to 
+This function gets the area under the concentration versus time curve from time 0 to
 infinity (Observed). Observed value for the time of the last mesurable concentration is used
 to calculate the extrapolated AUC.\cr
 }
 \details{
 \strong{Equation}
 \enumerate{
- \item Calculate the extrapolated AUC: \cr 
+ \item Calculate the extrapolated AUC: \cr
  \tabular{rl}{
   \tab \figure{auc_inf_o1.png} \cr
  }
  \eqn{CLAST = Last mesurable (non-zero) plasma concentration} \cr
- \eqn{KEL = Terminal phase rate constant} \cr 
+ \eqn{KEL = Terminal phase rate constant} \cr
  \item Final Equation: \cr
- \tabular{rl}{ 
+ \tabular{rl}{
   \tab \figure{auc_inf_o2.png} \cr
  }
  \eqn{AUCLAST = Area under the concentration versus time curve from zero until time of last
@@ -44,9 +54,9 @@ mesurable concentration} \cr
 }
 \section{Additional Details}{
 
-\strong{Linear Method} \cr  
+\strong{Linear Method} \cr
 \figure{auc_1.png} \cr
-\strong{Log Method} \cr  
+\strong{Log Method} \cr
 \figure{auc_2.png} \cr
 \eqn{AUC = Area under the curve} \cr
 \eqn{C_{i} = Concentration 1}{Ci = Concentration 1} \cr
@@ -56,7 +66,7 @@ mesurable concentration} \cr
 \eqn{ln = Natural Logarithm} \cr \cr
 \strong{Methods:} You can use the following methods to calculate AUC: \cr
 \enumerate{
- \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the 
+ \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
@@ -64,17 +74,22 @@ mesurable concentration} \cr
  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
  \item \strong{Linear Up - Log Down Trapazoidal Rule}: Linear trapezoidal while the concentrations
  are increasing and log trapezoidal while the concentration are decreasing, the assessment is made on
- a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear 
+ a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear
  trapezoidal rule is used.
 }
-\strong{Equation} \cr
-If the user selects the option to have dose normalized AUC then the following equation is applied: \cr 
-\figure{auc_dn.png} \cr
+}
+
+\section{Note}{
+
+The inputs 'kelflag', 'aucflag', 'auclast' and 'c_last' are optional. If 'auclast' input is not provided then it will generate the AUCLASTi using the concentration and time data provided. \cr
+If 'c_last' input is not provided then it will generate the CLAST using the concentration and time data provided. \cr \cr
+\strong{auclast}: Refer to \code{\link{auc_last}} for more details \cr
+\strong{clast}: Refer to \code{\link{clast}} for more details \cr
 }
 
 \section{Returns}{
 
-\strong{Value} \cr 
+\strong{Value} \cr
 \itemize{
  \item AUC: area under the curve
 }
@@ -83,59 +98,68 @@ If the user selects the option to have dose normalized AUC then the following eq
 \examples{
 ##########
 ## Data ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   30  ##    0   ##   2.89   ##
-##   30  ##    1   ##   2.49   ##
-##   30  ##    2   ##   2.47   ##
-##   30  ##    3   ##   2.38   ##
-##   30  ##    4   ##   2.32   ##
-##   30  ##    5   ##   2.28   ##
-#################################
+###########################################################
+##  SID  ##  TIME  ##   CONC   ##  KELFLAG  ##  AUCFLAG  ##
+###########################################################
+##   30  ##    0   ##   2.89   ##     0     ##     1     ##
+##   30  ##    1   ##   2.49   ##     1     ##     0     ##
+##   30  ##    2   ##   2.47   ##     0     ##     0     ##
+##   30  ##    3   ##   2.38   ##     0     ##     0     ##
+##   30  ##    4   ##   2.32   ##     0     ##     1     ##
+##   30  ##    5   ##   2.28   ##     1     ##     0     ##
+###########################################################
 
-data <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-auc_inf_o()   
-#Error in auc_all: 'conc' and 'time' vectors are NULL
+#auc_inf_o()
+#Error in auc_inf_o: 'conc' and 'time' vectors are NULL
 
-conc_vector <- data$CONC
-time_vector <- data$TIME
+conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28)
+time_vector <- c(0, 1, 2, 3, 4, 5)
+kelflag_vector <- c(0, 1, 0, 0, 0, 1)
+aucflag_vector <- c(1, 0, 0, 0, 1, 0)
 
-auc_inf_o(conc = conc_vector, time = time_vector)
+auc_inf_o(conc = conc_vector, time = time_vector, method = NA)
+#Error in auc_inf_o: the value provided for 'method' is not correct
+
+auc_inf_o(conc = conc_vector, time = time_vector, method = 2)
+#67.86757
+
+auc_inf_o(conc = conc_vector, time = time_vector, method = 1)
 #67.86212
- 
+
+auc_inf_o(conc = conc_vector, time = time_vector, method = 1, kelflag = kelflag_vector)
+#52.88634
+
+auc_inf_o(conc = conc_vector, time = time_vector, method = 1,  kelflag = kelflag_vector,
+          aucflag = aucflag_vector)
+#50.21078
+
 ############
 ## Data 2 ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   31  ##    0   ##      0   ## 
-##   31  ##    1   ##      0   ##
-##   31  ##    2   ##      0   ##
-#################################
+###########################################################
+##  SID  ##  TIME  ##   CONC   ##  KELFLAG  ##  AUCFLAG  ##
+###########################################################
+##   31  ##    0   ##      0   ##     0     ##     1     ##
+##   31  ##    1   ##      0   ##     0     ##     0     ##
+##   31  ##    2   ##      0   ##     0     ##     0     ##
+###########################################################
 
-data2 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-conc_vector <- data2$CONC
-time_vector <- data2$TIME
+conc_vector <- c(0, 0, 0)
+time_vector <- c(0, 1, 2)
+kelflag_vector <- c(0, 0, 0)
+aucflag_vector <- c(0, 0, 0)
 
-auc_inf_o(conc = conc_vector, time = time_vector)
-#NA
+auc_inf_o(conc = conc_vector, time = time_vector, method = 1)
+#0
 
 }
 \author{
 \itemize{
- \item Kevin McConnell
+ \item \strong{Rudraya Technical Team}
+ \item website: \url{www.rudraya.com}
+ \item email: \url{support@rudraya.com}
 }
 }

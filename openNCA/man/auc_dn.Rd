@@ -12,15 +12,15 @@ auc_dn(auc = NULL, dose = NULL)
 \item{dose}{The dose data (given in a vector form)}
 }
 \description{
-This function gets the dose normalized area under the concentration versus time curve from time 0 
+This function gets the dose normalized area under the concentration versus time curve from time 0
 until the last time point.
 }
 \details{
 \strong{Equation} \cr
 \figure{auc_dn.png} \cr
-\strong{Linear Method} \cr  
+\strong{Linear Method} \cr
 \figure{auc_1.png} \cr
-\strong{Log Method} \cr  
+\strong{Log Method} \cr
 \figure{auc_2.png} \cr
 \eqn{AUC = Area under the cruve} \cr
 \eqn{C_{i} = Concentration 1}{Ci = Concentration 1} \cr
@@ -30,7 +30,7 @@ until the last time point.
 \eqn{ln = Natural Logarithm} \cr \cr
 \strong{Methods:} You can use the following methods to calculate AUC: \cr
 \enumerate{
- \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the 
+ \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
@@ -38,13 +38,16 @@ until the last time point.
  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
  \item \strong{Linear Up - Log Down Trapazoidal Rule}: Linear trapezoidal while the concentrations
  are increasing and log trapezoidal while the concentration are decreasing, the assessment is made on
- a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear 
+ a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear
  trapezoidal rule is used.
 }
+\strong{Equation} \cr
+If the user selects the option to have dose normalized AUC then the following equation is applied: \cr
+\figure{auc_dn.png} \cr
 }
 \section{Returns}{
 
-\strong{Value or Vector} \cr 
+\strong{Value or Vector} \cr
 \itemize{
  \item AUC: dose normalized area under the curve
 }
@@ -53,58 +56,49 @@ until the last time point.
 \examples{
 ##########
 ## Data ##
-#################################
-##  SID  ##  TIME  ##  RESULT  ##
-#################################
-##   30  ##    0   ##   2.89   ##
-##   30  ##    1   ##   2.49   ##
-##   30  ##    2   ##   2.47   ##
-##   31  ##    0   ##      0   ##
-##   31  ##    1   ##   1.00   ##
-##   31  ##    2   ##      0   ##
-##   32  ##    0   ##   1.19   ##
-##   32  ##    1   ##   1.23   ##
-##   32  ##    2   ##   1.34   ##
-##   32  ##    4   ##   1.32   ##
-#################################
+######################################################
+##  SID  ##  TIME  ##   CONC   ##  EXFLAG  ##  DOSE ##
+######################################################
+##   30  ##    0   ##   2.89   ##    0     ##  200  ##
+##   30  ##    1   ##   2.49   ##    1     ##  200  ##
+##   30  ##    2   ##   2.47   ##    0     ##  200  ##
+##   30  ##    3   ##   2.38   ##    0     ##  200  ##
+##   30  ##    4   ##   2.32   ##    0     ##  200  ##
+##   30  ##    5   ##   2.28   ##    1     ##  200  ##
+######################################################
 
-data <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-auc_dn()   
-#No data found!
+#auc_dn()
+#Error in auc_dn: 'auc' and 'dose' vectors are NULL
 
-auc_dn(data)  
-#Object not of class NCA
+conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28)
+time_vector <- c(0, 1, 2, 3, 4, 5)
+exflag_vector <- c(0, 1, 0, 0, 0, 1)
 
-mod <- model("~/data.csv")  
-#Creates an NCA object with data represented in 'data' above
-auc_dn(mod)  
-#Please specify for which subject you want to get the AUC_DN for!
+auc_all(conc = conc_vector, time = time_vector, method = 1)
+#12.23956
 
-auc_dn(mod, sid = "all") 
-#  SID              AUC     METHOD
-#   30 4.94993257703106 Linear-Log
-#   31                1 Linear-Log
-#   32 5.15416479501756 Linear-Log
+auc_all(conc = conc_vector, time = time_vector, method = 1, exflag = exflag_vector)
+#10.12361
 
-auc_dn(mod, sid = 32)  
-#  SID              AUC     METHOD
-#   32 5.15416479501756 Linear-Log
+auc_dn(auc = 12.23956, dose = 200)
+#0.0611978
 
-auc_dn(mod, sid = 10)  
-#Invaild subject ID! Subject ID not found in the data provided!
+auc_dn(auc = 10.12361, dose = 200)
+#0.05061805
 
-auc_dn(mod, sid = 31, method = 5)
-#Invalid method number! Please provide a valid value for method!
+auc_dn(auc = c(12.23956, 10.12361), dose = c(200, 200))
+#0.06119780 0.05061805
+
+auc_dn(auc = 10.12361, dose = NA)
+#NA
 
 }
 \author{
 \itemize{
- \item Kevin McConnell
+ \item \strong{Rudraya Technical Team}
+ \item website: \url{www.rudraya.com}
+ \item email: \url{support@rudraya.com}
 }
 }

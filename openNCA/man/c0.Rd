@@ -14,98 +14,21 @@ c0(conc = NULL, time = NULL)
 \description{
 Initial concentration resulting immediately after an IV bolus administration.
 }
-\details{
-If all the concentrations are 0's then CMAXi will be 0. Also the interval must be in the
-range of the times listed in the data. \cr \cr
-\strong{Equation} \cr
-If the user selects the option to have dose normalized CMAXi then the following equation is applied: \cr 
-\figure{auc_dn_cmax.png} \cr
-}
 \section{Returns}{
 
-\strong{Value} \cr 
+\strong{Value} \cr
 \itemize{
  \item C0: initial concentration
 }
 }
 
 \examples{
-##########
-## Data ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   30  ##    0   ##   2.89   ##
-##   30  ##    1   ##   2.49   ##
-##   30  ##    2   ##   2.47   ##
-#################################
-
-data <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
-
-cmax()   
-#Error in cmax: 'conc' and 'time' vectors are NULL
-
-conc_vector <- data$CONC
-time_vector <- data$TIME
-
-cmax(conc = conc_vector, time = time_vector)
-#2.89
- 
-############
-## Data 2 ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   31  ##    0   ##      0   ## 
-##   31  ##    1   ##      0   ##
-##   31  ##    2   ##      0   ##
-#################################
-
-data2 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
-
-conc_vector <- data2$CONC
-time_vector <- data2$TIME
-
-cmax(conc = conc_vector, time = time_vector)
-#0
-
-############
-## Data 3 ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   32  ##    0   ##   1.19   ## 
-##   32  ##    1   ##   1.23   ##
-##   32  ##    2   ##   1.34   ##
-##   32  ## "None" ##   1.32   ##
-#################################
-
-data3 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
-
-conc_vector <- data3$CONC
-time_vector <- data3$TIME
-
-cmax(conc = conc_vector, time = time_vector)
-#Error in cmax: 'time' is not a numeric vector
 
 }
 \author{
 \itemize{
- \item Kevin McConnell
+ \item \strong{Rudraya Technical Team}
+ \item website: \url{www.rudraya.com}
+ \item email: \url{support@rudraya.com}
 }
 }

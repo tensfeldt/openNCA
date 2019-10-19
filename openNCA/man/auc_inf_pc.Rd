@@ -7,9 +7,11 @@
 auc_inf_pc(kel = NULL, aucinfp = NULL, c0 = NULL)
 }
 \arguments{
-\item{conc}{The concentration data (given in a vector form)}
+\item{kel}{The terminal phase rate constant for the concentration-time profile of interest (numeric value)}
 
-\item{time}{The time data (given in a vector form)}
+\item{aucinfp}{The area under the concentration versus time cruve from time 0 to infinity (Predicted) (numeric value)}
+
+\item{c0}{The residual plasma concentration observed at time zero (numeric value)}
 }
 \description{
 AUCINFP corrected using estimates of KEL and C0 \cr
@@ -24,9 +26,15 @@ AUCINFP corrected using estimates of KEL and C0 \cr
  \eqn{KEL = the terminal phase rate constant for the concentration-time profile of interest} \cr
 }
 }
+\section{Note}{
+
+\strong{auc_inf_p}: Refer to \code{\link{auc_inf_p}} for more details \cr
+\strong{kel}: Refer to \code{\link{kel}} for more details \cr
+}
+
 \section{Returns}{
 
-\strong{Value} \cr 
+\strong{Value} \cr
 \itemize{
  \item AUCINFPC: area under the curve corrected
 }
@@ -35,59 +43,61 @@ AUCINFP corrected using estimates of KEL and C0 \cr
 \examples{
 ##########
 ## Data ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   30  ##    0   ##   2.89   ##
-##   30  ##    1   ##   2.49   ##
-##   30  ##    2   ##   2.47   ##
-##   30  ##    3   ##   2.38   ##
-##   30  ##    4   ##   2.32   ##
-##   30  ##    5   ##   2.28   ##
-#################################
+###########################################################
+##  SID  ##  TIME  ##   CONC   ##  KELFLAG  ##  AUCFLAG  ##
+###########################################################
+##   30  ##    0   ##   1.01   ##     0     ##     1     ##
+##   30  ##    1   ##   1.16   ##     1     ##     0     ##
+##   30  ##    2   ##   1.17   ##     0     ##     0     ##
+##   30  ##    3   ##   1.13   ##     0     ##     0     ##
+##   30  ##    4   ##   1.21   ##     0     ##     1     ##
+##   30  ##    5   ##   0.976  ##     1     ##     0     ##
+##   30  ##    6   ##   0.785  ##     1     ##     0     ##
+##   30  ##    7   ##   0.55   ##     0     ##     0     ##
+##   30  ##    8   ##   0.368  ##     0     ##     0     ##
+##   30  ##    9   ##   0.289  ##     0     ##     1     ##
+##   30  ##    10  ##   0.118  ##     1     ##     0     ##
+##   30  ##    11  ##   0.0608 ##     1     ##     0     ##
+###########################################################
 
-data <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-auc_inf_o()   
-#Error in auc_all: 'conc' and 'time' vectors are NULL
+#auc_inf_pc()
+#Error in auc_inf_p: 'kel', 'aucinfp' and 'c0' vectors are NULL
 
-conc_vector <- data$CONC
-time_vector <- data$TIME
+conc_vector <- c(1.01, 1.16, 1.17, 1.13, 1.21, 0.976, 0.785, 0.55, 0.368, 0.289, 0.118, 0.0608)
+time_vector <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+kelflag_vector <- c(0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1)
+aucflag_vector <- c(1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0)
 
-auc_inf_o(conc = conc_vector, time = time_vector)
-#67.86212
- 
-############
-## Data 2 ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   31  ##    0   ##      0   ## 
-##   31  ##    1   ##      0   ##
-##   31  ##    2   ##      0   ##
-#################################
+kel(conc = conc_vector, time = time_vector)
+#      KEL      KELC0    KELTMLO    KELTMHI    KELNOPT      THALF     THALFF
+#0.2428728  2.0502221  0.0000000 11.0000000 12.0000000  2.8539516         NA
 
-data2 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+auc_inf_p(conc = conc_vector, time = time_vector, method = 2)
+#8.875061
 
-conc_vector <- data2$CONC
-time_vector <- data2$TIME
+auc_inf_pc(aucinfp = 8.875061, kel = 0.2428728, c0 = 1.01)
+#4.716506
 
-auc_inf_o(conc = conc_vector, time = time_vector)
-#NA
+auc_inf_p(conc = conc_vector, time = time_vector, method = 1, kelflag = kelflag_vector)
+#9.885099
+
+auc_inf_pc(aucinfp = 9.885099, kel = 0.2428728, c0 = 1.01)
+#5.726544
+
+auc_inf_p(conc = conc_vector, time = time_vector, method = 1,  kelflag = kelflag_vector,
+          aucflag = aucflag_vector)
+#8.565197
+
+auc_inf_pc(aucinfp = 8.565197, kel = 0.2428728, c0 = 1.01)
+#4.406642
 
 }
 \author{
 \itemize{
- \item Kevin McConnell
+ \item \strong{Rudraya Technical Team}
+ \item website: \url{www.rudraya.com}
+ \item email: \url{support@rudraya.com}
 }
 }

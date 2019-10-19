@@ -4,14 +4,14 @@
 \alias{at}
 \title{Amount of Drug in the body at time T, where T can have a numerical value.}
 \usage{
-at(time = NULL, conc = NULL, amt = NULL, amt_units = NULL)
+at(conc = NULL, amt = NULL, time = NULL, amt_units = NULL)
 }
 \arguments{
-\item{time}{The time data (given in a vector form)}
-
 \item{conc}{The concentration data (given in a vector form)}
 
 \item{amt}{The amount data (given in a vector form) either represents the volume or weight}
+
+\item{time}{The time data (given in a vector form)}
 
 \item{amt_units}{The units data for the amount (given in a vector form)}
 }
@@ -42,7 +42,7 @@ If urine is reported as weight, then system automatically will apply specific gr
 }
 \section{Returns}{
 
-\strong{Value} \cr 
+\strong{Value} \cr
 \itemize{
  \item AT: Amount of Drug in the body
 }
@@ -51,80 +51,73 @@ If urine is reported as weight, then system automatically will apply specific gr
 \examples{
 ##########
 ## Data ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   30  ##    0   ##   2.89   ##
-##   30  ##    1   ##   2.49   ##
-##   30  ##    2   ##   2.47   ##
-#################################
+################################################################
+##  SID  ##  TIME  ##   CONC   ##   AMOUNT  ##  AMOUNT UNITS  ##
+################################################################
+##   30  ##    0   ##   2.89   ##    210    ##       GM       ##
+##   30  ##    1   ##   2.49   ##    198    ##       GM       ##
+##   30  ##    2   ##   2.47   ##    190    ##       GM       ##
+################################################################
 
-data <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-cmax()   
-#Error in cmax: 'conc' and 'time' vectors are NULL
+#at()
+#Error in at: 'time', 'conc', 'amt', 'amt_units' vectors are NULL
 
-conc_vector <- data$CONC
-time_vector <- data$TIME
+conc_vector <- c(2.89, 2.49, 2.47)
+time_vector <- c(0, 1, 2)
+amt_vector <- c(210, 198, 190)
+amt_units_vector <- c("GM", "GM", "GM")
 
-cmax(conc = conc_vector, time = time_vector)
-#2.89
- 
+at(conc = conc_vector, time = time_vector, amt = amt_vector, amt_units = amt_units_vector)
+#595.0000 483.35219 460.0980
+
 ############
 ## Data 2 ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   31  ##    0   ##      0   ## 
-##   31  ##    1   ##      0   ##
-##   31  ##    2   ##      0   ##
-#################################
+################################################################
+##  SID  ##  TIME  ##   CONC   ##   AMOUNT  ##  AMOUNT UNITS  ##
+################################################################
+##   31  ##    0   ##      0   ##    210    ##       GM       ##
+##   31  ##    1   ##      0   ##    198    ##       GM       ##
+##   31  ##    2   ##      0   ##    190    ##       GM       ##
+################################################################
 
-data2 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-conc_vector <- data2$CONC
-time_vector <- data2$TIME
+conc_vector <- c(0, 0, 0)
+time_vector <- c(0, 1, 2)
+amt_vector <- c(210, 198, 190)
+amt_units_vector <- c("GM", "GM", "GM")
 
-cmax(conc = conc_vector, time = time_vector)
-#0
+at(conc = conc_vector, time = time_vector, amt = amt_vector, amt_units = amt_units_vector)
+#0 0 0
 
 ############
 ## Data 3 ##
-#################################
-##  SID  ##  TIME  ##   CONC   ## 
-#################################
-##   32  ##    0   ##   1.19   ## 
-##   32  ##    1   ##   1.23   ##
-##   32  ##    2   ##   1.34   ##
-##   32  ## "None" ##   1.32   ##
-#################################
+################################################################
+##  SID  ##  TIME  ##   CONC   ##   AMOUNT  ##  AMOUNT UNITS  ##
+################################################################
+##   32  ##    0   ##   1.19   ##    120    ##       GM       ##
+##   32  ##    1   ##   1.23   ##    145    ##       GM       ##
+##   32  ##    2   ##   1.34   ##    160    ##       GM       ##
+##   32  ## "None" ##   1.32   ##    NA     ##       GM       ##
+################################################################
 
-data3 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-conc_vector <- data3$CONC
-time_vector <- data3$TIME
+conc_vector <- c(1.19, 1.23, 1.34, 1.32)
+time_vector <- c(0, 1, 2, "None")
+amt_vector <- c(120, 145, 160, NA)
+amt_units_vector <- c("GM", "GM", "GM", "GM")
 
-cmax(conc = conc_vector, time = time_vector)
-#Error in cmax: 'time' is not a numeric vector
+at(conc = conc_vector, time = time_vector, amt = amt_vector, amt_units = amt_units_vector)
+#NA
 
 }
 \author{
 \itemize{
- \item Kevin McConnell
+ \item \strong{Rudraya Technical Team}
+ \item website: \url{www.rudraya.com}
+ \item email: \url{support@rudraya.com}
 }
 }

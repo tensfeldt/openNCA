@@ -4,21 +4,22 @@
 \alias{run_M1_SD_computation}
 \title{Run M1 SD Computation}
 \usage{
-run_M1_SD_computation(data = NULL, map = NULL, method = 1, model = "M1",
-  parameter = "SD", return = list())
+run_M1_SD_computation(data = NULL, map = NULL, method = 1,
+  parameter_list = list(), display_list = list(),
+  return_list = list())
 }
 \arguments{
-\item{data}{The dataframe that contians the raw data}
+\item{data}{The dataframe that contains the raw data}
 
-\item{map}{The dataframe that contians the map data}
+\item{map}{The dataframe that contains the map data}
 
-\item{method}{The AUC method to use}
+\item{method}{The methos of calculation for Area Under the Curve (see Details below)}
 
-\item{model}{This is the model type}
+\item{parameter_list}{The list of parameters to calculate (empty by default)}
 
-\item{parameter}{This is either single dose (SD) or steady state (SS)}
+\item{display_list}{The list of parameters to return (empty by default)}
 
-\item{return}{The list of parameters to return (by defualt it is empty, which means it will retunr all parameters)}
+\item{return_list}{The list of parameters to return from the original data (empty by default)}
 }
 \description{
 This function will compute all the relevant parameters for a M1 model Single Dose (SD).\cr
@@ -26,7 +27,7 @@ This function will compute all the relevant parameters for a M1 model Single Dos
 \details{
 \strong{Methods:} You can use the following methods to calculate AUC: \cr
 \enumerate{
- \item \strong{1: Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the 
+ \item \strong{1: Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
  \item \strong{2: Linear Trapazoidal Rule}: The linear method is used for the entire profile.
@@ -34,17 +35,18 @@ This function will compute all the relevant parameters for a M1 model Single Dos
  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
  \item \strong{4: Linear Up - Log Down Trapazoidal Rule}: Linear trapezoidal while the concentrations
  are increasing and log trapezoidal while the concentration are decreasing, the assessment is made on
- a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear 
+ a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear
  trapezoidal rule is used.
 }
-You can specify the options to subset the list of parameters that are returned: \cr
-\strong{Return List options} \cr  
+You can specify the options to subset the list of parameters that are returned, please refer to \code{\link{mct_template}} for more information. \cr
+The following are the functions that this function uses to generate parameters: \cr
+\strong{Return List options} \cr
 \enumerate{
  \item \strong{cmax}: Refer to \code{\link{cmax}} for more details
- \item \strong{cmin}: Refer to \code{\link{cmin}} for more details
- \item \strong{clast}: Refer to \code{\link{clast}} for more details
  \item \strong{cmax_c}: Refer to \code{\link{cmaxc}} for more details
  \item \strong{cmax_dn}: Refer to \code{\link{cmax_dn}} for more details
+ \item \strong{cmin}: Refer to \code{\link{cmin}} for more details
+ \item \strong{clast}: Refer to \code{\link{clast}} for more details
  \item \strong{tmax}: Refer to \code{\link{tmax}} for more details
  \item \strong{tmin}: Refer to \code{\link{tmin}} for more details
  \item \strong{tlast}: Refer to \code{\link{tlast}} for more details
@@ -52,8 +54,8 @@ You can specify the options to subset the list of parameters that are returned: 
  \item \strong{kel}: Refer to \code{\link{kel}} for more details
  \item \strong{kelr}: Refer to \code{\link{kel_r}} for more details
  \item \strong{lasttime}: Refer to \code{\link{lasttime}} for more details
- \item \strong{auc_dn}: Refer to \code{\link{auc_dn}} for more details
  \item \strong{auc_all}: Refer to \code{\link{auc_all}} for more details
+ \item \strong{auc_dn}: Refer to \code{\link{auc_dn}} for more details
  \item \strong{auc_last}: Refer to \code{\link{auc_last}} for more details
  \item \strong{auc_last_c}: Refer to \code{\link{auc_lastc}} for more details
  \item \strong{auc_last_dn}: Refer to \code{\link{auc_dn}} for more details
@@ -61,24 +63,25 @@ You can specify the options to subset the list of parameters that are returned: 
  \item \strong{auc_t1_t2}: Refer to \code{\link{auc_t1_t2}} for more details
  \item \strong{auc_inf_o}: Refer to \code{\link{auc_inf_o}} for more details
  \item \strong{auc_inf_o_c}: Refer to \code{\link{auc_inf_oc}} for more details
- \item \strong{auc_inf_p}: Refer to \code{\link{auc_inf_p}} for more details
- \item \strong{auc_inf_p_c}: Refer to \code{\link{auc_inf_pc}} for more details
  \item \strong{auc_inf_o_dn}: Refer to \code{\link{auc_dn}} for more details
+ \item \strong{cest}: Refer to \code{\link{cest}} for more details
+ \item \strong{auc_inf_p}: Refer to \code{\link{auc_inf_p}} for more details
+ \item \strong{auc_inf_p_c}: Refer to \code{\link{auc_inf_pc}} for more detail
  \item \strong{auc_inf_p_dn}: Refer to \code{\link{auc_dn}} for more details
  \item \strong{aumc_inf_o}: Refer to \code{\link{aumc_inf_o}} for more details
  \item \strong{aumc_inf_p}: Refer to \code{\link{aumc_inf_p}} for more details
  \item \strong{mrt_last}: Refer to \code{\link{mrt_last}} for more details
- \item \strong{mrto}: Refer to \code{\link{mrt_evif_o}} for more details
- \item \strong{mrtp}: Refer to \code{\link{mrt_evif_p}} for more details
- \item \strong{auc_xpct_o}: Refer to \code{\link{auc_XpctO}} for more details
- \item \strong{auc_xpct_p}: Refer to \code{\link{auc_XpctP}} for more details
- \item \strong{aumc_xpct_o}: Refer to \code{\link{aumc_XpctO}} for more details
- \item \strong{aumc_xpct_p}: Refer to \code{\link{aumc_XpctP}} for more details
- \item \strong{clo}: Refer to \code{\link{clo}} for more details
+ \item \strong{mrt_evif_o}: Refer to \code{\link{mrt_evif_o}} for more details
+ \item \strong{mrt_evif_p}: Refer to \code{\link{mrt_evif_p}} for more detail
+ \item \strong{auc_XpctO}: Refer to \code{\link{auc_XpctO}} for more details
+ \item \strong{auc_XpctP}: Refer to \code{\link{auc_XpctP}} for more details
+ \item \strong{aumc_XpctO}: Refer to \code{\link{aumc_XpctO}} for more details
+ \item \strong{aumc_XpctP}: Refer to \code{\link{aumc_XpctP}} for more details
  \item \strong{clfo}: Refer to \code{\link{clfo}} for more details
  \item \strong{clfow}: Refer to \code{\link{clfow}} for more details
  \item \strong{clfp}: Refer to \code{\link{clfp}} for more details
  \item \strong{clfpw}: Refer to \code{\link{clfpw}} for more details
+ \item \strong{cav}: Refer to \code{\link{cav}} for more details
  \item \strong{vzfo}: Refer to \code{\link{vzfo}} for more details
  \item \strong{vzfow}: Refer to \code{\link{vzfow}} for more details
  \item \strong{vzfp}: Refer to \code{\link{vzfp}} for more details
@@ -87,59 +90,44 @@ You can specify the options to subset the list of parameters that are returned: 
 }
 \section{Note}{
 
-By default all the return list options are selected and calculated
+By default all the return list options are selected and calculated if 'parameter_list' is not specified. Please refer to \code{\link{mct_template}}
+to get more calrification on how to specify which parameters to calculate to this function if you wish to subset the default caculated parameters. \cr
+By default 'display_list' argument is empty, which means that this function will return all caculated parameters specifed by the 'parameter_list' argument.
+Only specfiy a list of parameters to the 'display_list' if you want to subset the calculated parameters returned as a result of this function. \cr
+By default 'return_list' argument is empty, which means that this function will not append parameters passed from 'data' argument.
+Only specfiy a list of parameters to the 'return_list' if you want to return them as a result of this function. \cr
+If 'optimize_kel' is FALSE AND KEL is not one of the parameters (default or specified by 'parameter_list' argument) then
+this functions will return a datafram. If 'optimize_kel' is FALSE AND KEL is one of the parameters (default or specified by 'parameter_list' argument) then
+this functions will return a list with 'data_out' and 'est_data'. If 'optimize_kel' is TRUE AND KEL is one of the parameters (default or specified
+by 'parameter_list' argument) then this functions will return a list with 'data_out', 'optimized_kel_flag' and 'est_data'.
+If 'optimize_kel' is TRUE AND KEL is not one of the parameters (default or specified by 'parameter_list' argument) then
+this functions will return a list with 'data_out' and 'optimized_kel_flag'. \cr
+Please note that this function does not contain all the features of a M1 SD computation, so it is recommended that you
+use the parent function \code{\link{run_computation}}
 }
 
 \section{Returns}{
 
-\strong{Dataset} \cr
+\strong{Dataframe} \cr
+\itemize{
+ \item M1SD_Parameters: Caculated default/specified parameters
+}
+OR \cr
+\strong{List} \cr
+\itemize{
+ \item data_out: Calculated default/specified M1SD Parameters
+ \item optimized_kel_flag: Optimized KEL flag data used to calulate KEL based parameters
+ \item est_data: Calculated Estimated Parameters
+}
 }
 
 \examples{
-##########
-## Data ##
-########################################
-##  SID  ##  TIME  ##  RESULT  ## ... ##
-########################################
-##   30  ##    0   ##   2.89   ##     ##
-##   30  ##    1   ##   2.49   ##     ##
-##   30  ##    2   ##   2.47   ##     ##
-##   31  ##    0   ##      0   ##     ##
-##   31  ##    1   ##   1.00   ##     ##
-##   31  ##    2   ##      0   ##     ##
-##   32  ##    0   ##   1.19   ##     ##
-##   32  ##    1   ##   1.23   ##     ##
-##   32  ##    2   ##   1.34   ##     ##
-##   32  ##    4   ##   1.32   ##     ##
-########################################
-
-data <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
-
-#########
-## Map ## 
-##################################################
-##  PARAMETER  ##  MODEL  ##  DOSINGTYPE ## ... ##
-##################################################
-##    VALUE    ##    M1   ##     SD      ##     ##
-##################################################
-
-map <- data.frame(...)
-#Same map as above, just represented as a dataframe
-
-run_computation(data = data, map = map)
-#Generates the M1 SD computation results
-
-run_computation(data = data, map = map, flag = flag)
-#Generates the M1 SD computation results
 
 }
 \author{
 \itemize{
- \item Kevin McConnell
+ \item \strong{Thomas Tensfeldt, Pfizer & Rudraya Technical Team}
+ \item website: \url{www.pfizer.com}
+ \item email: \url{thomas.g.tensfeldt@pfizer.com}
 }
 }

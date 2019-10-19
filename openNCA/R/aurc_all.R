@@ -1,15 +1,15 @@
-#' Area under the urinary excretion rate curve from time 0 to the last rate. 
+#' Area under the urinary excretion rate curve from time 0 to the last rate.
 #'
 #' This function gets the area under urinary excretion rate curve from time 0 until the last
-#' time point. As illustrated in the following figure, AUC_ALL includes the trapezoidal area from the 
+#' time point. As illustrated in the following figure, AUC_ALL includes the trapezoidal area from the
 #' time of the last measurable concentration to the next time point. Although there may be additional
 #' time points, there is no additonal AUC since by defination all subsequent concentrations are zero.\cr
 #' \figure{auc_all.png}
-#' 
+#'
 #' @details
-#' \strong{Linear Method} \cr  
+#' \strong{Linear Method} \cr
 #' \figure{auc_1.png} \cr
-#' \strong{Log Method} \cr  
+#' \strong{Log Method} \cr
 #' \figure{auc_2.png} \cr
 #' \eqn{AUC = Area under the cruve} \cr
 #' \eqn{C_{i} = Concentration 1}{Ci = Concentration 1} \cr
@@ -19,7 +19,7 @@
 #' \eqn{ln = Natural Logarithm} \cr \cr
 #' \strong{Methods:} You can use the following methods to calculate AUC: \cr
 #' \enumerate{
-#'  \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the 
+#'  \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
 #'  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
 #'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
 #'  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
@@ -27,35 +27,35 @@
 #'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
 #'  \item \strong{Linear Up - Log Down Trapazoidal Rule}: Linear trapezoidal while the concentrations
 #'  are increasing and log trapezoidal while the concentration are decreasing, the assessment is made on
-#'  a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear 
+#'  a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear
 #'  trapezoidal rule is used.
 #' }
 #' \strong{Equation} \cr
-#' If the user selects the option to have dose normalized AUC then the following equation is applied: \cr 
-#' \figure{auc_dn.png} \cr 
-#' 
-#' @param conc The concentration data (given in a vector form) 
+#' If the user selects the option to have dose normalized AUC then the following equation is applied: \cr
+#' \figure{auc_dn.png} \cr
+#'
+#' @param conc The concentration data (given in a vector form)
 #' @param time The time data (given in a vector form)
 #' @param method The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr
 #' \enumerate{
 #' \item Linear-Log Trapazoidal Rule (default)
-#' \item Linear Trapazoidal Rule 
-#' \item Log Trapazoidal Rule 
-#' \item Linear Up - Log DownTrapazoidal Rule 
-#' } 
+#' \item Linear Trapazoidal Rule
+#' \item Log Trapazoidal Rule
+#' \item Linear Up - Log DownTrapazoidal Rule
+#' }
 #' Note: check 'Methods' section below for more details \cr
-#' 
+#'
 #' @section Returns:
-#' \strong{Value} \cr 
+#' \strong{Value} \cr
 #' \itemize{
 #'  \item AURC: area under the curve
 #' }
-#' 
-#' @examples 
+#'
+#' @examples
 #' ##########
 #' ## Data ##
 #' #################################
-#' ##  SID  ##  TIME  ##   CONC   ## 
+#' ##  SID  ##  TIME  ##   CONC   ##
 #' #################################
 #' ##   30  ##    0   ##   2.89   ##
 #' ##   30  ##    1   ##   2.49   ##
@@ -64,73 +64,75 @@
 #' ##   30  ##    4   ##   2.32   ##
 #' ##   30  ##    5   ##   2.28   ##
 #' #################################
-#' 
+#'
 #' data <- data.frame(
 #'     SID = ...,
 #'     TIME = ...,
 #'     RESULT = ...
 #' )
 #' #Same data as above, just represented as a dataframe
-#' 
-#' auc_all()   
+#'
+#' auc_all()
 #' #Error in auc_all: 'conc' and 'time' vectors are NULL
-#' 
+#'
 #' conc_vector <- data$CONC
 #' time_vector <- data$TIME
-#' 
+#'
 #' auc_all(conc = conc_vector, time = time_vector)
 #' #12.23956
-#'  
+#'
 #' ############
 #' ## Data 2 ##
 #' #################################
-#' ##  SID  ##  TIME  ##   CONC   ## 
+#' ##  SID  ##  TIME  ##   CONC   ##
 #' #################################
-#' ##   31  ##    0   ##      0   ## 
+#' ##   31  ##    0   ##      0   ##
 #' ##   31  ##    1   ##      0   ##
 #' ##   31  ##    2   ##      0   ##
 #' #################################
-#' 
+#'
 #' data2 <- data.frame(
 #'     SID = ...,
 #'     TIME = ...,
 #'     RESULT = ...
 #' )
 #' #Same data as above, just represented as a dataframe
-#' 
+#'
 #' conc_vector <- data2$CONC
 #' time_vector <- data2$TIME
-#' 
+#'
 #' auc_all(conc = conc_vector, time = time_vector)
-#' #Error in auc_lin_log(conc, time) : 
+#' #Error in auc_lin_log(conc, time) :
 #' #  Error in auc_lin_log: 'tmax' is NA
-#' 
+#'
 #' ############
 #' ## Data 3 ##
 #' #################################
-#' ##  SID  ##  TIME  ##   CONC   ## 
+#' ##  SID  ##  TIME  ##   CONC   ##
 #' #################################
-#' ##   32  ##    0   ##   1.19   ## 
+#' ##   32  ##    0   ##   1.19   ##
 #' ##   32  ##    1   ##   1.23   ##
 #' ##   32  ##    2   ##   1.34   ##
 #' #################################
-#' 
+#'
 #' data3 <- data.frame(
 #'     SID = ...,
 #'     TIME = ...,
 #'     RESULT = ...
 #' )
 #' #Same data as above, just represented as a dataframe
-#' 
+#'
 #' conc_vector <- data3$CONC
 #' time_vector <- data3$TIME
-#' 
+#'
 #' auc_all(conc = conc_vector, time = time_vector)
 #' #2.494215
-#' 
+#'
 #' @author
 #' \itemize{
-#'  \item Kevin McConnell
+#'  \item \strong{Rudraya Technical Team}
+#'  \item website: \url{www.rudraya.com}
+#'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
 aurc_all <- function(conc = NULL, time = NULL, method = 1){
@@ -141,7 +143,7 @@ aurc_all <- function(conc = NULL, time = NULL, method = 1){
   } else if(is.null(time)) {
     stop("Error in auc_all: 'time' vectors is NULL")
   }
-  
+
   if(!(is.numeric(conc) && is.vector(conc)) ){
     stop("Error in auc_all: 'conc' is not a numeric vector")
   }
@@ -154,7 +156,7 @@ aurc_all <- function(conc = NULL, time = NULL, method = 1){
   if(method != 1 && method != 2 && method != 3 && method != 4){
     stop("Error in auc_all: the value provided for 'method' is not correct")
   }
-  
+
   if(method == 1){
     return(auc_lin_log(conc = conc, time = time))
   } else if(method == 2){

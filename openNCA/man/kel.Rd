@@ -7,25 +7,30 @@
 \alias{keltmhi}
 \alias{kelnopt}
 \alias{thalf}
+\alias{thalff}
 \title{Terminal or Elimination phase rate constant}
 \usage{
-kel(conc = NULL, time = NULL, exflag = NULL)
+kel(conc = NULL, time = NULL, exflag = NULL, spanratio = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}
 
 \item{time}{The time data (given in a vector form)}
+
+\item{exflag}{The exclude flag data (given in a numeric vector)}
+
+\item{spanratio}{The spanratio criteria value used to calculate flag for THALF (numeric value)}
 }
 \description{
 This function gets the terminal or elimination phase rate constant, which is described as the absolute
 value of the slope of a least-squares linear regression during the terminal phase of the natural-logarithm
-(ln) transformed concentration-time profile. The function also gets the the intercept on natural log of 
-plasma drug concentration axis (KELC0), the corresponding values of initial timepoint used in the calculation 
-of kel (KELTMLO), final timepoint used in the calculation of kel (KELTMHI), number of timepoints used in 
-the calculation of kel (KELNOPT), and the terminal phase half-life (THALF)
+(ln) transformed concentration-time profile. The function also gets the the intercept on natural log of
+plasma drug concentration axis (KELC0), the corresponding values of initial timepoint used in the calculation
+of kel (KELTMLO), final timepoint used in the calculation of kel (KELTMHI), number of timepoints used in
+the calculation of kel (KELNOPT), the terminal phase half-life (THALF), and the terminal phase half-life flag (THALFF).
 }
 \details{
-\strong{First calculate slope} \cr  
+\strong{First calculate slope} \cr
 \figure{kel_eq1.png} \cr
 \figure{kel_eq2.png} \cr
 \figure{kel_eq3.png} \cr
@@ -37,24 +42,35 @@ the calculation of kel (KELNOPT), and the terminal phase half-life (THALF)
 \eqn{n = the number of data points} \cr \cr
 \strong{Terminal log-linear phase} = The phase in the natural-log transformed concentration-time profile selected
 by user at the time of primary parameter computaitons via interactive concentration-time plots(refer to KEL
-tab on the front end) \cr \cr  
+tab on the front end) \cr \cr
 Set time of last dose TDOSE to 0 and shift T accordingly in calculation of KEL. This impacts the C0 the intercept
 used in other paramerter calculations AUCINF \cr \cr
-\strong{Equation for KEL}\cr \eqn{KEL = S x -1} \cr \cr 
-\strong{Terminal Phase Half-Life Equation} \cr  
+\strong{Equation for KEL}\cr \eqn{KEL = S x -1} \cr \cr
+\strong{Terminal Phase Half-Life Equation} \cr
 \figure{thalf.png} \cr
-\eqn{KEL = Terminal Rate Constant} \cr
+\eqn{KEL = Terminal Rate Constant} \cr \cr
+\strong{Terminal Phase Half-Life Flag (THALFF)} \cr
+If \cr
+\figure{thalff.png} \cr
+Then:    Value = 0 \cr
+Else:    Value = 1 \cr \cr
+\eqn{KELTMHI = Final timepoint used for KEL} \cr
+\eqn{KELTMLO = Initial timepoint used for KEL} \cr
+\eqn{THALF = Terminal Phase Half-Life} \cr
+\eqn{SPANRATIOCRIT = Spanratio criteria used for THALFF flag} \cr
 }
 \section{Note}{
 
 If concentrations are less than or equal to zero or 'NA' for a data point, that data point is not used
 in calculations. There needs to be atleast 2 data points in the data. If KEL is less than 0 then the function
-will return 'ND' for Not Determined. And also you must provide a valid sid with respect to the data.
+will return NA. \cr
+The function will ensure that the concentration data and the time data provided are numeric vectors and
+are also of the same length. \cr
 }
 
 \section{Returns}{
 
-\strong{Vector} \cr 
+\strong{Vector} \cr
 \itemize{
  \item KEL: maximum observed concentration
  \item KELCO: the intercept on natural log of plasma drug concentration axis (y-intercept)
@@ -69,7 +85,7 @@ will return 'ND' for Not Determined. And also you must provide a valid sid with 
 
 If KEL returns NA then TMHI and TMLO both are set to NA as well. If TMLO is greater
 than or equal to TMHI, then TMLO is set to NA. If TMHI is less than or equal to TMLO, then TMHI is set
-to NA. If KEL returns NA then THALF is set to NA. If THALF is less than or equal to zero, then it is 
+to NA. If KEL returns NA then THALF is set to NA. If THALF is less than or equal to zero, then it is
 set to NA
 }
 
@@ -77,82 +93,69 @@ set to NA
 ##########
 ## Data ##
 #################################
-##  SID  ##  TIME  ##   CONC   ## 
+##  SID  ##  TIME  ##   CONC   ##
 #################################
 ##   30  ##    0   ##   2.89   ##
 ##   30  ##    1   ##   2.49   ##
 ##   30  ##    2   ##   2.47   ##
 #################################
 
-data <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-kel()   
+kel()
 #Error in kel: 'conc' and 'time' vectors are NULL
 
-conc_vector <- data$CONC
-time_vector <- data$TIME
+conc_vector <- c(2.89, 2.49, 2.47)
+time_vector <- c(0, 1, 2)
 
 kel(conc = conc_vector, time = time_vector)
-#        KEL      KELC0    KELTMLO    KELTMHI    KELNOPT      THALF 
-# 0.07851918 1.03777163 0.00000000 2.00000000 3.00000000 8.82774397 
- 
+#        KEL      KELC0    KELTMLO    KELTMHI    KELNOPT      THALF  THALFF
+# 0.07851918 1.03777163 0.00000000 2.00000000 3.00000000 8.82774397      NA
+
 ############
 ## Data 2 ##
 #################################
-##  SID  ##  TIME  ##   CONC   ## 
+##  SID  ##  TIME  ##   CONC   ##
 #################################
-##   31  ##    0   ##      0   ## 
+##   31  ##    0   ##      0   ##
 ##   31  ##    1   ##      0   ##
 ##   31  ##    2   ##      0   ##
 #################################
 
-data2 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-conc_vector <- data2$CONC
-time_vector <- data2$TIME
+conc_vector <- c(0, 0, 0)
+time_vector <- c(0, 1, 2)
 
 kel(conc = conc_vector, time = time_vector)
-# KEL KELC0 KELTMLO KELTMHI KELNOPT   THALF 
-#  NA    NA      NA      NA       0      NA 
+# KEL KELC0 KELTMLO KELTMHI KELNOPT   THALF  THALFF
+#  NA    NA      NA      NA       0      NA      NA
 
 ############
 ## Data 3 ##
 #################################
-##  SID  ##  TIME  ##   CONC   ## 
+##  SID  ##  TIME  ##   CONC   ##
 #################################
-##   32  ##    0   ##   2.19   ## 
+##   32  ##    0   ##   2.19   ##
 ##   32  ##    1   ##   2.23   ##
 ##   32  ##    2   ##   2.04   ##
-##   32  ##    3   ##   BLQ    ##
+##   32  ##    3   ##   NA     ##
 #################################
 
-data3 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
-#Same data as above, just represented as a dataframe
+#Data mentioned will be used for the following example
 
-conc_vector <- data3$CONC
-time_vector <- data3$TIME
+conc_vector <- c(2.19, 2.23, 2.04, NA)
+time_vector <- c(0, 1, 2, 3)
 
-kel(conc = conc_vector, time = time_vector)
-#        KEL       KELC0     KELTMLO     KELTMHI     KELNOPT       THALF 
-# 0.03547587  0.80176018  0.00000000  2.00000000  3.00000000 19.53855451 
+kel(conc = conc_vector, time = time_vector, spanratio = 2)
+#        KEL       KELC0     KELTMLO     KELTMHI     KELNOPT       THALF  THALFF
+# 0.03547587  0.80176018  0.00000000  2.00000000  3.00000000 19.53855451       1
 
 }
 \author{
 \itemize{
- \item Kevin McConnell
+ \item \strong{Rudraya Technical Team}
+ \item website: \url{www.rudraya.com}
+ \item email: \url{support@rudraya.com}
 }
 }

@@ -1,85 +1,102 @@
-#' Apparent clearance (predicated) of drug
-#' 
-#' Apparent clearance (predicted) of drug from e.g. plasma, for extravascular routes of administration.  
-#' 
+#' The total body clearance
+#'
+#' The total body clearance for extravascular administration divided by the fraction of dose absorbed calculated using AUCTAU.
+#'
 #' @details
-#' \strong{Model M1 (SD)}
-#' Single Dose Equation: 
+#' \strong{Model M1 (SS)}
+#' Steady-State Equation:
 #' \enumerate{
 #'  \tabular{rl}{
-#'   \tab \figure{clfp.png} \cr
+#'   \tab \figure{clftau.png} \cr
 #'  }
 #' }
-#' \eqn{F = fraction of dose absorbed assumed to be since value is unknown for extravascular model} \cr  
-#' \eqn{Dose = dose unit value for drug dosing interval} \cr   
-#' \eqn{AUCINFP = Area under the first moment curve from zero time to infinity  (Predicted)} \cr  
-#' 
-#' @section Additional Details:
-#' 
-#' @param aucinfo The AUCINFO data (given in a vector form) 
-#' @param dose The dose data (given in a vector form)
-#' 
+#' \eqn{AUCTAUi = Area under the concentration versus time curve from zero time until the end of the ith dosing interval} \cr
+#' \eqn{DOSEi = dose unit value for drug dosing interval} \cr
+#'
+#' @param auctau The area under the concentration versus time curve (numeric value)
+#' @param dose The dose data (numeric value)
+#'
 #' @section Returns:
-#' \strong{Value} \cr 
+#' \strong{Value} \cr
 #' \itemize{
-#'  \item CLFP: Apparent clearance of drug
+#'  \item CLFTAU: total body clearance divided by dose abosrbed
 #' }
-#' 
-#' @examples 
+#'
+#' @examples
 #' ##########
 #' ## Data ##
-#' #################################
-#' ##  SID  ##  TIME  ##  RESULT  ##
-#' #################################
-#' ##   30  ##    0   ##   2.89   ##
-#' ##   30  ##    1   ##   2.49   ##
-#' ##   30  ##    2   ##   2.47   ##
-#' ##   31  ##    0   ##      0   ##
-#' ##   31  ##    1   ##   1.00   ##
-#' ##   31  ##    2   ##      0   ##
-#' ##   32  ##    0   ##   1.19   ##
-#' ##   32  ##    1   ##   1.23   ##
-#' ##   32  ##    2   ##   1.34   ##
-#' ##   32  ##    4   ##   1.32   ##
-#' #################################
-#' 
-#' data <- data.frame(
-#'     SID = ...,
-#'     TIME = ...,
-#'     RESULT = ...
-#' )
-#' #Same data as above, just represented as a dataframe
-#' 
-#' aumc_XpctP()   
-#' #No data found!
-#' 
-#' aumc_XpctP(data)  
-#' #Object not of class NCA
-#' 
-#' mod <- model("~/data.csv")  
-#' #Creates an NCA object with data represented in 'data' above
-#' aumc_XpctP(mod)  
-#' #Please specify for which subject you want to get the AUMC_XPCTP for!
-#' 
-#' aumc_XpctP(mod, sid = "all") 
-#' #  SID              AUC     METHOD
-#' #   30 4.94993257703106 Linear-Log
-#' #   31                1 Linear-Log
-#' #   32 5.15416479501756 Linear-Log
-#' 
-#' aumc_XpctP(mod, sid = 32)  
-#' #  SID              AUC     METHOD
-#' #   32 5.15416479501756 Linear-Log
-#' 
-#' aumc_XpctP(mod, sid = 10)  
-#' #Invaild subject ID! Subject ID not found in the data provided!
-#' 
-#' aumc_XpctP(mod, sid = 31, method = 5)
-#' #Invalid method number! Please provide a valid value for method!
-#' 
+#' ##########################################
+#' ##  SID  ##  TIME  ##   CONC   ##  TAU  ##
+#' ##########################################
+#' ##   30  ##    0   ##   2.89   ##   5   ##
+#' ##   30  ##    1   ##   2.49   ##   5   ##
+#' ##   30  ##    2   ##   2.47   ##   5   ##
+#' ##   30  ##    3   ##   2.38   ##   5   ##
+#' ##   30  ##    4   ##   2.32   ##   5   ##
+#' ##   30  ##    5   ##   2.28   ##   5   ##
+#' ##########################################
+#'
+#' #Data mentioned will be used for the following example
+#'
+#' conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28)
+#' time_vector <- c(0, 1, 2, 3, 4, 5)
+#' tau_val <- 5
+#'
+#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+#' #12.23956
+#'
+#' clftau(auctau = 12.23956, dose = 300)
+#' #24.51069
+#'
+#' ############
+#' ## Data 2 ##
+#' ##########################################
+#' ##  SID  ##  TIME  ##   CONC   ##  TAU  ##
+#' ##########################################
+#' ##   31  ##    0   ##      0   ##   2   ##
+#' ##   31  ##    1   ##      0   ##   2   ##
+#' ##   31  ##    2   ##      0   ##   2   ##
+#' ##########################################
+#'
+#' #Data mentioned will be used for the following example
+#'
+#' conc_vector <- c(0, 0, 0)
+#' time_vector <- c(0, 1, 2)
+#' tau_val <- 2
+#'
+#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+#' #0
+#'
+#' clftau(auctau = 0, dose = 300)
+#' #NA
+#'
+#' ############
+#' ## Data 3 ##
+#' ##########################################
+#' ##  SID  ##  TIME  ##   CONC   ##  TAU  ##
+#' ##########################################
+#' ##   32  ##    0   ##   1.19   ##   2   ##
+#' ##   32  ##    1   ##   1.23   ##   2   ##
+#' ##   32  ##    2   ##   1.34   ##   2   ##
+#' ##########################################
+#'
+#' #Data mentioned will be used for the following example
+#'
+#' conc_vector <- c(1.19, 1.23, 1.34)
+#' time_vector <- c(0, 1, 2)
+#' tau_val <- 2
+#'
+#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+#' #2.495
+#'
+#' clftau(auctau = 2.495, dose = 300)
+#' #120.2405
+#'
 #' @author
 #' \itemize{
-#'  \item Kevin McConnell
+#'  \item \strong{Rudraya Technical Team}
+#'  \item website: \url{www.rudraya.com}
+#'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
 clftau <- function(auctau = NULL, dose = NULL){
@@ -90,17 +107,17 @@ clftau <- function(auctau = NULL, dose = NULL){
   } else if(is.null(dose)) {
     stop("Error in clftau: 'dose' vectors is NULL")
   }
-  
+
   if(length(dose) != length(auctau) ){
     stop("Error in clftau: length of vector arguments do not match")
   }
-  
+
   if(is.na(dose) || (0 %in% dose) || is.na(auctau)) {
     clf_tau <- NA
   } else {
     clf_tau <- dose/auctau
     clf_tau <- replace(clf_tau, is.infinite(clf_tau), NA)
   }
-  
+
   return(clf_tau)
 }
