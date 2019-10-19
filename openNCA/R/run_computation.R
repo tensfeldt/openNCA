@@ -27,6 +27,8 @@
 #' }
 #' @export
 run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset = NULL){
+  function_name <- as.list(sys.call())[[1]]
+
   if(is.null(data)){
     stop("Please provide a valid path for the 'data' parameter")
   } else {
@@ -82,7 +84,7 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
   map_data <- update_mct_data(map_data, data_data, flag_data, verbose=FALSE)
 
   k <- grep("DOSE", names(map_data), ignore.case=TRUE, perl=TRUE)
-  cat('run_computation.R:\n')
+  cat(function_name, '\n')
   print(map_data[,k])
 
 ### 2019-09-26/TGT/ added standardized "validate_timeconc_data" routine to resolve issue

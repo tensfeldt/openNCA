@@ -254,7 +254,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### as per run_computation.R must assume DOSE1 at moment
 
   dosevar <- names(parameter_indices("^DOSE1$", names(map_data), simplify=FALSE))
-  cat('run_M1_SD_computation.R: dosevar: ', dosevar, '\n')
+  cat(function_name, ' dosevar: ', dosevar, '\n')
   
   opt_list[1] <- map_data[,dosevar]
 
@@ -280,7 +280,6 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
     comp_required[[i]] <- pr || dp
     disp_required[[i]] <- pr
 ###    cat('i: ', i, ' pr: ', pr, ' dp: ', dp, ' comp_required[[', i, ']]: ', comp_required[[i]], ' disp_required[[', i, ']]: ', disp_required[[i]], '\n')
-    
 ###    if(comp_required[[i]]) { cat('parameter: ', i, ' regex: ', rg, ' required: ', comp_required[[i]], '\n') }
   }
 ###cat('comp_required: \n')
@@ -566,13 +565,15 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
   }
 ###  if("MRTEVIFO" %in% parameter_list){
 ###  if(parameter_required("^MRTEVIFO(i)*?$", parameter_list)){
-  if(disp_required[["MRTEVIFOi"]]) {
+###  if(disp_required[["MRTEVIFOi"]]) {
+  if(disp_required[["MRTEVIFO"]]) {
     col_names <- c(col_names, "MRTEVIFO")
     regular_int_type <- c(regular_int_type, "MRTEVIFO")
   }
 ###  if("MRTEVIFP" %in% parameter_list){
 ###  if(parameter_required("^MRTEVIFP(i)*?$", parameter_list)){
-  if(disp_required[["MRTEVIFPi"]]) {
+###  if(disp_required[["MRTEVIFPi"]]) {
+  if(disp_required[["MRTEVIFP"]]) {
     col_names <- c(col_names, "MRTEVIFP")
     regular_int_type <- c(regular_int_type, "MRTEVIFP")
   }
@@ -1172,12 +1173,14 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
         }
 ###        if("MRTEVIFO" %in% parameter_list){
 ###        if(parameter_required("^MRTEVIFO(i)*?$", parameter_list) || length(dependent_parameters("^MRTEVIFO(i)*?$"))>0) {
-        if(comp_required[["MRTEVIFOi"]]) {
+###        if(comp_required[["MRTEVIFOi"]]) {
+        if(comp_required[["MRTEVIFO"]]) {
           mrto <- mrt_evif_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, parameter = "SD", kelflag = kel_flag, aucflag = auc_flag)
         }
 ###        if("MRTEVIFP" %in% parameter_list){
 ###        if(parameter_required("^MRTEVIFP(i)*?$", parameter_list) || length(dependent_parameters("^MRTEVIFP(i)*?$"))>0) {
-        if(comp_required[["MRTEVIFPi"]]) {
+###        if(comp_required[["MRTEVIFPi"]]) {
+        if(comp_required[["MRTEVIFP"]]) {
           mrtp <- mrt_evif_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, parameter = "SD", kelflag = kel_flag, aucflag = auc_flag)
         }
 ###        if("AUCXPCTO" %in% parameter_list){
@@ -1298,7 +1301,7 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
 ###          if(map_data[, opt_list[1]] %in% names(data_data)) {
           if(parameter_required(dosevar, names(data_data))) {
 ###            row_data <- c(row_data, unique(tmp_df[, map_data[, opt_list[1]]])[1])
-            row_data <- c(row_data, unique(tmp_df[, dosevar])[1])
+              row_data <- c(row_data, unique(tmp_df[, dosevar])[1])
           }
         }
 ###        if("CMAX" %in% parameter_list) {
@@ -1512,14 +1515,16 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
 ### 2019-09-03/TGT/
 ###        if("MRTEVIFO" %in% parameter_list){
 ###        if(parameter_required("^MRTEVIFO(i)*?$", parameter_list)){
-        if(disp_required[["MRTEVIFOi"]]) {
+###        if(disp_required[["MRTEVIFOi"]]) {
+        if(disp_required[["MRTEVIFO"]]) {
           row_data <- c(row_data, mrto)
         }
 ### 2019-09-03/TGT/
 ###        if("MRTEVIFP" %in% parameter_list){
 ###        if(parameter_required("^MRTEVIFP(i)*?$", parameter_list)){
-        if(disp_required[["MRTEVIFPi"]]) {
-          row_data <- c(row_data, mrtp)
+###        if(disp_required[["MRTEVIFPi"]]) {
+        if(disp_required[["MRTEVIFP"]]) {
+            row_data <- c(row_data, mrtp)
         }
 ###        if("AUCXPCTO" %in% parameter_list){
         if(disp_required[["AUCXPCTO"]]) {
@@ -1595,8 +1600,6 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
 
 ###        df <- data.frame(SDEID=rep(i, length(col_names)), col_names=col_names, row_data=c(row_data, "temp"))
 ###        df <- data.frame(SDEID=rep(i, length(col_names)), col_names=col_names, row_data=c(row_data))
-        
-###        print(df)
 
         computation_df[i,] <- row_data
       } else {
@@ -1806,12 +1809,14 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
     }
 ###    if("MRTEVIFO" %in% display_list){
 ###    if(parameter_required("^MRTEVIFO(i)*?$", display_list)){
-    if(disp_required[["MRTEVIFOi"]]){
+###    if(disp_required[["MRTEVIFOi"]]){
+    if(disp_required[["MRTEVIFO"]]){
       display_parameters <- c(display_parameters, "MRTEVIFO")
     }
 ###    if("MRTEVIFP" %in% display_list){
 ###    if(parameter_required("^MRTEVIFP(i)*?$", display_list)){
-    if(disp_required[["MRTEVIFPi"]]){
+###    if(disp_required[["MRTEVIFPi"]]){
+    if(disp_required[["MRTEVIFP"]]){
       display_parameters <- c(display_parameters, "MRTEVIFP")
     }
 ###    if("AUCXPCTO" %in% display_list){

@@ -31,10 +31,11 @@
 #'
 #' @export
 update_mct_data <- function(map, data, flag, verbose=FALSE) {
+    function_name <- as.list(sys.call())[[1]]
 
     ### call timeconcvalues to determine TIME/CONC values provided
     timeconcvalues <- validate_timeconc_data(map, data, verbose=verbose)
-    if(verbose) { print(timeconcvalues) }
+    if(verbose) { cat(function_name, ' timeconcvalues: \n'); print(timeconcvalues) }
     ### timeconcvalues should all be column names/fields in data at this point, rather than pointers to other values in map
 
     ### maintain original values of TIME/TIMEU  
@@ -67,7 +68,7 @@ update_mct_data <- function(map, data, flag, verbose=FALSE) {
     ### DOSES to impute to unit dose
     if(parameter_required("imputedoses", names(timeconcvalues))) {
         map$IMPUTEDOSES <- paste(timeconcvalues$imputedoses, collapse=";") 
-        cat('timeconcvalues$imputedoses: ', timeconcvalues$imputedoses, ' str(timeconcvalues$imputedoses): ', str(timeconcvalues$imputedoses), "map$IMPUTEDOSES: ", map$IMPUTEDOSES, '\n')
+###        cat(function_name, ' timeconcvalues$imputedoses: ', timeconcvalues$imputedoses, ' str(timeconcvalues$imputedoses): ', str(timeconcvalues$imputedoses), "map$IMPUTEDOSES: ", map$IMPUTEDOSES, '\n')
    }
 
     ### DOSE information

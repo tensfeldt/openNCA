@@ -136,7 +136,7 @@
 #'  \item Kevin McConnell
 #' }
 #' @export
-run_computation <- function(data = NULL, map = NULL, flag = NULL, retvirt=FALSE){ # 2018-10-31/TGT/ Added retvirt
+run_computation <- function(data = NULL, map = NULL, flag = NULL) { 
   if(is.null(data)){
     stop("Please provide a valid path for the 'data' parameter")
   } else {
@@ -180,7 +180,7 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, retvirt=FALSE)
   if(!(map_data$SDEID %in% names(data_data) && map_data$NOMTIME %in% names(data_data) && map_data$CONC %in% names(data_data))){
     stop("Values provided via 'map' are not present in the dataset provided via 'data'")
   }
-  
+
   merged_data <- merge(x = data_data, y = flag_data, by = map_data$FLGMERGE)
   colnames(merged_data) <- gsub('.x','.dataset',names(merged_data))
   colnames(merged_data) <- gsub('.y','',names(merged_data))
@@ -237,6 +237,11 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, retvirt=FALSE)
     } else {
       stop("Unable to generate dosing interval for Stedy State data! Please provide a valid data parameters")
     }
+  }
+  
+  # 2019-05-03/TGT/ optimizekel call
+  if(is.element("OPTIMIZEKEL", names(map_data))) {
+    if(map_data$OPTIMIZEKEL == 1) { print("run_computation: optimizekel was triggered") }
   }
   
   if(toupper(map_data$AUCMETHOD) == "LINLOG"){
@@ -856,7 +861,46 @@ base_parameter_names <-
                                       parameter = toupper(map_data$DOSINGTYPE), return_list = return_list) 
   }
 
-  return(data_out)
+  # In order to return FLAGS and Parameter Results, need to return a list
+  results_list <- list()
+  results_list$data_out  <- data_out
+  results_list$flag_data <- flag_data
+  # Placeholder Template for Estimated Concentration Dataset
+  #  note right now with v0.6 (very old from ~Sept 2018) not reconciling that there's not a consistent/standard way to 
+  #  specify chosen/selected TIME variable in the code above but assuming map_data$TIME will do so with updated code
+  #  for run_computation.R
+  if(casefold(map_data$TIME)=="nominal") { vartime <- map_data$NOMTIME }
+  else if(casefold(map_data$TIME)=="actual") { vartime <- map_data$ACTTIME }
+  else { vartime <- map_data$TIME }
+
+  elist <- c("SDEID","PKDATAROWID","TIME","CEST_KEL","CEST_INT","CEST_EXT","CEST_C0","CEST_TLAST")
+  # Note that this prototype uses dimensions of the input FLAGS dataset as a starting point but
+  #  the estimated concentration dataset has no such restrictions on it as it can represent 
+  #  interpolated, estimated values as needed for C0/Partial AUCS/TLAST/etc. Indeed the only the FLGEXKEL selected
+  #  rows from flags will appear here as well.
+
+  est_data <- flag_data[flag_data$FLGEXKEL==0,c("PKDATAROWID"), drop=FALSE] # Select rows to include in KEL computations to start with
+
+  # Merge with concentration data
+  vlist <- c("SDEID", "PKDATAROWID", vartime)
+  est_data <- merge(x=est_data, y=data_data[,vlist], by="PKDATAROWID", all.x=TRUE)
+
+  # Rename selected TIME to "TIME"
+  names(est_data)[match(vartime, names(est_data))] <- "TIME"
+  # Add Placeholders for CEST_KEL, CEST_INT, CEST_EXT, CEST_C0, CEST_TLAST
+  est_data$CEST_KEL   <- rep(NA, nrow(est_data))
+  est_data$CEST_INT   <- rep(NA, nrow(est_data))
+  est_data$CEST_EXT   <- rep(NA, nrow(est_data))
+  est_data$CEST_C0    <- rep(NA, nrow(est_data))
+  est_data$CEST_TLAST <- rep(NA, nrow(est_data))
+  
+  # Reorder names
+  est_data <- est_data[,elist]
+
+  # Add est_data to results_list
+  results_list$est_data  <- est_data
+
+  return(results_list)
 }
 
 
