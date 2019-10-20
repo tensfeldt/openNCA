@@ -257,6 +257,11 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
   col <- reg_col + (auc_col * auc_len) + (interval_col * di_col) + 1 + (2 * (auc_len+1))
 
+  ### Determine DOSEs in dosevar, a vector of dose names pointing into map_data
+  doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
+  dosevar <- unlist(strsplit(map_data[,doselist], ";"))
+  dosevar <- map[,dosevar]
+
 ### 2019-09-16/TGT/ Precompute list of required parameters for col_names, parameter function evaluation and row_data generation  
   comp_required <- list()
   disp_required <- list()
@@ -333,6 +338,17 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###
     
   col_names <- c("SDEID")
+
+  if(disp_required[["DOSEi"]]) {
+    col_names <- c(col_names, unlist(dosevar))
+    regular_int_type <- c(regular_int_type, unlist(dosevar))
+  }
+
+  if(disp_required[["DOSEC"]]) {
+    col_names <- c(col_names, "DOSEC")
+    regular_int_type <- c(regular_int_type, "DOSEC")
+  }
+
 ###  if("C0" %in% parameter_list) {
 ###  if(parameter_required("^C0$", parameter_list) || length(dependent_parameters("^C0$"))>0) {
   if(disp_required[["C0"]]) {
@@ -752,10 +768,11 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###    regular_int_type <- c(regular_int_type, rep(paste0("DOSE",1:di_col)))
 ###  }
 ###  if(parameter_required("^DOSE[1-5]$", parameter_list)) {
-  if(disp_required[["DOSEi"]]) {
-    col_names <- c(col_names, rep(paste0("DOSE",1:di_col)))
-    regular_int_type <- c(regular_int_type, rep(paste0("DOSE",1:di_col)))
-  }
+### 2019-10-20/TGT/ Reposition
+###  if(disp_required[["DOSEi"]]) {
+###    col_names <- c(col_names, rep(paste0("DOSE",1:di_col)))
+###    regular_int_type <- c(regular_int_type, rep(paste0("DOSE",1:di_col)))
+###  }
 
 ###
 ###  cat("col_names: ", col_names, "\n")
@@ -1108,6 +1125,9 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       
       if(nrow(tmp_df) > 0){
         c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        if(comp_required[["DOSEC"]]) {
+            dose_c <- dosec(data = tmp_df, map = map_data)
+        }
 ###        if("CMAX" %in% parameter_list) {
         if(comp_required[["CMAX"]]) {
           c_max <- cmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
@@ -1421,6 +1441,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
 ###          if("AUCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
           if(comp_required[["AUCINFOi"]]) {
+print("in AUCINFOi comp required")
             aucinfoi[[d]] <- auc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
           }
 ###
@@ -1565,7 +1586,12 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
 ###          if("VZO" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFOi" %in% parameter_list) {
           if(comp_required[["VZO"]]) {
+              cat("before vz_o\n")
+              print(d)
+              print(aucinfoi)
+              print(aucinfoi[[d]])
             vz_o[[d]] <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinfoi[[d]], dose = tmp_dose)
+cat("after vz_o\n")
           }
 ###          if("VZP" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFPi" %in% parameter_list) {
           if(comp_required[["VZP"]]) {
@@ -1781,6 +1807,12 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
         row_data <- c(unique(data_data[,map_data$SDEID])[i])
 
+        if(disp_required[["DOSEi"]]){
+          row_data <- c(row_data, unlist(dose))
+        }
+        if(disp_required[["DOSEC"]]) {
+          row_data <- c(row_data, dose_c)
+        }
 ###        if("C0" %in% parameter_list) {
         if(disp_required[["C0"]]) {
           row_data <- c(row_data, c_0)
@@ -2152,10 +2184,11 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["TOLD"]]) {
           row_data <- c(row_data, unlist(told))
         }
+### 2019-10-20/TGT/ Reposition        
 ###        if("DOSEi" %in% parameter_list) {
-        if(disp_required[["DOSEi"]]) {
-          row_data <- c(row_data, unlist(dose))
-        }
+###        if(disp_required[["DOSEi"]]) {
+###          row_data <- c(row_data, unlist(dose))
+###        }
         
         computation_df[i,] <- row_data
       } else {

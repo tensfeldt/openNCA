@@ -79,7 +79,12 @@ update_mct_data <- function(map, data, flag, verbose=FALSE) {
     else { map$ORGDOSE  <- NA }
 
     ### DOSEU information
-    if(parameter_required("^DOSEU$", names(map))) { map$ORGDOSEU <- timeconcvalues$doseu } else { map$ORGDOSEU <- NA }
+    if(parameter_required("^DOSE(i{1}|[0-9]*?)U$", names(map)))  {
+        for(i in 1:length(timeconcvalues$doseu)) { map[,paste0("ORGDOSE",i,"U")]  <- timeconcvalues$doseu[i] }
+        map$DOSEULIST <- paste(timeconcvalues$doseu, collapse=";")
+    }
+    else { map$ORGDOSEu  <- NA }
+#    if(parameter_required("^DOSEU$", names(map))) { map$ORGDOSEU <- timeconcvalues$doseu } else { map$ORGDOSEU <- NA }
 
     ### create FLGTIME column name in map to map into flags and data once data and flags are merged
     flgtime <- "FLGTIME"

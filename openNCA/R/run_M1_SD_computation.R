@@ -253,19 +253,16 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###  dosevar <- names(parameter_indices("^DOSE(i{1}|[0-9]*?)$", names(map_data), simplify=FALSE))
 ### as per run_computation.R must assume DOSE1 at moment
 
-  dosevar <- names(parameter_indices("^DOSE1$", names(map_data), simplify=FALSE))
-  cat(function_name, ' dosevar: ', dosevar, '\n')
+###  dosevar <- names(parameter_indices("^DOSE1$", names(map_data), simplify=FALSE))
+###  cat(function_name, ' dosevar: ', dosevar, '\n')
   
-  opt_list[1] <- map_data[,dosevar]
+###  opt_list[1] <- map_data[,dosevar]
 
   ### Determine DOSEs in dosevar, a vector of dose names pointing into map_data
   doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
   dosevar <- unlist(strsplit(map_data[,doselist], ";"))
   ### assuming here there is a single dose
   dosevar <- map[,dosevar]
-  
-cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
-  print(dosevar)
   
 ### 2019-09-09/TGT/ Precompute list of required parameters for col_names, parameter function evaluation and row_data generation  
   comp_required <- list()
@@ -341,8 +338,9 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
 ###  computation_df <- data.frame(matrix(ncol = col, nrow = 0))
 
   col_names <- c("SDEID")
+
 ###  if("DOSEi" %in% parameter_list && opt_list[1] %in% names(map_data)) {
-  if(disp_required[["DOSE"]]) {
+  if(disp_required[["DOSE"]] || disp_required[["DOSEi"]]) {
 ###    if(map_data[, opt_list[1]] %in% names(data_data)) {
 ###    if(map_data[, dosevar] %in% names(data_data)) {
 ###      col_names <- c(col_names, dosevar)
@@ -350,6 +348,10 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
       col_names <- c(col_names, dosevar)
       regular_int_type <- c(regular_int_type, dosevar)
 ###    }
+  }
+  if(disp_required[["DOSEC"]]) {
+    col_names <- c(col_names, "DOSEC")
+    regular_int_type <- c(regular_int_type, "DOSEC")
   }
 ###  if(parameter_required("^CMAX$", parameter_list)) {
   if(disp_required[["CMAX"]]) {
@@ -835,6 +837,9 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
       if(nrow(tmp_df) > 0){
         c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
 
+        if(comp_required[["DOSEC"]]) {
+            dose_c <- dosec(data = tmp_df, map = map_data)
+        }
 ### 2019-09-04/TGT/ Add in dependency checking
 ### 2019-09-03/TGT/ switch to parameter_required
 ###        if("CMAX" %in% parameter_list) {
@@ -1297,12 +1302,15 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
         
         row_data <- c(unique(data_data[,map_data$SDEID])[i])
 ###        if("DOSEi" %in% parameter_list && opt_list[1] %in% names(map_data)){
-        if(disp_required[["DOSE"]]){
+        if(disp_required[["DOSE"]] || disp_required[["DOSEi"]]){
 ###          if(map_data[, opt_list[1]] %in% names(data_data)) {
           if(parameter_required(dosevar, names(data_data))) {
 ###            row_data <- c(row_data, unique(tmp_df[, map_data[, opt_list[1]]])[1])
               row_data <- c(row_data, unique(tmp_df[, dosevar])[1])
           }
+        }
+        if(disp_required[["DOSEC"]]) {
+          row_data <- c(row_data, dose_c)
         }
 ###        if("CMAX" %in% parameter_list) {
         if(disp_required[["CMAX"]]) {

@@ -244,11 +244,17 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   opt_col <- ifelse(length(opt_sel) > 0, ifelse(sum(opt_sel %in% names(map_data)) > 0 && any(map_data[, opt_sel[opt_sel %in% names(map_data)]] %in% names(data_data)), sum(map_data[, opt_sel[opt_sel %in% names(map_data)]] %in% names(data_data)), 0), 0)
   col <- reg_col + (auc_col * auc_len) + 1 + (2 * (auc_len+1)) + opt_col
 
+  ### Determine DOSEs in dosevar, a vector of dose names pointing into map_data
+  doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
+  dosevar <- unlist(strsplit(map_data[,doselist], ";"))
+  ### assuming here there is a single dose
+  dosevar <- map[,dosevar]
+
 ### 2019-09-09/TGT/ identify DOSE/DOSE1 from map
 ###  dosevar <- names(parameter_indices("^DOSE(i{1}|[0-9]*?)$", names(map_data), simplify=FALSE))
 ### as per run_computation.R must assume DOSE1 at moment
-  dosevar <- names(parameter_indices("^DOSE1$", names(map_data), simplify=FALSE))
-  opt_list[1] <- map_data[,dosevar]
+###  dosevar <- names(parameter_indices("^DOSE1$", names(map_data), simplify=FALSE))
+###  opt_list[1] <- map_data[,dosevar]
 
 ### 2019-09-16/TGT/ Precompute list of required parameters for col_names, parameter function evaluation and row_data generation  
   comp_required <- list()
@@ -327,6 +333,17 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###
 
   col_names <- c("SDEID")
+  
+  if(disp_required[["DOSE"]] || disp_required[["DOSEi"]]) {
+    col_names <- c(col_names, dosevar)
+    regular_int_type <- c(regular_int_type, dosevar)
+  }
+  
+  if(disp_required[["DOSEC"]]) {
+    col_names <- c(col_names, "DOSEC")
+    regular_int_type <- c(regular_int_type, "DOSEC")
+  }
+
 ###  if("CMAX" %in% parameter_list) {
   if(disp_required[["CMAX"]]) {
     col_names <- c(col_names, "CMAX")
@@ -618,6 +635,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
   col_names <- c(col_names, rep(paste0("CONC",1:(auc_len+1))), rep(paste0("CONCTIME",1:(auc_len+1))))
   regular_int_type <- c(regular_int_type, rep(paste0("CONC",1:(auc_len+1))), rep(paste0("CONCTIME",1:(auc_len+1))))
+### 2019-10-20/TGT/ Reposition
 ###  if("DOSEi" %in% parameter_list && opt_list[1] %in% names(map_data)) {
   if(disp_required[["DOSE"]]) {
 ###    if(map_data[, opt_list[1]] %in% names(data_data)) {
@@ -816,6 +834,9 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(nrow(tmp_df) > 0){
         c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
 
+        if(comp_required[["DOSEC"]]) {
+            dose_c <- dosec(data = tmp_df, map = map_data)
+        }
 ###        if("CMAX" %in% parameter_list) {
         if(comp_required[["CMAX"]]) {
           c_max <- cmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
@@ -949,7 +970,8 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
 ###        if("CMAXDN" %in% parameter_list && "CMAX" %in% parameter_list) {
         if(comp_required[["CMAXDN"]]) {
-          cmaxdn <- cmax_dn(cmax = c_max, dose = unique(tmp_df[,map_data$DOSE1])[1])
+###          cmaxdn <- cmax_dn(cmax = c_max, dose = unique(tmp_df[,map_data$DOSE1])[1])
+          cmaxdn <- cmax_dn(cmax = c_max, dose = unique(tmp_df[,dosevar])[1])
         }
 ### 2019-09-18/TGT/ Added KELC0
 ###        if("KEL" %in% parameter_list || "KELTMLO" %in% parameter_list || "KELTMHI" %in% parameter_list || "KELNOPT" %in% parameter_list || "THALF" %in% parameter_list || "THALFF" %in% parameter_list) {
@@ -984,7 +1006,8 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if(comp_required[["AUCDN"]]) {
 ###          aucdn <- auc_dn(auc = aucall, dose = unique(tmp_df[,map_data$DOSE1])[1])
         if(comp_required[["AUCALLDN"]]) {
-          aucalldn <- auc_dn(auc = aucall, dose = unique(tmp_df[,map_data$DOSE1])[1])
+###          aucalldn <- auc_dn(auc = aucall, dose = unique(tmp_df[,map_data$DOSE1])[1])
+          aucalldn <- auc_dn(auc = aucall, dose = unique(tmp_df[,dosevar])[1])
         }
 ###        if("AUCLASTC" %in% parameter_list) {
         if(comp_required[["AUCLASTC"]]) {
@@ -992,7 +1015,8 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("AUCLASTDN" %in% parameter_list) {
         if(comp_required[["AUCLASTDN"]]) {
-          auclastdn <- auc_dn(auc = auclast, dose = unique(tmp_df[,map_data$DOSE1])[1])
+###          auclastdn <- auc_dn(auc = auclast, dose = unique(tmp_df[,map_data$DOSE1])[1])
+          auclastdn <- auc_dn(auc = auclast, dose = unique(tmp_df[,dosevar])[1])
         }
 ###        if("AUMCLAST" %in% parameter_list) {
         if(comp_required[["AUMCLAST"]]) {
@@ -1069,7 +1093,8 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("AUCINFODN" %in% parameter_list && "AUCINFO" %in% parameter_list) {
 ###        if(parameter_required("^AUCINFODN", parameter_list)) {
         if(comp_required[["AUCINFODN"]]) {
-          aucinfo_dn <- auc_dn(auc = aucinf_o, dose = unique(tmp_df[,map_data$DOSE1])[1])
+###          aucinfo_dn <- auc_dn(auc = aucinf_o, dose = unique(tmp_df[,map_data$DOSE1])[1])
+          aucinfo_dn <- auc_dn(auc = aucinf_o, dose = unique(tmp_df[,dosevar])[1])
         }
 ### 2019-08-09/TGT/ Compute AUCINFP conditionally as needed for AUCINFP, AUCINFPC, AUCINFPDN
 ###                 Use regular expression to determine if ANY of these parameters are requested
@@ -1090,7 +1115,8 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("AUCINFPDN" %in% parameter_list && "AUCINFP" %in% parameter_list) {
 ###        if(parameter_required("^AUCINFPDN", parameter_list)) {
         if(comp_required[["AUCINFPDN"]]) {
-          aucinfp_dn <- auc_dn(auc = aucinf_p, dose = unique(tmp_df[,map_data$DOSE1])[1])
+###          aucinfp_dn <- auc_dn(auc = aucinf_p, dose = unique(tmp_df[,map_data$DOSE1])[1])
+          aucinfp_dn <- auc_dn(auc = aucinf_p, dose = unique(tmp_df[,dosevar])[1])
         }
 ###        if("AUMCINFO" %in% parameter_list) {
         if(comp_required[["AUMCINFO"]]) {
@@ -1130,7 +1156,8 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("CLO" %in% parameter_list) {
         if(comp_required[["CLO"]]) {
-          cl_o <- clo(aucinfo = aucinf_o, dose = unique(tmp_df[,map_data$DOSE1])[1])
+###          cl_o <- clo(aucinfo = aucinf_o, dose = unique(tmp_df[,map_data$DOSE1])[1])
+          cl_o <- clo(aucinfo = aucinf_o, dose = unique(tmp_df[,dosevar])[1])
         }
 ###        if("CLOW" %in% parameter_list) {
         if(comp_required[["CLOW"]]) {
@@ -1138,7 +1165,8 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("CLP" %in% parameter_list) {
         if(comp_required[["CLP"]]) {
-          cl_p <- clp(aucinfp = aucinf_p, dose = unique(tmp_df[,map_data$DOSE1])[1])
+###          cl_p <- clp(aucinfp = aucinf_p, dose = unique(tmp_df[,map_data$DOSE1])[1])
+          cl_p <- clp(aucinfp = aucinf_p, dose = unique(tmp_df[,dosevar])[1])
         }
 ###        if("CLPW" %in% parameter_list) {
         if(comp_required[["CLPW"]]) {
@@ -1146,7 +1174,8 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("VZO" %in% parameter_list) {
         if(comp_required[["VZO"]]) {
-          vz_o <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinf_o, dose = unique(tmp_df[,map_data$DOSE1])[1])
+###          vz_o <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinf_o, dose = unique(tmp_df[,map_data$DOSE1])[1])
+          vz_o <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinf_o, dose = unique(tmp_df[,dosevar])[1])
         }
 ###        if("VZOW" %in% parameter_list) {
         if(comp_required[["VZOW"]]) {
@@ -1155,7 +1184,8 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("VZP" %in% parameter_list) {
         if(comp_required[["VZP"]]) {
-          vz_p <- vzp(kel = kel_v[["KEL"]], aucinfp = aucinf_p, dose = unique(tmp_df[,map_data$DOSE1])[1])
+###          vz_p <- vzp(kel = kel_v[["KEL"]], aucinfp = aucinf_p, dose = unique(tmp_df[,map_data$DOSE1])[1])
+          vz_p <- vzp(kel = kel_v[["KEL"]], aucinfp = aucinf_p, dose = unique(tmp_df[,dosevar])[1])
         }
 ###        if("VZPW" %in% parameter_list) {
         if(comp_required[["VZPW"]]) {
@@ -1225,6 +1255,23 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         #                        AUMCXPTo, AUMCXPTp, cl_ow, cl_p, cl_pw, vz_o, vz_ow, vz_p, vz_pw)
 
         row_data <- c(unique(data_data[,map_data$SDEID])[i])
+
+        if(disp_required[["DOSE"]] || disp_required[["DOSEi"]]){
+          if(parameter_required(dosevar, names(data_data))) {
+              row_data <- c(row_data, unique(tmp_df[, dosevar])[1])
+          }
+        }
+        
+###        if(disp_required[["DOSE"]]){
+###          if(map_data[, dosevar] %in% names(data_data)) {
+###            row_data <- c(row_data, unique(tmp_df[, map_data[, dosevar]])[1])
+###          }
+###        }
+
+        if(disp_required[["DOSEC"]]) {
+          row_data <- c(row_data, dose_c)
+        }
+
 ###        if("CMAX" %in% parameter_list) {
         if(disp_required[["CMAX"]]) {
           row_data <- c(row_data, c_max)
@@ -1498,14 +1545,16 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                       c(tmp_df[,map_data$TIME], rep(NA, ((auc_len+1) - length(tmp_df[,map_data$TIME]))))
                       )
 
+### 2019-10-20/TGT/ Reposition
 ###        if("DOSEi" %in% parameter_list && opt_list[1] %in% names(map_data)){
-        if(disp_required[["DOSE"]]){
+###        if(disp_required[["DOSE"]]){
 ###          if(map_data[, opt_list[1]] %in% names(data_data)) {
-          if(map_data[, dosevar] %in% names(data_data)) {
+###          if(map_data[, dosevar] %in% names(data_data)) {
 ###            row_data <- c(row_data, unique(tmp_df[, map_data[, opt_list[1]]])[1])
-            row_data <- c(row_data, unique(tmp_df[, map_data[, dosevar]])[1])
-          }
-        }
+###            row_data <- c(row_data, unique(tmp_df[, map_data[, dosevar]])[1])
+###          }
+###        }
+        
 ###        if('TAUi' %in% parameter_list && opt_list[2] %in% names(map_data)){
         if(disp_required[["TAU"]] && parameter_required(opt_list[2], names(map_data))){
             if(parameter_required(opt_list[2], names(map_data))) { 

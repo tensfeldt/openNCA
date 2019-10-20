@@ -226,7 +226,8 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   regular_list <- c("CMAX", "CMAXDN", "CMIN", "CLAST", "TMAX", "TMIN", "TLAST", "TLAG", "KEL", "KELC0", "KELTMLO",
                     "KELTMHI", "KELNOPT", "KELRSQ", "KELRSQA", "THALF", "THALFF", "LASTTIME", "AUCALL", "AUCLAST", "AUCLASTC",
                     "AUCLASTDN", "AUCINFO", "AUCINFOC", "AUCINFODN", "CEST", "AUCINFP", "AUCINFPC", "AUCINFPDN", "MRTLAST", "AUCXPCTO",
-                    "AUCXPCTP", "AUMCXPTO", "AUMCXPTP", "CLFO")
+                    "AUCXPCTP", "AUMCXPTO", "AUMCXPTP")
+###                    "AUCXPCTP", "AUMCXPTO", "AUMCXPTP", "CLFO")
   regular_int_type <- NULL
   auc_pair_check <- FALSE
 
@@ -263,10 +264,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   dosevar <- unlist(strsplit(map_data[,doselist], ";"))
   dosevar <- map[,dosevar]
   
-  cat('run_M1_SS_computation.R: ','\n')
-cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
-  print(dosevar)
-
 ### 2019-09-16/TGT/ Precompute list of required parameters for col_names, parameter function evaluation and row_data generation  
   comp_required <- list()
   disp_required <- list()
@@ -346,6 +343,16 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
 ###    cat('auc_pair_check: ', auc_pair_check, '\n')
     
   col_names <- c("SDEID")
+  
+  if(disp_required[["DOSEi"]]){
+    col_names <- c(col_names, unlist(dosevar))
+    regular_int_type <- c(regular_int_type, unlist(dosevar))
+  }
+  
+  if(disp_required[["DOSEC"]]) {
+    col_names <- c(col_names, "DOSEC")
+    regular_int_type <- c(regular_int_type, "DOSEC")
+  }
 ###  if(parameter_required("^CMAX$", parameter_list) || length(dependent_parameters("^CMAX$"))>0) {
   if(disp_required[["CMAX"]]) {
     col_names <- c(col_names, "CMAX")
@@ -770,12 +777,14 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
     col_names <- c(col_names, rep(paste0("AUMCXPTP",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("AUMCXPTP",1:di_col)))
   }
+  
 ###  if("CLFO" %in% parameter_list && "AUCINFO" %in% parameter_list) {
 ###  if(parameter_required("^CLFO$", parameter_list) || length(dependent_parameters("^CLFO$"))>0){
-  if(disp_required[["CLFO"]]){
-    col_names <- c(col_names, "CLFO")
-    regular_int_type <- c(regular_int_type, "CLFO")
-  }
+###  if(disp_required[["CLFO"]]){
+###    col_names <- c(col_names, "CLFO")
+###    regular_int_type <- c(regular_int_type, "CLFO")
+###  }
+  
 ###  if("CAVi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###  if(parameter_required("^CAVi$", parameter_list) || length(dependent_parameters("^CAVi$"))>0){
   if(disp_required[["CAVi"]]){
@@ -840,12 +849,13 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
     col_names <- c(col_names, rep(paste0("TOLD",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("TOLD",1:di_col)))
   }
+### 2019-10-19/TGT/ reposition DOSEi before CMAX
 ###  if("DOSEi" %in% parameter_list) {
 ###  if(parameter_required("^DOSEi$", parameter_list) || length(dependent_parameters("^DOSEi$"))>0){
-  if(disp_required[["DOSEi"]]){
-    col_names <- c(col_names, rep(paste0("DOSE",1:di_col)))
-    regular_int_type <- c(regular_int_type, rep(paste0("DOSE",1:di_col)))
-  }
+###  if(disp_required[["DOSEi"]]){
+###    col_names <- c(col_names, rep(paste0("DOSE",1:di_col)))
+###    regular_int_type <- c(regular_int_type, rep(paste0("DOSE",1:di_col)))
+###  }
 
 ### 2019-08-09/TGT/ Reposition location of template computaton_df creation to following
 ###                 the generation of "col_names" and use planned "length(col_names)"
@@ -1161,6 +1171,7 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
       if(comp_required[["DIi"]]){
         di <- list()
       }
+### 2019-10-19/TGT/ reposition to before CMAX
 ###      if("DOSEi" %in% parameter_list) {
 ###      if(parameter_required("^DOSEi$", parameter_list) || length(dependent_parameters("^DOSEi$"))>0){
       if(comp_required[["DOSEi"]]){
@@ -1231,6 +1242,9 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
         orig_conc <- tmp_df[,map_data$CONC]
         
         c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        if(comp_required[["DOSEC"]]) {
+            dose_c <- dosec(data = tmp_df, map = map_data)
+        }
 ###        if("CMAX" %in% parameter_list) {
 ###        if(parameter_required("^CMAX$", parameter_list) || length(dependent_parameters("^CMAX$"))>0){
         if(comp_required[["CMAX"]]){
@@ -1516,6 +1530,10 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
         for(d in 1:di_col){
           tmp_di_df <- tmp_df[tmp_df[c(paste0("DI", d, "F"))] == 1,]
           tmp_dose <- tmp_di_df[, as.character(map_data[c(paste0("DOSE",d))])][1]
+###          cat('as.character(map_data[c(paste0("DOSE",d))]): ', as.character(map_data[c(paste0("DOSE",d))]),  '\n')
+###          cat('dosevar: ', '\n')
+###          print(dosevar)
+###          cat('tmp_dose: ', tmp_dose, '\n')
 ###if(i==1) {      print(tmp_di_df[,vlist]) }
 
 ###          cat('di_col: ', di_col, ' d: ', d, ' tmp_dose: ', tmp_dose, ' tmp_di_df: \n')
@@ -1925,11 +1943,13 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
         if(comp_required[["AUMCXPTP"]]){
           aumcxptp <- aumc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
         }
+        
 ###        if("CLFO" %in% parameter_list && "AUCINFO" %in% parameter_list) {
 ###        if(parameter_required("^CLFO$", parameter_list) || length(dependent_parameters("^CLFO$"))>0){
-        if(comp_required[["CLFO"]]){
-          clf_o <- clfo(aucinfo = aucinf_o, dose = unique(tmp_df[,map_data$DOSE1])[1])
-        }
+###        if(comp_required[["CLFO"]]){
+###          clf_o <- clfo(aucinfo = aucinf_o, dose = unique(tmp_df[,map_data$DOSE1])[1])
+###          clf_o <- clfo(aucinfo = aucinf_o, dose = unique(tmp_df[,dosevar])[1])
+###        }
 
 ###        if("KEL" %in% parameter_list){
 
@@ -1980,7 +2000,21 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
         #                        unlist(cl_o), unlist(clf_o), unlist(ca_v), unlist(clf_tau), unlist(clf_tauw), unlist(pt_f), unlist(pt_r),
         #                        unlist(vzf_tau), unlist(vzf_tauw))
 
+##################################################################################################################################
+### 2019-10-19/TGT/ Comment to indicate that this is where the "placeholders" are created to reserve space for results in row_data
+##################################################################################################################################
+
         row_data <- c(unique(data_data[,map_data$SDEID])[i])
+### 2019-10-19/TGT/ Reposition DOSEi to just before CMAX/after SDEID
+###        cat('unlist(dose):\n')
+###        print(unlist(dose))
+        if(disp_required[["DOSEi"]]){
+          row_data <- c(row_data, unlist(dose))
+        }
+
+        if(disp_required[["DOSEC"]]) {
+          row_data <- c(row_data, dose_c)
+        }
 ###        if("CMAX" %in% parameter_list) {
 ###        if(parameter_required("^CMAX$", parameter_list) || length(dependent_parameters("^CMAX$"))>0){
         if(disp_required[["CMAX"]]){
@@ -2375,11 +2409,13 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
         if(disp_required[["AUMCXPTPi"]]){
           row_data <- c(row_data, unlist(aumcxptpi))
         }
+        
 ###        if("CLFO" %in% parameter_list && "AUCINFO" %in% parameter_list) {
 ###        if(parameter_required("^CLFO$", parameter_list) || length(dependent_parameters("^CLFO$"))>0){
-        if(disp_required[["CLFO"]]){
-          row_data <- c(row_data, clf_o)
-        }
+###        if(disp_required[["CLFO"]]){
+###          row_data <- c(row_data, clf_o)
+###        }
+        
 ###        if("CAVi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###        if(parameter_required("^CAVi$", parameter_list) || length(dependent_parameters("^CAVi$"))>0){
         if(disp_required[["CAVi"]]){
@@ -2436,11 +2472,12 @@ cat('DOSELIST: ', doselist, 'dosevar: ',  '\n')
 ### print(parameter_required("^TOLD(i)*?$", parameter_list, simplify=FALSE))
           row_data <- c(row_data, unlist(told))
         }
+### 2019-10-19/TGT/ Reposition DOSEi to just before CMAX/after SDEID
 ###        if("DOSEi" %in% parameter_list) {
 ###        if(parameter_required("^DOSEi$", parameter_list) || length(dependent_parameters("^DOSEi$"))>0){
-        if(disp_required[["DOSEi"]]){
-          row_data <- c(row_data, unlist(dose))
-        }
+###        if(disp_required[["DOSEi"]]){
+###          row_data <- c(row_data, unlist(dose))
+###        }
 
 ###
 ###        print(tmp_di_df[,map_data$CONC])

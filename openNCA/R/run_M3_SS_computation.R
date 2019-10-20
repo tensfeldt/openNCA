@@ -254,6 +254,11 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
   col <- reg_col + (auc_col * auc_len) + (interval_col * di_col) + 1 + (2 * (auc_len+1))
 
+  ### Determine DOSEs in dosevar, a vector of dose names pointing into map_data
+  doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
+  dosevar <- unlist(strsplit(map_data[,doselist], ";"))
+  dosevar <- map[,dosevar]
+
   ### 2019-09-17/TGT/ Precompute list of required parameters for col_names, parameter function evaluation and row_data generation  
   comp_required <- list()
   disp_required <- list()
@@ -331,6 +336,19 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###
 
   col_names <- c("SDEID")
+  
+  if(disp_required[["DOSEi"]]) {
+###    col_names <- c(col_names, rep(paste0("DOSE",1:di_col)))
+    col_names <- c(col_names, unlist(dosevar))
+###    regular_int_type <- c(regular_int_type, rep(paste0("DOSE",1:di_col)))
+    regular_int_type <- c(regular_int_type, unlist(dosevar))
+  }
+  
+  if(disp_required[["DOSEC"]]) {
+    col_names <- c(col_names, "DOSEC")
+    regular_int_type <- c(regular_int_type, "DOSEC")
+  }
+
 ###  if("CMAX" %in% parameter_list) {
   if(disp_required[["CMAX"]]) {
     col_names <- c(col_names, "CMAX")
@@ -739,11 +757,12 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, rep(paste0("TOLD",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("TOLD",1:di_col)))
   }
+### 2019-10-20/TGT/ Reposition
 ###  if("DOSEi" %in% parameter_list) {
-  if(disp_required[["DOSEi"]]) {
-    col_names <- c(col_names, rep(paste0("DOSE",1:di_col)))
-    regular_int_type <- c(regular_int_type, rep(paste0("DOSE",1:di_col)))
-  }
+###  if(disp_required[["DOSEi"]]) {
+###    col_names <- c(col_names, rep(paste0("DOSE",1:di_col)))
+###    regular_int_type <- c(regular_int_type, rep(paste0("DOSE",1:di_col)))
+###  }
 
 ### 2019-08-09/TGT/ Reposition location of template computaton_df creation to following
 ###                 the generation of "col_names" and use planned "length(col_names)"
@@ -1078,6 +1097,9 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       
       if(nrow(tmp_df) > 0){
         c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        if(comp_required[["DOSEC"]]) {
+            dose_c <- dosec(data = tmp_df, map = map_data)
+        }
 ###        if("CMAX" %in% parameter_list) {
         if(comp_required[["CMAX"]]) {
           c_max <- cmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
@@ -1663,6 +1685,14 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         #                        unlist(vzf_tau), unlist(vzf_tauw))
 
         row_data <- c(unique(data_data[,map_data$SDEID])[i])
+        
+        if(disp_required[["DOSEi"]]) {
+          row_data <- c(row_data, unlist(dose))
+        }
+        if(disp_required[["DOSEC"]]) {
+          row_data <- c(row_data, dose_c)
+        }
+        
 ###        if("CMAX" %in% parameter_list) {
         if(disp_required[["CMAX"]]) {
           row_data <- c(row_data, c_max)
@@ -2030,10 +2060,11 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["TOLD"]]) {
           row_data <- c(row_data, unlist(told))
         }
+### 2019-10-20/TGT/ Reposition        
 ###        if("DOSEi" %in% parameter_list) {
-        if(disp_required[["DOSEi"]]) {
-          row_data <- c(row_data, unlist(dose))
-        }
+###        if(disp_required[["DOSEi"]]) {
+###          row_data <- c(row_data, unlist(dose))
+###        }
 
         computation_df[i,] <- row_data
       } else {

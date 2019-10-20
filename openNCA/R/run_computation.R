@@ -8,6 +8,7 @@
 #' @param data The dataframe that contains the raw data
 #' @param map The dataframe that contains the map data
 #' @param flag The dataframe that contains the flag data
+#' @param parameterset set to either "PARAMETERLIST" or "PARAMETERDISPLAYLIST"
 #'
 #' @section Returns:
 #' \strong{List} \cr
@@ -21,9 +22,9 @@
 #'
 #' @author
 #' \itemize{
-#'  \item \strong{Rudraya Technical Team}
-#'  \item website: \url{www.rudraya.com}
-#'  \item email: \url{support@rudraya.com}
+#'  \item \strong{Thomas Tensfeldt & Rudraya Technical Team}
+#'  \item website: \url{www.pfizer.com}
+#'  \item email: \url{Thomas.G.Tensfeldt@pfizer.com}
 #' }
 #' @export
 run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset = NULL){
@@ -84,8 +85,6 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
   map_data <- update_mct_data(map_data, data_data, flag_data, verbose=FALSE)
 
   k <- grep("DOSE", names(map_data), ignore.case=TRUE, perl=TRUE)
-  cat(function_name, '\n')
-  print(map_data[,k])
 
 ### 2019-09-26/TGT/ added standardized "validate_timeconc_data" routine to resolve issue
 ###                 that was not handled if TIME is set to a value in the input dataset directly
@@ -264,7 +263,6 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
         ss_dose <- paste0("DOSE", rep(1:maxdosingintervals))
         ss_tau  <- paste0("TAU" , rep(1:maxdosingintervals))
         ss_told <- paste0("TOLD", rep(1:maxdosingintervals))
-          cat("DOSELIST: ", map_data$DOSELIST, ' ss_dose: ', ss_dose, "\n")
           
         valid_dose <- NULL
         valid_tau <- NULL

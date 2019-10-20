@@ -173,15 +173,38 @@ validate_timeconc_data <- function(map, data, verbose=FALSE) {
     ### Assumption is that there is one source of units for dosing regardless the # of doses supporting each individual profile
     ###   i.e. there is one unit for all of the doses defined in the map
     ### missing dosing unit is considered a warning
-    if(parameter_required("^DOSEU$", names(map))) { vdoseu <- map$DOSEU }
-    else {
-        vdoseu <- ""
-        warning("No dosing unit provided in 'map'!")
-    }
+    if(parameter_required("^DOSE(i{1}|[0-9]*?)U$", names(map))) {
+        vdoseu <- parameter_indices("^DOSE(i{1}|[0-9]*?)U$", names(map))
+        vdoseu <- names(vdoseu)
 
-    if (!(parameter_required(vdoseu, names(data)))) {
-            warning("Dosing unit: '", vdoseu, "' isn't present in input concentration dataset\n")
+        ### Check that dose units appear in concentration dataset
+        ###  any missing dose unit definitions in MCP will be treated as UNIT DOSES
+        k <- parameter_indices(paste0("^",map[,vdoseu],"$"), names(data), simplify=FALSE)
+        ### vdoseudata is a boolean indicating whether the values of vdoseu appear in the input concentration dataset or not        
+        vdoseudata <- is.element(map[,vdoseu], names(k))
+        missing_doseu_names <- vdoseu[!vdoseudata]
+        if(length(missing_doseu_names)>0) {
+            cat(missing_doseu_names, " as defined in 'map', do not appear in input concentration dataset", "\n")
+###            cat("assuming unit dose amounts for: ", missing_dose_names, "\n")
+            warning("Dosing unit: '", vdoseu[!vdoseudata], "' isn't present in input concentration dataset\n")
+        }
     }
+    else {
+        vdoseu <- "DOSEU"
+        vdoseudata <- FALSE
+        missing_doseu_names <- "DOSEU"
+        warning("No dose unit information provided in 'map'.")
+    }
+        
+###    if(parameter_required("^DOSEU$", names(map))) { vdoseu <- map$DOSEU }
+###    else {
+###        vdoseu <- ""
+###        warning("No dosing unit provided in 'map'!")
+###    }
+
+###    if (!(parameter_required(vdoseu, names(data)))) {
+###            warning("Dosing unit: '", vdoseu, "' isn't present in input concentration dataset\n")
+###    }
     
     if(verbose) { cat('vtime: ', vtime, ' vtimeu: ', vtimeu, 'atime: ', atime, ' atimeu: ', atimeu, ' vconc: ', vconc, ' vconcu' , vconcu, '\n') }
     if(verbose && flgm4) { cat('vendtime: ', vendtime, ' vendtimeu: ', vendtimeu, '\n') }
@@ -197,10 +220,11 @@ validate_timeconc_data <- function(map, data, verbose=FALSE) {
         results[["endtime"]]  <- vendtime
         results[["endtimeu"]] <- vendtimeu
     }
-    results[["dose"]]     <- vdose
-    results[["dosedata"]] <- vdosedata
-    results[["doseu"]]    <- vdoseu
+    results[["dose"]]        <- vdose
+    results[["dosedata"]]    <- vdosedata
     results[["imputedoses"]] <- missing_dose_names
+    results[["doseu"]]       <- vdoseu
+    results[["doseudata"]]   <- vdoseudata
     
     return(results)
 }

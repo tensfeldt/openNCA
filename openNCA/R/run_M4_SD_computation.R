@@ -245,12 +245,18 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-09-06/TGT/ identify DOSE/DOSE1 from map
 ###  dosevar <- names(parameter_indices("^DOSE(i{1}|[0-9]*?)$", names(map_data), simplify=FALSE))
 ### as per run_computation.R must assume DOSE1 at moment
-  dosevar <- names(parameter_indices("^DOSE1$", names(map_data), simplify=FALSE))
+###  dosevar <- names(parameter_indices("^DOSE1$", names(map_data), simplify=FALSE))
 
+  ### Determine DOSEs in dosevar, a vector of dose names pointing into map_data
+  doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
+  dosevar <- unlist(strsplit(map_data[,doselist], ";"))
+  ### assuming here there is a single dose
+  dosevar <- map[,dosevar]
+    
 ###  cat('opt_list: ', opt_list, '\n')
-### cat('dosevar: ', dosevar, '\n')
+###  cat('dosevar: ', dosevar, '\n')
 ###  print(map_data[,dosevar])
-  opt_list[1] <- map_data[,dosevar]
+###  opt_list[1] <- map_data[,dosevar]
 ###  cat('opt_list: ', opt_list, '\n')
 
 ### 2019-09-09/TGT/ Precompute list of required parameters for col_names, parameter function evaluation and row_data generation  
@@ -321,6 +327,13 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   #print((mid_col * mid_len))
 
   col_names <- c("SDEID")
+    
+###  if(parameter_required("^DOSE(i{1}|[0-9]*?)$", parameter_list) || parameter_required(dependent_parameters("^DOSE(i{1}|[0-9]*?)$"), parameter_list)) {
+  if(disp_required[["DOSE"]] || disp_required[["DOSEi"]]) {
+    col_names <- c(col_names, dosevar)
+    regular_int_type <- c(regular_int_type, dosevar)
+  }
+    
 ###  if("AET" %in% parameter_list) {
 ###  if(parameter_required("^AET$", parameter_list) || parameter_required(dependent_parameters("^AET$"), parameter_list)) {
   if(disp_required[["AET"]]) {
@@ -518,20 +531,27 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       col_names <- c(col_names, rep(paste0("MIDPT",1:(aet_len))))
       regular_int_type <- c(regular_int_type, rep(paste0("MIDPT",1:(aet_len))))
   }
+
+### 2019-10-20/TGT/ Added CONC and CONCTIME values to results output
+  col_names <- c(col_names, rep(paste0("CONC",1:(aet_len))), rep(paste0("CONCTIME",1:(aet_len))))
+  regular_int_type <- c(regular_int_type, rep(paste0("CONC",1:(aet_len))), rep(paste0("CONCTIME",1:(aet_len))))
+    
 ### 2019-08-29/TGT/ must move "DOSEi" to "DOSE1". Will make these interoperable subsequently  
 ###  if("DOSEi" %in% parameter_list && opt_list[1] %in% names(map_data)) {
 ###  if("DOSE1" %in% parameter_list && opt_list[1] %in% names(map_data)) {
-  if(parameter_required("^DOSE(i{1}|[0-9]*?)$", parameter_list) || parameter_required(dependent_parameters("^DOSE(i{1}|[0-9]*?)$"), parameter_list)) {
+### 2019-10-20/TGT/ Reposition
+###  if(parameter_required("^DOSE(i{1}|[0-9]*?)$", parameter_list) || parameter_required(dependent_parameters("^DOSE(i{1}|[0-9]*?)$"), parameter_list)) {
 ###    if(map_data[, opt_list[1]] %in% names(data_data)) {
-    if(map_data[, dosevar] %in% names(data_data)) {
+###    if(map_data[, dosevar] %in% names(data_data)) {
 ###      col_names <- c(col_names, "DOSE1")
 ###      col_names <- c(col_names, "DOSE")
-      col_names <- c(col_names, dosevar)
+###      col_names <- c(col_names, dosevar)
 ###      regular_int_type <- c(regular_int_type, "DOSE1")
 ###      regular_int_type <- c(regular_int_type, "DOSE")
-      regular_int_type <- c(regular_int_type, dosevar)
-    }
-  }
+###      regular_int_type <- c(regular_int_type, dosevar)
+###    }
+###  }
+    
 ###  if('TAUi' %in% parameter_list && opt_list[2] %in% names(map_data)) {
 ###  cat('parameter_list:\n')
 ###  print(unlist(parameter_list))
@@ -711,9 +731,11 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ######### 2019-09-06/TGT/ need to match DOSE, DOSE1, etc here more appropriately
 ###          ae_pct <- aepct(ae = a_e, dose = unique(tmp_df[,map_data$DOSE1])[1])
 ###          ae_pct_dose <- unique(tmp_df[,map_data$DOSE])[1]
-          ae_pct_dose <- unique(tmp_df[,map_data[,dosevar]])[1]
+###          ae_pct_dose <- unique(tmp_df[,map_data[,dosevar]])[1]
+          ae_pct_dose <- unique(tmp_df[,dosevar])[1]
 ###          ae_pct <- aepct(ae = a_e, dose = unique(tmp_df[,map_data$DOSE])[1])
-          ae_pct <- aepct(ae = a_e, dose = unique(tmp_df[,map_data[,dosevar]])[1])
+###          ae_pct <- aepct(ae = a_e, dose = unique(tmp_df[,map_data[,dosevar]])[1])
+          ae_pct <- aepct(ae = a_e, dose = unique(tmp_df[,dosevar])[1])
 ###          cat("ae_pct: ", ae_pct, " ae_pct_dose: ", ae_pct_dose, "\n")
         }
 ###        if("MAXRATE" %in% parameter_list) {
@@ -750,7 +772,8 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             tmp <- aet(amt = amt, time = na.omit(tmp_df[,map_data$TIME]), t = na.omit(tmp_df[,map_data$TIME])[t])
 ###            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data$DOSE1])[1])
 #            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data$DOSE])[1])
-            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data[,dosevar]])[1])
+###            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data[,dosevar]])[1])
+            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,dosevar])[1])
             
             if(is.null(ae_t)){
               ae_t <- tmp
@@ -920,6 +943,11 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         #                        kelr_v[["KELRSQA"]], kel_v[["THALF"]])
 
         row_data <- c(unique(data_data[,map_data$SDEID])[i])
+          
+        if(disp_required[["DOSE"]] || disp_required[["DOSEi"]]) {
+            row_data <- c(row_data, unique(tmp_df[, dosevar])[1])
+        }
+        
 ###        if("AET" %in% parameter_list) {
 ###        if(parameter_required("^AET$", parameter_list) || parameter_required(dependent_parameters("^AET$"), parameter_list)) {
         if(disp_required[["AET"]]) {
@@ -1086,16 +1114,26 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if(disp_required[["MIDPT"]]) {
           row_data <- c(row_data, c(mid_pt, rep(NA, ((aet_len) - length(mid_pt)))))
         }
+          
+        row_data <- c(row_data,
+                      c(tmp_df[,map_data$CONC], rep(NA, ((aet_len) - length(tmp_df[,map_data$CONC])))),
+                      c(tmp_df[,map_data$TIME], rep(NA, ((aet_len) - length(tmp_df[,map_data$TIME]))))
+                      )
+
 ### 2019-08-29/TGT/ must move "DOSEi" to "DOSE1". Will make these interoperable subsequently  
 ###        if("DOSEi" %in% parameter_list && opt_list[1] %in% names(map_data)){
 ###        if("DOSE1" %in% parameter_list && opt_list[1] %in% names(map_data)){
-        if(parameter_required("^DOSE(i{1}|[0-9]*?)$", parameter_list) || parameter_required(dependent_parameters("^DOSE(i{1}|[0-9]*?)$"), parameter_list)) {
+### 2019-10-20/TGT/ Reposition
+###        if(parameter_required("^DOSE(i{1}|[0-9]*?)$", parameter_list) || parameter_required(dependent_parameters("^DOSE(i{1}|[0-9]*?)$"), parameter_list)) {
 ###          if(map_data[, opt_list[1]] %in% names(data_data)) {
-          if(map_data[, dosevar] %in% names(data_data)) {
+###          if(map_data[, dosevar] %in% names(data_data)) {
+###          if(dosevar %in% names(data_data)) {
 ###            row_data <- c(row_data, unique(tmp_df[, map_data[, opt_list[1]]])[1])
-            row_data <- c(row_data, unique(tmp_df[, map_data[, dosevar]])[1])
-          }
-        }
+###            row_data <- c(row_data, unique(tmp_df[, map_data[, dosevar]])[1])
+###            row_data <- c(row_data, unique(tmp_df[, dosevar])[1])
+###          }
+###        }
+          
 ###        if('TAUi' %in% parameter_list && opt_list[2] %in% names(map_data)){
 ###        if(parameter_required("^TAU(i{1}|[0-9]*?)$", parameter_list) || parameter_required(dependent_parameters("^TAU(i{1}|[0-9]*?)$"), parameter_list)) {
 ###        if(parameter_required("^TAU(i{1}|[0-9]*?)$", parameter_list) || parameter_required(dependent_parameters("^TAU(i{1}|[0-9]*?)$"), parameter_list)) {
@@ -1110,6 +1148,9 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          }
 ###        }
 
+###        df <- data.frame(SDEID=rep(i, length(col_names)), col_names=col_names, row_data=c(row_data, "temp"))
+###        df <- data.frame(SDEID=rep(i, length(col_names)), col_names=col_names, row_data=c(row_data))
+          
         computation_df[i,] <- row_data
 ###        cat('i: ', i, ' computation_df[i,]: \n'); print(computation_df[i,])  
       } else {
