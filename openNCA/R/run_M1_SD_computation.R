@@ -1210,7 +1210,8 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("CLFO" %in% parameter_list && "AUCINFO" %in% parameter_list) {
         if(comp_required[["CLFO"]]) {
 ###          clf_o <- clfo(aucinfo = aucinf_o, dose = unique(tmp_df[,map_data$DOSE1])[1])
-          clf_o <- clfo(aucinfo = aucinf_o, dose = unique(tmp_df[,dosevar])[1])
+###          clf_o <- clfo(aucinfo = aucinf_o, dose = unique(tmp_df[,dosevar])[1])
+            clf_o <- clfo(aucinfo = aucinf_o, dose = dose_c)
         }
 ###        if("CLFOW" %in% parameter_list && "CLFO" %in% parameter_list) {
         if(comp_required[["CLFOW"]]) {
@@ -1219,7 +1220,8 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("CLFP" %in% parameter_list && "AUCINFP" %in% parameter_list) {
         if(comp_required[["CLFP"]]) {
 ###          clf_p <- clfp(aucinfp = aucinf_p, dose = unique(tmp_df[,map_data$DOSE1])[1])
-          clf_p <- clfp(aucinfp = aucinf_p, dose = unique(tmp_df[,dosevar])[1])
+###          clf_p <- clfp(aucinfp = aucinf_p, dose = unique(tmp_df[,dosevar])[1])
+          clf_p <- clfp(aucinfp = aucinf_p, dose = dose_c)
         }
 ###        if("CLFPW" %in% parameter_list && "CLFP" %in% parameter_list) {
         if(comp_required[["CLFPW"]]) {
@@ -1229,7 +1231,8 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         vzf_o <- NA
         if(comp_required[["VZFO"]] && parameter_required("KEL", names(kel_v))) {
 ###          vzf_o <- vzfo(kel = kel_v[["KEL"]], aucinfo = aucinf_o, dose = unique(tmp_df[,map_data$DOSE1])[1])
-          vzf_o <- vzfo(kel = kel_v[["KEL"]], aucinfo = aucinf_o, dose = unique(tmp_df[,dosevar])[1])
+###          vzf_o <- vzfo(kel = kel_v[["KEL"]], aucinfo = aucinf_o, dose = unique(tmp_df[,dosevar])[1])
+          vzf_o <- vzfo(kel = kel_v[["KEL"]], aucinfo = aucinf_o, dose = dose_c)
         }
 ###        if("VZFOW" %in% parameter_list && "VZFO" %in% parameter_list) {
         if(comp_required[["VZFOW"]]) {
@@ -1239,7 +1242,8 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         vzf_p <- NA
         if(comp_required[["VZFP"]] && parameter_required("KEL", names(kel_v))) {
 ###          vzf_p <- vzfp(kel = kel_v[["KEL"]], aucinfp = aucinf_p, dose = unique(tmp_df[,map_data$DOSE1])[1])
-          vzf_p <- vzfp(kel = kel_v[["KEL"]], aucinfp = aucinf_p, dose = unique(tmp_df[,dosevar])[1])
+###       vzf_p <- vzfp(kel = kel_v[["KEL"]], aucinfp = aucinf_p, dose = unique(tmp_df[,dosevar])[1])
+          vzf_p <- vzfp(kel = kel_v[["KEL"]], aucinfp = aucinf_p, dose = dose_c)
         }
 ###        if("VZFPW" %in% parameter_list && "VZFP" %in% parameter_list) {
         if(comp_required[["VZFPW"]]) {
