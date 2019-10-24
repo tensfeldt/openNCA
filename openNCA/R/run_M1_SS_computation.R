@@ -353,6 +353,10 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "DOSEC")
     regular_int_type <- c(regular_int_type, "DOSEC")
   }
+  if(disp_required[["DOSECi"]]) {
+    col_names <- c(col_names, rep(paste0("DOSEC",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("DOSEC",1:di_col)))
+  }
 ###  if(parameter_required("^CMAX$", parameter_list) || length(dependent_parameters("^CMAX$"))>0) {
   if(disp_required[["CMAX"]]) {
     col_names <- c(col_names, "CMAX")
@@ -1381,9 +1385,11 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
 ###        if("CMAXDN" %in% parameter_list && "CMAX" %in% parameter_list) {
 ###        if(parameter_required("^CMAXDN$", parameter_list) || length(dependent_parameters("^CMAXDN$"))>0){
+### 2019-10-23/TGT/ use the first dose from the first dosing interval
         if(comp_required[["CMAXDN"]]){
-          tmpdose <- tmp_df[, as.character(map_data[c("DOSE1")])][1]
-          c_maxdn <- cmax_dn(cmax = c_max, dose = tmpdose)
+###          tmpdose <- tmp_df[, as.character(map_data[c("DOSE1")])][1]
+###          c_maxdn <- cmax_dn(cmax = c_max, dose = tmpdose)
+          c_maxdn <- cmax_dn(cmax = c_max, dose = unique(tmp_df[,unlist(dosevar)[1]]))
         }
 ###        if("CMIN" %in% parameter_list) {
 ###        if(parameter_required("^CMIN$", parameter_list) || length(dependent_parameters("^CMIN$"))>0){
@@ -1528,8 +1534,18 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 
         for(d in 1:di_col){
-          tmp_di_df <- tmp_df[tmp_df[c(paste0("DI", d, "F"))] == 1,]
-          tmp_dose <- tmp_di_df[, as.character(map_data[c(paste0("DOSE",d))])][1]
+          tmp_di_df  <- tmp_df[tmp_df[c(paste0("DI", d, "F"))] == 1,]
+          tmp_dose   <- tmp_di_df[, as.character(map_data[c(paste0("DOSE",d))])][1]
+
+          if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]) {
+            if(!is.na(tmp_dose)) { 
+                dose_c[d] <- dosec(data = tmp_di_df, map = map_data, idose=d)
+            }
+            else {
+              dose_c[d] <- dose_c
+            }
+          }
+
 ###          cat('as.character(map_data[c(paste0("DOSE",d))]): ', as.character(map_data[c(paste0("DOSE",d))]),  '\n')
 ###          cat('dosevar: ', '\n')
 ###          print(dosevar)
@@ -1735,7 +1751,8 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("CLFTAUi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###          if(parameter_required("^CLFTAUi$", parameter_list) || length(dependent_parameters("^CLFTAUi$"))>0){
           if(comp_required[["CLFTAUi"]]){
-            clf_tau[[d]] <- clftau(auctau = auctau[[d]], dose = tmp_dose)
+###              clf_tau[[d]] <- clftau(auctau = auctau[[d]], dose = tmp_dose)
+            clf_tau[[d]] <- clftau(auctau = auctau[[d]], dose = dose_c[d])
           }
 ###          if("CLFTAUWi" %in% parameter_list && "CLFTAUi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###          if(parameter_required("^CLFTAUWi$", parameter_list) || length(dependent_parameters("^CLFTAUWi$"))>0){
@@ -1756,7 +1773,8 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("VZFTAUi" %in% parameter_list && "KEL" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###          if(parameter_required("^VZFTAUi$", parameter_list) || length(dependent_parameters("^VZFTAUi$"))>0){
           if(comp_required[["VZFTAUi"]]){
-            vzf_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose = tmp_dose)
+###            vzf_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose = tmp_dose)
+            vzf_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose = dose_c[d])
           }
 ###          if("VZFTAUWi" %in% parameter_list && "VZFTAUi" %in% parameter_list && "KEL" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###          if(parameter_required("^VZFTAUWi$", parameter_list) || length(dependent_parameters("^VZFTAUWi$"))>0){
@@ -1847,7 +1865,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###              if("AUCT" %in% parameter_list){
               if(comp_required[["AUCT"]]){
                 if(length(auct) < auc_len) {
-                  auct <- c(auct, rep(NA, (auc_len - length(auct))))
+                    auct <- c(auct, rep(NA, (auc_len - length(auct))))
                 }
               }
 ###              if("AUCTDN" %in% parameter_list){
@@ -1943,7 +1961,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(comp_required[["AUMCXPTP"]]){
           aumcxptp <- aumc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
         }
-        
+
 ###        if("CLFO" %in% parameter_list && "AUCINFO" %in% parameter_list) {
 ###        if(parameter_required("^CLFO$", parameter_list) || length(dependent_parameters("^CLFO$"))>0){
 ###        if(comp_required[["CLFO"]]){
@@ -2003,7 +2021,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##################################################################################################################################
 ### 2019-10-19/TGT/ Comment to indicate that this is where the "placeholders" are created to reserve space for results in row_data
 ##################################################################################################################################
-
+        
         row_data <- c(unique(data_data[,map_data$SDEID])[i])
 ### 2019-10-19/TGT/ Reposition DOSEi to just before CMAX/after SDEID
 ###        cat('unlist(dose):\n')
@@ -2013,6 +2031,9 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 
         if(disp_required[["DOSEC"]]) {
+          row_data <- c(row_data, dose_c)
+        }
+        if(disp_required[["DOSECi"]]) {
           row_data <- c(row_data, dose_c)
         }
 ###        if("CMAX" %in% parameter_list) {

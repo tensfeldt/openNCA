@@ -24,9 +24,9 @@
 #'  \item email: \url{Thomas.G.Tensfeldt@pfizer.com}
 #' }
 #' @export
-dosec <- function(data = NULL, map = NULL){
+dosec <- function(data = NULL, map = NULL, idose = NULL){
   function_name <- as.list(sys.call())[[1]]
-
+        
   if(is.null(data)){
     stop("Please provide a valid path for the 'data' parameter")
   } else {
@@ -45,19 +45,21 @@ dosec <- function(data = NULL, map = NULL){
       stop("Invalid data frame provided for 'map'! Please provide a valid data frame")
     }
   }
-
+  if(is.null(idose)) { idose = 1 }
+  
   ### Concentration Units from data_data
   xconcu <- unique(data_data[,map_data$CONCU])
   ### Determine amount unit for concentration, i.e. if CONCU is "NG/ML" return "NG"
   k <- regexpr("(?<concamtu>[a-zA-Z]{1,2})/[a-zA-Z]{1,2}", xconcu, ignore.case=TRUE, perl=TRUE)
-  concamtu <- as.character(unlist(unique(parse.reg(xconcu, k))))
 
+  concamtu <- as.character(unlist(unique(parse.reg(xconcu, k))))
+  
   ### Update map_data$DOSEOUTPUTUNIT to concamtu
   map_data$DOSEOUTPUTUNIT <- concamtu
 
   ### Determine First DOSE and DOSE unit from map
-  xdoseu <- map_data[,unlist(strsplit(map_data$DOSEULIST, ";"))[1]]
-  xdose <- map_data[,unlist(strsplit(map_data$DOSELIST, ";"))[1]]
+  xdoseu <- map_data[,unlist(strsplit(map_data$DOSEULIST, ";"))[idose]]
+  xdose <- map_data[,unlist(strsplit(map_data$DOSELIST, ";"))[idose]]
   
   ### Create a pseudo results (resulting parameters) dataset to drive unit_conversion
   vlist <- c(map_data$CONCU, xdoseu, xdose)

@@ -185,6 +185,7 @@ create_dependency_list <- function() {
     dependency_list[["DOSEi"]] <- list(callfun=c(), regex="^DOSE(i{1}?|[0-9]+?)$", unit_class=c(uclass_dose), valid_models=c(m1, m2, m3, m4), display_list_models=c(), predecessors=c())
 ### 2019-09-01/TGT/ DOSEC not currently defined in computation engine codebase
     dependency_list[["DOSEC"]] <- list(callfun=c(), regex="^DOSEC$", unit_class=c(), valid_models=c(m1, m2, m3, m4), display_list_models=c(), predecessors=c())
+    dependency_list[["DOSECi"]] <- list(callfun=c(), regex="^DOSEC(i{1}?|[0-9]+?)$", unit_class=c(), valid_models=c(m1ss, m2ss, m3ss, m4ss), display_list_models=c(), predecessors=c())
 ### 2019-09-01/TGT/ F not currently defined in computation engine codebase
     dependency_list[["F"]] <- list(callfun=c(), regex="^F$", unit_class=c(uclass_ratio), valid_models=c(m1sd, m2sd, m3sd), display_list_models=c(), predecessors=c("AUCINFP"))
 ### 2019-09-01/TGT/ FREL not currently defined in computation engine codebase
