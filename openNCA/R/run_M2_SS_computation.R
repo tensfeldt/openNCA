@@ -348,6 +348,10 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "DOSEC")
     regular_int_type <- c(regular_int_type, "DOSEC")
   }
+  if(disp_required[["DOSECi"]]) {
+    col_names <- c(col_names, rep(paste0("DOSEC",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("DOSEC",1:di_col)))
+  }
 
 ###  if("C0" %in% parameter_list) {
 ###  if(parameter_required("^C0$", parameter_list) || length(dependent_parameters("^C0$"))>0) {
@@ -1392,6 +1396,16 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         for(d in 1:di_col){
           tmp_di_df <- tmp_df[tmp_df[c(paste0("DI", d, "F"))] == 1,]
           tmp_dose <- tmp_di_df[, as.character(map_data[c(paste0("DOSE",d))])][1]
+
+          if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]) {
+            if(!is.na(tmp_dose)) { 
+                dose_c[d] <- dosec(data = tmp_di_df, map = map_data, idose=d)
+            }
+            else {
+              dose_c[d] <- dose_c
+            }
+          }
+
 ### 2019-08-27/TGT/ Added tau_di to identify tau variables from map_data (need to introduce in validate_timeconc_data.R eventually
           tau_di <- paste0("TAU", d)
 
@@ -1567,7 +1581,8 @@ print("in AUCINFOi comp required")
           }
 ###          if("CLTAUi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
           if(comp_required[["CLTAUi"]]) {
-            cl_tau[[d]] <- cltau(auctau = auctau[[d]], dose = tmp_dose)
+###            cl_tau[[d]] <- cltau(auctau = auctau[[d]], dose = tmp_dose)
+            cl_tau[[d]] <- cltau(auctau = auctau[[d]], dose = dose_c[d])
           }
 ###          if("CLTAUWi" %in% parameter_list && "CLTAUi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
           if(comp_required[["CLTAUWi"]]) {
@@ -1586,16 +1601,13 @@ print("in AUCINFOi comp required")
           }
 ###          if("VZO" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFOi" %in% parameter_list) {
           if(comp_required[["VZO"]]) {
-              cat("before vz_o\n")
-              print(d)
-              print(aucinfoi)
-              print(aucinfoi[[d]])
-            vz_o[[d]] <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinfoi[[d]], dose = tmp_dose)
-cat("after vz_o\n")
+###            vz_o[[d]] <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinfoi[[d]], dose = tmp_dose)
+            vz_o[[d]] <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinfoi[[d]], dose = dose_c[d])
           }
 ###          if("VZP" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFPi" %in% parameter_list) {
           if(comp_required[["VZP"]]) {
-              vz_p[[d]] <- vzp(kel = kel_v[["KEL"]], aucinfp = aucinfpi[[d]], dose = tmp_dose)
+###              vz_p[[d]] <- vzp(kel = kel_v[["KEL"]], aucinfp = aucinfpi[[d]], dose = tmp_dose)
+              vz_p[[d]] <- vzp(kel = kel_v[["KEL"]], aucinfp = aucinfpi[[d]], dose = dose_c[d])
           }
 ###          if(("AUCT" %in% parameter_list || "AUCTDN" %in% parameter_list) && 'TMAXi' %in% parameter_list) {
           if(comp_required[["AUCT"]] || comp_required[["AUCTDN"]]) {
@@ -1811,6 +1823,9 @@ cat("after vz_o\n")
           row_data <- c(row_data, unlist(dose))
         }
         if(disp_required[["DOSEC"]]) {
+          row_data <- c(row_data, dose_c)
+        }
+        if(disp_required[["DOSECi"]]) {
           row_data <- c(row_data, dose_c)
         }
 ###        if("C0" %in% parameter_list) {
