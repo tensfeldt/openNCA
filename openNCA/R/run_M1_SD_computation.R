@@ -775,6 +775,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       warning("Flag 'SPANRATIOCRIT' does not have valid form! Please try again with numeric value")
     }
   }
+###  cat('optimizekel: ', map_data[,"OPTIMIZEKEL"], '\n')
   if("OPTIMIZE_KEL" %in% names(map_data)){
     if(!(is.na(map_data[,"OPTIMIZEKEL"]))){
       if(map_data[,"OPTIMIZEKEL"] != 1 && map_data[,"OPTIMIZEKEL"] != 0){
@@ -797,16 +798,20 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   #    }
   #  }
   #}
+### 2019-10-31/TGT/ Set defaults for OPTIMIZEKEL appropriately
+  kel_flag_optimized <- integer()
+  
   if(optimize_kel && (!"TMAX" %in% parameter_list || !"TLAST" %in% parameter_list || !"CMAX" %in% parameter_list || !"CLAST" %in% parameter_list || !"AUCLAST" %in% parameter_list ||
      !"FLGACCEPTKELCRIT" %in% names(map_data) || !"FLGEXKEL" %in% names(map_data) || !map_data$FLGEXKEL %in% names(data_data))){
     warning("Kel optmization cannot be performed because 'TMAX', 'TLAST', 'CMAX', 'CLAST', 'AUCLAST' are not part of the calulcated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGXKEL' are not present in the dataset")
   }
 
-  if(optimize_kel && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
-     "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
-    kel_flag_optimized <- integer()
-  }
-
+###  if(optimize_kel && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
+###     "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
+###    kel_flag_optimized <- integer()
+###  }
+###  print(kel_flag_optimized)
+  
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
     tryCatch({
       tmp_df <- data_data[data_data[,map_data$SDEID] == unique(data_data[,map_data$SDEID])[i],]
@@ -977,6 +982,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           tmp_kel_flag[selected_idx] <- 0
           kel_flag <- tmp_kel_flag
           kel_flag_optimized <- c(kel_flag_optimized, kel_flag)
+###          print(kel_flag)
         }
 
 ### 2019-09-04/TGT/ Add in dependency checking

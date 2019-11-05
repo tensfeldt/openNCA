@@ -1485,9 +1485,10 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             pt_r[[d]] <- ptr(cmax = c_maxi[[d]], cmin = c_mini[[d]])
           }
 ###          if("VZO" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFOi" %in% parameter_list) {
-          if(comp_required[["VZO"]]) {
+            if(comp_required[["VZO"]]) {
 ###            vz_o[[d]] <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinfoi[[d]], dose = tmp_dose)
-            vz_o[[d]] <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinfoi[[d]], dose = dose_c[d])
+                vz_o[[d]] <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinfoi[[d]], dose = dose_c[d])
+###                cat('d: ', d, ' kel: ', kel_v[["KEL"]], ' aucinfo: ', aucinfoi[[d]], ' vz_o[[d]]: ', vz_o[[d]], '\n')
           }
 ###          if("VZP" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFPi" %in% parameter_list) {
           if(comp_required[["VZP"]]) {
