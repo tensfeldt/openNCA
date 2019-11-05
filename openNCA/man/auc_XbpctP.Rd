@@ -2,9 +2,9 @@
 % Please edit documentation in R/auc_XbpctP.R
 \name{auc_XbpctP}
 \alias{auc_XbpctP}
-\title{Percentage of AUCINFP obtained by forward extrapolation}
+\title{Percentage of AUCINFP obtained by back extrapolation from the first non-zero concentration time point}
 \usage{
-auc_XbpctP(conc = NULL, time = NULL, method = 1, kelflag = NULL,
+auc_XbpctP(conc = NULL, time = NULL, method = 2, kelflag = NULL,
   aucflag = NULL)
 }
 \arguments{
@@ -22,7 +22,7 @@ auc_XbpctP(conc = NULL, time = NULL, method = 1, kelflag = NULL,
 Note: check 'Methods' section below for more details \cr}
 }
 \description{
-Percentage of AUCINFP obtained by forward extrapolation.\cr
+Percentage of AUCINFP obtained by back extrapolation from the first non-zero concentration time point.\cr
 }
 \details{
 \strong{Equation}
@@ -34,29 +34,6 @@ Percentage of AUCINFP obtained by forward extrapolation.\cr
 }
 \section{Additional Details}{
 
-\strong{Linear Method} \cr
-\figure{auc_1.png} \cr
-\strong{Log Method} \cr
-\figure{auc_2.png} \cr
-\eqn{AUC = Area under the cruve} \cr
-\eqn{C_{i} = Concentration 1}{Ci = Concentration 1} \cr
-\eqn{C_{i+1} = Concentration 2}{Ci+1 = Concentration 2} \cr
-\eqn{T_{i} = Time 1}{Ti = Time 1} \cr
-\eqn{T_{i+1} = Time 2}{Ti+1 = Time 2} \cr
-\eqn{ln = Natural Logarithm} \cr \cr
-\strong{Methods:} You can use the following methods to calculate AUC: \cr
-\enumerate{
- \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
- first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
- Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
- \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
- \item \strong{Log Trapazoidal Rule}: The log trapezoidal method is used for the entire profile. If
- Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
- \item \strong{Linear Up - Log Down Trapazoidal Rule}: Linear trapezoidal while the concentrations
- are increasing and log trapezoidal while the concentration are decreasing, the assessment is made on
- a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear
- trapezoidal rule is used.
-}
 }
 
 \section{Note}{
@@ -128,8 +105,8 @@ auc_XpctP(conc = conc_vector, time = time_vector)
 }
 \author{
 \itemize{
- \item \strong{Rudraya Technical Team}
- \item website: \url{www.rudraya.com}
- \item email: \url{support@rudraya.com}
+ \item \strong{Thomas Tensfeldt, Pfizer}
+ \item website: \url{www.pfizer.com}
+ \item email: \url{thomas.g.tensfeldt@pfizer.com}
 }
 }

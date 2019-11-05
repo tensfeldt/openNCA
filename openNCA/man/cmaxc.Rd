@@ -2,7 +2,7 @@
 % Please edit documentation in R/cmaxc.R
 \name{cmaxc}
 \alias{cmaxc}
-\title{Corrected CMAXi}
+\title{Corrected CMAX/CMAXi for Model M2 (IV Bolus)}
 \usage{
 cmaxc(kel = NULL, cmax = NULL, c0 = NULL, tmax = NULL)
 }
@@ -16,10 +16,11 @@ cmaxc(kel = NULL, cmax = NULL, c0 = NULL, tmax = NULL)
 \item{t_max}{The first time at which CMAXi is observed within the dosing interval (numeric value)}
 }
 \description{
-CMAXi corrected using estimates of KEL and C0. i refers to the value of NDOSEI. The correct
+CMAXi corrected using estimates of KEL and C0, the residual plasma concentration observed at
+time zero, i.e. the predose concentration. i refers to the value of NDOSEI. The corrected
 CMAXCi (and the other corrections below) should be triggered for computation when the FLAG
 for predose concentrations >5% of Cmax are observed has been set. This would ordinarily apply
-to CMAXC1, i.e. the first dosing interval of a concentration time profile. \cr
+to CMAXC1, i.e. the first dosing interval of a concentration time profile.\cr
 }
 \details{
 \strong{Equation}
@@ -51,8 +52,8 @@ to CMAXC1, i.e. the first dosing interval of a concentration time profile. \cr
 }
 \author{
 \itemize{
- \item \strong{Rudraya Technical Team}
- \item website: \url{www.rudraya.com}
- \item email: \url{support@rudraya.com}
+ \item \strong{Thomas Tensfeldt, Pfizer Inc & Rudraya Technical Team}
+ \item website: \url{www.pfizer.com}
+ \item email: \url{thomas.g.tensfeldt@pfizer.com}
 }
 }
