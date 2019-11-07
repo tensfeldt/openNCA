@@ -26,14 +26,14 @@ estimate_concentration <- function(time, conc, slope) {
     d <- d[m,]
     d$lconc <- log(d$conc)
 
-     n <- length(d$conc)
-     t2 <- d$time^2
-     intercept <- (sum(d$lconc)*sum(t2)) - (sum(d$time)*sum(d$time*d$lconc))
-     intercept <- intercept/(n*sum(t2)-(sum(d$time))^2)
+    n <- length(d$conc)
+    t2 <- d$time^2
+    intercept <- (sum(d$lconc)*sum(t2)) - (sum(d$time)*sum(d$time*d$lconc))
+    intercept <- intercept/(n*sum(t2)-(sum(d$time))^2)
 
-     slope <- -1*slope
-     est <- exp(intercept + (slope)*d$time)
+    slope <- -1*slope
+    est <- exp(intercept + (slope)*d$time)
 
-     return(est)
+    return(est)
 }
 

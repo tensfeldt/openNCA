@@ -167,16 +167,16 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
       stop("'FLGMERGE' value provided via 'map' is not present in 'flag' dataset")
     }
   }
-  if("OPTIMIZE_KEL" %in% names(map_data)){
+  if("OPTIMIZEKEL" %in% names(map_data)){
     if(!(is.na(map_data[,"OPTIMIZEKEL"]))){
       if(map_data[,"OPTIMIZEKEL"] != 1 && map_data[,"OPTIMIZEKEL"] != 0){
         warning("Map 'OPTMIZEKEL' does not have a valid value! Not using KEL optmization for this computation")
         optimize_kel <- FALSE
       } else {
-        optimize_kel <- as.logical(map_data[,"OPTIMIZE_KEL"])
+        optimize_kel <- as.logical(as.numeric(map_data[,"OPTIMIZEKEL"]))
       }
     } else {
-      optmize_kel <- FALSE
+      optimize_kel <- FALSE
     }
   } else {
     optimize_kel <- FALSE
@@ -633,7 +633,7 @@ if(FALSE) {
                               "AUCDN", "AURCALL", "AURCLAST", "AURCINFO", "AURCINFP", "AURCXPCTO", "AURCXPCTP", "AURCT1_T2"))
 }
   ### 2019-10-09/TGT/ Define model regular expression to determine associated model parameters
-  model_regex <- paste0("^", mct$MODEL, "(", mct$DOSINGTYPE, ")*?$")
+  model_regex <- paste0("^", map_data$MODEL, "(", map_data$DOSINGTYPE, ")*?$")
 
   parameter_list <- list()
   if(is.null(map_data$PARAMETERLIST)) { parameter_list <- model_parameters(model_regex) }
