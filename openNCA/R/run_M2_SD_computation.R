@@ -761,16 +761,16 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       warning("Flag 'SPANRATIOCRIT' does not have valid form! Please try again with numeric value")
     }
   }
-  if("OPTIMIZE_KEL" %in% names(map_data)){
+  if("OPTIMIZEKEL" %in% names(map_data)){
     if(!(is.na(map_data[,"OPTIMIZEKEL"]))){
       if(map_data[,"OPTIMIZEKEL"] != 1 && map_data[,"OPTIMIZEKEL"] != 0){
-        warning("Map 'OPTMIZEKEL' does not have a valid value! Not using KEL optmization for this computation")
+        warning("Map 'OPTIMIZEKEL' does not have a valid value! Not using KEL optimization for this computation")
         optimize_kel <- FALSE
       } else {
-        optimize_kel <- as.logical(map_data[,"OPTIMIZE_KEL"])
+        optimize_kel <- as.logical(as.numeric(map_data[,"OPTIMIZEKEL"]))
       }
     } else {
-      optmize_kel <- FALSE
+      optimize_kel <- FALSE
     }
   } else {
     optimize_kel <- FALSE
@@ -786,8 +786,8 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if(optimize_kel && (!"TMAX" %in% parameter_list || !"TLAST" %in% parameter_list || !"CMAX" %in% parameter_list || !"CLAST" %in% parameter_list || !"AUCLAST" %in% parameter_list ||
      !"FLGACCEPTKELCRIT" %in% names(map_data) || !"FLGEXKEL" %in% names(map_data) || !map_data$FLGEXKEL %in% names(data_data))){
 ### 2019-09-05/TGT/ fixed spelling
-###    warning("Kel optmization cannot be performed because 'TMAX', 'TLAST', 'CMAX', 'CLAST', 'AUCLAST' are not part of the calulcated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGXKEL' are not present in the dataset")
-    warning("Kel optmization cannot be performed because 'TMAX', 'TLAST', 'CMAX', 'CLAST', 'AUCLAST' are not part of the calculated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGXKEL' are not present in the dataset")
+###    warning("Kel optimization cannot be performed because 'TMAX', 'TLAST', 'CMAX', 'CLAST', 'AUCLAST' are not part of the calulcated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGXKEL' are not present in the dataset")
+    warning("Kel optimization cannot be performed because 'TMAX', 'TLAST', 'CMAX', 'CLAST', 'AUCLAST' are not part of the calculated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGXKEL' are not present in the dataset")
   }
   if(optimize_kel && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
      "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
