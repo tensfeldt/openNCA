@@ -4,7 +4,9 @@
 \alias{auc_lin_up_log_down}
 \title{Linear Up-Log Down Trapezoidal Area Under the Concentration-Time Curve (AUC) Calculation Method}
 \usage{
-auc_lin_up_log_down(conc = NULL, time = NULL, exflag = NULL)
+auc_lin_up_log_down(conc = NULL, time = NULL, exflag = NULL,
+  interpolate = NULL, model = NULL, dosing_type = NULL,
+  told = NULL, orig_conc = NULL, orig_time = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}
@@ -12,6 +14,18 @@ auc_lin_up_log_down(conc = NULL, time = NULL, exflag = NULL)
 \item{time}{The time data (given in a vector form)}
 
 \item{exflag}{The exclude flag data (given in a numeric vector)}
+
+\item{interpolate}{The value to determine whether to interpolate data points (given in a logical form)}
+
+\item{model}{The model specification (either 'M1', 'M2', 'M3', or 'M4')}
+
+\item{dosing_type}{The dosing type specification (either 'SD' or 'SS')}
+
+\item{told}{The time of last dose (given in a numeric value)}
+
+\item{orig_conc}{The original (full) concentration data (given in a numeric vector)}
+
+\item{orig_time}{The original (full) time data (given in a numeric vector)}
 }
 \description{
 Linear trapezoidal while concentrations are increasing, and log trapezoidal while

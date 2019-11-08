@@ -97,8 +97,8 @@ auc_dn(auc = 10.12361, dose = NA)
 }
 \author{
 \itemize{
- \item \strong{Rudraya Technical Team}
- \item website: \url{www.rudraya.com}
- \item email: \url{support@rudraya.com}
+ \item \strong{Thomas Tensfeldt, Pfizer & Rudraya Technical Team}
+ \item website: \url{www.pfizer.com}
+ \item email: \url{thomas.g.tensfeldt@pfizer.com}
 }
 }

@@ -55,7 +55,13 @@
 #' @param aucflag The AUC exclude flag data (given in a numeric vector)
 #' @param aucinfo The area under the concentration versus time curve from zero time to infinity (Observed) (numeric value)
 #' @param auclast The area under the concentration versus time curve from zero time until the time (TLAST) of the last measurable concentration (CLASTi) during the ith dosing interval (numeric value)
-#'
+#' @param interpolate The value to determine whether to interpolate data points (given in a logical form)
+#' @param model The model specification (either 'M1', 'M2', 'M3', or 'M4')
+#' @param dosing_type The dosing type specification (either 'SD' or 'SS')
+#' @param told The time of last dose (given in a numeric value)
+#' @param orig_conc The original (full) concentration data (given in a numeric vector)
+#' @param orig_time The original (full) time data (given in a numeric vector)
+#' 
 #' @section Returns:
 #' \strong{Value} \cr
 #' \itemize{
@@ -112,7 +118,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-auc_XpctO <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, aucflag = NULL, auc_info = NULL, auclast = NULL) {
+auc_XpctO <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, aucflag = NULL, auc_info = NULL, auclast = NULL, interpolate = NULL, model = NULL, dosing_type = NULL, told = NULL, orig_conc = NULL, orig_time = NULL) {
   if(is.null(conc) && is.null(time)){
     stop("Error in auc_XpctO: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -143,10 +149,10 @@ auc_XpctO <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, aucf
     return(auc_xpcto)
   } else {
     if(is.null(auc_info)){
-      auc_info <- auc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag)
+      auc_info <- auc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, interpolate = interpolate, model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time)
     }
     if(is.null(auclast)){
-      auclast <- auc_last(conc = conc, time = time, method = method, exflag = aucflag)
+      auclast <- auc_last(conc = conc, time = time, method = method, exflag = aucflag, interpolate = interpolate, model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time)
     }
 
     if(is.na(auc_info) || auc_info == 0 || is.na(auclast)){

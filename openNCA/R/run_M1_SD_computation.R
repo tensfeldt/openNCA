@@ -836,8 +836,10 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         emesis_flag <- NULL
       }
       if(nrow(tmp_df) > 0){
+        orig_time <- tmp_df[,map_data$TIME]
+        orig_conc <- tmp_df[,map_data$CONC]
+        
         c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
-
         if(comp_required[["DOSEC"]]) {
             dose_c <- dosec(data = tmp_df, map = map_data)
         }
@@ -870,7 +872,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("AUCLAST" %in% parameter_list) {
 ###        if(parameter_required("^AUCLAST$", parameter_list) || length(dependent_parameters("^AUCLAST$"))>0) {
         if(comp_required[["AUCLAST"]]) {
-          auclast <- auc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag)
+          auclast <- auc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, , interpolate = TRUE, model = "M1", dosing_type = "SD", told = unique(tmp_df[, map_data[, opt_list[3]]])[1], orig_conc = orig_conc, orig_time = orig_time)[[1]]
         }
         if(optimize_kel && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
            "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
@@ -1033,7 +1035,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###         if("AUCALL" %in% parameter_list) {
 ###         if(parameter_required("^AUCALL$", parameter_list) || length(dependent_parameters("^AUCALL$"))>0) {
         if(comp_required[["AUCALL"]]) {
-          aucall <- auc_all(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag)
+          aucall <- auc_all(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, interpolate = TRUE, model = "M1", dosing_type = "SD", told = unique(tmp_df[, map_data[, opt_list[3]]])[1], orig_conc = orig_conc, orig_time = orig_time)[[1]]
         }
 ### 2019-10-01/TGT/ replace AUCDN with AUCALLDN
 ###        if("AUCDN" %in% parameter_list && "AUCALL" %in% parameter_list) {
@@ -1066,7 +1068,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           auct <- NULL
           auc_int <- NULL
           for(t in 2:(auc_len+1)){
-            tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = tmp_df[,map_data$TIME][1], t2 = tmp_df[,map_data$TIME][t], method = method, exflag = auc_flag, t_max = t_max)
+            tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = tmp_df[,map_data$TIME][1], t2 = tmp_df[,map_data$TIME][t], method = method, exflag = auc_flag, t_max = t_max, , interpolate = TRUE, model = "M1", dosing_type = "SD", told = unique(tmp_df[, map_data[, opt_list[3]]])[1], orig_conc = orig_conc, orig_time = orig_time)[[1]]
             if(!is.na(unique(tmp_df[,map_data$TIME])[1]) && !is.na(unique(tmp_df[,map_data$TIME])[t])){
               tmp_int <- paste0(unique(tmp_df[,map_data$TIME])[1], "_", unique(tmp_df[,map_data$TIME])[t])
             } else {
@@ -1120,7 +1122,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if(parameter_required("^AUCINFO", parameter_list)) {
 ###        if(parameter_required("^AUCINFO$", parameter_list) || length(dependent_parameters("^AUCINFO$"))>0) {
         if(comp_required[["AUCINFO"]]) {
-            aucinf_o <- auc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
+            aucinf_o <- auc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, , interpolate = TRUE, model = "M1", dosing_type = "SD", told = unique(tmp_df[, map_data[, opt_list[3]]])[1], orig_conc = orig_conc, orig_time = orig_time)[[1]]
         }
 ### 2019-08-09/TGT/ It should not be required that AUCINFO be in the parameter_list.
 ###                 It should simply be computed if required by a dependent parameter.
@@ -1146,7 +1148,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-09-04/TGT/ Add in dependency checking
 ###        if(parameter_required("^AUCINFP", parameter_list) || length(dependent_parameters("^AUCINFP$"))>0) {
         if(comp_required[["AUCINFP"]]) {
-            aucinf_p <- auc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
+            aucinf_p <- auc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, interpolate = TRUE, model = "M1", dosing_type = "SD", told = unique(tmp_df[, map_data[, opt_list[3]]])[1], orig_conc = orig_conc, orig_time = orig_time)[[1]]
         }
 ### 2019-08-09/TGT/ It should not be required that AUCINFP be in the parameter_list.
 ###                 It should simply be computed if required by a dependent parameter.
@@ -1191,11 +1193,11 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("AUCXPCTO" %in% parameter_list){
         if(comp_required[["AUCXPCTO"]]) {
-          aucxpcto <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
+          aucxpcto <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, interpolate = TRUE, model = "M1", dosing_type = "SD", told = unique(tmp_df[, map_data[, opt_list[3]]])[1], orig_conc = orig_conc, orig_time = orig_time)[[1]]
         }
 ###        if("AUCXPCTP" %in% parameter_list){
         if(comp_required[["AUCXPCTP"]]) {
-          aucxpctp <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
+          aucxpctp <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, interpolate = TRUE, model = "M1", dosing_type = "SD", told = unique(tmp_df[, map_data[, opt_list[3]]])[1], orig_conc = orig_conc, orig_time = orig_time)[[1]]
         }
 ###        if("AUMCXPTO" %in% parameter_list){
         if(comp_required[["AUMCXPTO"]]) {

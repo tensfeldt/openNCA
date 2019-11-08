@@ -1100,6 +1100,9 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
       
       if(nrow(tmp_df) > 0){
+        orig_time <- tmp_df[,map_data$TIME]
+        orig_conc <- tmp_df[,map_data$CONC]
+        
         c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
         if(comp_required[["DOSEC"]]) {
             dose_c <- dosec(data = tmp_df, map = map_data)
@@ -1369,11 +1372,11 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("AUCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
           if(comp_required[["AUCINFOi"]]) {
             span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
-            aucinfoi[[d]] <- auc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, spanratio = span_ratio, kel = kel_v)
+            aucinfoi[[d]] <- auc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, spanratio = span_ratio, kel = kel_v, interpolate = TRUE, model = "M1", dosing_type = "SD", told = told[[d]], orig_conc = orig_conc, orig_time = orig_time)[[1]]
           }
 ###          if("AUCINFPi" %in% parameter_list && "CEST" %in% parameter_list && "AUCLASTi" %in% parameter_list && "TLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
           if(comp_required[["AUCINFPi"]]) {
-            aucinfpi[[d]] <- auc_inf_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
+            aucinfpi[[d]] <- auc_inf_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, interpolate = TRUE, model = "M1", dosing_type = "SD", told = told[[d]], orig_conc = orig_conc, orig_time = orig_time)[[1]]
           }
 ###          if("AUMCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
           if(comp_required[["AUMCINFOi"]]) {
@@ -1392,7 +1395,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
 ###          if("AUCLASTi" %in% parameter_list && 'TMAXi' %in% parameter_list && 'TLASTi' %in% parameter_list) {
           if(comp_required[["AUCLASTi"]]) {
-            auclasti[[d]] <- auc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag)
+            auclasti[[d]] <- auc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, interpolate = TRUE, model = "M1", dosing_type = "SD", told = told[[d]], orig_conc = orig_conc, orig_time = orig_time)[[1]]
           }
 ###          if("AUCLASTCi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "TLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
           if(comp_required[["AUCLASTCi"]]) {
@@ -1428,11 +1431,11 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
 ###          if("AUCXPCTOi" %in% parameter_list && "AUCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list){
           if(comp_required[["AUCXPCTOi"]]){
-            aucxpctoi[[d]] <- auc_XpctO(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_info = aucinfoi[[d]], auclast = auclasti[[d]])
+            aucxpctoi[[d]] <- auc_XpctO(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_info = aucinfoi[[d]], auclast = auclasti[[d]], interpolate = TRUE, model = "M1", dosing_type = "SD", told = told[[d]], orig_conc = orig_conc, orig_time = orig_time)[[1]]
           }
 ###          if("AUCXPCTPi" %in% parameter_list && "AUCINFPi" %in% parameter_list && "AUCLASTi" %in% parameter_list){
           if(comp_required[["AUCXPCTPi"]]){
-            aucxpctpi[[d]] <- auc_XpctP(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_infp = aucinfpi[[d]], auclast = auclasti[[d]])
+            aucxpctpi[[d]] <- auc_XpctP(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_infp = aucinfpi[[d]], auclast = auclasti[[d]], interpolate = TRUE, model = "M1", dosing_type = "SD", told = told[[d]], orig_conc = orig_conc, orig_time = orig_time)[[1]]
           }
 ###          if("AUMCXPTOi" %in% parameter_list && "AUMCINFOi" %in% parameter_list && "AUMCLAST" %in% parameter_list){
           if(comp_required[["AUMCXPTOi"]]){

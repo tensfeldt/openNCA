@@ -5,7 +5,7 @@
 \title{Run M1 SD Computation}
 \usage{
 run_M1_SD_computation(data = NULL, map = NULL, method = 1,
-  parameter_list = list(), display_list = list(),
+  model_regex = "^M1(SD)*?$", parameter_list = list(),
   return_list = list())
 }
 \arguments{
@@ -17,9 +17,9 @@ run_M1_SD_computation(data = NULL, map = NULL, method = 1,
 
 \item{parameter_list}{The list of parameters to calculate (empty by default)}
 
-\item{display_list}{The list of parameters to return (empty by default)}
-
 \item{return_list}{The list of parameters to return from the original data (empty by default)}
+
+\item{display_list}{The list of parameters to return (empty by default)}
 }
 \description{
 This function will compute all the relevant parameters for a M1 model Single Dose (SD).\cr

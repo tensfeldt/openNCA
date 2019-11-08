@@ -5,7 +5,9 @@
 \title{Area under the concentration versus time cruve from time 0 to time of the last mesurable concentration}
 \usage{
 auc_last(conc = NULL, time = NULL, method = 1, exflag = NULL,
-  t_last = NULL, t_max = NULL)
+  t_last = NULL, t_max = NULL, interpolate = NULL, model = NULL,
+  dosing_type = NULL, told = NULL, orig_conc = NULL,
+  orig_time = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}
@@ -26,6 +28,18 @@ Note: check 'Methods' section below for more details \cr}
 \item{t_last}{The time of last measureable (non-zero) plasma concentration (numeric value)}
 
 \item{t_max}{The first time at which CMAXi is observed within the dosing interval (numeric value)}
+
+\item{interpolate}{The value to determine whether to interpolate data points (given in a logical form)}
+
+\item{model}{The model specification (either 'M1', 'M2', 'M3', or 'M4')}
+
+\item{dosing_type}{The dosing type specification (either 'SD' or 'SS')}
+
+\item{told}{The time of last dose (given in a numeric value)}
+
+\item{orig_conc}{The original (full) concentration data (given in a numeric vector)}
+
+\item{orig_time}{The original (full) time data (given in a numeric vector)}
 }
 \description{
 This function gets the area under the concentration versus time curve from time 0 to time (TLAST) of the

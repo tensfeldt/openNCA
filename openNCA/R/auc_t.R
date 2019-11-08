@@ -42,7 +42,13 @@
 #' }
 #' Note: check 'Methods' section below for more details \cr
 #' @param exflag The exclude flag data (given in a numeric vector)
-#'
+#' @param interpolate The value to determine whether to interpolate data points (given in a logical form)
+#' @param model The model specification (either 'M1', 'M2', 'M3', or 'M4')
+#' @param dosing_type The dosing type specification (either 'SD' or 'SS')
+#' @param told The time of last dose (given in a numeric value)
+#' @param orig_conc The original (full) concentration data (given in a numeric vector)
+#' @param orig_time The original (full) time data (given in a numeric vector)
+#' 
 #' @section Returns:
 #' \strong{Value} \cr
 #' \itemize{
@@ -118,7 +124,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-auc_t <- function(conc = NULL, time = NULL, method = 1, exflag = NULL){
+auc_t <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, interpolate = NULL, model = NULL, dosing_type = NULL, told = NULL, orig_conc = NULL, orig_time = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in auc_t: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -147,12 +153,12 @@ auc_t <- function(conc = NULL, time = NULL, method = 1, exflag = NULL){
   }
 
   if(method == 1){
-    return(auc_lin_log(conc = conc, time = time, exflag = exflag))
+    return(auc_lin_log(conc = conc, time = time, exflag = exflag, interpolate = interpolate, model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time))
   } else if(method == 2){
-    return(auc_lin(conc = conc, time = time, exflag = exflag))
+    return(auc_lin(conc = conc, time = time, exflag = exflag, interpolate = interpolate, model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time))
   } else if(method == 3){
-    return(auc_log(conc = conc, time = time, exflag = exflag))
+    return(auc_log(conc = conc, time = time, exflag = exflag, interpolate = interpolate, model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time))
   } else if(method == 4){
-    return(auc_lin_up_log_down(conc = conc, time = time, exflag = exflag))
+    return(auc_lin_up_log_down(conc = conc, time = time, exflag = exflag, interpolate = interpolate, model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time))
   }
 }

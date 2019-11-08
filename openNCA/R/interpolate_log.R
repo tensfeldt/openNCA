@@ -1,10 +1,9 @@
 #' interpolate_log performs log-linear interpolation between two data points
 #' 
 #' @export
-#'
-#' 2019-10-18/TGT/ change error messages from "inerpolate_log" to "interpolate_log"
-#' 2019-11-06/RD Fixing typo, changed 'interpolate_lin' to 'interpolate_log' for errors
 interpolate_log <- function(conc1 = NULL, time1 = NULL, conc2 = NULL, time2 = NULL, est_time = NULL){
+### 2019-10-18/TGT/ change error messages from "inerpolate_log" to "interpolate_log"
+##  2019-11-06/RD Fixing typo, changed 'interpolate_lin' to 'interpolate_log' for errors
   if(is.null(conc1) || is.na(conc1)) {
     stop("Error in interpolate_log: 'conc1' value is NULL or NA")
   } else if(is.null(time1) || is.na(time1)) {

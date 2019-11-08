@@ -4,7 +4,9 @@
 \alias{auc_t}
 \title{Area under the concentration (AUC) versus time cruve from time 0 to time T}
 \usage{
-auc_t(conc = NULL, time = NULL, method = 1, exflag = NULL)
+auc_t(conc = NULL, time = NULL, method = 1, exflag = NULL,
+  interpolate = NULL, model = NULL, dosing_type = NULL,
+  told = NULL, orig_conc = NULL, orig_time = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}
@@ -21,6 +23,18 @@ auc_t(conc = NULL, time = NULL, method = 1, exflag = NULL)
 Note: check 'Methods' section below for more details \cr}
 
 \item{exflag}{The exclude flag data (given in a numeric vector)}
+
+\item{interpolate}{The value to determine whether to interpolate data points (given in a logical form)}
+
+\item{model}{The model specification (either 'M1', 'M2', 'M3', or 'M4')}
+
+\item{dosing_type}{The dosing type specification (either 'SD' or 'SS')}
+
+\item{told}{The time of last dose (given in a numeric value)}
+
+\item{orig_conc}{The original (full) concentration data (given in a numeric vector)}
+
+\item{orig_time}{The original (full) time data (given in a numeric vector)}
 }
 \description{
 This function gets the area under the concentration versus time curve from time 0 to time T for

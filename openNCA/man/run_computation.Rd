@@ -13,6 +13,8 @@ run_computation(data = NULL, map = NULL, flag = NULL,
 \item{map}{The dataframe that contains the map data}
 
 \item{flag}{The dataframe that contains the flag data}
+
+\item{parameterset}{set to either "PARAMETERLIST" or "PARAMETERDISPLAYLIST"}
 }
 \description{
 This function will compute all the relevant parameters for based specified fields provided via map argument.\cr
@@ -35,8 +37,8 @@ Please refer to \code{\link{mct_template}} for more details on what the 'map' ar
 }
 \author{
 \itemize{
- \item \strong{Rudraya Technical Team}
- \item website: \url{www.rudraya.com}
- \item email: \url{support@rudraya.com}
+ \item \strong{Thomas Tensfeldt & Rudraya Technical Team}
+ \item website: \url{www.pfizer.com}
+ \item email: \url{Thomas.G.Tensfeldt@pfizer.com}
 }
 }
