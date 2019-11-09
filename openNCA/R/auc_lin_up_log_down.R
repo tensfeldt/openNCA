@@ -116,57 +116,9 @@ auc_lin_up_log_down <- function(conc = NULL, time = NULL, exflag = NULL, interpo
 ##        2019-11-07/RD Added for Interpolation to check for triggers for interpolation
 ##
         if(isTRUE(interpolate)){
-##          2019-11-07/RD Added for Interpolation for AUC Start time has no data
-##        
-          if(is.na(conc[1]) && i == 1){
-            if(time[1] <= orig_time[1]){
-              if(model == "M2"){
-                #Extrapolate conc by log-linear regression 
-              } else {
-                if(dosing_type == "SD"){
-                  conc_s_tmp <- 0
-                } else if(dosing_type == "SS"){
-                  conc_s_tmp <- cmin(conc = conc, time = time)
-                }
-              }
-              if(time[1] == told){
-                conc[1] <- conc_s_tmp
-              } else {
-                cold <- ifelse(!is.na(orig_conc[which(told == orig_time)]), orig_conc[which(told == orig_time)], NA)
-                conc[1] <- interpolation_lin(conc1 = cold, time1 = told, conc2 = orig_conc[1], time2 = orig_time[1], est_time = time[1])
-              }
-            } else if((orig_time[1] < time[1]) && (time[1] < orig_time[length(orig_time)])){
-              idx <- which(time[1] == orig_time)
-              conc[1] <- interpolation_lin(conc1 = orig_conc[idx-1], time1 = orig_time[idx-1], conc2 = orig_conc[idx+1], time2 = orig_time[i+1], est_time = time[1])
-            } else if(time[1] > orig_time[length(orig_time)]){
-              kel_v <- kel(conc = conc, time = time)
-              if(!is.na(kel_v[["KEL"]])){
-                conc[1] <- cest(conc = conc, time = time)
-              } else {
-                conc[1] <- NA
-              }
-            }
-##          2019-11-07/RD Added for Interpolation for AUC End time has no data
-##  
-          } else if(is.na(conc[nrow(tmp)]) && (i+1) == nrow(tmp)){
-            if((orig_time[1] < time[nrow(tmp)]) && (time[nrow(tmp)] < orig_time[length(orig_time)])){
-              idx <- which(time[nrow(tmp)] == orig_time)
-              conc[nrow(tmp)] <- interpolation_lin(conc1 = orig_conc[idx-1], time1 = orig_time[idx-1], conc2 = orig_conc[idx+1], time2 = orig_time[i+1], est_time = time[nrow(tmp)])
-            } else {
-              kel_v <- kel(conc = conc, time = time)
-              if(!is.na(kel_v[["KEL"]])){
-                conc[nrow(tmp)] <- cest(conc = conc, time = time)
-              } else {
-                min_lim <- orig_time[length(orig_time)] - (orig_time[length(orig_time)] * 0.05)
-                max_lim <- (orig_time[length(orig_time)] * 0.05) + orig_time[length(orig_time)]
-                if(min_lim < time[nrow(tmp)] && time[nrow(tmp)] < max_lim){
-                  conc[nrow(tmp)] <- orig_conc[length(orig_conc)]
-                } else {
-                  conc[nrow(tmp)] <- NA
-                }
-              }
-            }
-          }
+##          2019-11-08/RD Added helper function for Interpolation
+##
+          conc <- estimate_missing_concentration(conc = conc, time = time, auc_method = "LIN", model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time)
         }
         auc_df[i] <- ((conc[i] + conc[i+1])/2)*(time[i+1]-time[i])
       } else {
@@ -174,114 +126,18 @@ auc_lin_up_log_down <- function(conc = NULL, time = NULL, exflag = NULL, interpo
 ##          2019-11-07/RD Added for Interpolation to check for triggers for interpolation
 ##
           if(isTRUE(interpolate)){
-##            2019-11-07/RD Added for Interpolation for AUC Start time has no data
-##        
-            if(is.na(conc[1]) && i == 1){
-              if(time[1] <= orig_time[1]){
-                if(model == "M2"){
-                  #Extrapolate conc by log-linear regression 
-                } else {
-                  if(dosing_type == "SD"){
-                    conc_s_tmp <- 0
-                  } else if(dosing_type == "SS"){
-                    conc_s_tmp <- cmin(conc = conc, time = time)
-                  }
-                }
-                if(time[1] == told){
-                  conc[1] <- conc_s_tmp
-                } else {
-                  cold <- ifelse(!is.na(orig_conc[which(told == orig_time)]), orig_conc[which(told == orig_time)], NA)
-                  conc[1] <- interpolation_lin(conc1 = cold, time1 = told, conc2 = orig_conc[1], time2 = orig_time[1], est_time = time[1])
-                }
-              } else if((orig_time[1] < time[1]) && (time[1] < orig_time[length(orig_time)])){
-                idx <- which(time[1] == orig_time)
-                conc[1] <- interpolation_lin(conc1 = orig_conc[idx-1], time1 = orig_time[idx-1], conc2 = orig_conc[idx+1], time2 = orig_time[i+1], est_time = time[1])
-              } else if(time[1] > orig_time[length(orig_time)]){
-                kel_v <- kel(conc = conc, time = time)
-                if(!is.na(kel_v[["KEL"]])){
-                  conc[1] <- cest(conc = conc, time = time)
-                } else {
-                  conc[1] <- NA
-                }
-              }
-##            2019-11-07/RD Added for Interpolation for AUC End time has no data
-##  
-            } else if(is.na(conc[nrow(tmp)]) && (i+1) == nrow(tmp)){
-              if((orig_time[1] < time[nrow(tmp)]) && (time[nrow(tmp)] < orig_time[length(orig_time)])){
-                idx <- which(time[nrow(tmp)] == orig_time)
-                conc[nrow(tmp)] <- interpolation_lin(conc1 = orig_conc[idx-1], time1 = orig_time[idx-1], conc2 = orig_conc[idx+1], time2 = orig_time[i+1], est_time = time[nrow(tmp)])
-              } else {
-                kel_v <- kel(conc = conc, time = time)
-                if(!is.na(kel_v[["KEL"]])){
-                  conc[nrow(tmp)] <- cest(conc = conc, time = time)
-                } else {
-                  min_lim <- orig_time[length(orig_time)] - (orig_time[length(orig_time)] * 0.05)
-                  max_lim <- (orig_time[length(orig_time)] * 0.05) + orig_time[length(orig_time)]
-                  if(min_lim < time[nrow(tmp)] && time[nrow(tmp)] < max_lim){
-                    conc[nrow(tmp)] <- orig_conc[length(orig_conc)]
-                  } else {
-                    conc[nrow(tmp)] <- NA
-                  }
-                }
-              }
-            }
+##            2019-11-08/RD Added helper function for Interpolation
+##
+            conc <- estimate_missing_concentration(conc = conc, time = time, auc_method = "LIN", model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time)
           }
           auc_df[i] <- ((conc[i] + conc[i+1])/2)*(time[i+1]-time[i])
         } else {
 ##          2019-11-07/RD Added for Interpolation to check for triggers for interpolation
 ##
           if(isTRUE(interpolate)){
-##            2019-11-07/RD Added for Interpolation for AUC Start time has no data
-##        
-            if(is.na(conc[1]) && i == 1){
-              if(time[1] <= orig_time[1]){
-                if(model == "M2"){
-                  #Extrapolate conc by log-linear regression 
-                } else {
-                  if(dosing_type == "SD"){
-                    conc_s_tmp <- 0
-                  } else if(dosing_type == "SS"){
-                    conc_s_tmp <- cmin(conc = conc, time = time)
-                  }
-                }
-                if(time[1] == told){
-                  conc[1] <- conc_s_tmp
-                } else {
-                  cold <- ifelse(!is.na(orig_conc[which(told == orig_time)]), orig_conc[which(told == orig_time)], NA)
-                  conc[1] <- interpolation_log(conc1 = cold, time1 = told, conc2 = orig_conc[1], time2 = orig_time[1], est_time = time[1])
-                }
-              } else if((orig_time[1] < time[1]) && (time[1] < orig_time[length(orig_time)])){
-                idx <- which(time[1] == orig_time)
-                conc[1] <- interpolation_lin(conc1 = orig_conc[idx-1], time1 = orig_time[idx-1], conc2 = orig_conc[idx+1], time2 = orig_time[i+1], est_time = time[1])
-              } else if(time[1] > orig_time[length(orig_time)]){
-                kel_v <- kel(conc = conc, time = time)
-                if(!is.na(kel_v[["KEL"]])){
-                  conc[1] <- cest(conc = conc, time = time)
-                } else {
-                  conc[1] <- NA
-                }
-              }
-##            2019-11-07/RD Added for Interpolation for AUC End time has no data
-##  
-            } else if(is.na(conc[nrow(tmp)]) && (i+1) == nrow(tmp)){
-              if((orig_time[1] < time[nrow(tmp)]) && (time[nrow(tmp)] < orig_time[length(orig_time)])){
-                idx <- which(time[nrow(tmp)] == orig_time)
-                conc[nrow(tmp)] <- interpolation_log(conc1 = orig_conc[idx-1], time1 = orig_time[idx-1], conc2 = orig_conc[idx+1], time2 = orig_time[i+1], est_time = time[nrow(tmp)])
-              } else {
-                kel_v <- kel(conc = conc, time = time)
-                if(!is.na(kel_v[["KEL"]])){
-                  conc[nrow(tmp)] <- cest(conc = conc, time = time)
-                } else {
-                  min_lim <- orig_time[length(orig_time)] - (orig_time[length(orig_time)] * 0.05)
-                  max_lim <- (orig_time[length(orig_time)] * 0.05) + orig_time[length(orig_time)]
-                  if(min_lim < time[nrow(tmp)] && time[nrow(tmp)] < max_lim){
-                    conc[nrow(tmp)] <- orig_conc[length(orig_conc)]
-                  } else {
-                    conc[nrow(tmp)] <- NA
-                  }
-                }
-              }
-            }
+##      2019-11-08/RD Added helper function for Interpolation
+##
+            conc <- estimate_missing_concentration(conc = conc, time = time, auc_method = "LOG", model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time)
           }
           tmp_ln <- conc[i]/conc[i+1]
           auc_df[i] <- ((conc[i] - conc[i+1])/log(tmp_ln))*(time[i+1]-time[i])
@@ -291,14 +147,6 @@ auc_lin_up_log_down <- function(conc = NULL, time = NULL, exflag = NULL, interpo
     auc_df <- as.numeric(auc_df)
     auc <- sum(auc_df, na.rm = TRUE)
   }
-##  2019-11-07/RD Returning interpolated data that will be used as an output
-##
-  if(isTRUE(interpolate)){
-    return(list(auc, conc, time))
-  } else {
-    return(auc)
-  }
-##  2019-11-07/RD Commenting this as interpolation return call will replace it 
-##
-##  return(auc)
+  
+  return(auc)
 }

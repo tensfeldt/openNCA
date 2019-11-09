@@ -905,6 +905,11 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   } else {
     optimize_kel <- FALSE
   }
+##  2019-11-08/RD Added for Interpolation to account for error handling
+##
+  if("INCLUDEINTERPOLATION" %in% names(map_data) && (map_data[, "INCLUDEINTERPOLATION"] != 0 && map_data[, "INCLUDEINTERPOLATION"] != 1)){
+    warning("Flag 'INCLUDEINTERPOLATION' does not have a valid value! Please try again with numeric value (either 0 or 1)")
+  }
   #if((!"LLOQPATTERNS" %in% names(map_data)) && generate_nominal_conc){
   #  warning("Flag 'LLOQPATTERNS' is not present in the map dataset")
   #  if("CONCRAW" %in% names(map_data) && "CONCRAW" %in% names(map_data)){
@@ -1102,8 +1107,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       ### 2019-08-28/TGT/ Reposition orig_time, orig_conc assignment here rather than within optimize_kel evaluation
       tmp_df <- data_data[data_data[,map_data$SDEID] == unique(data_data[,map_data$SDEID])[i],]
       tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
-      orig_time <- tmp_df[,map_data$TIME]
-      orig_conc <- tmp_df[,map_data$CONC]
+      tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
+      tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
       
       if("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data)){
         ex_flag <- as.numeric(tmp_df[,map_data$FLGEXSDE])
@@ -1125,6 +1130,13 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         emesis_flag <- as.numeric(tmp_df[,map_data$FLGEMESIS])
       } else {
         emesis_flag <- NULL
+      }
+##      2019-11-08/RD Added for Interpolation to account for INCLUDEINTERPOLATION Flag
+##
+      if("INCLUDEINTERPOLATION" %in% names(map_data)){
+        interpolation <- ifelse((map_data[,"INCLUDEINTERPOLATION"] == 0 || map_data[,"INCLUDEINTERPOLATION"] == 1), as.logical( map_data[,"INCLUDEINTERPOLATION"]), FALSE)
+      } else {
+        interpolation <- FALSE
       }
       
       if(nrow(tmp_df) > 0){
@@ -1459,7 +1471,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("AUCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
           if(comp_required[["AUCINFOi"]]) {
 print("in AUCINFOi comp required")
-            aucinfoi[[d]] <- auc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, interpolate = TRUE, model = "M1", dosing_type = "SD", told = told[[d]], orig_conc = orig_conc, orig_time = orig_time)[[1]]
+            aucinfoi[[d]] <- auc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
           }
 ###
 #          cat("c_est: ", c_est, ' t_lasti[[d]]: ', t_lasti[[d]], '\n')
@@ -1468,7 +1480,7 @@ print("in AUCINFOi comp required")
 ###          if("AUCINFPi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
           if(comp_required[["AUCINFPi"]]) {
               if(!exists('t_lasti[[d]])')) { t_lasti[[d]] <- tlast(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME]) }
-              aucinfpi[[d]] <- auc_inf_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, t_last = t_lasti[[d]], interpolate = TRUE, model = "M1", dosing_type = "SD", told = told[[d]], orig_conc = orig_conc, orig_time = orig_time)[[1]]
+              aucinfpi[[d]] <- auc_inf_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, t_last = t_lasti[[d]])
           }
 ###          if("AUMCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
           if(comp_required[["AUMCINFOi"]]) {
@@ -1487,7 +1499,7 @@ print("in AUCINFOi comp required")
           }
 ###          if("AUCLASTi" %in% parameter_list && 'TMAXi' %in% parameter_list && 'TLASTi' %in% parameter_list) {
           if(comp_required[["AUCLASTi"]]) {
-            auclasti[[d]] <- auc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, interpolate = TRUE, model = "M1", dosing_type = "SD", told = told[[d]], orig_conc = orig_conc, orig_time = orig_time)[[1]]
+            auclasti[[d]] <- auc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag)
           }
 ###          if("AUCLASTCi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "TLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
           if(comp_required[["AUCLASTCi"]]) {
@@ -1540,11 +1552,11 @@ print("in AUCINFOi comp required")
           }
 ###          if("AUCXPCTOi" %in% parameter_list && "AUCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list){
           if(comp_required[["AUCXPCTOi"]]){
-            aucxpctoi[[d]] <- auc_XpctO(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_info = aucinfoi[[d]], auclast = auclasti[[d]], interpolate = TRUE, model = "M1", dosing_type = "SD", told = told[[d]], orig_conc = orig_conc, orig_time = orig_time)[[1]]
+            aucxpctoi[[d]] <- auc_XpctO(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_info = aucinfoi[[d]], auclast = auclasti[[d]])
           }
 ###          if("AUCXPCTPi" %in% parameter_list && "AUCINFPi" %in% parameter_list && "AUCLASTi" %in% parameter_list){
           if(comp_required[["AUCXPCTPi"]]){
-            aucxpctpi[[d]] <- auc_XpctP(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_infp = aucinfpi[[d]], auclast = auclasti[[d]], interpolate = TRUE, model = "M1", dosing_type = "SD", told = told[[d]], orig_conc = orig_conc, orig_time = orig_time)[[1]]
+            aucxpctpi[[d]] <- auc_XpctP(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_infp = aucinfpi[[d]], auclast = auclasti[[d]])
           }
 ###          if("AUMCXPTOi" %in% parameter_list && "AUMCINFOi" %in% parameter_list && "AUMCLAST" %in% parameter_list){
           if(comp_required[["AUMCXPTOi"]]){
@@ -1707,15 +1719,35 @@ print("in AUCINFOi comp required")
           if(comp_required[["AUCT1_T2"]] && auc_pair_check) {
             time <- sort(unique(data_data[,map_data$TIME]))
             time_di <- sort(tmp_di_df[,map_data$TIME])
-
+##            2019-11-08/RD Added for Interpolation to account for error handling
+##
+            if(isTRUE(interpolation) && !(opt_list[3] %in% names(map_data))){
+              stop(paste0("Dataset provided via 'map' does not contain the required columns for interpolating partial areas ", opt_list[3]))
+            } else if(isTRUE(interpolation) && (opt_list[3] %in% names(map_data))) {
+              if(isTRUE(interpolation) && !(map_data[, opt_list[3]] %in% names(tmp_df))){
+                stop(paste0("Dataset provided via 'data' does not contain the required columns for interpolating partial areas ", opt_list[3]))
+              } else if(isTRUE(interpolation) && (map_data[, opt_list[3]] %in% names(tmp_df))){
+                tmp_told <- unique(tmp_df[, map_data[, opt_list[3]]])[1]
+              } else {
+                tmp_told <- NA
+              }
+            } else {
+              tmp_told <- NA
+            }
             for(t in 1:(auc_par_len)){
               if(!(is.numeric(as.numeric(map_data[, paste0("AUC.", t, ".T1")])) && is.numeric(as.numeric(map_data[, paste0("AUC.", t, ".T2")])))){
                 stop(paste0("'AUC.", t, ".T1' and/or 'AUC.", t, ".T2' value provided via 'map' is not a numeric value"))
               }
               auc_t1 <- as.numeric(map_data[, paste0("AUC.", t, ".T1")])
               auc_t2 <- as.numeric(map_data[, paste0("AUC.", t, ".T2")])
-              tmp <- auc_t1_t2(conc = tmp_di_df[,map_data$CONC], time = na.omit(tmp_di_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_maxi[[d]])
-
+##              2019-11-08/RD Changed the call for partial AUCs to account for interpolation
+##
+              if(isTRUE(interpolation)){
+                tmp <- auc_t1_t2(conc = tmp_di_df[,map_data$CONC], time = na.omit(tmp_di_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_maxi[[d]], interpolate = interpolation, model = "M2", dosing_type = "SS", told = tmp_told, orig_conc = orig_conc, orig_time = orig_time)
+              } else {
+                tmp <- auc_t1_t2(conc = tmp_di_df[,map_data$CONC], time = na.omit(tmp_di_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_maxi[[d]])
+              }
+              
               if(d == 1){
                 auct1_t2[[t]] <- tmp
               } else {
