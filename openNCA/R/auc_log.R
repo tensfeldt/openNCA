@@ -7,6 +7,7 @@
 #' @param time The time data (given in a vector form)
 #' @param exflag The exclude flag data (given in a numeric vector)
 #' @param interpolate The value to determine whether to interpolate data points (given in a logical form)
+#' @param extrapolate The value to determine whether to extrapolate data points (given in a logical form)
 #' @param model The model specification (either 'M1', 'M2', 'M3', or 'M4')
 #' @param dosing_type The dosing type specification (either 'SD' or 'SS')
 #' @param told The time of last dose (given in a numeric value)
@@ -14,7 +15,7 @@
 #' @param orig_time The original (full) time data (given in a numeric vector)
 #' 
 #! @export
-auc_log <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL, model = NULL, dosing_type = NULL, told = NULL, orig_conc = NULL, orig_time = NULL){
+auc_log <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL, extrapolate = NULL, model = NULL, dosing_type = NULL, told = NULL, orig_conc = NULL, orig_time = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in auc_log: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -108,25 +109,19 @@ auc_log <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL,
     t_max <- tmax(conc = conc, time = time)
     auc_df <- ""
 
+##    2019-11-07/RD Added for Interpolation to check for triggers for interpolation
+##
+    if(isTRUE(interpolate)){
+##      2019-11-08/RD Added helper function for Interpolation
+##
+      est_tmp <- estimate_missing_concentration(conc = conc, time = time, auc_method = "LIN", model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time)
+      conc <- est_tmp[[1]]
+    }
     if(!is.na(t_max)){
       for(i in 1:(nrow(tmp)-1)){
         if(conc[i] == 0 || conc[i+1] == 0){
-##            2019-11-07/RD Added for Interpolation to check for triggers for interpolation
-##
-          if(isTRUE(interpolate)){
-##            2019-11-08/RD Added helper function for Interpolation
-##
-            conc <- estimate_missing_concentration(conc = conc, time = time, auc_method = "LIN", model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time)
-          }
           auc_df[i] <- ((conc[i] + conc[i+1])/2)*(time[i+1]-time[i])
         } else {
-##            2019-11-07/RD Added for Interpolation to check for triggers for interpolation
-##
-          if(isTRUE(interpolate)){
-##            2019-11-08/RD Added helper function for Interpolation
-##
-            conc <- estimate_missing_concentration(conc = conc, time = time, auc_method = "LOG", model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time)
-          }
           tmp_ln <- conc[i]/conc[i+1]
           auc_df[i] <- ((conc[i] - conc[i+1])/log(tmp_ln))*(time[i+1]-time[i])
         }
@@ -137,6 +132,14 @@ auc_log <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL,
     auc_df <- as.numeric(auc_df)
     auc <- sum(auc_df, na.rm = TRUE)
   }
-
-  return(auc)
+##  2019-11-08/RD Returning interpolated data that will be used as an output
+##
+  if(isTRUE(interpolate)){
+    return(list(auc, est_tmp[[2]]))
+  } else {
+    return(auc)
+  }
+##  2019-11-08/RD Commenting this as interpolation return call will replace it 
+##
+##  return(auc)
 }

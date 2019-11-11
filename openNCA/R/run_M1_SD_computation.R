@@ -819,6 +819,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
+      cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
       norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_df), unique(tmp_df[,map_data$NORMBS])[1], NA), NA)
       
       if("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data)){
@@ -842,12 +843,19 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       } else {
         emesis_flag <- NULL
       }
-##      2019-11-08/RD Added for Interpolation to account for INCLUDEINTERPOLATION Flag
+##    2019-11-08/RD Added for Interpolation to account for INCLUDEINTERPOLATION Flag
 ##
       if("INCLUDEINTERPOLATION" %in% names(map_data)){
-        interpolation <- ifelse((map_data[,"INCLUDEINTERPOLATION"] == 0 || map_data[,"INCLUDEINTERPOLATION"] == 1), as.logical( map_data[,"INCLUDEINTERPOLATION"]), FALSE)
+        interpolation <- ifelse((map_data[,"INCLUDEINTERPOLATION"] == 0 || map_data[,"INCLUDEINTERPOLATION"] == 1), as.logical(as.numeric(map_data[,"INCLUDEINTERPOLATION"])), FALSE)
       } else {
         interpolation <- FALSE
+      }
+##      2019-11-08/RD Added for Extrapolation to account for INCLUDEEXTRAPOLATION Flag
+##
+      if("INCLUDEINTERPOLATION" %in% names(map_data)){
+        extrapolation <- ifelse((map_data[,"INCLUDEEXTRAPOLATION"] == 0 || map_data[,"INCLUDEEXTRAPOLATION"] == 1), as.logical(as.numeric(map_data[,"INCLUDEEXTRAPOLATION"])), FALSE)
+      } else {
+        extrapolation <- FALSE
       }
       
       if(nrow(tmp_df) > 0){
@@ -1117,12 +1125,12 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
 ##         2019-11-08/RD Added for Interpolation to account for error handling
 ##
-          if(isTRUE(interpolation) && !(opt_list[3] %in% names(map_data))){
+          if((isTRUE(interpolation) || isTRUE(extrapolation)) && !(opt_list[3] %in% names(map_data))){
             stop(paste0("Dataset provided via 'map' does not contain the required columns for interpolating partial areas ", opt_list[3]))
-          } else if(isTRUE(interpolation) && (opt_list[3] %in% names(map_data))) {
-            if(isTRUE(interpolation) && !(map_data[, opt_list[3]] %in% names(tmp_df))){
+          } else if((isTRUE(interpolation) || isTRUE(extrapolation)) && (opt_list[3] %in% names(map_data))) {
+            if((isTRUE(interpolation) || isTRUE(extrapolation)) && !(map_data[, opt_list[3]] %in% names(tmp_df))){
               stop(paste0("Dataset provided via 'data' does not contain the required columns for interpolating partial areas ", opt_list[3]))
-            } else if(isTRUE(interpolation) && (map_data[, opt_list[3]] %in% names(tmp_df))){
+            } else if((isTRUE(interpolation) || isTRUE(extrapolation)) && (map_data[, opt_list[3]] %in% names(tmp_df))){
               tmp_told <- unique(tmp_df[, map_data[, opt_list[3]]])[1]
             } else {
               tmp_told <- NA
@@ -1138,16 +1146,23 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             auc_t2 <- as.numeric(map_data[, paste0("AUC.", t, ".T2")])
 ##            2019-11-08/RD Changed the call for partial AUCs to account for interpolation
 ##
-            if(isTRUE(interpolation)){
-              tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, interpolate = interpolation, model = "M1", dosing_type = "SD", told = tmp_told, orig_conc = orig_conc, orig_time = orig_time)
+            if((isTRUE(interpolation) || isTRUE(extrapolation))){
+              tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, interpolate = interpolation, extrapolate = extrapolation, model = "M1", dosing_type = "SD", told = tmp_told, orig_conc = orig_conc, orig_time = orig_time)
+              tmp_auc <- tmp[[1]]
+              if(t == 1){
+                cest_tmp <- tmp[[2]]
+              } else {
+                cest_tmp <- rbind(cest_tmp, tmp[[2]])
+              }
+              cest_tmp <- unique(na.omit(cest_tmp))
             } else {
-              tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max)
+              tmp_auc <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max)
             }
             
             if(is.null(auct1_t2)){
-              auct1_t2 <- tmp
+              auct1_t2 <- tmp_auc
             } else {
-              auct1_t2 <- c(auct1_t2, tmp)
+              auct1_t2 <- c(auct1_t2, tmp_auc)
             }
           }
         }
@@ -1316,16 +1331,48 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         } else {
           cest_kel <- rep(NA, length(conc))
         }
+##        2019-11-08/RD/ Added to add cest interpolation/extrapolation data as an output
+##
+        
+        end_idx <- which(tmp_df[,map_data$TIME] == cest_tmp$TIME[length(cest_tmp$TIME)])
         
 ##################################################################################################################################
 ### Computations are completed at this point
 ##################################################################################################################################
 
           if(length(pkdataid) > 0){
+            cest_idx <- 1
             for(e in 1:length(pkdataid)){
               est_row <- c(pkdataid[e], unique(data_data[,map_data$SDEID])[i], time[e], cest_kel[e], NA, NA, NA, NA)
 ### 2019-10-06/TGT/ Add CEST at TLAST
-              if(time[e]==t_last) { est_row[8] <- c_est } 
+              if(time[e]==t_last) { est_row[8] <- c_est }
+##              2019-11-08/RD/ Added to account for interpolation/extrapolation data to return as an output
+##             
+              if(nrow(cest_tmp) > 0){
+                while(cest_idx <= nrow(cest_tmp)){
+                  if(cest_tmp[cest_idx, "TIME"] <= time[e]){
+                    if(!(cest_tmp[cest_idx, "TIME"] %in% time)){
+                      pkdr_idx <- which(tmp_df[,map_data$TIME] == cest_tmp[cest_idx, "TIME"])
+                      if(cest_tmp[cest_idx, "INT_EXT"] == "INT"){
+                        tmp_est_row <- c(tmp_df[pkdr_idx,"PKDATAROWID"], unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, cest_tmp[cest_idx, "CONC"], NA, NA, NA)
+                      } else if(cest_tmp[cest_idx, "INT_EXT"] == "EXT"){
+                        tmp_est_row <- c(tmp_df[pkdr_idx,"PKDATAROWID"], unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, NA, cest_tmp[cest_idx, "CONC"], NA, NA)
+                      }
+                      est_data[est_idx,] <- tmp_est_row
+                      est_idx <- est_idx + 1
+                      cest_idx <- cest_idx + 1
+                    } else {
+                      if(cest_tmp[cest_idx, "INT_EXT"] == "INT"){
+                        est_row[5] <- cest_tmp[cest_idx, "CONC"]
+                        cest_idx <- cest_idx + 1
+                      } else if(cest_tmp[cest_idx, "INT_EXT"] == "EXT"){
+                        est_row[6] <- cest_tmp[cest_idx, "CONC"]
+                        cest_idx <- cest_idx + 1
+                      }
+                    }
+                  }
+                }
+              }
               est_data[est_idx,] <- est_row
               est_idx <- est_idx + 1
             }

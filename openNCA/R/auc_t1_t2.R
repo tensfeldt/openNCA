@@ -48,6 +48,7 @@
 #' @param exflag The exclude flag data (given in a numeric vector)
 #' @param t_max The first time at which CMAXi is observed within the dosing interval (numeric value)
 #' @param interpolate The value to determine whether to interpolate data points (given in a logical form)
+#' @param extrapolate The value to determine whether to extrapolate data points (given in a logical form)
 #' @param model The model specification (either 'M1', 'M2', 'M3', or 'M4')
 #' @param dosing_type The dosing type specification (either 'SD' or 'SS')
 #' @param told The time of last dose (given in a numeric value)
@@ -135,7 +136,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1, exflag = NULL, t_max = NULL, dose_time = NULL, interpolate = NULL, model = NULL, dosing_type = NULL, told = NULL, orig_conc = NULL, orig_time = NULL){
+auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1, exflag = NULL, t_max = NULL, dose_time = NULL, interpolate = NULL, extrapolate = NULL, model = NULL, dosing_type = NULL, told = NULL, orig_conc = NULL, orig_time = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in auc_t1_t2: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -199,14 +200,14 @@ auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1
   if(sum(conc, na.rm = T) == 0){
     return(0)
   }
-
+  
   if(method == 1){
-    return(auc_lin_log(conc = conc, time = time, exflag = exflag, t_max = t_max, interpolate = interpolate, model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time))
+    return(auc_lin_log(conc = conc, time = time, exflag = exflag, t_max = t_max, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time))
   } else if(method == 2){
-    return(auc_lin(conc = conc, time = time, exflag = exflag, interpolate = interpolate, model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time))
+    return(auc_lin(conc = conc, time = time, exflag = exflag, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time))
   } else if(method == 3){
-    return(auc_log(conc = conc, time = time, exflag = exflag, interpolate = interpolate, model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time))
+    return(auc_log(conc = conc, time = time, exflag = exflag, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time))
   } else if(method == 4){
-    return(auc_lin_up_log_down(conc = conc, time = time, exflag = exflag, interpolate = interpolate, model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time))
+    return(auc_lin_up_log_down(conc = conc, time = time, exflag = exflag, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time))
   }
 }
