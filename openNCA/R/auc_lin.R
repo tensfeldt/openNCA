@@ -107,9 +107,9 @@ auc_lin <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL,
   } else {
     auc_df <- ""
 
-##    2019-11-07/RD Added for Interpolation to check for triggers for interpolation
+##    2019-11-11/RD Added for Interpolation/Extrapolation to check for triggers for interpolation/extrapolation
 ##
-    if(isTRUE(interpolate)){
+    if(isTRUE(interpolate) || isTRUE(extrapolate)){
 ##      2019-11-08/RD Added helper function for Interpolation
 ##
       est_tmp <- estimate_missing_concentration(conc = conc, time = time, auc_method = "LIN", model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time)
@@ -121,9 +121,9 @@ auc_lin <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL,
     auc_df <- as.numeric(auc_df)
     auc <- sum(auc_df, na.rm = TRUE)
   }
-##  2019-11-08/RD Returning interpolated data that will be used as an output
+##  2019-11-11/RD Returning interpolated/extrapolated data that will be used as an output
 ##
-  if(isTRUE(interpolate)){
+  if(isTRUE(interpolate) || isTRUE(extrapolate)){
     return(list(auc, est_tmp[[2]]))
   } else {
     return(auc)

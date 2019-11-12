@@ -2276,12 +2276,16 @@ if(FALSE) {
     if("KEL" %in% parameter_list){
       results_list$data_out <- data_out$data_out
       results_list$flag_data <- flag_data
-      results_list$flag_data[,map_data$FLGEXKEL] <- data_out$optimized_kel_flag
+      if(!is.null(data_out$optimized_kel_flag)){
+        results_list$flag_data[,map_data$FLGEXKEL] <- data_out$optimized_kel_flag
+      }
       results_list$est_data <- data_out$est_data
     } else {
       results_list$data_out <- data_out$data_out
       results_list$flag_data <- flag_data
-      results_list$flag_data[,map_data$FLGEXKEL] <- data_out$optimized_kel_flag
+      if(!is.null(data_out$optimized_kel_flag)){
+        results_list$flag_data[,map_data$FLGEXKEL] <- data_out$optimized_kel_flag
+      }
     }
   } else {
     if("KEL" %in% parameter_list){

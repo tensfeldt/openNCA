@@ -1908,15 +1908,15 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             time <- sort(unique(data_data[,map_data$TIME]))
             time_di <- sort(tmp_di_df[,map_data$TIME])
             
-##            2019-11-08/RD Added for Interpolation to account for error handling
+##            2019-11-11/RD Added for Interpolation to account for error handling
 ##
-            if((isTRUE(interpolation) || isTRUE(extrapolation)) && !(opt_list[3] %in% names(map_data))){
-              stop(paste0("Dataset provided via 'map' does not contain the required columns for interpolating partial areas ", opt_list[3]))
-            } else if((isTRUE(interpolation) || isTRUE(extrapolation)) && (opt_list[3] %in% names(map_data))) {
-              if((isTRUE(interpolation) || isTRUE(extrapolation)) && !(map_data[, opt_list[3]] %in% names(tmp_df))){
-                stop(paste0("Dataset provided via 'data' does not contain the required columns for interpolating partial areas ", opt_list[3]))
-              } else if(isTRUE(interpolation) && (map_data[, opt_list[3]] %in% names(tmp_df))){
-                tmp_told <- unique(tmp_df[, map_data[, opt_list[3]]])[1]
+            if((isTRUE(interpolation) || isTRUE(extrapolation)) && !(c(paste0("TOLD",d)) %in% names(map_data))){
+              stop(paste0("Dataset provided via 'map' does not contain the required columns for interpolating partial areas ", paste0("TOLD",d)))
+            } else if((isTRUE(interpolation) || isTRUE(extrapolation)) && (c(paste0("TOLD",d)) %in% names(map_data))) {
+              if((isTRUE(interpolation) || isTRUE(extrapolation)) && !(map_data[, c(paste0("TOLD",d))] %in% names(tmp_di_df))){
+                stop(paste0("Dataset provided via 'data' does not contain the required columns for interpolating partial areas ", paste0("TOLD",d)))
+              } else if((isTRUE(interpolation) || isTRUE(extrapolation)) && (map_data[, c(paste0("TOLD",d))] %in% names(tmp_di_df))){
+                tmp_told <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
               } else {
                 tmp_told <- NA
               }
@@ -2614,9 +2614,17 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if("FLGEMESIS" %in% names(map_data) && ("TMAXi" %in% parameter_list)){
     comutation_df$FLGACCEPTTMAX <- ifelse(computation_df$FLGEMESIS == 1 & computation_df$TMAX1 < 2 * median(computation_df$TMAX1), TRUE, FALSE)
   }
-
+  
   for(n in 1:length(regular_int_type)){
-    suppressWarnings(computation_df[,names(computation_df) == regular_int_type[n]] <- as.numeric(computation_df[,names(computation_df) == regular_int_type[n]]))
+    tmp_int_type <- computation_df[,names(computation_df) == as.character(regular_int_type[n])]
+    if(!is.null(ncol(tmp_int_type))){
+      for(r in 1:length(tmp_int_type)){
+        print(computation_df[,names(computation_df) == as.character(regular_int_type[n])][,r])
+        suppressWarnings(computation_df[,names(computation_df) == as.character(regular_int_type[n])][,r] <- as.numeric(computation_df[,names(computation_df) == as.character(regular_int_type[n])][,r]))
+      }
+    } else {
+      suppressWarnings(computation_df[,names(computation_df) == as.character(regular_int_type[n])] <- as.numeric(computation_df[,names(computation_df) == as.character(regular_int_type[n])]))
+    }
   }
 
   computation_df <- unit_conversion(data = data_data, map = map_data, result = computation_df, unit_class = "ALL")

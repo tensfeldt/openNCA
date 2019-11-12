@@ -1123,20 +1123,10 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             par_col <- rep(paste0("'", auct1_t2_names[!auct1_t2_names %in% names(map_data)], "'"))
             stop(paste0("Dataset provided via 'map' does not contain the required columns for partial areas ", par_col))
           }
-##         2019-11-08/RD Added for Interpolation to account for error handling
+##         2019-11-11/RD Removed Error handling for Interpolation because we agreed dose time is 0 for SD
 ##
-          if((isTRUE(interpolation) || isTRUE(extrapolation)) && !(opt_list[3] %in% names(map_data))){
-            stop(paste0("Dataset provided via 'map' does not contain the required columns for interpolating partial areas ", opt_list[3]))
-          } else if((isTRUE(interpolation) || isTRUE(extrapolation)) && (opt_list[3] %in% names(map_data))) {
-            if((isTRUE(interpolation) || isTRUE(extrapolation)) && !(map_data[, opt_list[3]] %in% names(tmp_df))){
-              stop(paste0("Dataset provided via 'data' does not contain the required columns for interpolating partial areas ", opt_list[3]))
-            } else if((isTRUE(interpolation) || isTRUE(extrapolation)) && (map_data[, opt_list[3]] %in% names(tmp_df))){
-              tmp_told <- unique(tmp_df[, map_data[, opt_list[3]]])[1]
-            } else {
-              tmp_told <- NA
-            }
-          } else {
-            tmp_told <- NA
+          if((isTRUE(interpolation) || isTRUE(extrapolation))){
+            tmp_told <- 0
           }
           for(t in 1:(auc_par_len)){
             if(!(is.numeric(as.numeric(map_data[, paste0("AUC.", t, ".T1")])) && is.numeric(as.numeric(map_data[, paste0("AUC.", t, ".T2")])))){
@@ -1723,7 +1713,15 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
 
   for(n in 1:length(regular_int_type)){
-    suppressWarnings(computation_df[,names(computation_df) == regular_int_type[n]] <- as.numeric(computation_df[,names(computation_df) == regular_int_type[n]]))
+    tmp_int_type <- computation_df[,names(computation_df) == as.character(regular_int_type[n])]
+    if(!is.null(ncol(tmp_int_type))){
+      for(r in 1:length(tmp_int_type)){
+        print(computation_df[,names(computation_df) == as.character(regular_int_type[n])][,r])
+        suppressWarnings(computation_df[,names(computation_df) == as.character(regular_int_type[n])][,r] <- as.numeric(computation_df[,names(computation_df) == as.character(regular_int_type[n])][,r]))
+      }
+    } else {
+      suppressWarnings(computation_df[,names(computation_df) == as.character(regular_int_type[n])] <- as.numeric(computation_df[,names(computation_df) == as.character(regular_int_type[n])]))
+    }
   }
 
   computation_df <- unit_conversion(data = data_data, map = map_data, result = computation_df, unit_class = "ALL")
