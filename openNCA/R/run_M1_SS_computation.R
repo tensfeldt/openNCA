@@ -1011,7 +1011,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     warning("Kel optimization cannot be performed because 'TMAX', 'TLAST', 'CMAX', 'CLAST', 'AUCLAST' are not part of the calulcated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGXKEL' are not present in the dataset")
   }
 
-  if(optimize_kel && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
+  if(optimize_kel && "TMAXi" %in% parameter_list && "TLAST" %in% parameter_list && "CMAXi" %in% parameter_list && "CLASTi" %in% parameter_list && "AUCLAST" %in% parameter_list &&
      "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
     kel_flag_optimized <- integer()
   }
@@ -1296,7 +1296,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(comp_required[["AUCLAST"]]){
           auclast <- auc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_last, t_max = t_max)
         }
-        if(optimize_kel && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
+        if(optimize_kel && "TMAXi" %in% parameter_list && "TLAST" %in% parameter_list && "CMAXi" %in% parameter_list && "CLASTi" %in% parameter_list && "AUCLAST" %in% parameter_list &&
            "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
 ### 2019-09-04/TGT/
 ###          orig_time <- tmp_df[,map_data$TIME]
@@ -1304,6 +1304,8 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           tmp_time <- orig_time
           tmp_conc <- orig_conc
 
+          #print(tmp_time)
+          #print(tmp_conc)
           if("FLGNOCMAX" %in% names(map_data) && (map_data$FLGNOCMAX == 1 || map_data$FLGNOCMAX == 0)){
             flg_no_cmax <- as.logical(map_data$FLGNOCMAX)
             if(flg_no_cmax){
@@ -1341,6 +1343,10 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               tmp_conc <- orig_conc[s_conc:e_conc]
             }
           }
+          #print("new data")
+          #print(tmp_time)
+          #print(tmp_conc)
+          #print("------")
 
           kel_n <- as.numeric(flag_df$CRIT[match("KELNOPT", flag_df$VAR)])
           kel_op <- flag_df$OPR[match("KELNOPT", flag_df$VAR)]
@@ -1357,6 +1363,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               ulist <- c(ulist,tlist)
             }
           }
+          #print(ulist)
 
           kelr_val <- kel_r(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])[["KELRSQ"]]
           if("AUCXPCTO" %in% flag_df$VAR){
@@ -1367,11 +1374,14 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             stop("Error in optimize kel")
           }
 
+          #print("for loop")
           selected_idx <- NA
           saved_kel_opt <- 0
           for(k in 1:length(ulist)){
             sel_time <- ulist[[k]]
             sel_conc <- tmp_conc[match(sel_time, tmp_time)]
+            #print(sel_time)
+            #print(sel_conc)
 
             kelr_opt <- kel_r(conc = sel_conc, time = sel_time)[["KELRSQ"]]
             if("AUCXPCTO" %in% flag_df$VAR){
@@ -1398,6 +1408,8 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 selected_idx <- match(sel_time, orig_time)
               }
             }
+            #print("selected KEL Flags")
+            #print(selected_idx)
           }
           tmp_kel_flag <- rep(1, length(kel_flag))
           tmp_kel_flag[selected_idx] <- 0
@@ -2059,11 +2071,13 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 while(cest_idx <= nrow(cest_tmp)){
                   if(cest_tmp[cest_idx, "TIME"] <= time[e]){
                     if(!(cest_tmp[cest_idx, "TIME"] %in% time)){
-                      pkdr_idx <- which(tmp_df[,map_data$TIME] == cest_tmp[cest_idx, "TIME"])
+##                      2019-11-12/RD/ Commented the way to retrieve the PKDATAROWID, need to find any alternative
+##                      
+                      #pkdr_idx <- which(tmp_df[,map_data$TIME] == cest_tmp[cest_idx, "TIME"])
                       if(cest_tmp[cest_idx, "INT_EXT"] == "INT"){
-                        tmp_est_row <- c(tmp_df[pkdr_idx,"PKDATAROWID"], unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, cest_tmp[cest_idx, "CONC"], NA, NA, NA)
+                        tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, cest_tmp[cest_idx, "CONC"], NA, NA, NA)
                       } else if(cest_tmp[cest_idx, "INT_EXT"] == "EXT"){
-                        tmp_est_row <- c(tmp_df[pkdr_idx,"PKDATAROWID"], unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, NA, cest_tmp[cest_idx, "CONC"], NA, NA)
+                        tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, NA, cest_tmp[cest_idx, "CONC"], NA, NA)
                       }
                       est_data[est_idx,] <- tmp_est_row
                       est_idx <- est_idx + 1
@@ -2077,6 +2091,8 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                         cest_idx <- cest_idx + 1
                       }
                     }
+                  } else {
+                    break
                   }
                 }
               }
@@ -2619,7 +2635,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     tmp_int_type <- computation_df[,names(computation_df) == as.character(regular_int_type[n])]
     if(!is.null(ncol(tmp_int_type))){
       for(r in 1:length(tmp_int_type)){
-        print(computation_df[,names(computation_df) == as.character(regular_int_type[n])][,r])
         suppressWarnings(computation_df[,names(computation_df) == as.character(regular_int_type[n])][,r] <- as.numeric(computation_df[,names(computation_df) == as.character(regular_int_type[n])][,r]))
       }
     } else {
@@ -2671,7 +2686,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   results_list$data_out <- computation_df
   results_list$est_data <- est_data
   
-  if(optimize_kel && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
+  if(optimize_kel && "TMAXi" %in% parameter_list && "TLAST" %in% parameter_list && "CMAXi" %in% parameter_list && "CLASTi" %in% parameter_list && "AUCLAST" %in% parameter_list &&
      "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
 ###    if("KEL" %in% parameter_list){
 ###    if("KEL" %in% parameter_list){

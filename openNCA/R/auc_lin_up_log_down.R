@@ -117,6 +117,7 @@ auc_lin_up_log_down <- function(conc = NULL, time = NULL, exflag = NULL, interpo
 ##
       est_tmp <- estimate_missing_concentration(conc = conc, time = time, auc_method = "LIN", model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time)
       conc <- est_tmp[[1]]
+      tmp <- data.frame(time, conc)
     }
     for(i in 1:(nrow(tmp)-1)){
       curr_c <- as.numeric(conc[i])

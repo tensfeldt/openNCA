@@ -114,6 +114,7 @@ auc_lin <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL,
 ##
       est_tmp <- estimate_missing_concentration(conc = conc, time = time, auc_method = "LIN", model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time)
       conc <- est_tmp[[1]]
+      tmp <- data.frame(time, conc)
     }
     for(i in 1:(nrow(tmp)-1)){
       auc_df[i] <- ((conc[i] + conc[i+1])/2)*(time[i+1]-time[i])

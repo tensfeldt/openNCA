@@ -52,11 +52,12 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, auc_method 
           tmp$INT_EXT[1] <- "INT"
         }
       } else if((orig_time[1] < time[1]) && (time[1] < orig_time[length(orig_time)])){
-        idx <- which(time[1] == orig_time)
+        idx <- which(orig_time < time[1])
+        idx <- idx[length(idx)]
         if(auc_method == "LIN"){
-          conc[1] <- interpolate_lin(conc1 = orig_conc[idx-1], time1 = orig_time[idx-1], conc2 = orig_conc[idx+1], time2 = orig_time[i+1], est_time = time[1])
+          conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
         } else if(auc_method == "LOG"){
-          conc[1] <- interpolate_log(conc1 = orig_conc[idx-1], time1 = orig_time[idx-1], conc2 = orig_conc[idx+1], time2 = orig_time[i+1], est_time = time[1])
+          conc[1] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
         }
         tmp$INT_EXT[1] <- "INT"
       } else if(time[1] >= orig_time[length(orig_time)]){
@@ -72,11 +73,12 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, auc_method 
 ##  
     } else if(is.na(conc[nrow(tmp)]) && (i+1) == nrow(tmp)){
       if((orig_time[1] < time[nrow(tmp)]) && (time[nrow(tmp)] < orig_time[length(orig_time)])){
-        idx <- which(time[nrow(tmp)] == orig_time)
+        idx <- which(orig_time < time[nrow(tmp)])
+        idx <- idx[length(idx)]
         if(auc_method == "LIN"){
-          conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx-1], time1 = orig_time[idx-1], conc2 = orig_conc[idx+1], time2 = orig_time[i+1], est_time = time[nrow(tmp)])
+          conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
         } else if(auc_method == "LOG"){
-          conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx-1], time1 = orig_time[idx-1], conc2 = orig_conc[idx+1], time2 = orig_time[i+1], est_time = time[nrow(tmp)])
+          conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
         }
         tmp$INT_EXT[nrow(tmp)] <- "INT"
       } else {

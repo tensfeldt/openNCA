@@ -1321,10 +1321,6 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         } else {
           cest_kel <- rep(NA, length(conc))
         }
-##        2019-11-08/RD/ Added to add cest interpolation/extrapolation data as an output
-##
-        
-        end_idx <- which(tmp_df[,map_data$TIME] == cest_tmp$TIME[length(cest_tmp$TIME)])
         
 ##################################################################################################################################
 ### Computations are completed at this point
@@ -1342,11 +1338,13 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 while(cest_idx <= nrow(cest_tmp)){
                   if(cest_tmp[cest_idx, "TIME"] <= time[e]){
                     if(!(cest_tmp[cest_idx, "TIME"] %in% time)){
-                      pkdr_idx <- which(tmp_df[,map_data$TIME] == cest_tmp[cest_idx, "TIME"])
+##                      2019-11-12/RD/ Commented the way to retrieve the PKDATAROWID, need to find any alternative
+##                      
+                      #pkdr_idx <- which(tmp_df[,map_data$TIME] == cest_tmp[cest_idx, "TIME"])
                       if(cest_tmp[cest_idx, "INT_EXT"] == "INT"){
-                        tmp_est_row <- c(tmp_df[pkdr_idx,"PKDATAROWID"], unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, cest_tmp[cest_idx, "CONC"], NA, NA, NA)
+                        tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, cest_tmp[cest_idx, "CONC"], NA, NA, NA)
                       } else if(cest_tmp[cest_idx, "INT_EXT"] == "EXT"){
-                        tmp_est_row <- c(tmp_df[pkdr_idx,"PKDATAROWID"], unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, NA, cest_tmp[cest_idx, "CONC"], NA, NA)
+                        tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, NA, cest_tmp[cest_idx, "CONC"], NA, NA)
                       }
                       est_data[est_idx,] <- tmp_est_row
                       est_idx <- est_idx + 1
@@ -1360,6 +1358,8 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                         cest_idx <- cest_idx + 1
                       }
                     }
+                  } else {
+                    break
                   }
                 }
               }
@@ -1716,7 +1716,6 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     tmp_int_type <- computation_df[,names(computation_df) == as.character(regular_int_type[n])]
     if(!is.null(ncol(tmp_int_type))){
       for(r in 1:length(tmp_int_type)){
-        print(computation_df[,names(computation_df) == as.character(regular_int_type[n])][,r])
         suppressWarnings(computation_df[,names(computation_df) == as.character(regular_int_type[n])][,r] <- as.numeric(computation_df[,names(computation_df) == as.character(regular_int_type[n])][,r]))
       }
     } else {

@@ -150,7 +150,7 @@ auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1
   } else if(is.na(t_max) && method==1) { # 2019-09-11/TGT/ - update 2019-09-25/TGT/ updated to also consider method
       return(NA)
   }
-
+  
   if(!(is.numeric(conc) && is.vector(conc)) ){
     stop("Error in auc_t1_t2: 'conc' is not a numeric vector")
   }
@@ -193,12 +193,26 @@ auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1
   }
   conc <- conc[time >= t1 & time <= t2]
   time <- time[time >= t1 & time <= t2]
-
+ 
+##  2019-11-12/RD Added to Interpolate/Extrapolate data properly for missing time values
+## 
+  if(isTRUE(interpolate) || isTRUE(extrapolate)){
+    if(!(t1 %in% time)){
+      time <- c(t1, time)
+      conc <- c(NA, conc)
+    }
+    if(!(t2 %in% time)){
+      time <- c(time, t2)
+      conc <- c(conc, NA)
+    }
+  } else {
+    if(sum(conc, na.rm = T) == 0){
+      return(0)
+    }
+  }
+  
   if(length(time) != length(conc)){
     stop("Error in auc_t1_t2: length of 'time' and 'conc' vectors are not equal")
-  }
-  if(sum(conc, na.rm = T) == 0){
-    return(0)
   }
   
   if(method == 1){
