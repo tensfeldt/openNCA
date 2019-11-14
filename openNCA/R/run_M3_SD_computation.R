@@ -1289,6 +1289,9 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               est_row <- c(pkdataid[e], unique(data_data[,map_data$SDEID])[i], time[e], cest_kel[e], NA, NA, NA, NA)
 ### 2019-10-06/TGT/ Add CEST at TLAST
               if(time[e]==t_last) { est_row[8] <- c_est } 
+##              2019-11-13/RD/ Added to account for last value of interpolation/extrapolation data to return as an output
+## 
+              last_est_added <- FALSE
 ##              2019-11-08/RD/ Added to account for interpolation/extrapolation data to return as an output
 ##             
               if(nrow(cest_tmp) > 0){
@@ -1316,12 +1319,32 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                       }
                     }
                   } else {
-                    break
+##                    2019-11-13/RD/ Added to account for interpolation/extrapolation data that occurs after last time value to return as an output
+## 
+                    if(cest_tmp[cest_idx, "TIME"] > time[length(pkdataid)]){
+                      if(!isTRUE(last_est_added)){
+                        est_data[est_idx,] <- est_row
+                        est_idx <- est_idx + 1
+                        last_est_added <- TRUE
+                      }
+                      if(cest_tmp[cest_idx, "INT_EXT"] == "INT"){
+                        tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, cest_tmp[cest_idx, "CONC"], NA, NA, NA)
+                      } else if(cest_tmp[cest_idx, "INT_EXT"] == "EXT"){
+                        tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, NA, cest_tmp[cest_idx, "CONC"], NA, NA)
+                      }
+                      est_data[est_idx,] <- tmp_est_row
+                      est_idx <- est_idx + 1
+                      cest_idx <- cest_idx + 1
+                    } else {
+                      break 
+                    }
                   }
                 }
               }
-              est_data[est_idx,] <- est_row
-              est_idx <- est_idx + 1
+              if(!isTRUE(last_est_added)){
+                est_data[est_idx,] <- est_row
+                est_idx <- est_idx + 1 
+              }
             }
           }
         }
@@ -1659,12 +1682,18 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     })
   }
 
+##  2019-11-13/RD/ Added to account for incorrect handling of FLGACCEPTKELCRIT
+## 
   if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
     if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
-      suppressWarnings(computation_df$FLGACCEPTKEL <- as.logical(computation_df$FLGACCEPTKEL))
+      for(f in 1:length(flag_df$VAR)){
+        computation_df[,flag_df$VAR[f]] <- as.numeric(computation_df[,flag_df$VAR[f]])
+      }
       if(nrow(computation_df[eval(parse(text=flag_subset)),]) > 0){
-        tmp_len <- length(computation_df[computation_df$SDEID %in% computation_df[eval(parse(text=flag_subset)), "SDEID"],]$FLGACCEPTKEL)
-        computation_df[computation_df$SDEID %in% computation_df[eval(parse(text=flag_subset)), "SDEID"],]$FLGACCEPTKEL <- rep(TRUE, tmp_len)
+        computation_df[eval(parse(text=flag_subset)),][,"FLGACCEPTKEL"] <- 1
+      }
+      for(f in 1:length(flag_df$VAR)){
+        computation_df[,flag_df$VAR[f]] <- as.character(computation_df[,flag_df$VAR[f]])
       }
     }
   }

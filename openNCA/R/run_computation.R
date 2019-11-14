@@ -933,7 +933,7 @@ if(FALSE) {
     }
     if("MRTEVIFOi" %in% parameter_list && (!"AUCINFOi" %in% parameter_list || !"AUCTAUi" %in% parameter_list || !"AUMCTAUi" %in% parameter_list)){
       if(!"AUCINFOi" %in% parameter_list){
-        parameter_list[[length(parameter_list)+1]] <- "AUINFOi"
+        parameter_list[[length(parameter_list)+1]] <- "AUCINFOi"
       }
       if(!"AUCTAUi" %in% parameter_list){
         parameter_list[[length(parameter_list)+1]] <- "AUCTAUi"
@@ -963,7 +963,7 @@ if(FALSE) {
     }
     if("MRTEVIFPi" %in% parameter_list && (!"AUCINFPi" %in% parameter_list || !"AUCTAUi" %in% parameter_list || !"AUMCTAUi" %in% parameter_list)){
       if(!"AUCINFPi" %in% parameter_list){
-        parameter_list[[length(parameter_list)+1]] <- "AUINFPi"
+        parameter_list[[length(parameter_list)+1]] <- "AUCINFPi"
       }
       if(!"AUCTAUi" %in% parameter_list){
         parameter_list[[length(parameter_list)+1]] <- "AUCTAUi"
@@ -1407,7 +1407,7 @@ if(FALSE) {
     }
     if("MRTIVIFOi" %in% parameter_list && (!"AUCINFOi" %in% parameter_list || !"AUCTAUi" %in% parameter_list || !"AUMCTAUi" %in% parameter_list)){
       if(!"AUCINFOi" %in% parameter_list){
-        parameter_list[[length(parameter_list)+1]] <- "AUINFOi"
+        parameter_list[[length(parameter_list)+1]] <- "AUCINFOi"
       }
       if(!"AUCTAUi" %in% parameter_list){
         parameter_list[[length(parameter_list)+1]] <- "AUCTAUi"
@@ -1445,7 +1445,7 @@ if(FALSE) {
     }
     if("MRTIVIFPi" %in% parameter_list && (!"AUCINFPi" %in% parameter_list || !"AUCTAUi" %in% parameter_list || !"AUMCTAUi" %in% parameter_list)){
       if(!"AUCINFPi" %in% parameter_list){
-        parameter_list[[length(parameter_list)+1]] <- "AUINFPi"
+        parameter_list[[length(parameter_list)+1]] <- "AUCINFPi"
       }
       if(!"AUCTAUi" %in% parameter_list){
         parameter_list[[length(parameter_list)+1]] <- "AUCTAUi"
@@ -1815,7 +1815,7 @@ if(FALSE) {
     }
     if("MRTIVIFOi" %in% parameter_list && (!"AUCINFOi" %in% parameter_list || !"AUCTAUi" %in% parameter_list || !"AUMCTAUi" %in% parameter_list)){
       if(!"AUCINFOi" %in% parameter_list){
-        parameter_list[[length(parameter_list)+1]] <- "AUINFOi"
+        parameter_list[[length(parameter_list)+1]] <- "AUCINFOi"
       }
       if(!"AUCTAUi" %in% parameter_list){
         parameter_list[[length(parameter_list)+1]] <- "AUCTAUi"
@@ -1853,7 +1853,7 @@ if(FALSE) {
     }
     if("MRTIVIFPi" %in% parameter_list && (!"AUCINFPi" %in% parameter_list || !"AUCTAUi" %in% parameter_list || !"AUMCTAUi" %in% parameter_list)){
       if(!"AUCINFPi" %in% parameter_list){
-        parameter_list[[length(parameter_list)+1]] <- "AUINFPi"
+        parameter_list[[length(parameter_list)+1]] <- "AUCINFPi"
       }
       if(!"AUCTAUi" %in% parameter_list){
         parameter_list[[length(parameter_list)+1]] <- "AUCTAUi"
