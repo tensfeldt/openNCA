@@ -63,7 +63,7 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, auc_method 
       } else if(time[1] >= orig_time[length(orig_time)]){
         kel_v <- kel(conc = conc, time = time)
         if(!is.na(kel_v[["KEL"]])){
-          conc[1] <- cest(conc = conc, time = time)
+          conc[1] <- cest(conc = conc, time = time, t_last = time[length(time)])
           tmp$INT_EXT[1] <- "EXT"
         } else {
           conc[1] <- NA
@@ -84,7 +84,7 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, auc_method 
       } else {
         kel_v <- kel(conc = conc, time = time)
         if(!is.na(kel_v[["KEL"]])){
-          conc[nrow(tmp)] <- cest(conc = conc, time = time)
+          conc[nrow(tmp)] <- cest(conc = conc, time = time, t_last = time[length(time)])
           tmp$INT_EXT[nrow(tmp)] <- "EXT"
         } else {
           min_lim <- orig_time[length(orig_time)] - (orig_time[length(orig_time)] * 0.05)

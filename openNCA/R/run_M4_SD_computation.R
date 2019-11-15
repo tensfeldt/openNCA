@@ -607,8 +607,10 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
           if(as.character(flag_df$VAR[j]) %in% parameter_list){
             if(j == 1 || is.na(flag_subset)) {
-              flag_subset <-  paste(paste0("computation_df", "$", flag_df$VAR[j]), flag_df$OPR[j], flag_df$CRIT[j])
+              flag_subset <-  paste(paste0("!is.na(computation_df", "$", flag_df$VAR[j],")"))
+              flag_subset <-  paste(flag_subset, "&", paste0("computation_df", "$", flag_df$VAR[j]), flag_df$OPR[j], flag_df$CRIT[j])
             } else {
+              flag_subset <-  paste(flag_subset, "&", paste(paste0("!is.na(computation_df", "$", flag_df$VAR[j]),")"))
               flag_subset <-  paste(flag_subset, "&", paste0("computation_df", "$", flag_df$VAR[j]), flag_df$OPR[j], flag_df$CRIT[j])
             }
           } else {
@@ -1163,10 +1165,14 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
   if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
     if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
-      suppressWarnings(computation_df$FLGACCEPTKEL <- as.logical(computation_df$FLGACCEPTKEL))
+      for(f in 1:length(flag_df$VAR)){
+        computation_df[,flag_df$VAR[f]] <- as.numeric(computation_df[,flag_df$VAR[f]])
+      }
       if(nrow(computation_df[eval(parse(text=flag_subset)),]) > 0){
-        tmp_len <- length(computation_df[computation_df$SDEID %in% computation_df[eval(parse(text=flag_subset)), "SDEID"],]$FLGACCEPTKEL)
-        computation_df[computation_df$SDEID %in% computation_df[eval(parse(text=flag_subset)), "SDEID"],]$FLGACCEPTKEL <- rep(TRUE, tmp_len)
+        computation_df[eval(parse(text=flag_subset)),][,"FLGACCEPTKEL"] <- 1
+      }
+      for(f in 1:length(flag_df$VAR)){
+        computation_df[,flag_df$VAR[f]] <- as.character(computation_df[,flag_df$VAR[f]])
       }
     }
   }

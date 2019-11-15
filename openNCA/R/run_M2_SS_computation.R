@@ -815,8 +815,10 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
           if(as.character(flag_df$VAR[j]) %in% parameter_list){
             if(j == 1 || is.na(flag_subset)) {
-              flag_subset <-  paste(paste0("computation_df", "$", flag_df$VAR[j]), flag_df$OPR[j], flag_df$CRIT[j])
+              flag_subset <-  paste(paste0("!is.na(computation_df", "$", flag_df$VAR[j],")"))
+              flag_subset <-  paste(flag_subset, "&", paste0("computation_df", "$", flag_df$VAR[j]), flag_df$OPR[j], flag_df$CRIT[j])
             } else {
+              flag_subset <-  paste(flag_subset, "&", paste(paste0("!is.na(computation_df", "$", flag_df$VAR[j]),")"))
               flag_subset <-  paste(flag_subset, "&", paste0("computation_df", "$", flag_df$VAR[j]), flag_df$OPR[j], flag_df$CRIT[j])
             }
           } else {
@@ -1478,7 +1480,6 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
 ###          if("AUCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
           if(comp_required[["AUCINFOi"]]) {
-print("in AUCINFOi comp required")
             aucinfoi[[d]] <- auc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
           }
 ###
@@ -1848,23 +1849,40 @@ print("in AUCINFOi comp required")
 ###            cest_kel <- rep(NA, length(conc))
           }
 
-          if(length(pkdataid) > 0){
-            for(e in 1:length(pkdataid)){
-              est_row <- c(pkdataid[e], unique(data_data[,map_data$SDEID])[i], time[e], cest_kel[e], NA, NA, NA, NA)
-### 2019-10-06/TGT/ Add CEST at TLAST
-              if(time[e]==t_last) { est_row[8] <- c_est } 
-##              2019-11-13/RD/ Added to account for last value of interpolation/extrapolation data to return as an output
+##          2019-11-14/RD/ Updated logic for interpolation/extrapolation data to return as an output
 ## 
-              last_est_added <- FALSE
+          if(length(pkdataid) > 0){
+            cest_idx <- 1
+            kest_idx <- 1
+##            2019-11-13/RD/ Added to account for last value of interpolation/extrapolation data to return as an output
+## 
+            last_kest_added <- FALSE
+            last_cest_added <- FALSE
+            while(kest_idx <= length(pkdataid)){
 ##              2019-11-08/RD/ Added to account for interpolation/extrapolation data to return as an output
 ##             
               if(nrow(cest_tmp) > 0){
+##                2019-11-14/RD/ Added to account for correct ordering of time for interpolation/extrapolation data to return as an output
+##             
+                cest_tmp <- cest_tmp[order(cest_tmp$TIME), ]
                 while(cest_idx <= nrow(cest_tmp)){
-                  if(cest_tmp[cest_idx, "TIME"] <= time[e]){
+                  est_row <- c(pkdataid[kest_idx], unique(data_data[,map_data$SDEID])[i], time[kest_idx], cest_kel[kest_idx], NA, NA, NA, NA)
+### 2019-10-06/TGT/ Add CEST at TLAST
+                  if(time[kest_idx]==t_last) { est_row[8] <- c_est }
+                  
+                  if(isTRUE(last_kest_added)){
+                    if(cest_tmp[cest_idx, "INT_EXT"] == "INT"){
+                      tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, cest_tmp[cest_idx, "CONC"], NA, NA, NA)
+                    } else if(cest_tmp[cest_idx, "INT_EXT"] == "EXT"){
+                      tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, NA, cest_tmp[cest_idx, "CONC"], NA, NA)
+                    }
+                    est_data[est_idx,] <- tmp_est_row
+                    est_idx <- est_idx + 1
+                    cest_idx <- cest_idx + 1 
+                  } else if(as.numeric(cest_tmp[cest_idx, "TIME"]) <= as.numeric(time[kest_idx])){
                     if(!(cest_tmp[cest_idx, "TIME"] %in% time)){
 ##                      2019-11-12/RD/ Commented the way to retrieve the PKDATAROWID, need to find any alternative
 ##                      
-                      #pkdr_idx <- which(tmp_df[,map_data$TIME] == cest_tmp[cest_idx, "TIME"])
                       if(cest_tmp[cest_idx, "INT_EXT"] == "INT"){
                         tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, cest_tmp[cest_idx, "CONC"], NA, NA, NA)
                       } else if(cest_tmp[cest_idx, "INT_EXT"] == "EXT"){
@@ -1872,43 +1890,71 @@ print("in AUCINFOi comp required")
                       }
                       est_data[est_idx,] <- tmp_est_row
                       est_idx <- est_idx + 1
-                      cest_idx <- cest_idx + 1
+                      if(cest_idx == nrow(cest_tmp)){
+                        last_cest_added <- TRUE
+                      } else {
+                        cest_idx <- cest_idx + 1 
+                      }
                     } else {
                       if(cest_tmp[cest_idx, "INT_EXT"] == "INT"){
                         est_row[5] <- cest_tmp[cest_idx, "CONC"]
-                        cest_idx <- cest_idx + 1
                       } else if(cest_tmp[cest_idx, "INT_EXT"] == "EXT"){
                         est_row[6] <- cest_tmp[cest_idx, "CONC"]
-                        cest_idx <- cest_idx + 1
+                      }
+                      est_data[est_idx,] <- est_row
+                      est_idx <- est_idx + 1 
+                      if(cest_idx == nrow(cest_tmp)){
+                        last_cest_added <- TRUE
+                      } else {
+                        cest_idx <- cest_idx + 1 
+                      }
+                      if(kest_idx == length(pkdataid)){
+                        last_kest_added <- TRUE
+                      } else {
+                        kest_idx <- kest_idx + 1 
                       }
                     }
                   } else {
-##                    2019-11-13/RD/ Added to account for interpolation/extrapolation data that occurs after last time value to return as an output
-## 
-                    if(cest_tmp[cest_idx, "TIME"] > time[length(pkdataid)]){
-                      if(!isTRUE(last_est_added)){
-                        est_data[est_idx,] <- est_row
-                        est_idx <- est_idx + 1
-                        last_est_added <- TRUE
-                      }
-                      if(cest_tmp[cest_idx, "INT_EXT"] == "INT"){
-                        tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, cest_tmp[cest_idx, "CONC"], NA, NA, NA)
-                      } else if(cest_tmp[cest_idx, "INT_EXT"] == "EXT"){
-                        tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, NA, cest_tmp[cest_idx, "CONC"], NA, NA)
-                      }
-                      est_data[est_idx,] <- tmp_est_row
-                      est_idx <- est_idx + 1
-                      cest_idx <- cest_idx + 1
+                    est_data[est_idx,] <- est_row
+                    est_idx <- est_idx + 1 
+                    if(kest_idx == length(pkdataid)){
+                      last_kest_added <- TRUE
                     } else {
-                      break 
+                      kest_idx <- kest_idx + 1 
                     }
                   }
                 }
-              }
-              if(!isTRUE(last_est_added)){
+                if(isTRUE(last_cest_added)){
+                  est_row <- c(pkdataid[kest_idx], unique(data_data[,map_data$SDEID])[i], time[kest_idx], cest_kel[kest_idx], NA, NA, NA, NA)
+### 2019-10-06/TGT/ Add CEST at TLAST
+                  if(time[kest_idx]==t_last) { est_row[8] <- c_est }
+                  
+                  est_data[est_idx,] <- est_row
+                  est_idx <- est_idx + 1 
+                  kest_idx <- kest_idx + 1  
+                } else {
+                  break
+                }
+              } else {
+                est_row <- c(pkdataid[kest_idx], unique(data_data[,map_data$SDEID])[i], time[kest_idx], cest_kel[kest_idx], NA, NA, NA, NA)
+### 2019-10-06/TGT/ Add CEST at TLAST
+                if(time[kest_idx]==t_last) { est_row[8] <- c_est }
+                
                 est_data[est_idx,] <- est_row
                 est_idx <- est_idx + 1 
+                kest_idx <- kest_idx + 1
               }
+            }
+          } else if(nrow(cest_tmp) > 0){
+            cest_tmp <- cest_tmp[order(cest_tmp$TIME), ]
+            for(cest_idx in 1:nrow(cest_tmp)){
+              if(cest_tmp[cest_idx, "INT_EXT"] == "INT"){
+                tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, cest_tmp[cest_idx, "CONC"], NA, NA, NA)
+              } else if(cest_tmp[cest_idx, "INT_EXT"] == "EXT"){
+                tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, NA, cest_tmp[cest_idx, "CONC"], NA, NA)
+              }
+              est_data[est_idx,] <- tmp_est_row
+              est_idx <- est_idx + 1
             }
           }
         }
@@ -2061,8 +2107,11 @@ print("in AUCINFOi comp required")
 ###        if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
         if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
           if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
-            row_data <- c(row_data, "FALSE")
+            row_data <- c(row_data, 0)
+          } else {
+            row_data <- c(row_data, 0)
           }
+          print(row_data)
         }
 ###        if("THALF" %in% parameter_list) {
         if(disp_required[["THALF"]]) {
@@ -2328,7 +2377,11 @@ print("in AUCINFOi comp required")
         computation_df[,flag_df$VAR[f]] <- as.numeric(computation_df[,flag_df$VAR[f]])
       }
       if(nrow(computation_df[eval(parse(text=flag_subset)),]) > 0){
-        computation_df[eval(parse(text=flag_subset)),][,"FLGACCEPTKEL"] <- 1
+        print(computation_df[eval(parse(text=flag_subset)),][,"FLGACCEPTKEL"])
+        print(str(computation_df[eval(parse(text=flag_subset)),][,"FLGACCEPTKEL"]))
+        print(flag_subset)
+        print(names(computation_df))
+        computation_df[eval(parse(text=flag_subset)),][,"FLGACCEPTKEL"] <- rep("1", length(computation_df[eval(parse(text=flag_subset)),][,"FLGACCEPTKEL"]))
       }
       for(f in 1:length(flag_df$VAR)){
         computation_df[,flag_df$VAR[f]] <- as.character(computation_df[,flag_df$VAR[f]])
