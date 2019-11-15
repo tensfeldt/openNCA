@@ -327,7 +327,6 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     elist <- c("PKDATAROWID", "SDEID","TIME","CEST_KEL","CEST_INT","CEST_EXT","CEST_C0","CEST_TLAST")
     est_data <- data.frame(matrix(ncol = length(elist), nrow = 0))
     names(est_data) <- elist
-    est_idx <- 1
 ###  }
   
 ### 2018-08-09/TGT/ Re-position timing of creation of template computation_df
@@ -1737,114 +1736,44 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###            cest_kel <- rep(NA, length(conc))
           }
 
-##          2019-11-14/RD/ Updated logic for interpolation/extrapolation data to return as an output
-## 
+          tmp_est_data <- data.frame(matrix(ncol = length(elist), nrow = 0))
+          names(tmp_est_data) <- elist
+          est_idx <- 1
           if(length(pkdataid) > 0){
-            cest_idx <- 1
-            kest_idx <- 1
-##            2019-11-13/RD/ Added to account for last value of interpolation/extrapolation data to return as an output
-## 
-            last_kest_added <- FALSE
-            last_cest_added <- FALSE
-            while(kest_idx <= length(pkdataid)){
-##              2019-11-08/RD/ Added to account for interpolation/extrapolation data to return as an output
-##             
+            for(e in 1:length(pkdataid)){
+              est_row <- c(pkdataid[e], unique(data_data[,map_data$SDEID])[i], time[e], cest_kel[e], NA, NA, NA, NA)
+### 2019-10-06/TGT/ Add CEST at TLAST
+              if(time[e]==t_last) { est_row[8] <- c_est }
+              
               if(nrow(cest_tmp) > 0){
-##                2019-11-14/RD/ Added to account for correct ordering of time for interpolation/extrapolation data to return as an output
-##             
-                cest_tmp <- cest_tmp[order(cest_tmp$TIME), ]
-                while(cest_idx <= nrow(cest_tmp)){
-                  est_row <- c(pkdataid[kest_idx], unique(data_data[,map_data$SDEID])[i], time[kest_idx], cest_kel[kest_idx], NA, NA, NA, NA)
-### 2019-10-06/TGT/ Add CEST at TLAST
-                  if(time[kest_idx]==t_last) { est_row[8] <- c_est }
-                  
-                  if(isTRUE(last_kest_added)){
-                    if(cest_tmp[cest_idx, "INT_EXT"] == "INT"){
-                      tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, cest_tmp[cest_idx, "CONC"], NA, NA, NA)
-                    } else if(cest_tmp[cest_idx, "INT_EXT"] == "EXT"){
-                      tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, NA, cest_tmp[cest_idx, "CONC"], NA, NA)
-                    }
-                    est_data[est_idx,] <- tmp_est_row
-                    est_idx <- est_idx + 1
-                    cest_idx <- cest_idx + 1 
-                  } else if(as.numeric(cest_tmp[cest_idx, "TIME"]) <= as.numeric(time[kest_idx])){
-                    if(!(cest_tmp[cest_idx, "TIME"] %in% time)){
-##                      2019-11-12/RD/ Commented the way to retrieve the PKDATAROWID, need to find any alternative
-##                      
-                      if(cest_tmp[cest_idx, "INT_EXT"] == "INT"){
-                        tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, cest_tmp[cest_idx, "CONC"], NA, NA, NA)
-                      } else if(cest_tmp[cest_idx, "INT_EXT"] == "EXT"){
-                        tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, NA, cest_tmp[cest_idx, "CONC"], NA, NA)
-                      }
-                      est_data[est_idx,] <- tmp_est_row
-                      est_idx <- est_idx + 1
-                      if(cest_idx == nrow(cest_tmp)){
-                        last_cest_added <- TRUE
-                      } else {
-                        cest_idx <- cest_idx + 1 
-                      }
-                    } else {
-                      if(cest_tmp[cest_idx, "INT_EXT"] == "INT"){
-                        est_row[5] <- cest_tmp[cest_idx, "CONC"]
-                      } else if(cest_tmp[cest_idx, "INT_EXT"] == "EXT"){
-                        est_row[6] <- cest_tmp[cest_idx, "CONC"]
-                      }
-                      est_data[est_idx,] <- est_row
-                      est_idx <- est_idx + 1 
-                      if(cest_idx == nrow(cest_tmp)){
-                        last_cest_added <- TRUE
-                      } else {
-                        cest_idx <- cest_idx + 1 
-                      }
-                      if(kest_idx == length(pkdataid)){
-                        last_kest_added <- TRUE
-                      } else {
-                        kest_idx <- kest_idx + 1 
-                      }
-                    }
-                  } else {
-                    est_data[est_idx,] <- est_row
-                    est_idx <- est_idx + 1 
-                    if(kest_idx == length(pkdataid)){
-                      last_kest_added <- TRUE
-                    } else {
-                      kest_idx <- kest_idx + 1 
-                    }
+                cest_idx <- which(cest_tmp$TIME == time[e])
+                if(length(cest_idx) > 0){
+                  curr_cest <- cest_tmp[cest_idx,]
+                  if(curr_cest[,"INT_EXT"] == "INT"){
+                    est_row[5] <- curr_cest[,"CONC"]
+                  } else if(curr_cest[,"INT_EXT"] == "EXT"){
+                    est_row[6] <- curr_cest[,"CONC"]
                   }
+                  cest_tmp <- cest_tmp[-cest_idx,]
                 }
-                if(isTRUE(last_cest_added)){
-                  est_row <- c(pkdataid[kest_idx], unique(data_data[,map_data$SDEID])[i], time[kest_idx], cest_kel[kest_idx], NA, NA, NA, NA)
-### 2019-10-06/TGT/ Add CEST at TLAST
-                  if(time[kest_idx]==t_last) { est_row[8] <- c_est }
-                  
-                  est_data[est_idx,] <- est_row
-                  est_idx <- est_idx + 1 
-                  kest_idx <- kest_idx + 1  
-                } else {
-                  break
-                }
-              } else {
-                est_row <- c(pkdataid[kest_idx], unique(data_data[,map_data$SDEID])[i], time[kest_idx], cest_kel[kest_idx], NA, NA, NA, NA)
-### 2019-10-06/TGT/ Add CEST at TLAST
-                if(time[kest_idx]==t_last) { est_row[8] <- c_est }
-                
-                est_data[est_idx,] <- est_row
-                est_idx <- est_idx + 1 
-                kest_idx <- kest_idx + 1
               }
-            }
-          } else if(nrow(cest_tmp) > 0){
-            cest_tmp <- cest_tmp[order(cest_tmp$TIME), ]
-            for(cest_idx in 1:nrow(cest_tmp)){
-              if(cest_tmp[cest_idx, "INT_EXT"] == "INT"){
-                tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, cest_tmp[cest_idx, "CONC"], NA, NA, NA)
-              } else if(cest_tmp[cest_idx, "INT_EXT"] == "EXT"){
-                tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[cest_idx, "TIME"], NA, NA, cest_tmp[cest_idx, "CONC"], NA, NA)
-              }
-              est_data[est_idx,] <- tmp_est_row
+              tmp_est_data[est_idx,] <- est_row
               est_idx <- est_idx + 1
             }
           }
+          if(nrow(cest_tmp) > 0){
+            for(c in 1:nrow(cest_tmp)){
+              if(cest_tmp[c,"INT_EXT"] == "INT"){
+                tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, cest_tmp[c,"CONC"], NA, NA, NA) 
+              } else if(cest_tmp[c,"INT_EXT"] == "INT"){
+                tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, NA, cest_tmp[c,"CONC"], NA, NA)
+              }
+              tmp_est_data[est_idx,] <- tmp_est_row
+              est_idx <- est_idx + 1
+            }
+          }
+          tmp_est_data <- tmp_est_data[order(tmp_est_data$TIME), ]
+          est_data <- rbind(est_data, tmp_est_data)
         }
 
         #computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], unlist(c_max), unlist(c_min), unlist(c_last),
