@@ -949,7 +949,7 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
 
           selected_idx <- NA
-          saved_kel_opt <- 0
+          saved_kel_opt <- -1
           for(k in 1:length(ulist)){
             sel_time <- ulist[[k]]
             sel_conc <- tmp_conc[match(sel_time, tmp_time)]
@@ -972,10 +972,10 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             } else {
               kel_opt <- 0
             }
-
+            
             if(!is.na(kel_opt)){
               if(kel_opt > saved_kel_opt){
-                saved_kel_opt <- kelr_opt
+                saved_kel_opt <- kel_opt
                 selected_idx <- match(sel_time, orig_time)
               }
             }
@@ -1475,16 +1475,16 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 if(is.numeric(tau_val) && is.numeric(last_crit_factor)){
                   row_data <- c(row_data, ifelse(last_time >= lt_accept_crit, 1, 0))
                 } else {
-                  row_data <- c(row_data, NA)
+                  row_data <- c(row_data, 0)
                 }
               } else {
-                row_data <- c(row_data, NA)
+                row_data <- c(row_data, 0)
               }
             } else {
-              row_data <- c(row_data, NA)
+              row_data <- c(row_data, 0)
             }
           } else {
-            row_data <- c(row_data, NA)
+            row_data <- c(row_data, 0)
           }
         }
         if(disp_required[["AUCALL"]]) {

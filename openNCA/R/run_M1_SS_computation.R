@@ -344,10 +344,9 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   col_names <- c("SDEID")
   
   if(disp_required[["DOSEi"]]){
-    col_names <- c(col_names, unlist(dosevar))
-    regular_int_type <- c(regular_int_type, unlist(dosevar))
+    col_names <- c(col_names, rep(paste0("DOSE",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("DOSE",1:di_col)))
   }
-  
   if(disp_required[["DOSEC"]]) {
     col_names <- c(col_names, "DOSEC")
     regular_int_type <- c(regular_int_type, "DOSEC")
@@ -1018,10 +1017,13 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
 
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
-    #print(unique(data_data[,map_data$SDEID])[i])
     tryCatch({
 ###      if("CMAXi" %in% parameter_list) {
 ###      if(parameter_required("^CMAXi$", parameter_list) || length(dependent_parameters("^CMAXi$"))>0){
+      if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]){
+        dose_ci <- list()
+      }
+      
       if(comp_required[["CMAXi"]]){
         c_maxi <- list()
       }
@@ -1304,9 +1306,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          orig_conc <- tmp_df[,map_data$CONC]
           tmp_time <- orig_time
           tmp_conc <- orig_conc
-
-          #print(tmp_time)
-          #print(tmp_conc)
+          
           if("FLGNOCMAX" %in% names(map_data) && (map_data$FLGNOCMAX == 1 || map_data$FLGNOCMAX == 0)){
             flg_no_cmax <- as.logical(map_data$FLGNOCMAX)
             if(flg_no_cmax){
@@ -1344,10 +1344,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               tmp_conc <- orig_conc[s_conc:e_conc]
             }
           }
-          #print("new data")
-          #print(tmp_time)
-          #print(tmp_conc)
-          #print("------")
 
           kel_n <- as.numeric(flag_df$CRIT[match("KELNOPT", flag_df$VAR)])
           kel_op <- flag_df$OPR[match("KELNOPT", flag_df$VAR)]
@@ -1364,7 +1360,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               ulist <- c(ulist,tlist)
             }
           }
-          #print(ulist)
 
           kelr_val <- kel_r(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])[["KELRSQ"]]
           if("AUCXPCTO" %in% flag_df$VAR){
@@ -1377,12 +1372,10 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
           #print("for loop")
           selected_idx <- NA
-          saved_kel_opt <- 0
+          saved_kel_opt <- -1
           for(k in 1:length(ulist)){
             sel_time <- ulist[[k]]
             sel_conc <- tmp_conc[match(sel_time, tmp_time)]
-            #print(sel_time)
-            #print(sel_conc)
 
             kelr_opt <- kel_r(conc = sel_conc, time = sel_time)[["KELRSQ"]]
             if("AUCXPCTO" %in% flag_df$VAR){
@@ -1409,8 +1402,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 selected_idx <- match(sel_time, orig_time)
               }
             }
-            #print("selected KEL Flags")
-            #print(selected_idx)
           }
           tmp_kel_flag <- rep(1, length(kel_flag))
           tmp_kel_flag[selected_idx] <- 0
@@ -1574,10 +1565,10 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
           if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]) {
             if(!is.na(tmp_dose)) { 
-                dose_c[d] <- dosec(data = tmp_di_df, map = map_data, idose=d)
+                dose_ci[[d]] <- dosec(data = tmp_di_df, map = map_data, idose=d)
             }
             else {
-              dose_c[d] <- dose_c
+              dose_ci[[d]] <- dose_c
             }
           }
 
@@ -1787,7 +1778,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if(parameter_required("^CLFTAUi$", parameter_list) || length(dependent_parameters("^CLFTAUi$"))>0){
           if(comp_required[["CLFTAUi"]]){
 ###              clf_tau[[d]] <- clftau(auctau = auctau[[d]], dose = tmp_dose)
-            clf_tau[[d]] <- clftau(auctau = auctau[[d]], dose = dose_c[d])
+            clf_tau[[d]] <- clftau(auctau = auctau[[d]], dose = dose_ci[[d]])
           }
 ###          if("CLFTAUWi" %in% parameter_list && "CLFTAUi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###          if(parameter_required("^CLFTAUWi$", parameter_list) || length(dependent_parameters("^CLFTAUWi$"))>0){
@@ -1809,7 +1800,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if(parameter_required("^VZFTAUi$", parameter_list) || length(dependent_parameters("^VZFTAUi$"))>0){
           if(comp_required[["VZFTAUi"]]){
 ###            vzf_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose = tmp_dose)
-            vzf_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose = dose_c[d])
+            vzf_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose = dose_ci[[d]])
           }
 ###          if("VZFTAUWi" %in% parameter_list && "VZFTAUi" %in% parameter_list && "KEL" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###          if(parameter_required("^VZFTAUWi$", parameter_list) || length(dependent_parameters("^VZFTAUWi$"))>0){
@@ -2121,12 +2112,11 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["DOSEi"]]){
           row_data <- c(row_data, unlist(dose))
         }
-
         if(disp_required[["DOSEC"]]) {
           row_data <- c(row_data, dose_c)
         }
         if(disp_required[["DOSECi"]]) {
-          row_data <- c(row_data, dose_c)
+          row_data <- c(row_data, unlist(dose_ci))
         }
 ###        if("CMAX" %in% parameter_list) {
 ###        if(parameter_required("^CMAX$", parameter_list) || length(dependent_parameters("^CMAX$"))>0){
@@ -2314,16 +2304,16 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 if(is.numeric(tau_val) && is.numeric(last_crit_factor)){
                   row_data <- c(row_data, ifelse(last_time >= lt_accept_crit, 1, 0))
                 } else {
-                  row_data <- c(row_data, NA)
+                  row_data <- c(row_data, 0)
                 }
               } else {
-                row_data <- c(row_data, NA)
+                row_data <- c(row_data, 0)
               }
             } else {
-              row_data <- c(row_data, NA)
+              row_data <- c(row_data, 0)
             }
           } else {
-            row_data <- c(row_data, NA)
+            row_data <- c(row_data, 0)
           }
         }
 ###        if("AUCALL" %in% parameter_list && 'TMAX' %in% parameter_list) {
@@ -2609,7 +2599,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(nr>nc) { c_name <- c(c_name, rep("added", nr-nc)) }
         rdf <- data.frame(col_names=c_name, row_data=r_data)
 ###        print(rdf)
-                
+        
         computation_df[i,] <- row_data
       } else {
         computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], rep(NA, length(names(computation_df))-1))

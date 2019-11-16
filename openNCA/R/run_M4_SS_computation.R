@@ -219,10 +219,10 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   aet_len <- length(unique(data_data[,map_data$TIME]))
 
 ###
-  cat('map_data$TIME: ', map_data$TIME, ' ', 'map_data$NOMTIME: ', map_data$NOMTIME, ' ', length(unique(data_data[,map_data$TIME])), '\n')
-  print(unique(data_data[,map_data$TIME]))
+###  cat('map_data$TIME: ', map_data$TIME, ' ', 'map_data$NOMTIME: ', map_data$NOMTIME, ' ', length(unique(data_data[,map_data$TIME])), '\n')
+###  print(unique(data_data[,map_data$TIME]))
   
-  cat('interval_list:\n');print(interval_list[interval_list %in% parameter_list])
+###  cat('interval_list:\n');print(interval_list[interval_list %in% parameter_list])
   interval_col <- sum(interval_list %in% parameter_list)
   reg_col <- sum(regular_list %in% parameter_list) + ifelse(any(c("KELRSQ","KELRSQA") %in% parameter_list), 1, 0)
   aet_col <- ifelse(sum(aet_list %in% parameter_list) >= 1, sum(aet_list %in% parameter_list), 0)
@@ -230,8 +230,8 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   auc_par_len <- ifelse(auc_list %in% parameter_list && 'AUCNPAIR' %in% names(map_data), ifelse(!(is.null(map_data$AUCNPAIR) || is.na(suppressWarnings(as.numeric(map_data$AUCNPAIR)))), suppressWarnings(as.numeric(map_data$AUCNPAIR)), 0), 0)
   col <- reg_col + (tmp_aet_col * aet_len) + (mid_col * mid_len) + (interval_col * di_col) + 1 + (2 * (aet_len))
 ###
-  cat('tmp_mid_pt:', tmp_mid_pt, '\n')
-  cat(' mid_len: ', mid_len, ' mid_col: ', mid_col, ' interval_col: ', interval_col, ' reg_col: ', reg_col, ' aet_col: ', aet_col, ' tmp_aet_col: ', tmp_aet_col, ' auc_par_len: ', auc_par_len, ' col: ', col, '\n')
+###  cat('tmp_mid_pt:', tmp_mid_pt, '\n')
+###  cat(' mid_len: ', mid_len, ' mid_col: ', mid_col, ' interval_col: ', interval_col, ' reg_col: ', reg_col, ' aet_col: ', aet_col, ' tmp_aet_col: ', tmp_aet_col, ' auc_par_len: ', auc_par_len, ' col: ', col, '\n')
   
   ### 2019-09-19/TGT/ Precompute list of required parameters for col_names, parameter function evaluation and row_data generation  
   comp_required <- list()
@@ -549,7 +549,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   #}
 
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
-      cat("############### SDEID: ", i, '\n')
+###      cat("############### SDEID: ", i, '\n')
     tryCatch({
 ###      if("DIi" %in% parameter_list) {
       if(comp_required[["DIi"]]) {
@@ -754,7 +754,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           aurclast <- auc_last(conc = rt, time = mid_pt, method = method, exflag = auc_flag)
         }
 ###        if("AURCT1_T2" %in% parameter_list && "TMAXRATEi" %in% parameter_list) {
-          cat('comp_required[["AURCT1_T2"]]: ', comp_required[["AURCT1_T2"]], ' auc_pair_check: ', auc_pair_check, '\n')
+###          cat('comp_required[["AURCT1_T2"]]: ', comp_required[["AURCT1_T2"]], ' auc_pair_check: ', auc_pair_check, '\n')
         if(comp_required[["AURCT1_T2"]] && auc_pair_check) {
           aurct <- NULL
           aurc_int <- NULL
@@ -777,8 +777,8 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             aurc_int <- c(aurc_int, rep(NA, (mid_col - length(aurc_int))))
           }
 ###
-          print(aurct)
-          print(aurc_int)
+###          print(aurct)
+###          print(aurc_int)
           
           if(auc_pair_check){
             aurct1_t2 <- NULL
@@ -938,7 +938,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
           if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
-            row_data <- c(row_data, "FALSE")
+            row_data <- c(row_data, 0)
+          } else {
+            row_data <- c(row_data, 0)
           }
         }
 ###        if("THALF" %in% parameter_list) {
@@ -965,7 +967,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("AURCT1_T2" %in% parameter_list) {
         if(disp_required[["AURCT1_T2"]] && auc_pair_check) {
           row_data <- c(row_data, aurct, aurc_int)
-            cat('AURC 1-x: and AURCINT 1-x\n'); print(row_data)
+###            cat('AURC 1-x: and AURCINT 1-x\n'); print(row_data)
           if(auc_pair_check){
             row_data <- c(row_data, aurct1_t2)
           }
@@ -1242,7 +1244,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     colnames(merged_computation) <- gsub('.y','',names(merged_computation))
     computation_df <- merged_computation
   }
-    print(head(computation_df))
+###    print(head(computation_df))
 
 ### 2019-09-17/TGT/ Always return est_data and full results_list
   results_list <- list()

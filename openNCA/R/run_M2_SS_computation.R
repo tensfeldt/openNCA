@@ -1154,7 +1154,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         
         c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
         if(comp_required[["DOSEC"]]) {
-            dose_c <- dosec(data = tmp_df, map = map_data)
+          dose_c <- dosec(data = tmp_df, map = map_data)
         }
 ###        if("CMAX" %in% parameter_list) {
         if(comp_required[["CMAX"]]) {
@@ -1248,7 +1248,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
 
           selected_idx <- NA
-          saved_kel_opt <- 0
+          saved_kel_opt <- -1
           for(k in 1:length(ulist)){
             sel_time <- ulist[[k]]
             sel_conc <- tmp_conc[match(sel_time, tmp_time)]
@@ -2040,7 +2040,6 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           } else {
             row_data <- c(row_data, 0)
           }
-          print(row_data)
         }
 ###        if("THALF" %in% parameter_list) {
         if(disp_required[["THALF"]]) {
@@ -2067,16 +2066,16 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 if(is.numeric(tau_val) && is.numeric(last_crit_factor)){
                   row_data <- c(row_data, ifelse(last_time >= lt_accept_crit, 1, 0))
                 } else {
-                  row_data <- c(row_data, NA)
+                  row_data <- c(row_data, 0)
                 }
               } else {
-                row_data <- c(row_data, NA)
+                row_data <- c(row_data, 0)
               }
             } else {
-              row_data <- c(row_data, NA)
+              row_data <- c(row_data, 0)
             }
           } else {
-            row_data <- c(row_data, NA)
+            row_data <- c(row_data, 0)
           }
         }
 ###        if("AUCALL" %in% parameter_list && 'TMAX' %in% parameter_list) {
@@ -2306,10 +2305,6 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         computation_df[,flag_df$VAR[f]] <- as.numeric(computation_df[,flag_df$VAR[f]])
       }
       if(nrow(computation_df[eval(parse(text=flag_subset)),]) > 0){
-        print(computation_df[eval(parse(text=flag_subset)),][,"FLGACCEPTKEL"])
-        print(str(computation_df[eval(parse(text=flag_subset)),][,"FLGACCEPTKEL"]))
-        print(flag_subset)
-        print(names(computation_df))
         computation_df[eval(parse(text=flag_subset)),][,"FLGACCEPTKEL"] <- rep("1", length(computation_df[eval(parse(text=flag_subset)),][,"FLGACCEPTKEL"]))
       }
       for(f in 1:length(flag_df$VAR)){
