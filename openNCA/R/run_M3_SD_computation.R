@@ -1314,7 +1314,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             for(c in 1:nrow(cest_tmp)){
               if(cest_tmp[c,"INT_EXT"] == "INT"){
                 tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, cest_tmp[c,"CONC"], NA, NA, NA) 
-              } else if(cest_tmp[c,"INT_EXT"] == "INT"){
+              } else if(cest_tmp[c,"INT_EXT"] == "EXT"){
                 tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, NA, cest_tmp[c,"CONC"], NA, NA)
               }
               tmp_est_data[est_idx,] <- tmp_est_row
