@@ -93,7 +93,7 @@ auc_lin_log <- function(conc = NULL, time = NULL, exflag = NULL, t_max = NULL, i
     conc <- conc[exflag]
   }
   
-  if(!isTRUE(interpolate)){
+  if(!isTRUE(interpolate) && !isTRUE(extrapolate)){
     time <- time[!is.na(conc)]
     conc <- conc[!is.na(conc)]  
   }
@@ -124,11 +124,15 @@ auc_lin_log <- function(conc = NULL, time = NULL, exflag = NULL, t_max = NULL, i
         tmp <- data.frame(time, conc)
       }
       for(i in 1:(nrow(tmp)-1)){
-        if(tmp$time[i+1] <= t_max || tmp$conc[i] == 0 || tmp$conc[i+1] == 0 || tmp$conc[i] == tmp$conc[i+1]){
-          auc_df[i] <- ((tmp$conc[i] + tmp$conc[i+1])/2)*(tmp$time[i+1]-tmp$time[i])
+        if(!is.na(tmp$time[i]) && !is.na(tmp$time[i+1]) && !is.na(tmp$conc[i]) && !is.na(tmp$conc[i+1])){
+          if(tmp$time[i+1] <= t_max || tmp$conc[i] == 0 || tmp$conc[i+1] == 0 || tmp$conc[i] == tmp$conc[i+1]){
+            auc_df[i] <- ((tmp$conc[i] + tmp$conc[i+1])/2)*(tmp$time[i+1]-tmp$time[i])
+          } else {
+            tmp_ln <- tmp$conc[i]/tmp$conc[i+1]
+            auc_df[i] <- ((tmp$conc[i] - tmp$conc[i+1])/log(tmp_ln))*(tmp$time[i+1]-tmp$time[i])
+          }
         } else {
-          tmp_ln <- tmp$conc[i]/tmp$conc[i+1]
-          auc_df[i] <- ((tmp$conc[i] - tmp$conc[i+1])/log(tmp_ln))*(tmp$time[i+1]-tmp$time[i])
+          auc_df[i] <- NA
         }
       }
     } else {

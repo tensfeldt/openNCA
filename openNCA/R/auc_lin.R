@@ -90,7 +90,7 @@ auc_lin <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL,
     conc <- conc[exflag]
   }
 
-  if(!isTRUE(interpolate)){
+  if(!isTRUE(interpolate) && !isTRUE(extrapolate)){
     time <- time[!is.na(conc)]
     conc <- conc[!is.na(conc)]  
   }
@@ -117,7 +117,11 @@ auc_lin <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL,
       tmp <- data.frame(time, conc)
     }
     for(i in 1:(nrow(tmp)-1)){
-      auc_df[i] <- ((conc[i] + conc[i+1])/2)*(time[i+1]-time[i])
+      if(!is.na(tmp$time[i]) && !is.na(tmp$time[i+1]) && !is.na(tmp$conc[i]) && !is.na(tmp$conc[i+1])){
+        auc_df[i] <- ((conc[i] + conc[i+1])/2)*(time[i+1]-time[i])
+      } else {
+        auc_df[i] <- NA
+      }
     }
     auc_df <- as.numeric(auc_df)
     auc <- sum(auc_df, na.rm = TRUE)

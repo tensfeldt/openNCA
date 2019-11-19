@@ -919,14 +919,14 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   #    }
   #  }
   #}
-  if(optimize_kel && (!"TMAX" %in% parameter_list || !"TLAST" %in% parameter_list || !"CMAX" %in% parameter_list || !"CLAST" %in% parameter_list || !"AUCLAST" %in% parameter_list ||
+  if(isTRUE(optimize_kel) && (!"TMAX" %in% parameter_list || !"TLAST" %in% parameter_list || !"CMAX" %in% parameter_list || !"CLAST" %in% parameter_list || !"AUCLAST" %in% parameter_list ||
      !"FLGACCEPTKELCRIT" %in% names(map_data) || !"FLGEXKEL" %in% names(map_data) || !map_data$FLGEXKEL %in% names(data_data))){
 ### 2019-09-05/TGT/ Fixed spelling
 ###    warning("Kel optimization cannot be performed because 'TMAX', 'TLAST', 'CMAX', 'CLAST', 'AUCLAST' are not part of the calulcated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGXKEL' are not present in the dataset")
     warning("Kel optimization cannot be performed because 'TMAX', 'TLAST', 'CMAX', 'CLAST', 'AUCLAST' are not part of the calculated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGXKEL' are not present in the dataset")
   }
 
-  if(optimize_kel && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
+  if(isTRUE(optimize_kel) && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
      "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
     kel_flag_optimized <- integer()
   }
@@ -1176,7 +1176,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(comp_required[["AUCLAST"]]) {
           auclast <- auc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_last, t_max = t_max)
         }
-        if(optimize_kel && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
+        if(isTRUE(optimize_kel) && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
            "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
 ### 2019-09-28/TGT/ move orig_time/orig_conc assignments outside the evaluation loop
 ###          orig_time <- tmp_df[,map_data$TIME]
@@ -1185,8 +1185,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           tmp_conc <- orig_conc
 
           if("FLGNOCMAX" %in% names(map_data) && (map_data$FLGNOCMAX == 1 || map_data$FLGNOCMAX == 0)){
-            flg_no_cmax <- as.logical(map_data$FLGNOCMAX)
-            if(flg_no_cmax){
+            flg_no_cmax <- as.logical(as.numeric(map_data$FLGNOCMAX))
+            if(isTRUE(flg_no_cmax)){
               if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
                 s_time <- match(t_max, orig_time)+1
                 e_time <- match(t_last, orig_time)
@@ -1274,7 +1274,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
             if(!is.na(kel_opt)){
               if(kel_opt > saved_kel_opt){
-                saved_kel_opt <- kelr_opt
+                saved_kel_opt <- kel_opt
                 selected_idx <- match(sel_time, orig_time)
               }
             }
@@ -2366,7 +2366,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   results_list$data_out <- computation_df
   results_list$est_data <- est_data
 
-  if(optimize_kel && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
+  if(isTRUE(optimize_kel) && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
      "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
 ###    if("KEL" %in% parameter_list){
 ###      results_list <- list()

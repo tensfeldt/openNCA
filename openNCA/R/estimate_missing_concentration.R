@@ -67,6 +67,7 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, auc_method 
           tmp$INT_EXT[1] <- "EXT"
         } else {
           conc[1] <- NA
+          tmp$INT_EXT[1] <- "EXT"
         }
       }
 ##    2019-11-08/RD Added for Interpolation for AUC End time has no data
@@ -94,6 +95,7 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, auc_method 
             tmp$INT_EXT[nrow(tmp)] <- "EXT"
           } else {
             conc[nrow(tmp)] <- NA
+            tmp$INT_EXT[nrow(tmp)] <- "EXT"
           }
         }
       }
