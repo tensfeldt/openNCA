@@ -13,11 +13,12 @@
 #' @param model The model specification (either 'M1', 'M2', 'M3', or 'M4')
 #' @param dosing_type The dosing type specification (either 'SD' or 'SS')
 #' @param told The time of last dose (given in a numeric value)
+#' @param kel The KEL value (given as a numeric)
 #' @param orig_conc The original (full) concentration data (given in a numeric vector)
 #' @param orig_time The original (full) time data (given in a numeric vector)
 #' 
 #! @export
-auc_lin_up_log_down <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL, extrapolate = NULL, model = NULL, dosing_type = NULL, told = NULL, orig_conc = NULL, orig_time = NULL){
+auc_lin_up_log_down <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL, extrapolate = NULL, model = NULL, dosing_type = NULL, told = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in auc_lin_up_log_down: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -115,7 +116,7 @@ auc_lin_up_log_down <- function(conc = NULL, time = NULL, exflag = NULL, interpo
     if(isTRUE(interpolate) || isTRUE(extrapolate)){
 ##      2019-11-08/RD Added helper function for Interpolation
 ##
-      est_tmp <- estimate_missing_concentration(conc = conc, time = time, auc_method = "LIN", model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time)
+      est_tmp <- estimate_missing_concentration(conc = conc, time = time, auc_method = "LIN", model = model, dosing_type = dosing_type, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time)
       conc <- est_tmp[[1]]
       tmp <- data.frame(time, conc)
     }

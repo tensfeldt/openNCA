@@ -6,11 +6,12 @@
 #' @param model The model specification (either 'M1', 'M2', 'M3', or 'M4')
 #' @param dosing_type The dosing type specification (either 'SD' or 'SS')
 #' @param told The time of last dose (given in a numeric value)
+#' @param kel The KEL value (given as a numeric)
 #' @param orig_conc The original (full) concentration data (given in a numeric vector)
 #' @param orig_time The original (full) time data (given in a numeric vector)
 #' 
 #' 
-estimate_missing_concentration <- function(conc = NULL, time = NULL, auc_method = NULL, model = NULL, dosing_type = NULL, told = NULL, orig_conc = NULL, orig_time = NULL) {
+estimate_missing_concentration <- function(conc = NULL, time = NULL, auc_method = NULL, model = NULL, dosing_type = NULL, told = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL) {
   if(is.null(auc_method)){
     stop("Error in estimate_missing_concentration: 'auc_method' is NULL")
   }
@@ -61,9 +62,8 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, auc_method 
         }
         tmp$INT_EXT[1] <- "INT"
       } else if(time[1] >= orig_time[length(orig_time)]){
-        kel_v <- kel(conc = conc, time = time)
-        if(!is.na(kel_v[["KEL"]])){
-          conc[1] <- cest(conc = conc, time = time, t_last = time[length(time)])
+        if(!is.na(kel[["KEL"]])){
+          conc[1] <- cest(conc = conc, time = time, t_last = time[length(time)], kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
           tmp$INT_EXT[1] <- "EXT"
         } else {
           conc[1] <- NA
@@ -83,9 +83,8 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, auc_method 
         }
         tmp$INT_EXT[nrow(tmp)] <- "INT"
       } else {
-        kel_v <- kel(conc = conc, time = time)
-        if(!is.na(kel_v[["KEL"]])){
-          conc[nrow(tmp)] <- cest(conc = conc, time = time, t_last = time[length(time)])
+        if(!is.na(kel[["KEL"]])){
+          conc[nrow(tmp)] <- cest(conc = conc, time = time, t_last = time[length(time)], kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
           tmp$INT_EXT[nrow(tmp)] <- "EXT"
         } else {
           min_lim <- orig_time[length(orig_time)] - (orig_time[length(orig_time)] * 0.05)

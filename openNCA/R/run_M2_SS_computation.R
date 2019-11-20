@@ -436,6 +436,22 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, rep(paste0("TLAST",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("TLAST",1:di_col)))
   }
+  if(disp_required[["CTROUGHi"]]){
+    col_names <- c(col_names, rep(paste0("CTROUGH",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("CTROUGH",1:di_col)))
+  }
+  if(disp_required[["CTROUGHENDi"]]){
+    col_names <- c(col_names, rep(paste0("CTROUGHEND",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("CTROUGHEND",1:di_col)))
+  }
+  if(disp_required[["PTROUGHRi"]]){
+    col_names <- c(col_names, rep(paste0("PTROUGHR",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("PTROUGHR",1:di_col)))
+  }
+  if(disp_required[["PTROUGHRENDi"]]){
+    col_names <- c(col_names, rep(paste0("PTROUGHREND",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("PTROUGHREND",1:di_col)))
+  }
   if(disp_required[["KEL"]]) {
     col_names <- c(col_names, "KEL")
     regular_int_type <- c(regular_int_type, "KEL")
@@ -979,6 +995,18 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(comp_required[["LASTTIMEi"]]) {
         last_timei <- list()
       }
+      if(comp_required[["CTROUGHi"]]){
+        c_troughi <- list()
+      }
+      if(comp_required[["CTROUGHENDi"]]){
+        c_troughendi <- list()
+      }
+      if(comp_required[["PTROUGHRi"]]){
+        p_troughri <- list()
+      }
+      if(comp_required[["PTROUGHRENDi"]]){
+        p_troughrendi <- list()
+      }
 ###      if("AUCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
       if(comp_required[["AUCINFOi"]]) {
         aucinfoi <- list()
@@ -1310,6 +1338,18 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("LASTTIME" %in% parameter_list) {
         if(comp_required[["LASTTIME"]]) {
           last_time <- lasttime(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        }
+        if(comp_required[["CTROUGHi"]]){
+          c_troughi[[d]] <- ctrough(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], tau = tau[[d]], told = told[[d]])
+        }
+        if(comp_required[["CTROUGHENDi"]]){
+          c_troughendi[[d]] <- ctroughend(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], tau = tau[[d]], told = told[[d]])
+        }
+        if(comp_required[["PTROUGHRi"]]){
+          p_troughri[[d]] <- ptroughr(cmax = c_maxi[[d]], ctrough = c_troughi[[d]])
+        }
+        if(comp_required[["PTROUGHRENDi"]]){
+          p_troughrendi[[d]] <- ptroughrend(cmax = c_maxi[[d]], ctrough = c_troughendi[[d]])
         }
 ###        if("CMAXC" %in% parameter_list && "CMAX" %in% parameter_list && "TMAX" %in% parameter_list && "KEL" %in% parameter_list) {
         if(comp_required[["CMAXC"]]) {
@@ -1752,7 +1792,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##              2019-11-08/RD Changed the call for partial AUCs to account for interpolation
 ##
               if((isTRUE(interpolation) || isTRUE(extrapolation))){
-                tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, interpolate = interpolation, extrapolate = extrapolation, model = "M1", dosing_type = "SD", told = tmp_told, orig_conc = orig_conc, orig_time = orig_time)
+                tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, interpolate = interpolation, extrapolate = extrapolation, model = "M1", dosing_type = "SD", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time)
                 tmp_auc <- tmp[[1]]
                 if(t == 1){
                   cest_tmp <- tmp[[2]]
@@ -1996,6 +2036,18 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("TLASTi" %in% parameter_list) {
         if(disp_required[["TLASTi"]]) {
           row_data <- c(row_data, unlist(t_lasti))
+        }
+        if(disp_required[["CTROUGHi"]]){
+          row_data <- c(row_data, unlist(c_troughi))
+        }
+        if(disp_required[["CTROUGHENDi"]]){
+          row_data <- c(row_data, unlist(c_troughendi))
+        }
+        if(disp_required[["PTROUGHRi"]]){
+          row_data <- c(row_data, unlist(p_troughri))
+        }
+        if(disp_required[["PTROUGHRENDi"]]){
+          row_data <- c(row_data, unlist(p_troughrendi))
         }
 ###        if("KEL" %in% parameter_list) {
         if(disp_required[["KEL"]]) {

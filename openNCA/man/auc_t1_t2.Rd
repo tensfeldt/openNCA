@@ -6,8 +6,9 @@
 \usage{
 auc_t1_t2(conc = NULL, time = NULL, t1 = NULL, t2 = NULL,
   method = 1, exflag = NULL, t_max = NULL, dose_time = NULL,
-  interpolate = NULL, model = NULL, dosing_type = NULL,
-  told = NULL, orig_conc = NULL, orig_time = NULL)
+  interpolate = NULL, extrapolate = NULL, model = NULL,
+  dosing_type = NULL, told = NULL, orig_conc = NULL,
+  orig_time = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}
@@ -32,6 +33,8 @@ Note: check 'Methods' section below for more details \cr}
 \item{t_max}{The first time at which CMAXi is observed within the dosing interval (numeric value)}
 
 \item{interpolate}{The value to determine whether to interpolate data points (given in a logical form)}
+
+\item{extrapolate}{The value to determine whether to extrapolate data points (given in a logical form)}
 
 \item{model}{The model specification (either 'M1', 'M2', 'M3', or 'M4')}
 

@@ -459,6 +459,22 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "TLAG")
     regular_int_type <- c(regular_int_type, "TLAG")
   }
+  if(disp_required[["CTROUGHi"]]){
+    col_names <- c(col_names, rep(paste0("CTROUGH",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("CTROUGH",1:di_col)))
+  }
+  if(disp_required[["CTROUGHENDi"]]){
+    col_names <- c(col_names, rep(paste0("CTROUGHEND",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("CTROUGHEND",1:di_col)))
+  }
+  if(disp_required[["PTROUGHRi"]]){
+    col_names <- c(col_names, rep(paste0("PTROUGHR",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("PTROUGHR",1:di_col)))
+  }
+  if(disp_required[["PTROUGHRENDi"]]){
+    col_names <- c(col_names, rep(paste0("PTROUGHREND",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("PTROUGHREND",1:di_col)))
+  }
 ###  if("KEL" %in% parameter_list) {
 ###  if(parameter_required("^KEL$", parameter_list) || length(dependent_parameters("^KEL$"))>0){
   if(disp_required[["KEL"]]){
@@ -614,7 +630,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
 ###  if("AUCT" %in% parameter_list || "AUCTDN" %in% parameter_list){
 ###  if(parameter_required("^AUCT$", parameter_list) || parameter_required("^AUCTDN$", parameter_list)){
-  if(disp_required[["AUCT"]]){
+  if(disp_required[["AUCT"]] || disp_required[["AUCTDN"]]){
     col_names <- c(col_names, rep(paste0("AUCINT",1:auc_len)))
   }
 ###  if("AUCT1_T2" %in% parameter_list && "TMAXi" %in% parameter_list && auc_pair_check) {
@@ -1065,6 +1081,18 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###      if(parameter_required("^LASTTIMEi$", parameter_list) || length(dependent_parameters("^LASTTIMEi$"))>0){
       if(comp_required[["LASTTIMEi"]]){
         last_timei <- list()
+      }
+      if(comp_required[["CTROUGHi"]]){
+        c_troughi <- list()
+      }
+      if(comp_required[["CTROUGHENDi"]]){
+        c_troughendi <- list()
+      }
+      if(comp_required[["PTROUGHRi"]]){
+        p_troughri <- list()
+      }
+      if(comp_required[["PTROUGHRENDi"]]){
+        p_troughrendi <- list()
       }
 ###      if("AUCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
 ###      if(parameter_required("^AUCINFOi$", parameter_list) || length(dependent_parameters("^AUCINFOi$"))>0){
@@ -1638,6 +1666,18 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["LASTTIMEi"]]){
             last_timei[[d]] <- lasttime(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME])
           }
+          if(comp_required[["CTROUGHi"]]){
+            c_troughi[[d]] <- ctrough(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], tau = tau[[d]], told = told[[d]])
+          }
+          if(comp_required[["CTROUGHENDi"]]){
+            c_troughendi[[d]] <- ctroughend(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], tau = tau[[d]], told = told[[d]])
+          }
+          if(comp_required[["PTROUGHRi"]]){
+            p_troughri[[d]] <- ptroughr(cmax = c_maxi[[d]], ctrough = c_troughi[[d]])
+          }
+          if(comp_required[["PTROUGHRENDi"]]){
+            p_troughrendi[[d]] <- ptroughrend(cmax = c_maxi[[d]], ctrough = c_troughendi[[d]])
+          }
 ### 2019-08-30/TGT/ Remove "CMAXCi" since only valid for M2 Bolus administration applications
 ###          if("CMAXCi" %in% parameter_list && "CMAXi" %in% parameter_list && "TMAXi" %in% parameter_list && "KEL" %in% parameter_list) {
 ###            c_maxci[[d]] <- cmaxc(kel = kel_v[["KEL"]], cmax = c_maxi[[d]], c0 = c_0, tmax = t_maxi[[d]])
@@ -1936,7 +1976,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##              2019-11-08/RD Changed the call for partial AUCs to account for interpolation
 ##
               if((isTRUE(interpolation) || isTRUE(extrapolation))){
-                tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, interpolate = interpolation, extrapolate = extrapolation, model = "M1", dosing_type = "SD", told = tmp_told, orig_conc = orig_conc, orig_time = orig_time)
+                tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, interpolate = interpolation, extrapolate = extrapolation, model = "M1", dosing_type = "SD", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time)
                 tmp_auc <- tmp[[1]]
                 if(t == 1){
                   cest_tmp <- tmp[[2]]
@@ -2216,6 +2256,18 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if(parameter_required("^TLAG$", parameter_list) || length(dependent_parameters("^TLAG$"))>0){
         if(disp_required[["TLAG"]]){
           row_data <- c(row_data, unlist(t_lag))
+        }
+        if(disp_required[["CTROUGHi"]]){
+          row_data <- c(row_data, unlist(c_troughi))
+        }
+        if(disp_required[["CTROUGHENDi"]]){
+          row_data <- c(row_data, unlist(c_troughendi))
+        }
+        if(disp_required[["PTROUGHRi"]]){
+          row_data <- c(row_data, unlist(p_troughri))
+        }
+        if(disp_required[["PTROUGHRENDi"]]){
+          row_data <- c(row_data, unlist(p_troughrendi))
         }
 ###        if("KEL" %in% parameter_list) {
 ###        if(parameter_required("^KEL$", parameter_list) || length(dependent_parameters("^KEL$"))>0){

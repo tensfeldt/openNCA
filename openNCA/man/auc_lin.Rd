@@ -5,8 +5,9 @@
 \title{Linear Trapezoidal Area Under the Concentration-Time Curve (AUC) Calculation Method}
 \usage{
 auc_lin(conc = NULL, time = NULL, exflag = NULL,
-  interpolate = NULL, model = NULL, dosing_type = NULL,
-  told = NULL, orig_conc = NULL, orig_time = NULL)
+  interpolate = NULL, extrapolate = NULL, model = NULL,
+  dosing_type = NULL, told = NULL, orig_conc = NULL,
+  orig_time = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}
@@ -16,6 +17,8 @@ auc_lin(conc = NULL, time = NULL, exflag = NULL,
 \item{exflag}{The exclude flag data (given in a numeric vector)}
 
 \item{interpolate}{The value to determine whether to interpolate data points (given in a logical form)}
+
+\item{extrapolate}{The value to determine whether to extrapolate data points (given in a logical form)}
 
 \item{model}{The model specification (either 'M1', 'M2', 'M3', or 'M4')}
 
