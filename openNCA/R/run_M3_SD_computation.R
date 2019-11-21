@@ -337,12 +337,26 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, dosevar)
     regular_int_type <- c(regular_int_type, dosevar)
   }
-  
   if(disp_required[["DOSEC"]]) {
     col_names <- c(col_names, "DOSEC")
     regular_int_type <- c(regular_int_type, "DOSEC")
   }
-
+  if(disp_required[["DOFi"]]){
+    col_names <- c(col_names, "DOF")
+    regular_int_type <- c(regular_int_type, "DOF")
+  }
+  if(disp_required[["CENDINF"]]){
+    col_names <- c(col_names, "CENDINF")
+    regular_int_type <- c(regular_int_type, "CENDINF")
+  }
+  if(disp_required[["CENDINFDN"]]){
+    col_names <- c(col_names, "CENDINFDN")
+    regular_int_type <- c(regular_int_type, "CENDINFDN")
+  }
+  if(disp_required[["TENDINF"]]){
+    col_names <- c(col_names, "TENDINF")
+    regular_int_type <- c(regular_int_type, "TENDINF")
+  }
 ###  if("CMAX" %in% parameter_list) {
   if(disp_required[["CMAX"]]) {
     col_names <- c(col_names, "CMAX")
@@ -489,8 +503,15 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
 ###  if("AUCT" %in% parameter_list && "TMAX" %in% parameter_list) {
   if(disp_required[["AUCT"]]) {
-    col_names <- c(col_names, rep(paste0("AUC",1:auc_len)), rep(paste0("AUCINT",1:auc_len)))
+    col_names <- c(col_names, rep(paste0("AUC",1:auc_len)))
     regular_int_type <- c(regular_int_type, paste0("AUC",1:auc_len))
+  }
+  if(disp_required[["AUCTDN"]]){
+    col_names <- c(col_names, rep(paste0("AUC",1:auc_len,"DN")))
+    regular_int_type <- c(regular_int_type, paste0("AUC",1:auc_len,"DN"))
+  }
+  if(disp_required[["AUCT"]] || disp_required[["AUCTDN"]]){
+    col_names <- c(col_names, rep(paste0("AUCINT",1:auc_len)))
   }
 ###  if("AUCT1_T2" %in% parameter_list && "TMAX" %in% parameter_list && auc_par_len > 0) {
   if(disp_required[["AUCT1_T2"]] && auc_pair_check) {
@@ -817,6 +838,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
       cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
+      tmp_dose <- unique(tmp_df[, dosevar])[1]
       
       if("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data)){
         ex_flag <- as.numeric(tmp_df[,map_data$FLGEXSDE])
@@ -862,7 +884,16 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         
         c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
         if(comp_required[["DOSEC"]]) {
-            dose_c <- dosec(data = tmp_df, map = map_data)
+          dose_c <- dosec(data = tmp_df, map = map_data)
+        }
+        if(comp_required[["CENDINF"]]){
+          cend_inf <- cendinf(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], dof = dof)
+        }
+        if(comp_required[["CENDINFDN"]]){
+          cend_infdn <- cendinf_dn(cendinf = cend_inf, dose = tmp_dose)
+        }
+        if(comp_required[["TENDINF"]]){
+          tend_inf <- tendinf(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], dof = dof)
         }
 ###        if("CMAX" %in% parameter_list) {
         if(comp_required[["CMAX"]]) {
@@ -1053,25 +1084,46 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("AUCT" %in% parameter_list && 'TMAX' %in% parameter_list) {
         if(comp_required[["AUCT"]]) {
           auct <- NULL
+          auctdn <- NULL
           auc_int <- NULL
           for(t in 2:(auc_len+1)){
             tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = tmp_df[,map_data$TIME][1], t2 = tmp_df[,map_data$TIME][t], method = method, exflag = auc_flag, t_max = t_max)
+            tmp_dn <- auc_dn(auc = tmp, dose = tmp_dose)
             if(!is.na(unique(tmp_df[,map_data$TIME])[1]) && !is.na(unique(tmp_df[,map_data$TIME])[t])){
               tmp_int <- paste0(unique(tmp_df[,map_data$TIME])[1], "_", unique(tmp_df[,map_data$TIME])[t])
             } else {
               tmp_int <- NA
             }
 
-            if(is.null(auc_t)){
-              auct <- tmp
+            if(comp_required[["AUCT"]]){
+              if(is.null(auct)){
+                auct <- tmp
+              } else {
+                auct <- c(auct, tmp)
+              }
+            }
+            if(comp_required[["AUCTDN"]]){
+              if(is.null(auctdn)){
+                auctdn <- tmp_dn
+              } else {
+                auctdn <- c(auctdn, tmp_dn)
+              }
+            }
+            if(is.null(auc_int)){
               auc_int <- tmp_int
             } else {
-              auct <- c(auct, tmp)
               auc_int <- c(auc_int, tmp_int)
             }
           }
-          if(length(auct) < auc_col) {
-            auct <- c(auct, rep(NA, (auc_col - length(auct))))
+          if(comp_required[["AUCT"]]){
+            if(length(auct) < auc_col) {
+              auct <- c(auct, rep(NA, (auc_col - length(auct))))
+            }
+          }
+          if(comp_required[["AUCTDN"]]){
+            if(length(auctdn) < auc_col) {
+              auctdn <- c(auctdn, rep(NA, (auc_col - length(auctdn))))
+            }
           }
           if(length(auc_int) < auc_col) {
             auc_int <- c(auc_int, rep(NA, (auc_col - length(auc_int))))
@@ -1349,6 +1401,18 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["DOSEC"]]) {
           row_data <- c(row_data, dose_c)
         }
+        if(disp_required[["DOFi"]]){
+          row_data <- c(row_data, dof)
+        }
+        if(disp_required[["CENDINF"]]){
+          row_data <- c(row_data, cend_inf)
+        }
+        if(disp_required[["CENDINFDN"]]){
+          row_data <- c(row_data, cend_infdn)
+        }
+        if(disp_required[["TENDINF"]]){
+          row_data <- c(row_data, tend_inf)
+        }
 
 ###        if("CMAX" %in% parameter_list) {
         if(disp_required[["CMAX"]]) {
@@ -1506,7 +1570,13 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("AUCT" %in% parameter_list && "TMAX" %in% parameter_list) {
         if(disp_required[["AUCT"]]) {
-          row_data <- c(row_data, auct, auc_int)
+          row_data <- c(row_data, auct)
+        }
+        if(disp_required[["AUCTDN"]]) {
+          row_data <- c(row_data, auctdn)
+        }
+        if(disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) {
+          row_data <- c(row_data, auc_int)
         }
 ###        if("AUCT1_T2" %in% parameter_list && "TMAX" %in% parameter_list && auc_pair_check) {
         if("AUCT1_T2" %in% parameter_list && "TMAX" %in% parameter_list && auc_pair_check) {

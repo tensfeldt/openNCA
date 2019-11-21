@@ -351,7 +351,22 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, rep(paste0("DOSEC",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("DOSEC",1:di_col)))
   }
-
+  if(disp_required[["DOFi"]]){
+    col_names <- c(col_names, rep(paste0("DOF",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("DOF",1:di_col)))
+  }
+  if(disp_required[["CENDINFi"]]){
+    col_names <- c(col_names, rep(paste0("CENDINF",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("CENDINF",1:di_col)))
+  }
+  if(disp_required[["CENDINFDN"]]){
+    col_names <- c(col_names, rep(paste0("CENDINFDN",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("CENDINFDN",1:di_col)))
+  }
+  if(disp_required[["TENDINFi"]]){
+    col_names <- c(col_names, rep(paste0("TENDINF",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("TENDINF",1:di_col)))
+  }
 ###  if("CMAX" %in% parameter_list) {
   if(disp_required[["CMAX"]]) {
     col_names <- c(col_names, "CMAX")
@@ -437,6 +452,22 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if(disp_required[["TLASTi"]]) {
     col_names <- c(col_names, rep(paste0("TLAST",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("TLAST",1:di_col)))
+  }
+  if(disp_required[["CTROUGHi"]]){
+    col_names <- c(col_names, rep(paste0("CTROUGH",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("CTROUGH",1:di_col)))
+  }
+  if(disp_required[["CTROUGHENDi"]]){
+    col_names <- c(col_names, rep(paste0("CTROUGHEND",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("CTROUGHEND",1:di_col)))
+  }
+  if(disp_required[["PTROUGHRi"]]){
+    col_names <- c(col_names, rep(paste0("PTROUGHR",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("PTROUGHR",1:di_col)))
+  }
+  if(disp_required[["PTROUGHRENDi"]]){
+    col_names <- c(col_names, rep(paste0("PTROUGHREND",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("PTROUGHREND",1:di_col)))
   }
 ###  if("KEL" %in% parameter_list) {
   if(disp_required[["KEL"]]) {
@@ -733,15 +764,29 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, rep(paste0("PTR",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("PTR",1:di_col)))
   }
-###  if("VZO" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFOi" %in% parameter_list) {
-  if(disp_required[["VZO"]]) {
-    col_names <- c(col_names, rep(paste0("VZO",1:di_col)))
-    regular_int_type <- c(regular_int_type, rep(paste0("VZO",1:di_col)))
+  if(disp_required[["VSSOi"]]) {
+    col_names <- c(col_names, rep(paste0("VSSO",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("VSSO",1:di_col)))
   }
-###  if("VZP" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFPi" %in% parameter_list) {
-  if(disp_required[["VZP"]]) {
-    col_names <- c(col_names, rep(paste0("VZP",1:di_col)))
-    regular_int_type <- c(regular_int_type, rep(paste0("VZP",1:di_col)))
+  if(disp_required[["VSSPi"]]) {
+    col_names <- c(col_names, rep(paste0("VSSP",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("VSSP",1:di_col)))
+  }
+  if(disp_required[["VSSOWi"]]) {
+    col_names <- c(col_names, rep(paste0("VSSOW",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("VSSOW",1:di_col)))
+  }
+  if(disp_required[["VSSPWi"]]) {
+    col_names <- c(col_names, rep(paste0("VSSPW",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("VSSPW",1:di_col)))
+  }
+  if(disp_required[["VZTAUi"]]) {
+    col_names <- c(col_names, rep(paste0("VZTAU",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("VZTAU",1:di_col)))
+  }
+  if(disp_required[["VZTAUWi"]]) {
+    col_names <- c(col_names, rep(paste0("VZTAUW",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("VZTAUW",1:di_col)))
   }
   col_names <- c(col_names, rep(paste0("CONC",1:(auc_len+1))), rep(paste0("CONCTIME",1:(auc_len+1))))
   regular_int_type <- c(regular_int_type, rep(paste0("CONC",1:(auc_len+1))), rep(paste0("CONCTIME",1:(auc_len+1))))
@@ -921,6 +966,16 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
     #print(unique(data_data[,map_data$SDEID])[i])
     tryCatch({
+      dof <- list()
+      if(comp_required[["CENDINFi"]]){
+        cend_inf <- list()
+      }
+      if(comp_required[["CENDINFDN"]]){
+        cend_infdn <- list()
+      }
+      if(comp_required[["TENDINFi"]]){
+        tend_inf <- list()
+      }
 ###      if("CMAXi" %in% parameter_list) {
       if(comp_required[["CMAXi"]]) {
         c_maxi <- list()
@@ -956,6 +1011,18 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###      if("LASTTIMEi" %in% parameter_list) {
       if(comp_required[["LASTTIMEi"]]) {
         last_timei <- list()
+      }
+      if(comp_required[["CTROUGHi"]]){
+        c_troughi <- list()
+      }
+      if(comp_required[["CTROUGHENDi"]]){
+        c_troughendi <- list()
+      }
+      if(comp_required[["PTROUGHRi"]]){
+        p_troughri <- list()
+      }
+      if(comp_required[["PTROUGHRENDi"]]){
+        p_troughrendi <- list()
       }
 ###      if("AUCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
       if(comp_required[["AUCINFOi"]]) {
@@ -1072,13 +1139,23 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(comp_required[["PTRi"]]) {
         pt_r <- list()
       }
-###      if("VZO" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFOi" %in% parameter_list) {
-      if(comp_required[["VZO"]]) {
-        vz_o <- list()
+      if(comp_required[["VSSOi"]]) {
+        vsso <- list()
       }
-###      if("VZP" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFPi" %in% parameter_list) {
-      if(comp_required[["VZP"]]) {
-        vz_p <- list()
+      if(comp_required[["VSSPi"]]) {
+        vssp <- list()
+      }
+      if(comp_required[["VSSOWi"]]) {
+        vssow <- list()
+      }
+      if(comp_required[["VSSPWi"]]) {
+        vsspw <- list()
+      }
+      if(comp_required[["VZTAUi"]]) {
+        vz_tau <- list()
+      }
+      if(comp_required[["VZTAUWi"]]) {
+        vz_tauw <- list()
       }
 
       tmp_df <- data_data[data_data[,map_data$SDEID] == unique(data_data[,map_data$SDEID])[i],]
@@ -1350,9 +1427,16 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               dose_c[d] <- dose_c
             }
           }
-
-          dof <- ifelse(paste0("DOF",d) %in% names(map_data), ifelse(map_data[c(paste0("DOF",d))] %in% names(data_data), unique(tmp_di_df[,as.character(map_data[c(paste0("DOF",d))])])[1], NA), NA)
-          
+          dof[[d]] <- ifelse(paste0("DOF",d) %in% names(map_data), ifelse(map_data[c(paste0("DOF",d))] %in% names(data_data), unique(tmp_di_df[,as.character(map_data[c(paste0("DOF",d))])])[1], NA), NA)
+          if(comp_required[["CENDINFi"]]){
+            cend_inf[[d]] <- cendinf(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], dof = dof[[d]])
+          }
+          if(comp_required[["CENDINFDN"]]){
+            cend_infdn[[d]] <- cendinf_dn(cendinf = cend_inf[[d]], dose = tmp_dose)
+          }
+          if(comp_required[["TENDINFi"]]){
+            tend_inf[[d]] <- tendinf(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], dof = dof[[d]])
+          }
 ###          if("TAUi" %in% parameter_list) {
           if(comp_required[["TAUi"]] || comp_required[["TAU"]]) {
             tau[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TAU",d))])][1]
@@ -1443,15 +1527,15 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
 ###          if("MRTLASTi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "AUMCLASTi" %in% parameter_list) {
           if(comp_required[["MRTLASTi"]]) {
-            mrtlasti[[d]] <- mrt_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, model = "M2", aucflag = auc_flag, dof = dof, auclast = auclasti[[d]])
+            mrtlasti[[d]] <- mrt_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, model = "M2", aucflag = auc_flag, dof = dof[[d]], auclast = auclasti[[d]])
           }
 ###          if("MRTIVIFOi" %in% parameter_list && "AUCINFOi" %in% parameter_list && "AUCTAUi" %in% parameter_list && "AUMCTAUi" %in% parameter_list){
           if(comp_required[["MRTIVIFOi"]]){
-            mrtivifoi[[d]] <- mrt_ivif_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], dof = dof, orig_conc = tmp_df[,map_data$CONC], orig_time = tmp_df[,map_data$TIME])
+            mrtivifoi[[d]] <- mrt_ivif_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], dof = dof[[d]], orig_conc = tmp_df[,map_data$CONC], orig_time = tmp_df[,map_data$TIME])
           }
 ###          if("MRTIVIFPi" %in% parameter_list && "AUCINFPi" %in% parameter_list && "AUCTAUi" %in% parameter_list && "AUMCTAUi" %in% parameter_list){
           if(comp_required[["MRTIVIFPi"]]){
-            mrtivifpi[[d]] <- mrt_ivif_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], dof = dof, orig_conc = tmp_df[,map_data$CONC], orig_time = tmp_df[,map_data$TIME])
+            mrtivifpi[[d]] <- mrt_ivif_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], dof = dof[[d]], orig_conc = tmp_df[,map_data$CONC], orig_time = tmp_df[,map_data$TIME])
           }
 ###          if("AUCXPCTOi" %in% parameter_list && "AUCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list){
           if(comp_required[["AUCXPCTOi"]]){
@@ -1493,6 +1577,18 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["DOSEi"]]) {
             dose[[d]] <- tmp_dose
           }
+          if(comp_required[["CTROUGHi"]]){
+            c_troughi[[d]] <- ctrough(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], tau = tau[[d]], told = told[[d]])
+          }
+          if(comp_required[["CTROUGHENDi"]]){
+            c_troughendi[[d]] <- ctroughend(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], tau = tau[[d]], told = told[[d]])
+          }
+          if(comp_required[["PTROUGHRi"]]){
+            p_troughri[[d]] <- ptroughr(cmax = c_maxi[[d]], ctrough = c_troughi[[d]])
+          }
+          if(comp_required[["PTROUGHRENDi"]]){
+            p_troughrendi[[d]] <- ptroughrend(cmax = c_maxi[[d]], ctrough = c_troughendi[[d]])
+          }
 ###          if("CLTAUi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
           if(comp_required[["CLTAUi"]]) {
 ###            cl_tau[[d]] <- cltau(auctau = auctau[[d]], dose = tmp_dose)
@@ -1511,16 +1607,25 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["PTRi"]]) {
             pt_r[[d]] <- ptr(cmax = c_maxi[[d]], cmin = c_mini[[d]])
           }
-###          if("VZO" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFOi" %in% parameter_list) {
-          if(comp_required[["VZO"]]) {
-###            vz_o[[d]] <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinfoi[[d]], dose = tmp_dose)
-            vz_o[[d]] <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinfoi[[d]], dose = dose_c[d])
+          if(comp_required[["VSSOi"]]) {
+            vsso[[d]] <- vss(cl = cl_tau[[d]], mrt = mrtivifoi[[d]])
           }
-###          if("VZP" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFPi" %in% parameter_list) {
-          if(comp_required[["VZP"]]) {
-###            vz_p[[d]] <- vzp(kel = kel_v[["KEL"]], aucinfp = aucinfpi[[d]], dose = tmp_dose)
-            vz_p[[d]] <- vzp(kel = kel_v[["KEL"]], aucinfp = aucinfpi[[d]], dose = dose_c[d])
+          if(comp_required[["VSSPi"]]) {
+            vssp[[d]] <- vss(cl = cl_tau[[d]], mrt = mrtivifpi[[d]])
           }
+          if(comp_required[["VSSOWi"]]) {
+            vssow[[d]] <- vssw(vss = vsso[[d]], normbs = norm_bs)
+          }
+          if(comp_required[["VSSPWi"]]) {
+            vsspw[[d]] <- vssw(vss = vssp[[d]], normbs = norm_bs)
+          }
+          if(comp_required[["VZTAUi"]]) {
+            vz_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose = dose_c[d])
+          }
+          if(comp_required[["VZTAUWi"]]) {
+            vz_tauw[[d]] <- vzftauw(vzftau = vz_tau[[d]], normbs = norm_bs)
+          }
+          
           if(("AUCT" %in% parameter_list || "AUCTDN" %in% parameter_list) && 'TMAXi' %in% parameter_list) {
             time <- sort(tmp_df[,map_data$TIME])
             time_di <- sort(tmp_di_df[,map_data$TIME])
@@ -1690,7 +1795,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("MRTLAST" %in% parameter_list && "AUCLAST" %in% parameter_list && "AUMCLAST" %in% parameter_list) {
         if(comp_required[["MRTLAST"]]) {
-          mrtlast <- mrt_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M2", aucflag = auc_flag, dof = dof, auclast = auclast)
+          mrtlast <- mrt_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M2", aucflag = auc_flag, dof = dof[[d]], auclast = auclast)
         }
 ###        if("AUCXPCTO" %in% parameter_list && "AUCINFO" %in% parameter_list && "AUCLAST" %in% parameter_list){
         if(comp_required[["AUCXPCTO"]]){
@@ -1796,7 +1901,18 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["DOSECi"]]) {
           row_data <- c(row_data, dose_c)
         }
-        
+        if(disp_required[["DOFi"]]){
+          row_data <- c(row_data, unlist(dof))
+        }
+        if(disp_required[["CENDINFi"]]){
+          row_data <- c(row_data, unlist(cend_inf))
+        }
+        if(disp_required[["CENDINFDN"]]){
+          row_data <- c(row_data, unlist(cend_infdn))
+        }
+        if(disp_required[["TENDINFi"]]){
+          row_data <- c(row_data, unlist(tend_inf))
+        }
 ###        if("CMAX" %in% parameter_list) {
         if(disp_required[["CMAX"]]) {
           row_data <- c(row_data, c_max)
@@ -1881,6 +1997,18 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("TLASTi" %in% parameter_list) {
         if(disp_required[["TLASTi"]]) {
           row_data <- c(row_data, unlist(t_lasti))
+        }
+        if(disp_required[["CTROUGHi"]]){
+          row_data <- c(row_data, unlist(c_troughi))
+        }
+        if(disp_required[["CTROUGHENDi"]]){
+          row_data <- c(row_data, unlist(c_troughendi))
+        }
+        if(disp_required[["PTROUGHRi"]]){
+          row_data <- c(row_data, unlist(p_troughri))
+        }
+        if(disp_required[["PTROUGHRENDi"]]){
+          row_data <- c(row_data, unlist(p_troughrendi))
         }
 ###        if("KEL" %in% parameter_list) {
         if(disp_required[["KEL"]]) {
@@ -2142,13 +2270,23 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["PTRi"]]) {
           row_data <- c(row_data, unlist(pt_r))
         }
-###        if("VZO" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFOi" %in% parameter_list) {
-        if(disp_required[["VZO"]]) {
-          row_data <- c(row_data, unlist(vz_o))
+        if(disp_required[["VSSOi"]]) {
+          row_data <- c(row_data, unlist(vsso))
         }
-###        if("VZP" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFPi" %in% parameter_list) {
-        if(disp_required[["VZP"]]) {
-          row_data <- c(row_data, unlist(vz_p))
+        if(disp_required[["VSSPi"]]) {
+          row_data <- c(row_data, unlist(vssp))
+        }
+        if(disp_required[["VSSOWi"]]) {
+          row_data <- c(row_data, unlist(vssow))
+        }
+        if(disp_required[["VSSPWi"]]) {
+          row_data <- c(row_data, unlist(vsspw))
+        }
+        if(disp_required[["VZTAUi"]]) {
+          row_data <- c(row_data, unlist(vz_tau))
+        }
+        if(disp_required[["VZTAUWi"]]) {
+          row_data <- c(row_data, unlist(vz_tauw))
         }
         row_data <- c(row_data,
                       c(tmp_df[,map_data$CONC], rep(NA, ((auc_len+1) - length(tmp_df[,map_data$CONC])))),

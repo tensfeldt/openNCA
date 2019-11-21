@@ -7,7 +7,7 @@
 auc_t1_t2(conc = NULL, time = NULL, t1 = NULL, t2 = NULL,
   method = 1, exflag = NULL, t_max = NULL, dose_time = NULL,
   interpolate = NULL, extrapolate = NULL, model = NULL,
-  dosing_type = NULL, told = NULL, orig_conc = NULL,
+  dosing_type = NULL, told = NULL, kel = NULL, orig_conc = NULL,
   orig_time = NULL)
 }
 \arguments{
@@ -40,7 +40,9 @@ Note: check 'Methods' section below for more details \cr}
 
 \item{dosing_type}{The dosing type specification (either 'SD' or 'SS')}
 
-\item{told}{The time of last dose (given in a numeric value)}
+\item{told}{The time of last dose (given as a numeric value)}
+
+\item{kel}{The KEL value (given as a numeric)}
 
 \item{orig_conc}{The original (full) concentration data (given in a numeric vector)}
 

@@ -4,7 +4,7 @@
 \alias{ctrough}
 \title{Pre-dose concentration}
 \usage{
-ctrough(conc = NULL, time = NULL, tau = NULL)
+ctrough(conc = NULL, time = NULL, tau = NULL, told = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

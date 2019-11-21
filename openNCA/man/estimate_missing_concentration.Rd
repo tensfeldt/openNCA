@@ -6,7 +6,7 @@
 \usage{
 estimate_missing_concentration(conc = NULL, time = NULL,
   auc_method = NULL, model = NULL, dosing_type = NULL, told = NULL,
-  orig_conc = NULL, orig_time = NULL)
+  kel = NULL, orig_conc = NULL, orig_time = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}
@@ -20,6 +20,8 @@ estimate_missing_concentration(conc = NULL, time = NULL,
 \item{dosing_type}{The dosing type specification (either 'SD' or 'SS')}
 
 \item{told}{The time of last dose (given in a numeric value)}
+
+\item{kel}{The KEL value (given as a numeric)}
 
 \item{orig_conc}{The original (full) concentration data (given in a numeric vector)}
 

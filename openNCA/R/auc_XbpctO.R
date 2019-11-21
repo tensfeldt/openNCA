@@ -135,6 +135,8 @@ auc_XbpctO <- function(conc = NULL, time = NULL, method = 2, kelflag = NULL, auc
   }
   if(!is.na(auct0_t1) && !is.na(auc_info) && auc_info!=0) {
     auc_xbpcto <- 100*(auct0_t1)/auc_info
+  } else {
+    auc_xbpcto <- NA
   }
 
   return(auc_xbpcto)
