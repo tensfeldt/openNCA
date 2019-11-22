@@ -5,13 +5,18 @@
 \title{Helper Function for Estimating Missing Concentration Data for AUC Start and End Times}
 \usage{
 estimate_missing_concentration(conc = NULL, time = NULL,
-  auc_method = NULL, model = NULL, dosing_type = NULL, told = NULL,
-  kel = NULL, orig_conc = NULL, orig_time = NULL)
+  interpolate = NULL, extrapolate = NULL, auc_method = NULL,
+  model = NULL, dosing_type = NULL, told = NULL, kel = NULL,
+  orig_conc = NULL, orig_time = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}
 
 \item{time}{The time data (given in a vector form)}
+
+\item{interpolate}{The value to determine whether to interpolate data points (given in a logical form)}
+
+\item{extrapolate}{The value to determine whether to extrapolate data points (given in a logical form)}
 
 \item{auc_method}{The method specified for AUC (either 'LIN' or 'LOG')}
 

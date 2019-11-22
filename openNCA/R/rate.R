@@ -49,12 +49,13 @@ rate <- function(start_time = NULL, end_time = NULL, conc = NULL, vol = NULL, vo
     stop("Error in rate: 'type' is not a character value")
   }
   
-  if(toupper(type) != "INTERVAL") {
-    r <- NA
-  } else {
-### 2019-10-03/TGT/ update to include specific gravity adjustment for the rates
-###    r <- ((conc * vol)/(end_time - start_time))
+  r <- NA
+  if(!is.null(type)) {
+    if(toupper(type) == "INTERVAL") {
+  ### 2019-10-03/TGT/ update to include specific gravity adjustment for the rates
+  ###    r <- ((conc * vol)/(end_time - start_time))
       r <- ((conc * vol)/(end_time - start_time))/specific_gravity_adjustment(amt_units=volu, map=map)
+    }
   }
   
   return(r)

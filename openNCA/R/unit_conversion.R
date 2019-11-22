@@ -51,9 +51,9 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
   u_class  <- c("TIMEU", "AMOUNTU", "DOSEU", "VOLUMEU", "CONCU", "KELU", "CLU", "AUCU", "AUMCU", "AUCNORMU", "AURCU", "CONCNORMU", "RATEU", "VOLUMEWU", "CLWU", "ALL")
 
 ### Elemental Unit Types
-  units    <- c("HR", "MIN", "KG", "GM",  "DG", "CG", "MG", "UG", "NG",  "PG",  "FG", "KL", "L", "DL", "CL", "ML", "UL", "NL",  "PL",  "FL",        "")
-  val      <- c(  60,     1,  1e3,    1,  1e-1, 1e-2, 1e-3, 1e-6, 1e-9, 1e-12, 1e-15,  1e3,   1, 1e-1, 1e-2, 1e-3, 1e-6, 1e-9, 1e-12, 1e-15,        NA)
-  class    <- c( "T",   "T",  "M",  "M",   "M",  "M",  "M",  "M",  "M",   "M",   "M",  "V", "V",  "V",  "V",  "V",  "V",  "V",   "V",   "V", "MISSING")
+  units    <- c("HR", "MIN", "KG", "GM", "DPM", "ngeq",  "DG", "CG", "MG", "UG", "MCG", "NG",  "PG",  "FG", "KL", "L", "DL", "CL", "ML", "UL", "NL",  "PL",  "FL",        "")
+  val      <- c(  60,     1,  1e3,    1,     1,      1,  1e-1, 1e-2, 1e-3, 1e-6,  1e-6, 1e-9, 1e-12, 1e-15,  1e3,   1, 1e-1, 1e-2, 1e-3, 1e-6, 1e-9, 1e-12, 1e-15,        NA)
+  class    <- c( "T",   "T",  "M",  "M",   "M",    "M",   "M",  "M",  "M",  "M",   "M",  "M",   "M",   "M",  "V", "V",  "V",  "V",  "V",  "V",  "V",   "V",   "V", "MISSING")
 
   if(is.null(data)){
     stop("Please provide a valid path for the 'data' parameter")
@@ -396,7 +396,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
       }
 ### 2019-08-12/TGT/ modify check (Not sure at this time why CONCOUTPUTUNIT is being checked here. Need to verify this
 ###      if(!is.na(map_data$CONCOUTPUTUNIT)){
-      if(is.element("CONCOUTPUTUNIT", names(map))){
+      if(!is.element("CONCOUTPUTUNIT", names(map))){
         warning("'CONCOUTPUTUNIT' is not present in the proper form! Please try again using 'Amount/Volume' format!")
       }
     } else {

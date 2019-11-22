@@ -792,6 +792,9 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if("INCLUDEINTERPOLATION" %in% names(map_data) && (map_data[, "INCLUDEINTERPOLATION"] != 0 && map_data[, "INCLUDEINTERPOLATION"] != 1)){
     warning("Flag 'INCLUDEINTERPOLATION' does not have a valid value! Please try again with numeric value (either 0 or 1)")
   }
+  if("INCLUDEEXTRAPOLATION" %in% names(map_data) && (map_data[, "INCLUDEEXTRAPOLATION"] != 0 && map_data[, "INCLUDEEXTRAPOLATION"] != 1)){
+    warning("Flag 'INCLUDEEXTRAPOLATION' does not have a valid value! Please try again with numeric value (either 0 or 1)")
+  }
   #if((!"LLOQPATTERNS" %in% names(map_data)) && generate_nominal_conc){
   #  warning("Flag 'LLOQPATTERNS' is not present in the map dataset")
   #  if("CONCRAW" %in% names(map_data) && "CONCRAW" %in% names(map_data)){
@@ -809,6 +812,7 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if(isTRUE(optimize_kel) && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
      "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
     kel_flag_optimized <- integer()
+    kel_opt_warning <- FALSE
   }
 
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
@@ -851,7 +855,7 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
 ##      2019-11-08/RD Added for Extrapolation to account for INCLUDEEXTRAPOLATION Flag
 ##
-      if("INCLUDEINTERPOLATION" %in% names(map_data)){
+      if("INCLUDEEXTRAPOLATION" %in% names(map_data)){
         extrapolation <- ifelse((map_data[,"INCLUDEEXTRAPOLATION"] == 0 || map_data[,"INCLUDEEXTRAPOLATION"] == 1), as.logical(as.numeric(map_data[,"INCLUDEEXTRAPOLATION"])), FALSE)
       } else {
         extrapolation <- FALSE
@@ -935,67 +939,74 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
 
-          kel_n <- as.numeric(flag_df$CRIT[match("KELNOPT", flag_df$VAR)])
-          kel_op <- flag_df$OPR[match("KELNOPT", flag_df$VAR)]
-
-          ulist <- list()
-          for(j in kel_n:length(tmp_time)){
-            if(j <= length(tmp_time)) {
-              if(choose(length(tmp_time), j) == 1){
-                tlist <- list(as.vector(combn(tmp_time, j)))
-              } else {
-                cbn <- combn(tmp_time, j)
-                tlist <- lapply(seq(ncol(cbn)), function(i) cbn[,i])
+          if(all(c("KELNOPT", "KELRSQ") %in% flag_df$VAR) && ("AUCXPCTO" %in% flag_df$VAR || "AUCXPCTP" %in% flag_df$VAR)){
+            kel_n <- as.numeric(flag_df$CRIT[match("KELNOPT", flag_df$VAR)])
+            kel_op <- flag_df$OPR[match("KELNOPT", flag_df$VAR)]
+  
+            ulist <- list()
+            for(j in kel_n:length(tmp_time)){
+              if(j <= length(tmp_time)) {
+                if(choose(length(tmp_time), j) == 1){
+                  tlist <- list(as.vector(combn(tmp_time, j)))
+                } else {
+                  cbn <- combn(tmp_time, j)
+                  tlist <- lapply(seq(ncol(cbn)), function(i) cbn[,i])
+                }
+                ulist <- c(ulist,tlist)
               }
-              ulist <- c(ulist,tlist)
             }
-          }
-
-          kelr_val <- kel_r(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])[["KELRSQ"]]
-          if("AUCXPCTO" %in% flag_df$VAR){
-            aucxpct <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, aucflag = auc_flag)
-          } else if("AUCXPCTP" %in% flag_df$VAR){
-            aucxpct <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, aucflag = auc_flag)
-          } else {
-            stop("Error in optimize kel")
-          }
-
-          selected_idx <- NA
-          saved_kel_opt <- -1
-          for(k in 1:length(ulist)){
-            sel_time <- ulist[[k]]
-            sel_conc <- tmp_conc[match(sel_time, tmp_time)]
-
-            kelr_opt <- kel_r(conc = sel_conc, time = sel_time)[["KELRSQ"]]
+  
+            kelr_val <- kel_r(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])[["KELRSQ"]]
             if("AUCXPCTO" %in% flag_df$VAR){
-              span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
-              aucinfo_opt <- auc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, auclast = auclast, c_last = c_last, spanratio = span_ratio)
-              aucxpct_opt <- auc_XpctO(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_info = aucinfo_opt, auclast = auclast)
+              aucxpct <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, aucflag = auc_flag)
             } else if("AUCXPCTP" %in% flag_df$VAR){
-              span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
-              aucinfp_opt <- auc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, auclast = auclast, t_last = t_last, spanratio = span_ratio)
-              aucxpct_opt <- auc_XpctP(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_infp = aucinfp_opt, auclast = auclast)
+              aucxpct <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, aucflag = auc_flag)
             } else {
               stop("Error in optimize kel")
             }
-
-            if(!is.na(kelr_opt) && !is.na(aucxpct_opt)){
-              kel_opt <- ((kelr_opt - kelr_val)/(1 - kelr_val)) + (length(sel_time)/length(tmp_time)) + ((aucxpct - aucxpct_opt)/aucxpct)
-            } else {
-              kel_opt <- 0
-            }
-            
-            if(!is.na(kel_opt)){
-              if(kel_opt > saved_kel_opt){
-                saved_kel_opt <- kel_opt
-                selected_idx <- match(sel_time, orig_time)
+  
+            selected_idx <- NA
+            saved_kel_opt <- -1
+            for(k in 1:length(ulist)){
+              sel_time <- ulist[[k]]
+              sel_conc <- tmp_conc[match(sel_time, tmp_time)]
+  
+              kelr_opt <- kel_r(conc = sel_conc, time = sel_time)[["KELRSQ"]]
+              if("AUCXPCTO" %in% flag_df$VAR){
+                span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
+                aucinfo_opt <- auc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, auclast = auclast, c_last = c_last, spanratio = span_ratio)
+                aucxpct_opt <- auc_XpctO(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_info = aucinfo_opt, auclast = auclast)
+              } else if("AUCXPCTP" %in% flag_df$VAR){
+                span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
+                aucinfp_opt <- auc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, auclast = auclast, t_last = t_last, spanratio = span_ratio)
+                aucxpct_opt <- auc_XpctP(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_infp = aucinfp_opt, auclast = auclast)
+              } else {
+                stop("Error in optimize kel")
+              }
+  
+              if(!is.na(kelr_opt) && !is.na(aucxpct_opt)){
+                kel_opt <- ((kelr_opt - kelr_val)/(1 - kelr_val)) + (length(sel_time)/length(tmp_time)) + ((aucxpct - aucxpct_opt)/aucxpct)
+              } else {
+                kel_opt <- 0
+              }
+              
+              if(!is.na(kel_opt)){
+                if(kel_opt > saved_kel_opt){
+                  saved_kel_opt <- kel_opt
+                  selected_idx <- match(sel_time, orig_time)
+                }
               }
             }
+            tmp_kel_flag <- rep(1, length(kel_flag))
+            tmp_kel_flag[selected_idx] <- 0
+            kel_flag <- tmp_kel_flag
+            kel_flag_optimized <- c(kel_flag_optimized, kel_flag)
+          } else {
+            if(!isTRUE(kel_opt_warning)){
+              warning("Kel optimization cannot be performed because 'KELNOPT', 'KELRSQ' and 'AUCXPCTO' or 'AUCXPCTP' are not part of the Flag 'FLGACCEPTKELCRIT'")
+              kel_opt_warning <- TRUE
+            }
           }
-          tmp_kel_flag <- rep(1, length(kel_flag))
-          tmp_kel_flag[selected_idx] <- 0
-          kel_flag <- tmp_kel_flag
-          kel_flag_optimized <- c(kel_flag_optimized, kel_flag)
         }
 ###        if("CMAXDN" %in% parameter_list && "CMAX" %in% parameter_list) {
         if(comp_required[["CMAXDN"]]) {
@@ -1135,14 +1146,18 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##            2019-11-08/RD Changed the call for partial AUCs to account for interpolation
 ##
             if((isTRUE(interpolation) || isTRUE(extrapolation))){
-              tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, interpolate = interpolation, extrapolate = extrapolation, model = "M1", dosing_type = "SD", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time)
-              tmp_auc <- tmp[[1]]
-              if(t == 1){
-                cest_tmp <- tmp[[2]]
+              tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, interpolate = interpolation, extrapolate = extrapolation, model = "M2", dosing_type = "SD", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time)
+              if(is.list(tmp)){
+                tmp_auc <- tmp[[1]]
+                if(t == 1){
+                  cest_tmp <- tmp[[2]]
+                } else {
+                  cest_tmp <- rbind(cest_tmp, tmp[[2]])
+                }
+                cest_tmp <- unique(na.omit(cest_tmp))
               } else {
-                cest_tmp <- rbind(cest_tmp, tmp[[2]])
+                tmp_auc <- tmp
               }
-              cest_tmp <- unique(na.omit(cest_tmp))
             } else {
               tmp_auc <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max)
             }
@@ -1713,14 +1728,18 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ## 
   if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
     if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
-      for(f in 1:length(flag_df$VAR)){
-        computation_df[,flag_df$VAR[f]] <- as.numeric(computation_df[,flag_df$VAR[f]])
-      }
-      if(nrow(computation_df[eval(parse(text=flag_subset)),]) > 0){
-        computation_df[eval(parse(text=flag_subset)),][,"FLGACCEPTKEL"] <- 1
-      }
-      for(f in 1:length(flag_df$VAR)){
-        computation_df[,flag_df$VAR[f]] <- as.character(computation_df[,flag_df$VAR[f]])
+      if(as.character(flag_df$VAR[j]) %in% names(computation_df)){
+        for(f in 1:length(flag_df$VAR)){
+          computation_df[,flag_df$VAR[f]] <- as.numeric(computation_df[,flag_df$VAR[f]])
+        }
+        if(nrow(computation_df[eval(parse(text=flag_subset)),]) > 0){
+          computation_df[eval(parse(text=flag_subset)),][,"FLGACCEPTKEL"] <- 1
+        }
+        for(f in 1:length(flag_df$VAR)){
+          computation_df[,flag_df$VAR[f]] <- as.character(computation_df[,flag_df$VAR[f]])
+        }
+      } else {
+        warning(paste0("Flag 'FLGACCEPTKELCRIT' values provided via 'map' does not have a parameter name that is generated as an output '", flag_df$VAR[j], "'"))
       }
     }
   }
