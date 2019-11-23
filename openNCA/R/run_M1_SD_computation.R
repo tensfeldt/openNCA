@@ -833,6 +833,10 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
+      test_df <- tmp_df[,c(map_data$CONC, map_data$TIME)]
+      if(any(duplicated(test_df))){
+        tmp_df <- tmp_df[!duplicated(test_df),]
+      }
       cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
       norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_df), unique(tmp_df[,map_data$NORMBS])[1], NA), NA)
       tmp_dose <- unique(tmp_df[, dosevar])[1]
@@ -973,7 +977,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 ulist <- c(ulist,tlist)
               }
             }
-  
+ 
             kelr_val <- kel_r(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])[["KELRSQ"]]
             if("AUCXPCTO" %in% flag_df$VAR){
               aucxpct <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, aucflag = auc_flag)
@@ -982,7 +986,14 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             } else {
               stop("Error in optimize kel")
             }
-  
+## /2019-11-22/RD This will be used for FLGACCEPTKEL
+##            kelr_val <- as.numeric(flag_df$CRIT[match("KELRSQ", flag_df$VAR)])
+##            if("AUCXPCTO" %in% flag_df$VAR){
+##              aucxpct <- as.numeric(flag_df$CRIT[match("AUCXPCTO", flag_df$VAR)])
+##            } else if("AUCXPCTP" %in% flag_df$VAR){
+##              aucxpct <- as.numeric(flag_df$CRIT[match("AUCXPCTP", flag_df$VAR)])
+##            }
+              
             selected_idx <- NA
             saved_kel_opt <- -1
             for(k in 1:length(ulist)){

@@ -711,6 +711,10 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
+      test_df <- tmp_df[,c(map_data$CONC, map_data$TIME)]
+      if(any(duplicated(test_df))){
+        tmp_df <- tmp_df[!duplicated(test_df),]
+      }
       cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
       
       if("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data)){
@@ -756,7 +760,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###      rt <- rate(start_time = tmp_df[,map_data[[map_data$TIME]]], end_time = tmp_df[,map_data[[map_data$ENDTIME]]], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]))
 ### 2019-10-03/TGT/ rt <- rate(start_time = tmp_df[,map_data$TIME], end_time = tmp_df[,map_data$ENDTIME], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]))
       type <- ifelse("SAMPLETYPE" %in% names(map_data), ifelse(map_data$SAMPLETYPE %in% names(tmp_df), as.character(unique(tmp_df[,map_data$SAMPLETYPE])[1]), NULL), NULL)
-      rt <- rate(start_time = tmp_df[,map_data$TIME], end_time = tmp_df[,map_data$ENDTIME], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]), volu = as.numeric(tmp_df[,map_data$AMOUNTU]), type = type, map = map_data)
+      rt <- rate(start_time = tmp_df[,map_data$TIME], end_time = tmp_df[,map_data$ENDTIME], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]), volu = tmp_df[,map_data$AMOUNTU], type = type, map = map_data)
 
       if(nrow(tmp_df) > 0){
         orig_time <- rt
@@ -805,6 +809,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
         for(d in 1:di_col){
           tmp_di_df <- tmp_df[tmp_df[c(paste0("DI", d, "F"))] == 1,]
+          tmp_di_df <- tmp_di_df[order(tmp_di_df[,map_data$TIME]),]
           tmp_dose <- tmp_di_df[, as.character(map_data[c(paste0("DOSE",d))])][1]
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###          tmp_mid_pt <- midpt(start_time = tmp_di_df[,map_data[[map_data$TIME]]], end_time = tmp_di_df[,map_data$NOMENDTIME])
@@ -872,7 +877,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###              tmp <- aet(amt = amt, time = na.omit(tmp_df[,map_data[[map_data$TIME]]]), t = na.omit(tmp_df[,map_data[[map_data$TIME]]])[t])
               tmp <- aet(amt = amt, time = na.omit(tmp_df[,map_data$TIME]), t = na.omit(tmp_df[,map_data$TIME])[t])
               tmp_pct <-  aetpct(aet = tmp, dose = tmp_dose)
-              cat('i: ', i, ' tmp_dose: ', tmp_dose, ' d: ', d, ' dose[[d]]: ', dose[[d]], '\n')
+###              cat('i: ', i, ' tmp_dose: ', tmp_dose, ' d: ', d, ' dose[[d]]: ', dose[[d]], '\n')
 
               if(is.null(ae_t)){
                 ae_t <- tmp
@@ -893,6 +898,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             amt <- at(conc = tmp_df[,map_data$CONC], amt = tmp_df[,map_data$AMOUNT], time = tmp_df[,map_data$TIME], amt_units = tmp_df[,map_data$AMOUNTU])
           }
         }
+
 ###        if("AUCDN" %in% parameter_list) {
 ### 2019-010-10/TGT/ Removed AUCDN
 ###        if(comp_required[["AUCDN"]]) {

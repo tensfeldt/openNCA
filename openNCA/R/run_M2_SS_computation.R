@@ -976,6 +976,9 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     for(i in 1:length(unique(data_data[,map_data$SDEID]))){
 ###        cat("i: ", i, " SDEID: ", unique(data_data[,map_data$SDEID])[i], "\n")
     tryCatch({
+      if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]){
+        dose_c_i <- list()
+      }
 ### 2019-09-16/TGT/ Missing initiailization for c_0
 ###      if("C0" %in% parameter_list) {
       if(comp_required[["C0"]]) {
@@ -1174,6 +1177,10 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
+      test_df <- tmp_df[,c(map_data$CONC, map_data$TIME)]
+      if(any(duplicated(test_df))){
+        tmp_df <- tmp_df[!duplicated(test_df),]
+      }
       cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
       
       if("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data)){
@@ -1490,15 +1497,15 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
         for(d in 1:di_col){
           tmp_di_df <- tmp_df[tmp_df[c(paste0("DI", d, "F"))] == 1,]
+          tmp_di_df <- tmp_di_df[order(tmp_di_df[,map_data$TIME]),]
           norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_di_df), tmp_di_df[,map_data$NORMBS][1], NA), NA)
           tmp_dose <- tmp_di_df[, as.character(map_data[c(paste0("DOSE",d))])][1]
 
           if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]) {
             if(!is.na(tmp_dose)) { 
-                dose_c[d] <- dosec(data = tmp_di_df, map = map_data, idose=d)
-            }
-            else {
-              dose_c[d] <- dose_c
+                dose_c_i[[d]] <- dosec(data = tmp_di_df, map = map_data, idose=d)
+            } else {
+              dose_c_i[[d]] <- dose_c
             }
           }
 
@@ -1689,7 +1696,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("CLTAUi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
           if(comp_required[["CLTAUi"]]) {
 ###            cl_tau[[d]] <- cltau(auctau = auctau[[d]], dose = tmp_dose)
-            cl_tau[[d]] <- cltau(auctau = auctau[[d]], dose = dose_c[d])
+            cl_tau[[d]] <- cltau(auctau = auctau[[d]], dose = tmp_dose)
           }
 ###          if("CLTAUWi" %in% parameter_list && "CLTAUi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
           if(comp_required[["CLTAUWi"]]) {
@@ -1718,7 +1725,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             vsspw[[d]] <- vssw(vss = vssp[[d]], normbs = norm_bs)
           }
           if(comp_required[["VZTAUi"]]) {
-            vz_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose = dose_c[d])
+            vz_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose = tmp_dose)
           }
           if(comp_required[["VZTAUWi"]]) {
             vz_tauw[[d]] <- vzftauw(vzftau = vz_tau[[d]], normbs = norm_bs)
@@ -2007,7 +2014,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           row_data <- c(row_data, dose_c)
         }
         if(disp_required[["DOSECi"]]) {
-          row_data <- c(row_data, dose_c)
+          row_data <- c(row_data, unlist(dose_c_i))
         }
 ###        if("C0" %in% parameter_list) {
         if(disp_required[["C0"]]) {

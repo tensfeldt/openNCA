@@ -1170,6 +1170,10 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
+      test_df <- tmp_df[,c(map_data$CONC, map_data$TIME)]
+      if(any(duplicated(test_df))){
+        tmp_df <- tmp_df[!duplicated(test_df),]
+      }
       cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
       
       if("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data)){
@@ -1606,7 +1610,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("CLTAUi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
           if(comp_required[["CLTAUi"]]) {
 ###            cl_tau[[d]] <- cltau(auctau = auctau[[d]], dose = tmp_dose)
-            cl_tau[[d]] <- cltau(auctau = auctau[[d]], dose = dose_c_i[[d]])
+            cl_tau[[d]] <- cltau(auctau = auctau[[d]], dose = tmp_dose)
           }
 ###          if("CLTAUWi" %in% parameter_list && "CLTAUi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
           if(comp_required[["CLTAUWi"]]) {
@@ -1634,7 +1638,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             vsspw[[d]] <- vssw(vss = vssp[[d]], normbs = norm_bs)
           }
           if(comp_required[["VZTAUi"]]) {
-            vz_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose = dose_c_i[[d]])
+            vz_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose = tmp_dose)
           }
           if(comp_required[["VZTAUWi"]]) {
             vz_tauw[[d]] <- vzftauw(vzftau = vz_tau[[d]], normbs = norm_bs)

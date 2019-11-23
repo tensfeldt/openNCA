@@ -822,6 +822,10 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
+      test_df <- tmp_df[,c(map_data$CONC, map_data$TIME)]
+      if(any(duplicated(test_df))){
+        tmp_df <- tmp_df[!duplicated(test_df),]
+      }
       cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
       tmp_dose <- unique(tmp_df[, dosevar])[1]
 

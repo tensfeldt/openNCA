@@ -1256,6 +1256,10 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
+      test_df <- tmp_df[,c(map_data$CONC, map_data$TIME)]
+      if(any(duplicated(test_df))){
+        tmp_df <- tmp_df[!duplicated(test_df),]
+      }
       cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
 ###
 ###      cat('map_data$TIME: ', map_data$TIME, ' map_data$NOMTIME: ', map_data$NOMTIME, ' map_data$ACTTIME: ', map_data$ACTTIME, ' map_data$CONC: ', map_data$CONC, '\n')
@@ -1600,6 +1604,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
         for(d in 1:di_col){
           tmp_di_df  <- tmp_df[tmp_df[c(paste0("DI", d, "F"))] == 1,]
+          tmp_di_df <- tmp_di_df[order(tmp_di_df[,map_data$TIME]),]
           tmp_dose   <- tmp_di_df[, as.character(map_data[c(paste0("DOSE",d))])][1]
 
           if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]) {
