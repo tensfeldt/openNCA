@@ -22,6 +22,8 @@
 ratelast <- function(rate = NULL){
   if(is.null(rate)) {
     stop("Error in ratelast: 'rate' vector is NULL")
+  } else if(all(is.na(rate))) { # 2019-11-24/RD/
+    return(NA)
   }
   
   if(!(is.numeric(rate) && is.vector(rate)) ){

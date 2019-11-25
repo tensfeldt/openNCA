@@ -25,7 +25,13 @@ midptlast <- function(midpt = NULL, rate = NULL){
     stop("Error in midptlast: 'midpt' vector is NULL")
   } else if(is.null(rate)) {
     stop("Error in midptlast: 'rate' vector is NULL")
-  } 
+  } else if(all(is.na(midpt))) { # 2019-11-24/RD/
+    return(NA)
+  } else if(all(is.na(rate))) { # 2019-11-24/RD/
+    return(NA)
+  }
+  
+  
   if(!(is.numeric(midpt) && is.vector(midpt))){
     stop("Error in midptlast: 'midpt' is not a numeric vector")
   }

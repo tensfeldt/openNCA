@@ -109,6 +109,10 @@ aet <- function(amt = NULL, time = NULL, t = NULL){
     stop("Error in aet: 'time' vector is NULL")
   } else if(is.null(t)) {
     stop("Error in aet: value 't' is NULL")
+  } else if(all(is.na(time))) { # 2019-11-24/RD/
+    return(NA)
+  } else if(all(is.na(amt))) { # 2019-11-24/RD/
+    return(NA)
   }
 
   if(!(is.numeric(amt) && is.vector(amt))){

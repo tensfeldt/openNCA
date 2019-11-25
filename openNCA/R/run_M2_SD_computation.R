@@ -1359,7 +1359,8 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             for(e in 1:length(pkdataid)){
               est_row <- c(pkdataid[e], unique(data_data[,map_data$SDEID])[i], time[e], cest_kel[e], NA, NA, NA, NA)
 ### 2019-10-06/TGT/ Add CEST at TLAST
-              if(time[e]==t_last) { est_row[8] <- c_est }
+              ## 2019-11-24/RD Added check for NA to account for all NAs concentration data
+              if(!is.na(t_last)){ if(time[e]==t_last) { est_row[8] <- c_est } }
               
               if(nrow(cest_tmp) > 0){
                 cest_idx <- which(cest_tmp$TIME == time[e])

@@ -5,7 +5,11 @@ midpt <- function(start_time = NULL, end_time = NULL, type = "INTERVAL"){
     stop("Error in midpt: 'start_time' vector is NULL")
   } else if(is.null(end_time)) {
     stop("Error in midpt: 'end_time' vector is NULL")
-  } 
+  } else if(all(is.na(start_time))) { # 2019-11-24/RD/
+    return(NA)
+  } else if(all(is.na(end_time))) { # 2019-11-24/RD/
+    return(NA)
+  }
   
   if(!(is.numeric(start_time) && is.vector(start_time))){
     stop("Error in midpt: 'start_time' is not a numeric vector")

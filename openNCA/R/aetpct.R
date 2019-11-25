@@ -129,6 +129,10 @@ aetpct <- function(aet = NULL, dose = NULL){
     stop("Error in aetpct: 'aet' vector is NULL")
   } else if(is.null(dose)) {
     stop("Error in aetpct: 'dose' vector is NULL")
+  } else if(all(is.na(aet))) { # 2019-11-24/RD/
+    return(NA)
+  } else if(all(is.na(dose))) { # 2019-11-24/RD/
+    return(NA)
   }
 
   if(!(is.numeric(aet) && is.vector(aet))){

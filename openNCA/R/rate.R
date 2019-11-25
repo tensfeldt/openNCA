@@ -28,7 +28,15 @@ rate <- function(start_time = NULL, end_time = NULL, conc = NULL, vol = NULL, vo
     } else {
       stop(paste0("Error in rate: ", err, " vector is NULL"))
     }
-  } 
+  } else if(all(is.na(start_time))) { # 2019-11-24/RD/
+    return(NA)
+  } else if(all(is.na(end_time))) { # 2019-11-24/RD/
+    return(NA)
+  } else if(all(is.na(conc))) { # 2019-11-24/RD/
+    return(NA)
+  } else if(all(is.na(vol))) { # 2019-11-24/RD/
+    return(NA)
+  }
   
   if(!(is.numeric(start_time) && is.vector(start_time))){
     stop("Error in rate: 'start_time' is not a numeric vector")

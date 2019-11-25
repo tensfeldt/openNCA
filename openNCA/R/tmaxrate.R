@@ -26,7 +26,13 @@ tmaxrate <- function(midpt = NULL, rate = NULL){
     stop("Error in tmaxrate: 'midpt' vector is NULL")
   } else if(is.null(rate)) {
     stop("Error in tmaxrate: 'rate' vector is NULL")
+  } else if(all(is.na(midpt))) { # 2019-11-24/RD/
+    return(NA)
+  } else if(all(is.na(rate))) { # 2019-11-24/RD/
+    return(NA)
   }
+  
+  
   if(!(is.numeric(midpt) && is.vector(midpt))){
     stop("Error in tmaxrate: 'midpt' is not a numeric vector")
   }

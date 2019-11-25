@@ -1044,7 +1044,8 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(length(pkdataid) > 0){
           for(e in 1:length(pkdataid)){
             est_row <- c(pkdataid[e], unique(data_data[,map_data$SDEID])[i], time[e], cest_kel[e], NA, NA, NA, NA)
-            if(time[e]==t_last) { est_row[8] <- c_est }
+            ## 2019-11-24/RD Added check for NA to account for all NAs concentration data
+            if(!is.na(t_last)){ if(time[e]==t_last) { est_row[8] <- c_est } }
             
             if(nrow(cest_tmp) > 0){
               cest_idx <- which(cest_tmp$TIME == time[e])

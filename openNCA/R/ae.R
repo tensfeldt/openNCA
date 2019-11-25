@@ -93,7 +93,12 @@ ae <- function(amt = NULL, time = NULL){
     stop("Error in ae: 'amt' vector is NULL")
   } else if(is.null(time)) {
     stop("Error in ae: 'time' vector is NULL")
-  }
+  } else if(all(is.na(time))) { # 2019-11-24/RD/
+    return(NA)
+  } else if(all(is.na(amt))) { # 2019-11-24/RD/
+    return(NA)
+  } 
+  
   if(!(is.numeric(amt) && is.vector(amt))){
     stop("Error in ae: 'amt' is not a numeric vector")
   }

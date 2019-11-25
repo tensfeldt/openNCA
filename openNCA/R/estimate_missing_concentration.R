@@ -21,6 +21,13 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
     stop("Error in estimate_missing_concentration: 'auc_method' is not either 'LIN' or 'LOG'")
   }
   
+## 2019-11-24/RD Removing any CONC value that is equal to 0
+  sel_idx <- which(orig_conc == 0)
+  if(length(sel_idx) > 0){
+    orig_conc <- orig_conc[-sel_idx]
+    orig_time <- orig_time[-sel_idx] 
+  }
+  
   tmp <- data.frame("CONC" = conc, "TIME" = time, "INT_EXT" = NA)
   
   for(i in 1:(nrow(tmp)-1)){

@@ -132,10 +132,16 @@ at <- function(conc = NULL, amt = NULL, time = NULL, amt_units = NULL, map=NULL)
     } else {
       stop(paste0("Error in at: ", err, " vector is NULL"))
     }
+  } else if(all(is.na(time))) { # 2019-11-24/RD/
+    return(rep(NA, length(conc[!is.na(time)])))
+  } else if(all(is.na(conc))) { # 2019-11-24/RD/
+    return(rep(NA, length(conc[!is.na(time)])))
+  } else if(all(is.na(amt))) { # 2019-11-24/RD/
+    return(rep(NA, length(conc[!is.na(time)])))
   }
 
   if(any(is.na(amt)) || any(is.na(conc))) {
-    a_t <- NA
+    a_t <- rep(NA, length(conc[!is.na(time)]))
   } else {
 ### 2019-10-03/TGT/ remove units processing and replace with specific_gravity_adjustment() call      
 ###    wt_units <- c("kg", "gm", "dg", "cg", "mg", "ug", "ng", "pg", "fg", "")
