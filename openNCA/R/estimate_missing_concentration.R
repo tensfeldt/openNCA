@@ -79,7 +79,7 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
       } else if(time[1] >= orig_time[length(orig_time)]){
         if(!is.na(kel[["KEL"]])){
           if(isTRUE(extrapolate)){
-            conc[1] <- cest(conc = conc, time = time, t_last = time[length(time)], kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
+            conc[1] <- cest(conc = conc, time = time, t_last = time[1], kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
             tmp$INT_EXT[1] <- "EXT"
           }
         } else {

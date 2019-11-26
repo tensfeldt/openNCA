@@ -816,12 +816,12 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   #  }
   #}
   
-  if(isTRUE(optimize_kel) && (!"TMAX" %in% parameter_list || !"TLAST" %in% parameter_list || !"CMAX" %in% parameter_list || !"CLAST" %in% parameter_list || !"AUCLAST" %in% parameter_list ||
+  if(isTRUE(optimize_kel) && (!comp_required[["TMAX"]] || !comp_required[["TLAST"]] || !comp_required[["CMAX"]] || !comp_required[["CLAST"]] || !comp_required[["AUCLAST"]] ||
      !"FLGACCEPTKELCRIT" %in% names(map_data) || !"FLGEXKEL" %in% names(map_data) || !map_data$FLGEXKEL %in% names(data_data))){
-    warning("Kel optimization cannot be performed because 'TMAX', 'TLAST', 'CMAX', 'CLAST', 'AUCLAST' are not part of the calulcated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGEXKEL' are not present in the dataset")
+    warning("Kel optimization cannot be performed because 'TMAX', 'TLAST', 'CMAX', 'CLAST', 'AUCLAST' are not part of the calculated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGEXKEL' are not present in the dataset")
   }
 
-  if(isTRUE(optimize_kel) && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
+  if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
      "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
     kel_flag_optimized <- integer()
     kel_opt_warning <- FALSE
@@ -865,6 +865,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##    2019-11-08/RD Added for Interpolation to account for INCLUDEINTERPOLATION Flag
 ##
       if("INCLUDEINTERPOLATION" %in% names(map_data)){
+        map_data[,"INCLUDEINTERPOLATION"] <- as.numeric(map_data[,"INCLUDEINTERPOLATION"])
         interpolation <- ifelse((map_data[,"INCLUDEINTERPOLATION"] == 0 || map_data[,"INCLUDEINTERPOLATION"] == 1), as.logical(as.numeric(map_data[,"INCLUDEINTERPOLATION"])), FALSE)
       } else {
         interpolation <- FALSE
@@ -872,6 +873,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##      2019-11-08/RD Added for Extrapolation to account for INCLUDEEXTRAPOLATION Flag
 ##
       if("INCLUDEEXTRAPOLATION" %in% names(map_data)){
+        map_data[,"INCLUDEEXTRAPOLATION"] <- as.numeric(map_data[,"INCLUDEEXTRAPOLATION"])
         extrapolation <- ifelse((map_data[,"INCLUDEEXTRAPOLATION"] == 0 || map_data[,"INCLUDEEXTRAPOLATION"] == 1), as.logical(as.numeric(map_data[,"INCLUDEEXTRAPOLATION"])), FALSE)
       } else {
         extrapolation <- FALSE
@@ -916,7 +918,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(comp_required[["AUCLAST"]]) {
           auclast <- auc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag)
         }
-        if(isTRUE(optimize_kel) && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
+        if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
            "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
           orig_time <- tmp_df[,map_data$TIME]
           orig_conc <- tmp_df[,map_data$CONC]
@@ -1388,6 +1390,25 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         names(tmp_est_data) <- elist
         est_idx <- 1
         if(length(pkdataid) > 0){
+          ## 2019-11-25/RD Added logic to account for Interpolated/Extrapolated values that are generated before CEST KEL timepoints
+          if(nrow(cest_tmp) > 0){
+            cest_idx0 <- c()
+            for(c in 1:nrow(cest_tmp)){
+              if(cest_tmp[c,"TIME"] < time[1]){
+                if(cest_tmp[c,"INT_EXT"] == "INT"){
+                  tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, cest_tmp[c,"CONC"], NA, NA, NA) 
+                } else if(cest_tmp[c,"INT_EXT"] == "EXT"){
+                  tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, NA, cest_tmp[c,"CONC"], NA, NA)
+                }
+                cest_idx0 <- c(cest_idx0, c)
+                tmp_est_data[est_idx,] <- tmp_est_row
+                est_idx <- est_idx + 1
+              }
+            }
+            if(length(cest_idx0) > 0){
+              cest_tmp <- cest_tmp[-cest_idx0,]
+            }
+          }
           for(e in 1:length(pkdataid)){
             est_row <- c(pkdataid[e], unique(data_data[,map_data$SDEID])[i], time[e], cest_kel[e], NA, NA, NA, NA)
             ### 2019-10-06/TGT/ Add CEST at TLAST
@@ -1767,7 +1788,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ## 
   if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
     if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
-      if(as.character(flag_df$VAR[j]) %in% names(computation_df)){
+      if(all(as.character(flag_df$VAR) %in% names(computation_df))){
         for(f in 1:length(flag_df$VAR)){
           computation_df[,flag_df$VAR[f]] <- as.numeric(computation_df[,flag_df$VAR[f]])
         }
@@ -1778,7 +1799,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           computation_df[,flag_df$VAR[f]] <- as.character(computation_df[,flag_df$VAR[f]])
         }
       } else {
-        warning(paste0("Flag 'FLGACCEPTKELCRIT' values provided via 'map' does not have a parameter name that is generated as an output '", flag_df$VAR[j], "'"))
+        warning(paste0("Flag 'FLGACCEPTKELCRIT' values provided via 'map' does not have a parameter name that is generated as an output '", as.character(flag_df$VAR)[as.character(flag_df$VAR) %in% names(computation_df)], "'"))
       }
     }
   }
@@ -1843,7 +1864,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   results_list$data_out <- computation_df
   results_list$est_data <- est_data
   
-  if(isTRUE(optimize_kel) && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
+  if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
      "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
 ###    if("KEL" %in% parameter_list){
 ###      results_list <- list()

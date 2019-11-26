@@ -660,12 +660,12 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   #    }
   #  }
   #}
-  if(isTRUE(optimize_kel) && (!"TMAX" %in% parameter_list || !"TLAST" %in% parameter_list || !"CMAX" %in% parameter_list || !"CLAST" %in% parameter_list || !"AUCLAST" %in% parameter_list ||
+  if(isTRUE(optimize_kel) && (!comp_required[["TMAXi"]] || !comp_required[["TLASTi"]] || !comp_required[["CMAXi"]] || !comp_required[["CLASTi"]] || !comp_required[["AUCLASTi"]] ||
      !"FLGACCEPTKELCRIT" %in% names(map_data) || !"FLGEXKEL" %in% names(map_data) || !map_data$FLGEXKEL %in% names(data_data))){
-    warning("Kel optimization cannot be performed because 'TMAX', 'TLAST', 'CMAX', 'CLAST', 'AUCLAST' are not part of the calulcated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGXKEL' are not present in the dataset")
+    warning("Kel optimization cannot be performed because 'TMAXi', 'TLASTi', 'CMAXi', 'CLASTi', 'AUCLASTi' are not part of the calculated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGEXKEL' are not present in the dataset")
   }
   
-  if(isTRUE(optimize_kel) && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
+  if(isTRUE(optimize_kel) && comp_required[["TMAXi"]] && comp_required[["TLASTi"]] && comp_required[["CMAXi"]] && comp_required[["CLASTi"]] && comp_required[["AUCLASTi"]] &&
      "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
     kel_flag_optimized <- integer()
     kel_opt_warning <- FALSE
@@ -740,11 +740,13 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
       
       if("INCLUDEINTERPOLATION" %in% names(map_data)){
+        map_data[,"INCLUDEINTERPOLATION"] <- as.numeric(map_data[,"INCLUDEINTERPOLATION"])
         interpolation <- ifelse((map_data[,"INCLUDEINTERPOLATION"] == 0 || map_data[,"INCLUDEINTERPOLATION"] == 1), as.logical( map_data[,"INCLUDEINTERPOLATION"]), FALSE)
       } else {
         interpolation <- FALSE
       }
       if("INCLUDEEXTRAPOLATION" %in% names(map_data)){
+        map_data[,"INCLUDEEXTRAPOLATION"] <- as.numeric(map_data[,"INCLUDEEXTRAPOLATION"])
         extrapolation <- ifelse((map_data[,"INCLUDEEXTRAPOLATION"] == 0 || map_data[,"INCLUDEEXTRAPOLATION"] == 1), as.logical(as.numeric(map_data[,"INCLUDEEXTRAPOLATION"])), FALSE)
       } else {
         extrapolation <- FALSE
@@ -915,6 +917,120 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(comp_required[["AURCLAST"]]) {
           aurclast <- auc_last(conc = rt, time = mid_pt, method = method, exflag = auc_flag)
         }
+        if(isTRUE(optimize_kel) && comp_required[["TMAXi"]] && comp_required[["TLASTi"]] && comp_required[["CMAXi"]] && comp_required[["CLASTi"]] && comp_required[["AUCLASTi"]] &&
+           "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
+          orig_time <- mid_pt
+          orig_conc <- rt
+          tmp_time <- orig_time
+          tmp_conc <- orig_conc
+          
+          if("FLGNOCMAX" %in% names(map_data) && (map_data$FLGNOCMAX == 1 || map_data$FLGNOCMAX == 0)){
+            flg_no_cmax <- as.logical(as.numeric(map_data$FLGNOCMAX))
+            if(isTRUE(flg_no_cmax)){
+              if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
+                s_time <- match(t_max, orig_time)+1
+                e_time <- match(t_last, orig_time)
+                tmp_time <- orig_time[s_time:e_time]
+              }
+              if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
+                s_conc <- match(c_max, orig_conc)+1
+                e_conc <- match(c_last, orig_conc)
+                tmp_conc <- orig_conc[s_conc:e_conc]
+              }
+            } else {
+              if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
+                s_time <- match(t_max, orig_time)
+                e_time <- match(t_last, orig_time)
+                tmp_time <- orig_time[s_time:e_time]
+              }
+              if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
+                s_conc <- match(c_max, orig_conc)
+                e_conc <- match(c_last, orig_conc)
+                tmp_conc <- orig_conc[s_conc:e_conc]
+              }
+            }
+          } else {
+            if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
+              s_time <- match(t_max, orig_time)+1
+              e_time <- match(t_last, orig_time)
+              tmp_time <- orig_time[s_time:e_time]
+            }
+            if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
+              s_conc <- match(c_max, orig_conc)+1
+              e_conc <- match(c_last, orig_conc)
+              tmp_conc <- orig_conc[s_conc:e_conc]
+            }
+          }
+          
+          if(all(c("KELNOPT", "KELRSQ") %in% flag_df$VAR) && ("AURCXPCTO" %in% flag_df$VAR || "AURCXPCTP" %in% flag_df$VAR)){
+            kel_n <- as.numeric(flag_df$CRIT[match("KELNOPT", flag_df$VAR)])
+            kel_op <- flag_df$OPR[match("KELNOPT", flag_df$VAR)]
+            
+            ulist <- list()
+            for(j in kel_n:length(tmp_time)){
+              if(j <= length(tmp_time)) {
+                if(choose(length(tmp_time), j) == 1){
+                  tlist <- list(as.vector(combn(tmp_time, j)))
+                } else {
+                  cbn <- combn(tmp_time, j)
+                  tlist <- lapply(seq(ncol(cbn)), function(i) cbn[,i])
+                }
+                ulist <- c(ulist,tlist)
+              }
+            }
+            
+            kelr_val <- kel_r(conc = rt, time = mid_pt)[["KELRSQ"]]
+            if("AURCXPCTO" %in% flag_df$VAR){
+              aucxpct <- auc_XpctO(conc = rt, time = mid_pt, method = method, aucflag = auc_flag)
+            } else if("AURCXPCTP" %in% flag_df$VAR){
+              aucxpct <- auc_XpctP(conc = rt, time = mid_pt, method = method, aucflag = auc_flag)
+            } else {
+              stop("Error in optimize kel")
+            }
+            
+            selected_idx <- NA
+            saved_kel_opt <- -1
+            for(k in 1:length(ulist)){
+              sel_time <- ulist[[k]]
+              sel_conc <- tmp_conc[match(sel_time, tmp_time)]
+              
+              kelr_opt <- kel_r(conc = sel_conc, time = sel_time)[["KELRSQ"]]
+              if("AURCXPCTO" %in% flag_df$VAR){
+                span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
+                aucinfo_opt <- auc_inf_o(conc = rt, time = mid_pt, method = method, auclast = auclast, c_last = c_last, spanratio = span_ratio)
+                aucxpct_opt <- auc_XpctO(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_info = aucinfo_opt, auclast = auclast)
+              } else if("AURCXPCTP" %in% flag_df$VAR){
+                span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
+                aucinfp_opt <- auc_inf_p(conc = rt, time = mid_pt, method = method, auclast = auclast, t_last = t_last, spanratio = span_ratio)
+                aucxpct_opt <- auc_XpctP(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_infp = aucinfp_opt, auclast = auclast)
+              } else {
+                stop("Error in optimize kel")
+              }
+              
+              if(!is.na(kelr_opt) && !is.na(aucxpct_opt)){
+                kel_opt <- ((kelr_opt - kelr_val)/(1 - kelr_val)) + (length(sel_time)/length(tmp_time)) + ((aucxpct - aucxpct_opt)/aucxpct)
+              } else {
+                kel_opt <- 0
+              }
+              
+              if(!is.na(kel_opt)){
+                if(kel_opt > saved_kel_opt){
+                  saved_kel_opt <- kel_opt
+                  selected_idx <- match(sel_time, orig_time)
+                }
+              }
+            }
+            tmp_kel_flag <- rep(1, length(kel_flag))
+            tmp_kel_flag[selected_idx] <- 0
+            kel_flag <- tmp_kel_flag
+            kel_flag_optimized <- c(kel_flag_optimized, kel_flag)
+          } else {
+            if(!isTRUE(kel_opt_warning)){
+              warning("Kel optimization cannot be performed because 'KELNOPT', 'KELRSQ' and 'AURCXPCTO' or 'AURCXPCTP' are not part of the Flag 'FLGACCEPTKELCRIT'")
+              kel_opt_warning <- TRUE
+            }
+          }
+        }
 ###        if("AURCT1_T2" %in% parameter_list && "TMAXRATEi" %in% parameter_list) {
 ###          cat('comp_required[["AURCT1_T2"]]: ', comp_required[["AURCT1_T2"]], ' auc_pair_check: ', auc_pair_check, '\n')
         if(comp_required[["AURCT1_T2"]] && auc_pair_check) {
@@ -1042,6 +1158,25 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         names(tmp_est_data) <- elist
         est_idx <- 1
         if(length(pkdataid) > 0){
+          ## 2019-11-25/RD Added logic to account for Interpolated/Extrapolated values that are generated before CEST KEL timepoints
+          if(nrow(cest_tmp) > 0){
+            cest_idx0 <- c()
+            for(c in 1:nrow(cest_tmp)){
+              if(cest_tmp[c,"TIME"] < time[1]){
+                if(cest_tmp[c,"INT_EXT"] == "INT"){
+                  tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, cest_tmp[c,"CONC"], NA, NA, NA) 
+                } else if(cest_tmp[c,"INT_EXT"] == "EXT"){
+                  tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, NA, cest_tmp[c,"CONC"], NA, NA)
+                }
+                cest_idx0 <- c(cest_idx0, c)
+                tmp_est_data[est_idx,] <- tmp_est_row
+                est_idx <- est_idx + 1
+              }
+            }
+            if(length(cest_idx0) > 0){
+              cest_tmp <- cest_tmp[-cest_idx0,]
+            }
+          }
           for(e in 1:length(pkdataid)){
             est_row <- c(pkdataid[e], unique(data_data[,map_data$SDEID])[i], time[e], cest_kel[e], NA, NA, NA, NA)
             ## 2019-11-24/RD Added check for NA to account for all NAs concentration data
@@ -1257,7 +1392,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   
   if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
     if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
-      if(as.character(flag_df$VAR[j]) %in% names(computation_df)){
+      if(all(as.character(flag_df$VAR) %in% names(computation_df))){
         for(f in 1:length(flag_df$VAR)){
           computation_df[,flag_df$VAR[f]] <- as.numeric(computation_df[,flag_df$VAR[f]])
         }
@@ -1268,7 +1403,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           computation_df[,flag_df$VAR[f]] <- as.character(computation_df[,flag_df$VAR[f]])
         }
       } else {
-        warning(paste0("Flag 'FLGACCEPTKELCRIT' values provided via 'map' does not have a parameter name that is generated as an output '", flag_df$VAR[j], "'"))
+        warning(paste0("Flag 'FLGACCEPTKELCRIT' values provided via 'map' does not have a parameter name that is generated as an output '", as.character(flag_df$VAR)[as.character(flag_df$VAR) %in% names(computation_df)], "'"))
       }
     }
   }
@@ -1481,7 +1616,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   results_list$data_out <- computation_df
   results_list$est_data <- est_data
   
-  if(isTRUE(optimize_kel) && "TMAX" %in% parameter_list && "TLAST" %in% parameter_list && "CMAX" %in% parameter_list && "CLAST" %in% parameter_list && "AUCLAST" %in% parameter_list &&
+  if(isTRUE(optimize_kel) && comp_required[["TMAXi"]] && comp_required[["TLASTi"]] && comp_required[["CMAXi"]] && comp_required[["CLASTi"]] && comp_required[["AUCLASTi"]] &&
      "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
     results_list$optimized_kel_flag <- kel_flag_optimized
   }

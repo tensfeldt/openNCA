@@ -365,6 +365,7 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
               }
               merged_data[c(paste0("DI", i, "F"))] <- NA
               #temp_data <- NA
+              warning_generated <- FALSE
               for(j in 1:length(unique(merged_data[,map_data$SDEID]))){
                 tmp_df <- merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],]
                 #print(unique(merged_data[,map_data$SDEID])[j])
@@ -473,7 +474,15 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
 ### 2019-08-27/TGT/ modify to map_data$TIME as no longer a pointer                      
 ###                    tmp_merged <-  merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j], map_data[, map_data$TIME]]
                     tmp_merged <-  merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j], map_data$TIME]
-                    merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, told_i-1), rep(1, (tau_i-told_i+1)), rep(0, (nrow(tmp_df) - tau_i)))
+                    if(is.na(tau_i)){
+                      merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, told_i-1), rep(1, (tau_i-told_i+1)), rep(0, (nrow(tmp_df) - tau_i)))
+                    } else {
+                      merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, nrow(tmp_df)))
+                      if(!isTRUE(warning_generated)){
+                        warning(paste0("Unable to generate dosing interval for Steady State data! TAU value 'TAU", i ,"' or TOLD value 'TOLD", i ,"' not found in the provided TIME data"))
+                        warning_generated <- TRUE
+                      }  
+                    }
                   } else {
                     #print(time)
 ### 2019-09-14/TGT/ need to match NOMINAL time for SS TOLD, TAU
@@ -481,7 +490,7 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
 ###                      print(time)
                     told_i <- match(told, time)
                     tau_i <- match((tau+told), time)
-###                    cat('i: ', i, ' told_i: ', told_i, ' tau_i: ', tau_i, '\n')  
+###                    cat('i: ', i, ' told: ', told, ' told_i: ', told_i, ' tau: ', tau, ' tau_i: ', tau_i, '\n')  
                     #print(told)
                     #print(tau)
                     #print(told_i)
@@ -508,7 +517,15 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
 ### 2019-08-27/TGT/ modify to map_data$TIME as no longer a pointer                      
 ###                    tmp_merged <-  merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j], map_data[, map_data$TIME]]
                     tmp_merged <-  merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j], map_data$TIME]
-                    merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, told_i-1), rep(1, (tau_i-told_i+1)), rep(0, (nrow(tmp_df) - tau_i)))
+                    if(!is.na(tau_i) && !is.na(told_i)){
+                      merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, told_i-1), rep(1, (tau_i-told_i+1)), rep(0, (nrow(tmp_df) - tau_i)))
+                    } else {
+                      merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, nrow(tmp_df)))
+                      if(!isTRUE(warning_generated)){
+                        warning(paste0("Unable to generate dosing interval for Steady State data! TAU value 'TAU", i ,"' or TOLD value 'TOLD", i ,"' not found in the provided TIME data"))
+                        warning_generated <- TRUE
+                      }
+                    }
                   }
                 }
               }
