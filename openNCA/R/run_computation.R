@@ -474,14 +474,36 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
 ### 2019-08-27/TGT/ modify to map_data$TIME as no longer a pointer                      
 ###                    tmp_merged <-  merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j], map_data[, map_data$TIME]]
                     tmp_merged <-  merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j], map_data$TIME]
-                    if(is.na(tau_i)){
+                    if(!is.na(tau_i) && !is.na(told_i)){
                       merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, told_i-1), rep(1, (tau_i-told_i+1)), rep(0, (nrow(tmp_df) - tau_i)))
                     } else {
-                      merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, nrow(tmp_df)))
-                      if(!isTRUE(warning_generated)){
-                        warning(paste0("Unable to generate dosing interval for Steady State data! TAU value 'TAU", i ,"' or TOLD value 'TOLD", i ,"' not found in the provided TIME data"))
-                        warning_generated <- TRUE
-                      }  
+                      if(i == intervals){
+                        if(is.na(told_i)){
+                          merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, nrow(tmp_df)))
+                          if(!isTRUE(warning_generated)){
+                            warning(paste0("Unable to generate dosing interval for Steady State data! TOLD value 'TOLD", i ,"' not found in the provided TIME data"))
+                            warning_generated <- TRUE
+                          }  
+                        } else if(is.na(tau_i)){
+                          tmp_tau_i <- which(e_time <= (tau+told))
+                          if(length(tmp_tau_i) > 0){
+                            tau_i <- tmp_tau_i[length(tmp_tau_i)] 
+                            merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, told_i-1), rep(1, (tau_i-told_i+1)), rep(0, (nrow(tmp_df) - tau_i)))
+                          } else {
+                            merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, nrow(tmp_df)))
+                            if(!isTRUE(warning_generated)){
+                              warning(paste0("Unable to generate dosing interval for Steady State data! TAU value 'TAU", i ,"' not found in the provided TIME data"))
+                              warning_generated <- TRUE
+                            }
+                          }
+                        }
+                      } else {
+                        merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, nrow(tmp_df)))
+                        if(!isTRUE(warning_generated)){
+                          warning(paste0("Unable to generate dosing interval for Steady State data! TAU value 'TAU", i ,"' or TOLD value 'TOLD", i ,"' not found in the provided TIME data"))
+                          warning_generated <- TRUE
+                        }   
+                      }
                     }
                   } else {
                     #print(time)
@@ -520,10 +542,32 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
                     if(!is.na(tau_i) && !is.na(told_i)){
                       merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, told_i-1), rep(1, (tau_i-told_i+1)), rep(0, (nrow(tmp_df) - tau_i)))
                     } else {
-                      merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, nrow(tmp_df)))
-                      if(!isTRUE(warning_generated)){
-                        warning(paste0("Unable to generate dosing interval for Steady State data! TAU value 'TAU", i ,"' or TOLD value 'TOLD", i ,"' not found in the provided TIME data"))
-                        warning_generated <- TRUE
+                      if(i == intervals){
+                        if(is.na(told_i)){
+                          merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, nrow(tmp_df)))
+                          if(!isTRUE(warning_generated)){
+                            warning(paste0("Unable to generate dosing interval for Steady State data! TOLD value 'TOLD", i ,"' not found in the provided TIME data"))
+                            warning_generated <- TRUE
+                          }  
+                        } else if(is.na(tau_i)){
+                          tmp_tau_i <- which(time <= (tau+told))
+                          if(length(tmp_tau_i) > 0){
+                            tau_i <- tmp_tau_i[length(tmp_tau_i)] 
+                            merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, told_i-1), rep(1, (tau_i-told_i+1)), rep(0, (nrow(tmp_df) - tau_i)))
+                          } else {
+                            merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, nrow(tmp_df)))
+                            if(!isTRUE(warning_generated)){
+                              warning(paste0("Unable to generate dosing interval for Steady State data! TAU value 'TAU", i ,"' not found in the provided TIME data"))
+                              warning_generated <- TRUE
+                            }
+                          }
+                        }
+                      } else {
+                        merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, nrow(tmp_df)))
+                        if(!isTRUE(warning_generated)){
+                          warning(paste0("Unable to generate dosing interval for Steady State data! TAU value 'TAU", i ,"' or TOLD value 'TOLD", i ,"' not found in the provided TIME data"))
+                          warning_generated <- TRUE
+                        }
                       }
                     }
                   }

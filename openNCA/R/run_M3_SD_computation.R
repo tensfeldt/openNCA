@@ -226,7 +226,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###
   aucpari <- grep('^AUC.([0-9]+?).T[1-2]$', names(map_data), ignore.case=TRUE, perl=TRUE)
   if(length(aucpari)>0) {
-      auc_par_len <- length(aucpari)/2
+      auc_par_len <- floor(length(aucpari)/2)
       g <- names(map_data)[aucpari]
       ### Ensure pairs are coherent
       aucpar1 <- grep('^AUC.([0-9]+?).T[1]$', names(map_data), ignore.case=TRUE, perl=TRUE)
@@ -842,12 +842,6 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
-      test_df <- tmp_df[,c(map_data$CONC, map_data$TIME)]
-      if(any(duplicated(test_df))){
-        tmp_df <- tmp_df[!duplicated(test_df),]
-      }
-      cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
-      tmp_dose <- unique(tmp_df[, dosevar])[1]
       
       if("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data)){
         ex_flag <- as.numeric(tmp_df[,map_data$FLGEXSDE])
@@ -870,6 +864,21 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       } else {
         emesis_flag <- NULL
       }
+      test_df <- tmp_df[,c(map_data$CONC, map_data$TIME)]
+      if(any(duplicated(test_df))){
+        tmp_df <- tmp_df[!duplicated(test_df),]
+        warning(paste0("Removing duplicate CONC and TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
+      }
+##      2019-11-26/RD Added to account for duplicate TIME but different CONC values
+##
+##      test_df2 <- tmp_df[,c(map_data$TIME)]
+##      if(any(duplicated(test_df2))){
+##        tmp_df <- tmp_df[0,]
+##        warning(paste0("Detected duplicate TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "', cannot generate any parameters!"))
+##      }
+      cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
+      tmp_dose <- unique(tmp_df[, dosevar])[1]
+      
 ##      2019-11-08/RD Added for Interpolation to account for INCLUDEINTERPOLATION Flag
 ##
       if("INCLUDEINTERPOLATION" %in% names(map_data)){

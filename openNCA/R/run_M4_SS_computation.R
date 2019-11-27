@@ -225,7 +225,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###  cat('interval_list:\n');print(interval_list[interval_list %in% parameter_list])
   aucpari <- grep('^AUC.([0-9]+?).T[1-2]$', names(map_data), ignore.case=TRUE, perl=TRUE)
   if(length(aucpari)>0) {
-    aurc_par_len <- length(aucpari)/2
+    aurc_par_len <- floor(length(aucpari)/2)
     g <- names(map_data)[aucpari]
     ### Ensure pairs are coherent
     aucpar1 <- grep('^AUC.([0-9]+?).T[1]$', names(map_data), ignore.case=TRUE, perl=TRUE)
@@ -243,7 +243,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   reg_col <- sum(regular_list %in% parameter_list) + ifelse(any(c("KELRSQ","KELRSQA") %in% parameter_list), 1, 0)
   aet_col <- ifelse(sum(aet_list %in% parameter_list) >= 1, sum(aet_list %in% parameter_list), 0)
   tmp_aet_col <- ifelse("AET" %in% parameter_list, aet_col+1, aet_col)
-  aurc_par_len <- ifelse(auc_list %in% parameter_list && 'AUCNPAIR' %in% names(map_data), ifelse(!(is.null(map_data$AUCNPAIR) || is.na(suppressWarnings(as.numeric(map_data$AUCNPAIR)))), suppressWarnings(as.numeric(map_data$AUCNPAIR)), 0), 0)
+##  aurc_par_len <- ifelse(auc_list %in% parameter_list && 'AUCNPAIR' %in% names(map_data), ifelse(!(is.null(map_data$AUCNPAIR) || is.na(suppressWarnings(as.numeric(map_data$AUCNPAIR)))), suppressWarnings(as.numeric(map_data$AUCNPAIR)), 0), 0)
   col <- reg_col + (tmp_aet_col * aet_len) + (mid_col * mid_len) + (interval_col * di_col) + 1 + (2 * (aet_len))
 ###
 ###  cat('tmp_mid_pt:', tmp_mid_pt, '\n')
@@ -711,11 +711,6 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
-      test_df <- tmp_df[,c(map_data$CONC, map_data$TIME)]
-      if(any(duplicated(test_df))){
-        tmp_df <- tmp_df[!duplicated(test_df),]
-      }
-      cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
       
       if("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data)){
         ex_flag <- as.numeric(tmp_df[,map_data$FLGEXSDE])
@@ -738,6 +733,19 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       } else {
         emesis_flag <- NULL
       }
+      test_df <- tmp_df[,c(map_data$CONC, map_data$TIME)]
+      if(any(duplicated(test_df))){
+        tmp_df <- tmp_df[!duplicated(test_df),]
+        warning(paste0("Removing duplicate CONC and TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
+      }
+##      2019-11-26/RD Added to account for duplicate TIME but different CONC values
+##
+##      test_df2 <- tmp_df[,c(map_data$TIME)]
+##      if(any(duplicated(test_df2))){
+##        tmp_df <- tmp_df[0,]
+##        warning(paste0("Detected duplicate TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "', cannot generate any parameters!"))
+##      }
+      cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
       
       if("INCLUDEINTERPOLATION" %in% names(map_data)){
         map_data[,"INCLUDEINTERPOLATION"] <- as.numeric(map_data[,"INCLUDEINTERPOLATION"])
@@ -763,7 +771,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-10-03/TGT/ rt <- rate(start_time = tmp_df[,map_data$TIME], end_time = tmp_df[,map_data$ENDTIME], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]))
       type <- ifelse("SAMPLETYPE" %in% names(map_data), ifelse(map_data$SAMPLETYPE %in% names(tmp_df), as.character(unique(tmp_df[,map_data$SAMPLETYPE])[1]), NULL), NULL)
       rt <- rate(start_time = tmp_df[,map_data$TIME], end_time = tmp_df[,map_data$ENDTIME], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]), volu = tmp_df[,map_data$AMOUNTU], type = type, map = map_data)
-
+      
       if(nrow(tmp_df) > 0){
         orig_time <- rt
         orig_conc <- mid_pt
@@ -807,6 +815,14 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         if(comp_required[["MIDPTLAST"]]) {
           midpt_last <- midptlast(midpt = mid_pt, rate = rt)
+        }
+        if(comp_required[["AURCT1_T2"]] && auc_pair_check) {
+          aurct1_t2 <- list()
+          aurct1_t2_names <- c(rep(paste0("AUC.", 1:aurc_par_len, ".T1")), rep(paste0("AUC.", 1:aurc_par_len, ".T2")))
+          if(!all(aurct1_t2_names %in% names(map_data))){
+            par_col <- rep(paste0("'", aurct1_t2_names[!aurct1_t2_names %in% names(map_data)], "'"))
+            stop(paste0("Dataset provided via 'map' does not contain the required columns for partial areas ", par_col))
+          }
         }
 
         for(d in 1:di_col){
@@ -898,6 +914,85 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###            amt <- at(conc = tmp_df[,map_data$CONC], amt = tmp_df[,map_data$AMOUNT], time = tmp_df[,map_data[[map_data$TIME]]], amt_units = tmp_df[,map_data$AMOUNTU])
             amt <- at(conc = tmp_df[,map_data$CONC], amt = tmp_df[,map_data$AMOUNT], time = tmp_df[,map_data$TIME], amt_units = tmp_df[,map_data$AMOUNTU])
+          }
+          
+###        if("AURCT1_T2" %in% parameter_list && "TMAXRATEi" %in% parameter_list) {
+###          cat('comp_required[["AURCT1_T2"]]: ', comp_required[["AURCT1_T2"]], ' auc_pair_check: ', auc_pair_check, '\n')
+          if(comp_required[["AURCT1_T2"]] && auc_pair_check) {
+## 2019-11-21/RD This is commented since it is not part of AURCT1_T2
+##          aurct <- NULL
+##          aurc_int <- NULL
+##          for(t in 2:(mid_len+1)){
+##            tmp <- auc_t1_t2(conc = rt, time = mid_pt, t1 = mid_pt[1], t2 = mid_pt[t], method = method, exflag = auc_flag, t_max = tmax_rate[[d]])
+##            tmp_int <- paste0(unique(mid_pt)[1], "_", unique(mid_pt)[t])
+##
+##            if(is.null(aurct)){
+##              aurct <- tmp
+##              aurc_int <- tmp_int
+##            } else {
+##              aurct <- c(aurct, tmp)
+##              aurc_int <- c(aurc_int, tmp_int)
+##            }
+##          }
+##          if(length(aurct) < mid_col) {
+##            aurct <- c(aurct, rep(NA, (mid_col - length(aurct))))
+##          }
+##          if(length(aurc_int) < mid_col) {
+##            aurc_int <- c(aurc_int, rep(NA, (mid_col - length(aurc_int))))
+##          }
+
+###
+###          print(aurct)
+###          print(aurc_int)
+
+##          if(auc_pair_check){
+##          2019-11-26/RD Added for Interpolation to account for error handling
+##
+            if((isTRUE(interpolation) || isTRUE(extrapolation)) && !(c(paste0("TOLD",d)) %in% names(map_data))){
+              stop(paste0("Dataset provided via 'map' does not contain the required columns for interpolating partial areas ", paste0("TOLD",d)))
+            } else if((isTRUE(interpolation) || isTRUE(extrapolation)) && (c(paste0("TOLD",d)) %in% names(map_data))) {
+              if((isTRUE(interpolation) || isTRUE(extrapolation)) && !(map_data[, c(paste0("TOLD",d))] %in% names(tmp_di_df))){
+                stop(paste0("Dataset provided via 'data' does not contain the required columns for interpolating partial areas ", paste0("TOLD",d)))
+              } else if((isTRUE(interpolation) || isTRUE(extrapolation)) && (map_data[, c(paste0("TOLD",d))] %in% names(tmp_di_df))){
+                tmp_told <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
+              } else {
+                tmp_told <- NA
+              }
+            } else {
+              tmp_told <- NA
+            }
+### 2019-09-23/TGT/ fix auc_par_len -> aurc_par_len
+###            for(t in 1:(aurc_par_len)){
+            for(t in 1:(aurc_par_len)){
+              if(!(is.numeric(as.numeric(map_data[, paste0("AUC.", t, ".T1")])) && is.numeric(as.numeric(map_data[, paste0("AUC.", t, ".T2")])))){
+                stop(paste0("'AUC.", t, ".T1' and/or 'AUC.", t, ".T2' value provided via 'map' is not a numeric value"))
+              }
+              aurc_t1 <- as.numeric(map_data[, paste0("AUC.", t, ".T1")])
+              aurc_t2 <- as.numeric(map_data[, paste0("AUC.", t, ".T2")])
+              
+              if((isTRUE(interpolation) || isTRUE(extrapolation))){
+                tmp <- auc_t1_t2(conc = rt, time = mid_pt, t1 = aurc_t1, t2 = aurc_t2, method = method, exflag = auc_flag, t_max = tmax_rate[[d]], interpolate = interpolation, extrapolate = extrapolation, model = "M4", dosing_type = "SS", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time)
+                if(is.list(tmp)){
+                  tmp_auc <- tmp[[1]]
+                  if(t == 1){
+                    cest_tmp <- tmp[[2]]
+                  } else {
+                    cest_tmp <- rbind(cest_tmp, tmp[[2]])
+                  }
+                  cest_tmp <- unique(na.omit(cest_tmp))
+                } else {
+                  tmp_auc <- tmp
+                }
+              } else {
+                tmp_auc <- auc_t1_t2(conc = rt, time = mid_pt, t1 = aurc_t1, t2 = aurc_t2, method = method, exflag = auc_flag, t_max = tmax_rate[[d]])
+              }
+              
+              if(d == 1){
+                aurct1_t2[[t]] <- tmp_auc
+              } else {
+                aurct1_t2[[t]] <- sum(c(unlist(aurct1_t2[[t]]), tmp_auc), na.rm = TRUE)
+              }
+            }
           }
         }
 
@@ -1028,79 +1123,6 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             if(!isTRUE(kel_opt_warning)){
               warning("Kel optimization cannot be performed because 'KELNOPT', 'KELRSQ' and 'AURCXPCTO' or 'AURCXPCTP' are not part of the Flag 'FLGACCEPTKELCRIT'")
               kel_opt_warning <- TRUE
-            }
-          }
-        }
-###        if("AURCT1_T2" %in% parameter_list && "TMAXRATEi" %in% parameter_list) {
-###          cat('comp_required[["AURCT1_T2"]]: ', comp_required[["AURCT1_T2"]], ' auc_pair_check: ', auc_pair_check, '\n')
-        if(comp_required[["AURCT1_T2"]] && auc_pair_check) {
-## 2019-11-21/RD This is commented since it is not part of AURCT1_T2
-##          aurct <- NULL
-##          aurc_int <- NULL
-##          for(t in 2:(mid_len+1)){
-##            tmp <- auc_t1_t2(conc = rt, time = mid_pt, t1 = mid_pt[1], t2 = mid_pt[t], method = method, exflag = auc_flag, t_max = tmax_rate[[d]])
-##            tmp_int <- paste0(unique(mid_pt)[1], "_", unique(mid_pt)[t])
-##
-##            if(is.null(aurct)){
-##              aurct <- tmp
-##              aurc_int <- tmp_int
-##            } else {
-##              aurct <- c(aurct, tmp)
-##              aurc_int <- c(aurc_int, tmp_int)
-##            }
-##          }
-##          if(length(aurct) < mid_col) {
-##            aurct <- c(aurct, rep(NA, (mid_col - length(aurct))))
-##          }
-##          if(length(aurc_int) < mid_col) {
-##            aurc_int <- c(aurc_int, rep(NA, (mid_col - length(aurc_int))))
-##          }
-          
-###
-###          print(aurct)
-###          print(aurc_int)
-          
-##          if(auc_pair_check){
-          aurct1_t2 <- NULL
-          aurct1_t2_names <- c(rep(paste0("AUC.", 1:aurc_par_len, ".T1")), rep(paste0("AUC.", 1:aurc_par_len, ".T2")))
-          if(!all(aurct1_t2_names %in% names(map_data))){
-            par_col <- rep(paste0("'", aurct1_t2_names[!aurct1_t2_names %in% names(map_data)], "'"))
-            stop(paste0("Dataset provided via 'map' does not contain the required columns for partial areas ", par_col))
-          }
-          if((isTRUE(interpolation) || isTRUE(extrapolation))){
-            tmp_told <- 0
-          }
-### 2019-09-23/TGT/ fix auc_par_len -> aurc_par_len
-###            for(t in 1:(aurc_par_len)){
-          for(t in 1:(aurc_par_len)){
-            if(!(is.numeric(as.numeric(map_data[, paste0("AUC.", t, ".T1")])) && is.numeric(as.numeric(map_data[, paste0("AUC.", t, ".T2")])))){
-              stop(paste0("'AUC.", t, ".T1' and/or 'AUC.", t, ".T2' value provided via 'map' is not a numeric value"))
-            }
-            aurc_t1 <- as.numeric(map_data[, paste0("AUC.", t, ".T1")])
-            aurc_t2 <- as.numeric(map_data[, paste0("AUC.", t, ".T2")])
-            
-            if((isTRUE(interpolation) || isTRUE(extrapolation))){
-              tmp <- auc_t1_t2(conc = rt, time = mid_pt, t1 = aurc_t1, t2 = aurc_t2, method = method, exflag = auc_flag, t_max = tmax_rate[[d]], interpolate = interpolation, extrapolate = extrapolation, model = "M4", dosing_type = "SS", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time)
-              if(is.list(tmp)){
-                tmp_auc <- tmp[[1]]
-                if(t == 1){
-                  cest_tmp <- tmp[[2]]
-                } else {
-                  cest_tmp <- rbind(cest_tmp, tmp[[2]])
-                }
-                cest_tmp <- unique(na.omit(cest_tmp))
-              } else {
-                tmp_auc <- tmp
-              }
-            } else {
-              tmp_auc <- auc_t1_t2(conc = rt, time = mid_pt, t1 = aurc_t1, t2 = aurc_t2, method = method, exflag = auc_flag, t_max = tmax_rate[[d]])
-            }
-### 2019-09-23/TGT/ fix auct1_t2 -> aurct1_t2
-###              if(is.null(auct1_t2)){
-            if(is.null(aurct1_t2)){
-              aurct1_t2 <- tmp_auc
-            } else {
-              aurct1_t2 <- c(aurct1_t2, tmp_auc)
             }
           }
         }
@@ -1324,7 +1346,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("AURCT1_T2" %in% parameter_list) {
         if(disp_required[["AURCT1_T2"]] && auc_pair_check) {
 ###            cat('AURC 1-x: and AURCINT 1-x\n'); print(row_data)
-          row_data <- c(row_data, aurct1_t2)
+          row_data <- c(row_data, unlist(aurct1_t2))
         }
 ###        if("AURCINFO" %in% parameter_list) {
         if(disp_required[["AURCINFO"]]) {
