@@ -254,7 +254,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   dosevar <- unlist(strsplit(map_data[,doselist], ";"))
   ### assuming here there is a single dose
   dosevar <- map[,dosevar]
-  
+   
   ### 2019-09-19/TGT/ Precompute list of required parameters for col_names, parameter function evaluation and row_data generation  
   comp_required <- list()
   disp_required <- list()
@@ -265,7 +265,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###      print(dependent_parameters(rg))
     pr <- parameter_required(rg, parameter_list=plist)
     dp <- parameter_required(dependent_parameters(rg), plist)
-    comp_required[[i]] <- pr || dp
+    comp_required[[i]] <- pr || dp 
     disp_required[[i]] <- pr
 ###    cat('i: ', i, ' pr: ', pr, ' dp: ', dp, ' comp_required[[', i, ']]: ', comp_required[[i]], ' disp_required[[', i, ']]: ', disp_required[[i]], '\n')
     
@@ -358,6 +358,14 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if(disp_required[["AEPCT"]]) {
     col_names <- c(col_names, "AEPCT")
     regular_int_type <- c(regular_int_type, "AEPCT")
+  }
+  if(disp_required[["AETAUi"]]){
+    col_names <- c(col_names, rep(paste0("AETAU",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("AETAU",1:di_col)))
+  }
+  if(disp_required[["AETAUPTi"]]){
+    col_names <- c(col_names, rep(paste0("AETAUPT",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("AETAUPT",1:di_col)))
   }
   if(disp_required[["MAXRATE"]]) {
     col_names <- c(col_names, "MAXRATE")
@@ -464,6 +472,10 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if(disp_required[["AURCLAST"]]) {
     col_names <- c(col_names, "AURCLAST")
     regular_int_type <- c(regular_int_type, "AURCLAST")
+  }
+  if(disp_required[["AURCT"]]) {
+    col_names <- c(col_names, rep(paste0("AURC",1:(aet_len-1))), rep(paste0("AURCINT",1:(aet_len-1))))
+    regular_int_type <- c(regular_int_type, paste0("AURC",1:(aet_len-1)))
   }
 ###  if("AURCT1_T2" %in% parameter_list) {
   if(disp_required[["AURCT1_T2"]] && auc_pair_check) {
@@ -690,6 +702,16 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(comp_required[["DOSEi"]]) {
         dose <- list()
       }
+      if(comp_required[["AETAUi"]]) {
+        aetau_i <- list()
+      }
+      if(comp_required[["AETAUPTi"]]) {
+        aetau_pt_i <- list()
+      }
+      if(comp_required[["AURCT"]]) {
+        aurct <- list()
+        aurc_int <- list()
+      }
 ###      if("MAXRATEi" %in% parameter_list) {
       if(comp_required[["MAXRATEi"]]) {
         max_rate_i <- list()
@@ -915,7 +937,60 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###            amt <- at(conc = tmp_df[,map_data$CONC], amt = tmp_df[,map_data$AMOUNT], time = tmp_df[,map_data[[map_data$TIME]]], amt_units = tmp_df[,map_data$AMOUNTU])
             amt <- at(conc = tmp_df[,map_data$CONC], amt = tmp_df[,map_data$AMOUNT], time = tmp_df[,map_data$TIME], amt_units = tmp_df[,map_data$AMOUNTU])
           }
-          
+          if(comp_required[["AETAUi"]]){
+            aetau_i[[d]] <- aetau(aet = ae_t, time = na.omit(tmp_df[,map_data$TIME]), t = tau[[d]])
+          }
+          if(comp_required[["AETAUPTi"]]) {
+            aetau_pt_i[[d]] <- aepct(ae = aetau_i[[d]], dose = tmp_dose)
+          }
+          if(comp_required[["AURCT"]]) {
+            prev_na <- FALSE
+            prev_aurc <- NA
+            
+            for(t in 2:(length(mid_pt))){
+              if(mid_pt[t] %in% tmp_mid_pt[-1]) {
+                tmp <- auc_t1_t2(conc = rt, time =  mid_pt, t1 = tmp_mid_pt[1], t2 = mid_pt[t], method = method, exflag = auc_flag, t_max = tmax_rate_i[[d]])
+                tmp_int <- paste0(mid_pt[1], "_", mid_pt[t])
+              } else {
+                tmp <- NA
+                tmp_int <- paste0(mid_pt[1], "_", mid_pt[t])
+              }
+              
+              if(d == 1){
+                aurct[[t-1]] <- tmp
+                aurc_int[[t-1]] <- tmp_int
+              } else {
+                if(prev_na){
+                  prev_na <- FALSE
+                  if(is.numeric(tmp)){
+                    prev_aurc <- unlist(aurct[[t-2]])
+                    aurct[[t-1]] <- sum(c(prev_aurc, tmp), na.rm = TRUE)
+                  }
+                } else {
+                  if(!is.na(prev_auc)){
+                    aurct[[t-1]] <- sum(c(prev_aurc, tmp), na.rm = TRUE)
+                  } else {
+                    aurct[[t-1]] <- sum(c(aurct[[t-1]], tmp), na.rm = TRUE)
+                  }
+                }
+                aurc_int[[t-1]] <- ifelse(aurc_int[[t-1]] != tmp_int, tmp_int, aurc_int[[t-1]])
+                
+                if(is.na(tmp)){
+                  prev_na <- TRUE
+                } else {
+                  prev_na <- FALSE
+                }
+              }
+            }
+            if(d == di_col){
+              if(length(aurct) < (aet_len-1)) {
+                aurct <- c(aurct, rep(NA, ((aet_len-1) - length(aurct))))
+              } 
+              if(length(aurc_int) < aet_len) {
+                aurc_int <- c(aurc_int, rep(NA, ((aet_len-1) - length(aurc_int))))
+              }
+            }
+          }
 ###        if("AURCT1_T2" %in% parameter_list && "TMAXRATEi" %in% parameter_list) {
 ###          cat('comp_required[["AURCT1_T2"]]: ', comp_required[["AURCT1_T2"]], ' auc_pair_check: ', auc_pair_check, '\n')
           if(comp_required[["AURCT1_T2"]] && auc_pair_check) {
@@ -971,7 +1046,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               aurc_t2 <- as.numeric(map_data[, paste0("AUC.", t, ".T2")])
               
               if((isTRUE(interpolation) || isTRUE(extrapolation))){
-                tmp <- auc_t1_t2(conc = rt, time = mid_pt, t1 = aurc_t1, t2 = aurc_t2, method = method, exflag = auc_flag, t_max = tmax_rate[[d]], interpolate = interpolation, extrapolate = extrapolation, model = "M4", dosing_type = "SS", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time)
+                tmp <- auc_t1_t2(conc = rt, time = mid_pt, t1 = aurc_t1, t2 = aurc_t2, method = method, exflag = auc_flag, t_max = tmax_rate, interpolate = interpolation, extrapolate = extrapolation, model = "M4", dosing_type = "SS", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time, includeNA = TRUE)
                 if(is.list(tmp)){
                   tmp_auc <- tmp[[1]]
                   if(t == 1){
@@ -984,7 +1059,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                   tmp_auc <- tmp
                 }
               } else {
-                tmp_auc <- auc_t1_t2(conc = rt, time = mid_pt, t1 = aurc_t1, t2 = aurc_t2, method = method, exflag = auc_flag, t_max = tmax_rate[[d]])
+                tmp_auc <- auc_t1_t2(conc = rt, time = mid_pt, t1 = aurc_t1, t2 = aurc_t2, method = method, exflag = auc_flag, t_max = tmax_rate, includeNA = TRUE)
               }
               
               if(d == 1){
@@ -1254,6 +1329,12 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["AEPCT"]]) {
           row_data <- c(row_data, ae_pct)
         }
+        if(disp_required[["AETAUi"]]) {
+          row_data <- c(row_data, unlist(aetau_i))
+        }
+        if(disp_required[["AETAUPTi"]]) {
+          row_data <- c(row_data, unlist(aetau_pt_i))
+        }
         if(disp_required[["MAXRATE"]]) {
           row_data <- c(row_data, max_rate)
         }
@@ -1342,6 +1423,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("AURCLAST" %in% parameter_list) {
         if(disp_required[["AURCLAST"]]) {
           row_data <- c(row_data, aurclast)
+        }
+        if(disp_required[["AURCT"]]) {
+          row_data <- c(row_data, unlist(aurct), unlist(aurc_int))
         }
 ###        if("AURCT1_T2" %in% parameter_list) {
         if(disp_required[["AURCT1_T2"]] && auc_pair_check) {

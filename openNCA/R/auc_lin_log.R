@@ -18,7 +18,7 @@
 #' @param orig_time The original (full) time data (given in a numeric vector)
 #' 
 #! @export
-auc_lin_log <- function(conc = NULL, time = NULL, exflag = NULL, t_max = NULL, interpolate = NULL, extrapolate = NULL, model = NULL, dosing_type = NULL, told = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL){
+auc_lin_log <- function(conc = NULL, time = NULL, exflag = NULL, t_max = NULL, interpolate = NULL, extrapolate = NULL, model = NULL, dosing_type = NULL, told = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL, includeNA = FALSE){
   if(is.null(conc) && is.null(time)){
     stop("Error in auc_lin_log: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -94,7 +94,9 @@ auc_lin_log <- function(conc = NULL, time = NULL, exflag = NULL, t_max = NULL, i
     conc <- conc[exflag]
   }
   
-  if(!isTRUE(interpolate) && !isTRUE(extrapolate)){
+  interpolate_check <- ifelse(is.null(interpolate), FALSE, isTRUE(interpolate))
+  extrapolate_check <- ifelse(is.null(extrapolate), FALSE, isTRUE(extrapolate))
+  if((!isTRUE(interpolate_check) && !isTRUE(extrapolate_check)) && !isTRUE(includeNA)){
     time <- time[!is.na(conc)]
     conc <- conc[!is.na(conc)]  
   }
@@ -124,23 +126,29 @@ auc_lin_log <- function(conc = NULL, time = NULL, exflag = NULL, t_max = NULL, i
         conc <- est_tmp[[1]]
         tmp <- data.frame(time, conc)
       }
-      for(i in 1:(nrow(tmp)-1)){
-        if(!is.na(tmp$time[i]) && !is.na(tmp$time[i+1]) && !is.na(tmp$conc[i]) && !is.na(tmp$conc[i+1])){
-          if(tmp$time[i+1] <= t_max || tmp$conc[i] == 0 || tmp$conc[i+1] == 0 || tmp$conc[i] == tmp$conc[i+1]){
-            auc_df[i] <- ((tmp$conc[i] + tmp$conc[i+1])/2)*(tmp$time[i+1]-tmp$time[i])
+      if(!is.na(tmp$conc[1]) && !is.na(tmp$conc[length(tmp$conc)])){
+        for(i in 1:(nrow(tmp)-1)){
+          if(!is.na(tmp$time[i]) && !is.na(tmp$time[i+1]) && !is.na(tmp$conc[i]) && !is.na(tmp$conc[i+1])){
+            if(tmp$time[i+1] <= t_max || tmp$conc[i] == 0 || tmp$conc[i+1] == 0 || tmp$conc[i] == tmp$conc[i+1]){
+              auc_df[i] <- ((tmp$conc[i] + tmp$conc[i+1])/2)*(tmp$time[i+1]-tmp$time[i])
+            } else {
+              tmp_ln <- tmp$conc[i]/tmp$conc[i+1]
+              auc_df[i] <- ((tmp$conc[i] - tmp$conc[i+1])/log(tmp_ln))*(tmp$time[i+1]-tmp$time[i])
+            }
           } else {
-            tmp_ln <- tmp$conc[i]/tmp$conc[i+1]
-            auc_df[i] <- ((tmp$conc[i] - tmp$conc[i+1])/log(tmp_ln))*(tmp$time[i+1]-tmp$time[i])
+            auc_df[i] <- NA
           }
-        } else {
-          auc_df[i] <- NA
         }
+      } else {
+        auc <- NA
       }
     } else {
       stop("Error in auc_lin_log: 'tmax' is NA")
     }
-    auc_df <- as.numeric(auc_df)
-    auc <- sum(auc_df, na.rm = TRUE)
+    if(!is.na(tmp$conc[1]) && !is.na(tmp$conc[length(tmp$conc)])){
+      auc_df <- as.numeric(auc_df)
+      auc <- sum(auc_df, na.rm = TRUE)
+    }
   }
 ##  2019-11-11/RD Returning interpolated/extrapolated data that will be used as an output
 ##

@@ -133,17 +133,13 @@ aetau <- function(aet = NULL, time = NULL, t = NULL){
   if(any(is.na(aet))) {
     ae_tau <- NA
   } else {
-    if(t %in% time) {
-      tmp_time <- time[time <= t]
-      if(length(tmp_time) > 0) {
-        tmp_aet <- aet[1:length(tmp_time)]
-      } else {
-        stop("Error in aetau: value 't' cannot be used to subset 'time' vector")
-      }
-      ae_tau <- sum(tmp_aet[!is.na(tmp_time)])
+    tmp_time <- time[time <= t]
+    if(length(tmp_time) > 0) {
+      tmp_aet <- aet[1:length(tmp_time)]
     } else {
-      stop("Error in aetau: value 't' is not present in 'time' vector")
+      stop("Error in aetau: value 't' cannot be used to subset 'time' vector")
     }
+    ae_tau <- sum(tmp_aet[!is.na(tmp_time)])
   }
 
   return(ae_tau)

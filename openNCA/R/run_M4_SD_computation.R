@@ -481,6 +481,10 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "AURCLAST")
     regular_int_type <- c(regular_int_type, "AURCLAST")
   }
+  if(disp_required[["AURCT"]]) {
+    col_names <- c(col_names, rep(paste0("AURC",1:(aet_len-1))), rep(paste0("AURCINT",1:(aet_len-1))))
+    regular_int_type <- c(regular_int_type, paste0("AURC",1:(aet_len-1)))
+  }
 ###  if("AURCT1_T2" %in% parameter_list && "TMAXRATE" %in% parameter_list) {
 ###  if(parameter_required("^AURCT1_T2$", parameter_list) || parameter_required(dependent_parameters("^AURCT1_T2$"), parameter_list)) {
   if(disp_required[["AURCT1_T2"]] && auc_pair_check) {
@@ -1054,6 +1058,35 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
         }
+        if(comp_required[["AURCT"]]) {
+          aurct <- NULL
+          aurc_int <- NULL
+          for(t in 2:(length(mid_pt))){
+            tmp <- auc_t1_t2(conc = rt, time = mid_pt, t1 = mid_pt[1], t2 = mid_pt[t], method = method, exflag = auc_flag, t_max = tmax_rate)
+            if(!is.na(unique(tmp_df[,map_data$TIME])[1]) && !is.na(unique(tmp_df[,map_data$TIME])[t])){
+              tmp_int <- paste0(mid_pt[1], "_", mid_pt[t])
+            } else {
+              tmp_int <- NA
+            }
+            
+            if(is.null(aurct)){
+              aurct <- tmp
+            } else {
+              aurct <- c(aurct, tmp)
+            }
+            if(is.null(aurc_int)){
+              aurc_int <- tmp_int
+            } else {
+              aurc_int <- c(aurc_int, tmp_int)
+            }
+          }
+          if(length(aurct) < (aet_len-1)) {
+            aurct <- c(aurct, rep(NA, ((aet_len-1) - length(aurct))))
+          }
+          if(length(aurc_int) < (aet_len-1)) {
+            aurc_int <- c(aurc_int, rep(NA, ((aet_len-1) - length(aurc_int))))
+          }
+        }
 ###        if("AURCT1_T2" %in% parameter_list && "TMAXRATE" %in% parameter_list) {
 ###        if(parameter_required("^AURCT1_T2$", parameter_list) || parameter_required(dependent_parameters("^AURCT1_T2$"), parameter_list)) {
         if(comp_required[["AURCT1_T2"]] && auc_pair_check) {
@@ -1099,7 +1132,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             aurc_t2 <- as.numeric(map_data[, paste0("AUC.", t, ".T2")])
             
             if((isTRUE(interpolation) || isTRUE(extrapolation))){
-              tmp <- auc_t1_t2(conc = rt, time = mid_pt, t1 = aurc_t1, t2 = aurc_t2, method = method, exflag = auc_flag, t_max = tmax_rate, interpolate = interpolation, extrapolate = extrapolation, model = "M4", dosing_type = "SD", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time)
+              tmp <- auc_t1_t2(conc = rt, time = mid_pt, t1 = aurc_t1, t2 = aurc_t2, method = method, exflag = auc_flag, t_max = tmax_rate, interpolate = interpolation, extrapolate = extrapolation, model = "M4", dosing_type = "SD", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time, includeNA = TRUE)
               if(is.list(tmp)){
                 tmp_auc <- tmp[[1]]
                 if(t == 1){
@@ -1112,7 +1145,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 tmp_auc <- tmp
               }
             } else {
-              tmp_auc <- auc_t1_t2(conc = rt, time = mid_pt, t1 = aurc_t1, t2 = aurc_t2, method = method, exflag = auc_flag, t_max = tmax_rate)
+              tmp_auc <- auc_t1_t2(conc = rt, time = mid_pt, t1 = aurc_t1, t2 = aurc_t2, method = method, exflag = auc_flag, t_max = tmax_rate, includeNA = TRUE)
             }
             
             if(is.null(aurct1_t2)){
@@ -1368,6 +1401,9 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if(parameter_required("^AURCLAST$", parameter_list) || parameter_required(dependent_parameters("^AURCLAST$"), parameter_list)) {
         if(disp_required[["AURCLAST"]]) {
           row_data <- c(row_data, aurclast)
+        }
+        if(disp_required[["AURCT"]]) {
+          row_data <- c(row_data, aurct, aurc_int)
         }
 ###        if("AURCT1_T2" %in% parameter_list) {
 ###        if(parameter_required("^AURCT1_T2$", parameter_list) || parameter_required(dependent_parameters("^AURCT1_T2$"), parameter_list)) {

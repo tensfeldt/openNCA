@@ -15,7 +15,7 @@
 #' @param orig_time The original (full) time data (given in a numeric vector)
 #' 
 #! @export
-auc_lin <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL, extrapolate = NULL, model = NULL, dosing_type = NULL, told = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL){
+auc_lin <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL, extrapolate = NULL, model = NULL, dosing_type = NULL, told = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL, includeNA = FALSE){
   if(is.null(conc) && is.null(time)){
     stop("Error in auc_lin: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -91,7 +91,9 @@ auc_lin <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL,
     conc <- conc[exflag]
   }
 
-  if(!isTRUE(interpolate) && !isTRUE(extrapolate)){
+  interpolate_check <- ifelse(is.null(interpolate), FALSE, isTRUE(interpolate))
+  extrapolate_check <- ifelse(is.null(extrapolate), FALSE, isTRUE(extrapolate))
+  if((!isTRUE(interpolate_check) && !isTRUE(extrapolate_check)) && !isTRUE(includeNA)){
     time <- time[!is.na(conc)]
     conc <- conc[!is.na(conc)]  
   }
@@ -117,15 +119,21 @@ auc_lin <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL,
       conc <- est_tmp[[1]]
       tmp <- data.frame(time, conc)
     }
-    for(i in 1:(nrow(tmp)-1)){
-      if(!is.na(tmp$time[i]) && !is.na(tmp$time[i+1]) && !is.na(tmp$conc[i]) && !is.na(tmp$conc[i+1])){
-        auc_df[i] <- ((conc[i] + conc[i+1])/2)*(time[i+1]-time[i])
-      } else {
-        auc_df[i] <- NA
+    if(!is.na(tmp$conc[1]) && !is.na(tmp$conc[length(tmp$conc)])){
+      for(i in 1:(nrow(tmp)-1)){
+        if(!is.na(tmp$time[i]) && !is.na(tmp$time[i+1]) && !is.na(tmp$conc[i]) && !is.na(tmp$conc[i+1])){
+          auc_df[i] <- ((conc[i] + conc[i+1])/2)*(time[i+1]-time[i])
+        } else {
+          auc_df[i] <- NA
+        }
       }
+    } else {
+      auc <- NA
     }
-    auc_df <- as.numeric(auc_df)
-    auc <- sum(auc_df, na.rm = TRUE)
+    if(!is.na(tmp$conc[1]) && !is.na(tmp$conc[length(tmp$conc)])){
+      auc_df <- as.numeric(auc_df)
+      auc <- sum(auc_df, na.rm = TRUE)
+    }
   }
 ##  2019-11-11/RD Returning interpolated/extrapolated data that will be used as an output
 ##

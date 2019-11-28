@@ -1038,7 +1038,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
     tryCatch({
-      print(unique(data_data[,map_data$SDEID])[i])
 ###      if("CMAXi" %in% parameter_list) {
 ###      if(parameter_required("^CMAXi$", parameter_list) || length(dependent_parameters("^CMAXi$"))>0){
       if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]){
@@ -2004,7 +2003,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##              2019-11-08/RD Changed the call for partial AUCs to account for interpolation
 ##
               if((isTRUE(interpolation) || isTRUE(extrapolation))){
-                tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, interpolate = interpolation, extrapolate = extrapolation, model = "M1", dosing_type = "SS", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time)
+                tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, interpolate = interpolation, extrapolate = extrapolation, model = "M1", dosing_type = "SS", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time, includeNA = TRUE)
                 if(is.list(tmp)){  
                   tmp_auc <- tmp[[1]]
                   if(t == 1){
@@ -2017,7 +2016,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                   tmp_auc <- tmp
                 }
               } else {
-                tmp_auc <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max)
+                tmp_auc <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, includeNA = TRUE)
               }
 
               if(d == 1){

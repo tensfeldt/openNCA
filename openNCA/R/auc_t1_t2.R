@@ -137,7 +137,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1, exflag = NULL, t_max = NULL, dose_time = NULL, interpolate = NULL, extrapolate = NULL, model = NULL, dosing_type = NULL, told = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL){
+auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1, exflag = NULL, t_max = NULL, dose_time = NULL, interpolate = NULL, extrapolate = NULL, model = NULL, dosing_type = NULL, told = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL, includeNA = FALSE){
   if(is.null(conc) && is.null(time)){
     stop("Error in auc_t1_t2: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -197,32 +197,34 @@ auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1
  
 ##  2019-11-12/RD Added to Interpolate/Extrapolate data properly for missing time values
 ## 
-  if(isTRUE(interpolate) || isTRUE(extrapolate)){
-    if(!(t1 %in% time)){
-      time <- c(t1, time)
-      conc <- c(NA, conc)
-    }
-    if(!(t2 %in% time)){
-      time <- c(time, t2)
-      conc <- c(conc, NA)
-    }
-  } else {
-    if(sum(conc, na.rm = T) == 0){
-      return(0)
-    }
+  if(!(t1 %in% time)){
+    time <- c(t1, time)
+    conc <- c(NA, conc)
+    exflag <- c(0, exflag)
   }
+  if(!(t2 %in% time)){
+    time <- c(time, t2)
+    conc <- c(conc, NA)
+    exflag <- c(exflag, 0)
+  }
+  #if(isTRUE(interpolate) || isTRUE(extrapolate)){
+  #} else {
+  #  if(sum(conc, na.rm = T) == 0){
+  #    return(0)
+  #  }
+  #}
   
   if(length(time) != length(conc)){
     stop("Error in auc_t1_t2: length of 'time' and 'conc' vectors are not equal")
   }
   
   if(method == 1){
-    return(auc_lin_log(conc = conc, time = time, exflag = exflag, t_max = t_max, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time))
+    return(auc_lin_log(conc = conc, time = time, exflag = exflag, t_max = t_max, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time, includeNA = includeNA))
   } else if(method == 2){
-    return(auc_lin(conc = conc, time = time, exflag = exflag, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time))
+    return(auc_lin(conc = conc, time = time, exflag = exflag, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time, includeNA = includeNA))
   } else if(method == 3){
-    return(auc_log(conc = conc, time = time, exflag = exflag, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time))
+    return(auc_log(conc = conc, time = time, exflag = exflag, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time, includeNA = includeNA))
   } else if(method == 4){
-    return(auc_lin_up_log_down(conc = conc, time = time, exflag = exflag, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time))
+    return(auc_lin_up_log_down(conc = conc, time = time, exflag = exflag, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time, includeNA = includeNA))
   }
 }
