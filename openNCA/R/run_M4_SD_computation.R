@@ -745,6 +745,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
       
+      tmp_kel_flg <- as.numeric(tmp_df[,map_data$FLGEXKEL])
       if("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data)){
         ex_flag <- as.numeric(tmp_df[,map_data$FLGEXSDE])
         tmp_df <- tmp_df[!as.logical(ex_flag),]
@@ -753,6 +754,9 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
       if("FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
         kel_flag <- as.numeric(tmp_df[,map_data$FLGEXKEL])
+        if(isTRUE(optimize_kel)){
+          kel_flag <- rep(1, length(tmp_kel_flg))
+        }
       } else {
         kel_flag <- NULL
       }
@@ -770,6 +774,11 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(any(duplicated(test_df))){
         tmp_df <- tmp_df[!duplicated(test_df),]
         warning(paste0("Removing duplicate CONC and TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
+      }
+      test_df_2 <- tmp_df[,c(map_data$TIME)]
+      if(any(duplicated(test_df_2))){
+        tmp_df <- tmp_df[rep(FALSE, nrow(tmp_df)),]
+        warning(paste0("Removing SDEID: '", unique(data_data[,map_data$SDEID])[i], "' due to duplicate TIME but different CONC values"))
       }
 ##      2019-11-26/RD Added to account for duplicate TIME but different CONC values
 ##
@@ -1262,7 +1271,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             est_idx <- est_idx + 1
           }
         }
-        if(nrow(cest_tmp) > 0){
+        if(nrow(cest_tmp) > 0){ 
           for(c in 1:nrow(cest_tmp)){
             if(cest_tmp[c,"INT_EXT"] == "INT"){
               tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, cest_tmp[c,"CONC"], NA, NA, NA) 
@@ -1273,6 +1282,8 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             est_idx <- est_idx + 1
           }
         }
+        tmp_est_data <- tmp_est_data[order(tmp_est_data$TIME), ]
+        est_data <- rbind(est_data, tmp_est_data)
 ### 2019-09-05/TGT/
 ###        }
 
@@ -1494,6 +1505,9 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         computation_df[i,] <- row_data
 ###        cat('i: ', i, ' computation_df[i,]: \n'); print(computation_df[i,])  
       } else {
+        if(isTRUE(optimize_kel)){
+          kel_flag_optimized <- c(kel_flag_optimized, kel_flag)
+        }
         computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], rep(NA, length(names(computation_df))-1))
       }
     }, error = function(e) {

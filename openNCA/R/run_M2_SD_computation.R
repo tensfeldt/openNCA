@@ -359,6 +359,10 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if("FLGACCEPTPREDOSECRIT" %in% names(map_data) && ("CMAX" %in% parameter_list)){
     col_names <- c(col_names, "FLGACCEPTPREDOSE")
   }
+  if(disp_required[["CMIN"]]) {
+    col_names <- c(col_names, "CMIN")
+    regular_int_type <- c(regular_int_type, "CMIN")
+  }
   if(disp_required[["CLAST"]]) {
     col_names <- c(col_names, "CLAST")
     regular_int_type <- c(regular_int_type, "CLAST")
@@ -824,6 +828,7 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
 
+      tmp_kel_flg <- as.numeric(tmp_df[,map_data$FLGEXKEL])
       if("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data)){
         ex_flag <- as.numeric(tmp_df[,map_data$FLGEXSDE])
         tmp_df <- tmp_df[!as.logical(ex_flag),]
@@ -832,6 +837,9 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
       if("FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
         kel_flag <- as.numeric(tmp_df[,map_data$FLGEXKEL])
+        if(isTRUE(optimize_kel)){
+          kel_flag <- rep(1, length(tmp_kel_flg))
+        }
       } else {
         kel_flag <- NULL
       }
@@ -849,6 +857,11 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(any(duplicated(test_df))){
         tmp_df <- tmp_df[!duplicated(test_df),]
         warning(paste0("Removing duplicate CONC and TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
+      }
+      test_df_2 <- tmp_df[,c(map_data$TIME)]
+      if(any(duplicated(test_df_2))){
+        tmp_df <- tmp_df[rep(FALSE, nrow(tmp_df)),]
+        warning(paste0("Removing SDEID: '", unique(data_data[,map_data$SDEID])[i], "' due to duplicate TIME but different CONC values"))
       }
 ##      2019-11-26/RD Added to account for duplicate TIME but different CONC values
 ##
@@ -1023,6 +1036,9 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
         }
+        if(comp_required[["CMIN"]]) {
+          c_min <- cmin(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        }
 ###        if("CMAXDN" %in% parameter_list && "CMAX" %in% parameter_list) {
         if(comp_required[["CMAXDN"]]) {
 ###          cmaxdn <- cmax_dn(cmax = c_max, dose = unique(tmp_df[,map_data$DOSE1])[1])
@@ -1037,7 +1053,7 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           kel_v <- kel(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], exflag = kel_flag, spanratio = span_ratio)
         }
 ###        if("KELRSQ" %in% parameter_list || "KELRSQA" %in% parameter_list) {
-        if(comp_required[["KELRSQ"]] || comp_required[["KELRSQA"]]) {
+        if(comp_required[["KELR"]] || comp_required[["KELRSQ"]] || comp_required[["KELRSQA"]]) {
           kelr_v <- kel_r(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], exflag = kel_flag)
         }
         if(comp_required[["LASTTIME"]]) {
@@ -1419,10 +1435,8 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               est_idx <- est_idx + 1
             }
           }
-          if(!disp_required[["C0"]]) {
-            tmp_est_data <- tmp_est_data[order(tmp_est_data$TIME), ]
-            est_data <- rbind(est_data, tmp_est_data)
-          }
+          tmp_est_data <- tmp_est_data[order(tmp_est_data$TIME), ]
+          est_data <- rbind(est_data, tmp_est_data)
         }
   
         #computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], c_0, v_0, c_max, c_last, c_max_c, cmaxdn, t_max, t_last,
@@ -1482,6 +1496,9 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             row_data <- c(row_data, 1)
           }
         }
+        if(disp_required[["CMIN"]]) {
+          row_data <- c(row_data, c_min)
+        }
         if(disp_required[["CLAST"]]) {
           row_data <- c(row_data, c_last)
         }
@@ -1502,7 +1519,7 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           row_data <- c(row_data, t_max)
         }
         if("FLGEMESIS" %in% names(map_data) && ("TMAX" %in% parameter_list)){
-          row_data <- c(row_data, NA)
+          row_data <- c(row_data, 1)
         }
         if(disp_required[["TMIN"]]) {
           row_data <- c(row_data, t_min)
@@ -1753,6 +1770,9 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         
         computation_df[i,] <- row_data
       } else {
+        if(isTRUE(optimize_kel)){
+          kel_flag_optimized <- c(kel_flag_optimized, kel_flag)
+        }
         computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], rep(NA, length(names(computation_df))-1))
       }
     }, error = function(e) {
@@ -1780,7 +1800,21 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     }
   }
   if("FLGEMESIS" %in% names(map_data) && ("TMAX" %in% parameter_list)){
-    comutation_df$FLGACCEPTTMAX <- ifelse(computation_df$FLGEMESIS == 1 & computation_df$TMAX1 < 2 * median(computation_df$TMAX1), TRUE, FALSE)
+    for(f in 1:length(unique(computation_df[,map_data$SDEID]))){
+      tmp_df <- data_data[data_data[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],]
+      emesis_flag_check <- ifelse(any(as.logical(as.numeric(tmp_df[,map_data$FLGEMESIS]))), TRUE, FALSE)
+      tmp_comp_df <- computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],]
+      if("DOSE" %in% names(computation_df)){
+        test_df_3 <- computation_df[computation_df[,"DOSE"] == tmp_comp_df[,"DOSE"],]
+        tmp_median <- median(as.numeric(test_df_3[,"TMAX"]), na.rm = TRUE) 
+      } else {
+        tmp_median <- NULL
+      }
+      tmp_tmax <- as.numeric(tmp_comp_df[,"TMAX"])
+      if(!is.null(tmp_median) && !is.na(tmp_median) && !is.null(tmp_tmax) && !is.na(tmp_tmax)){
+        computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],"FLGACCEPTTMAX"] <- ifelse((isTRUE(emesis_flag_check) && (tmp_tmax < (2 * tmp_median))), 1, ifelse(!isTRUE(emesis_flag_check), 1 , 0))  
+      }
+    }
   }
 
   for(n in 1:length(regular_int_type)){

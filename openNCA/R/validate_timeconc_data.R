@@ -28,7 +28,27 @@ validate_timeconc_data <- function(map, data, verbose=FALSE) {
     results <- list()
     time.pointer  <- NULL
     timeu.pointer <- NULL
-
+    nomtime <- NULL
+    nomtimeu <- NULL
+    acttime <- NULL
+    acttimeu <- NULL
+    vtime <- NULL
+    vtimeu <- NULL
+    atime <- NULL
+    atimeu <- NULL
+    vconc <- NULL
+    vconcu <- NULL
+    vdose <- NULL
+    vdoseu <- NULL
+    if(casefold(map$MODEL)=="m4") { 
+      nomendtime <- NULL
+      nomendtimeu <- NULL
+      actendtime <- NULL
+      actendtimeu <- NULL
+      vendtime <- NULL
+      vendtimeu <- NULL
+    }
+    
     ### Check if TIME and CONC appear in map/mct
     if( !(parameter_required("^TIME$", names(map)) && parameter_required("^CONC$", names(map))) ) {
         stop("Dataset provided via 'map' does not contain the required columns 'TIME' and 'CONC'")

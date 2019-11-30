@@ -7,7 +7,7 @@
 auc_lin_log(conc = NULL, time = NULL, exflag = NULL, t_max = NULL,
   interpolate = NULL, extrapolate = NULL, model = NULL,
   dosing_type = NULL, told = NULL, kel = NULL, orig_conc = NULL,
-  orig_time = NULL)
+  orig_time = NULL, includeNA = FALSE)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

@@ -411,7 +411,7 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
 ############################################################################################################
 ### 2019-09-14/TGT/ use NOMTIME????????? - but does it perform all of the necessary interpolation/extrapolation to support this?
 ###                      time <- tmp_df[, map_data$TIME]
-                      time <- tmp_df[, map_data$NOMTIME]
+                      tmp_time <- tmp_df[, map_data$NOMTIME]
 ### 2019-08-27/TGT/ following no longer needed with validate_timeconc_data                    
 ###                  if(map_data$TIME == "NOMTIME"){
 ###                    if(!(map_data$NOMTIME %in% names(tmp_df))){
@@ -454,7 +454,13 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
                     #print(tau_i)
                     if(is.na(told_i) || is.na(tau_i)){
                       if(is.na(told_i)){
-                        stop("8 Unable to generate dosing interval for Steady State data! TOLD value not found in the provided TIME data")
+                        #if(casefold(map_data$ORGTIME)=='actual'){
+                        #  told <- s_time[told < s_time][1]
+                        #  told_i <- match(told, s_time)
+                        #  tau_i <- match((tau+told), e_time)
+                        #} else {
+                          stop("8 Unable to generate dosing interval for Steady State data! TOLD value not found in the provided TIME data")
+                        #}
                       }
                       if(is.na(tau_i)){
                         if(length(e_time[e_time < (tau+told)]) > 0){
@@ -510,8 +516,8 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
 ### 2019-09-14/TGT/ need to match NOMINAL time for SS TOLD, TAU
 ###                      cat('i: ', i, ' told: ', told, ' tau: ', tau, ' tau+told: ', tau+told, ' nomtime: ', map_data$NOMTIME, ' acttime: ', map_data$ACTTIME, ' time: \n')
 ###                      print(time)
-                    told_i <- match(told, time)
-                    tau_i <- match((tau+told), time)
+                    told_i <- match(told, tmp_time)
+                    tau_i <- match((tau+told), tmp_time)
 ###                    cat('i: ', i, ' told: ', told, ' told_i: ', told_i, ' tau: ', tau, ' tau_i: ', tau_i, '\n')  
                     #print(told)
                     #print(tau)
@@ -519,12 +525,18 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
                     #print(tau_i)
                     if(is.na(told_i) || is.na(tau_i)){
                       if(is.na(told_i)){
-                        stop("10 Unable to generate dosing interval for Steady State data! TOLD value not found in the provided TIME data")
+                        #if(casefold(map_data$ORGTIME)=='actual'){
+                        #  told <- tmp_time[told < tmp_time][1]
+                        #  told_i <- match(told, tmp_time)
+                        #  tau_i <- match((tau+told), tmp_time)
+                        #} else {
+                          stop("10 Unable to generate dosing interval for Steady State data! TOLD value not found in the provided TIME data") 
+                        #}
                       }
                       if(is.na(tau_i)){
-                        if(length(time[time < (tau+told)]) > 0){
-                          tau <- time[time < (tau+told)][length(time[time < (tau+told)])]
-                          tau_i <- match((tau+told), time)
+                        if(length(tmp_time[tmp_time < (tau+told)]) > 0){
+                          tau <- tmp_time[tmp_time < (tau+told)][length(tmp_time[tmp_time < (tau+told)])]
+                          tau_i <- match((tau+told), tmp_time)
                           #print('updated TAU')
                           #print(tau)
                           #print(tau_i)
@@ -550,7 +562,7 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
                             warning_generated <- TRUE
                           }  
                         } else if(is.na(tau_i)){
-                          tmp_tau_i <- which(time <= (tau+told))
+                          tmp_tau_i <- which(tmp_time <= (tau+told))
                           if(length(tmp_tau_i) > 0){
                             tau_i <- tmp_tau_i[length(tmp_tau_i)] 
                             merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][order(tmp_merged),][[c(paste0("DI", i, "F"))]] <- c(rep(0, told_i-1), rep(1, (tau_i-told_i+1)), rep(0, (nrow(tmp_df) - tau_i)))

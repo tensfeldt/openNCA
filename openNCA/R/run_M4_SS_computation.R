@@ -429,7 +429,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     regular_int_type <- c(regular_int_type, "KELNOPT")
   }
 ###  if("KELRSQ" %in% parameter_list || "KELRSQA" %in% parameter_list){
-  if(disp_required[["KELRSQ"]] || disp_required[["KELRSQA"]]){
+  if(disp_required[["KELR"]]){
     col_names <- c(col_names, "KELR")
     regular_int_type <- c(regular_int_type, "KELR")
   }
@@ -734,6 +734,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
       
+      tmp_kel_flg <- as.numeric(tmp_df[,map_data$FLGEXKEL])
       if("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data)){
         ex_flag <- as.numeric(tmp_df[,map_data$FLGEXSDE])
         tmp_df <- tmp_df[!as.logical(ex_flag),]
@@ -742,6 +743,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
       if("FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
         kel_flag <- as.numeric(tmp_df[,map_data$FLGEXKEL])
+        if(isTRUE(optimize_kel)){
+          kel_flag <- rep(1, length(tmp_kel_flg))
+        }
       } else {
         kel_flag <- NULL
       }
@@ -759,6 +763,11 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(any(duplicated(test_df))){
         tmp_df <- tmp_df[!duplicated(test_df),]
         warning(paste0("Removing duplicate CONC and TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
+      }
+      test_df_2 <- tmp_df[,c(map_data$TIME)]
+      if(any(duplicated(test_df_2))){
+        tmp_df <- tmp_df[rep(FALSE, nrow(tmp_df)),]
+        warning(paste0("Removing SDEID: '", unique(data_data[,map_data$SDEID])[i], "' due to duplicate TIME but different CONC values"))
       }
 ##      2019-11-26/RD Added to account for duplicate TIME but different CONC values
 ##
@@ -814,7 +823,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           kel_v <- kel(conc = rt, time = mid_pt, exflag = kel_flag, spanratio = span_ratio)
         }
 ###        if("KELRSQ" %in% parameter_list || "KELRSQA" %in% parameter_list) {
-        if(comp_required[["KELRSQ"]] || comp_required[["KELRSQA"]]) {
+        if(comp_required[["KELR"]] || comp_required[["KELRSQ"]] || comp_required[["KELRSQA"]]) {
           kelr_v <- kel_r(conc = rt, time = mid_pt, exflag = kel_flag)
         }
         if(comp_required[["CEST"]] || parameter_required("KEL", names(kel_v)) || parameter_required("KELC0", names(kel_v))) {
@@ -1306,6 +1315,8 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             est_idx <- est_idx + 1
           }
         }
+        tmp_est_data <- tmp_est_data[order(tmp_est_data$TIME), ]
+        est_data <- rbind(est_data, tmp_est_data)
 
         #computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], amt, ae_t, a_e, kel_v[["KEL"]], kel_v[["KELTMLO"]],
         #                        kel_v[["KELTMHI"]], kel_v[["KELNOPT"]], kelr_v[["KELR"]], kelr_v[["KELRSQ"]],
@@ -1487,6 +1498,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          cat('i: ', i, 'assigned to computation_df\n')
           
       } else {
+        if(isTRUE(optimize_kel)){
+          kel_flag_optimized <- c(kel_flag_optimized, kel_flag)
+        }
         computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], rep(NA, length(names(computation_df))-1))
       }
     }, error = function(e) {
@@ -1586,7 +1600,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       display_parameters <- c(display_parameters, "KELNOPT")
     }
 ###    if("KELRSQ" %in% display_list || "KELRSQA" %in% display_list){
-    if(disp_required[["KELRSQ"]] || disp_required[["KELRSQA"]]){
+    if(disp_required[["KELR"]]){
       display_parameters <- c(display_parameters, "KELR")
     }
 ###    if("KELRSQ" %in% display_list){
