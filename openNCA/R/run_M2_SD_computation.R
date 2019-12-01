@@ -1435,8 +1435,6 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               est_idx <- est_idx + 1
             }
           }
-          tmp_est_data <- tmp_est_data[order(tmp_est_data$TIME), ]
-          est_data <- rbind(est_data, tmp_est_data)
         }
   
         #computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], c_0, v_0, c_max, c_last, c_max_c, cmaxdn, t_max, t_last,
@@ -1464,8 +1462,6 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           row_data <- c(row_data, tmp_est_c0)
           ### 2019-09-24/TGT/ Add C0 to estimated concentration dataset
           if(!is.na(tmp_est_c0)) { 
-            est_idx <- nrow(tmp_est_data) + 1
-            tmp_est_data[est_idx,] <- c(NA, sdeid, 0, NA, NA, NA, est_c_0$est_c0, NA)
             ### 2019-09-24/TGT/ Add Time and Conc datapoints used to estimate C0 to estimated concentration dataset
             if(length(est_c_0$time)>0) { 
               for(jtime in 1:length(est_c_0$time)) {
@@ -1476,6 +1472,9 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             tmp_est_data <- tmp_est_data[order(tmp_est_data$TIME), ]
             est_data <- rbind(est_data, tmp_est_data)
           }
+        } else {
+          tmp_est_data <- tmp_est_data[order(tmp_est_data$TIME), ]
+          est_data <- rbind(est_data, tmp_est_data)
         }
         if(disp_required[["V0"]]) {
           row_data <- c(row_data, v_0)

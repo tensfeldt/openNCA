@@ -974,6 +974,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
 
     for(i in 1:length(unique(data_data[,map_data$SDEID]))){
+      sdeid <- unique(data_data[,map_data$SDEID])[i]
 ###        cat("i: ", i, " SDEID: ", unique(data_data[,map_data$SDEID])[i], "\n")
     tryCatch({
       if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]){
@@ -981,9 +982,10 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
 ### 2019-09-16/TGT/ Missing initiailization for c_0
 ###      if("C0" %in% parameter_list) {
-      if(comp_required[["C0"]]) {
-        c_0 <- list()
-      }
+##  2019-11-29/RD This is not needed
+##      if(comp_required[["C0"]]) {
+##        c_0 <- list()
+##      }
 ###      if("V0" %in% parameter_list) {
       if(comp_required[["V0"]]) {
         v_0 <- list()
@@ -1243,9 +1245,13 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         orig_time <- tmp_df[,map_data$TIME]
         orig_conc <- tmp_df[,map_data$CONC]
         
-        c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        obs_c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        
         if(comp_required[["DOSEC"]]) {
           dose_c <- dosec(data = tmp_df, map = map_data)
+        }
+        if(comp_required[["C0"]]) {
+          est_c_0 <- est_c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], npts=2, returnall=TRUE)
         }
 ###        if("CMAX" %in% parameter_list) {
         if(comp_required[["CMAX"]]) {
@@ -1411,7 +1417,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("CMAXC" %in% parameter_list && "CMAX" %in% parameter_list && "TMAX" %in% parameter_list && "KEL" %in% parameter_list) {
         if(comp_required[["CMAXC"]]) {
-          c_maxc <- cmaxc(kel = kel_v[["KEL"]], cmax = c_max, c0 = c_0, tmax = t_max)
+          c_maxc <- cmaxc(kel = kel_v[["KEL"]], cmax = c_max, c0 = obs_c_0, tmax = t_max)
         }
 ###        if("AUCALL" %in% parameter_list && 'TMAX' %in% parameter_list) {
         if(comp_required[["AUCALL"]]) {
@@ -1534,7 +1540,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
 ###          if("V0" %in% parameter_list) {
           if(comp_required[["V0"]]) {
-            v_0[[d]] <- v0(c0 = c_0, dose = tmp_dose)
+            v_0[[d]] <- v0(c0 = obs_c_0, dose = tmp_dose)
           }
 ###          if("CMAXi" %in% parameter_list) {
 ###          cat('comp_required[["CMAXi"]]: ', comp_required[["CMAXi"]], '\n')
@@ -1574,7 +1580,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("CMAXCi" %in% parameter_list && "CMAXi" %in% parameter_list && "TMAXi" %in% parameter_list && "KEL" %in% parameter_list) {
 ###          cat('comp_required[["CMAXCi"]]: ', comp_required[["CMAXCi"]], '\n')
           if(comp_required[["CMAXCi"]]) {
-            c_maxci[[d]] <- cmaxc(kel = kel_v[["KEL"]], cmax = c_maxi[[d]], c0 = c_0, tmax = t_maxi[[d]])
+            c_maxci[[d]] <- cmaxc(kel = kel_v[["KEL"]], cmax = c_maxi[[d]], c0 = obs_c_0, tmax = t_maxi[[d]])
           }
 ###          if("AUCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
           if(comp_required[["AUCINFOi"]]) {
@@ -1610,7 +1616,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
 ###          if("AUCLASTCi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "TLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
           if(comp_required[["AUCLASTCi"]]) {
-            auclasti_c[[d]] <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclasti[[d]], c0 = c_0, tlast = t_lasti[[d]])
+            auclasti_c[[d]] <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclasti[[d]], c0 = obs_c_0, tlast = t_lasti[[d]])
           }
 ###          if("AUCLASTDNi" %in% parameter_list && "AUCLASTi" %in% parameter_list) {
           if(comp_required[["AUCLASTDNi"]]) {
@@ -1893,14 +1899,14 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               }
             }
           }
-          #c_max_c <- cmaxc(kel = kel_v[["KEL"]], cmax = c_max, c0 = c_0, tmax = t_max)
+          #c_max_c <- cmaxc(kel = kel_v[["KEL"]], cmax = c_max, c0 = obs_c_0, tmax = t_max)
         }
-        #c_max_c <- cmaxc(kel = kel_v[["KEL"]], cmax = c_max, c0 = c_0, tmax = t_max)
-        #auclast_c <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclast, c0 = c_0, tlast = t_last)
+        #c_max_c <- cmaxc(kel = kel_v[["KEL"]], cmax = c_max, c0 = obs_c_0, tmax = t_max)
+        #auclast_c <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclast, c0 = obs_c_0, tlast = t_last)
 
 ###        if("AUCLASTC" %in% parameter_list && "AUCLAST" %in% parameter_list && "TLAST" %in% parameter_list && "KEL" %in% parameter_list) {
         if(comp_required[["AUCLASTC"]]) {
-          auclastc <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclast, c0 = c_0, tlast = t_last)
+          auclastc <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclast, c0 = obs_c_0, tlast = t_last)
         }
 ###        if("AUCLASTDN" %in% parameter_list && "AUCLAST" %in% parameter_list) {
         if(comp_required[["AUCLASTDN"]]) {
@@ -1908,11 +1914,11 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("AUCINFOC" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFO" %in% parameter_list) {
         if(comp_required[["AUCINFOC"]]) {
-          aucinf_oc <- auc_inf_oc(kel = kel_v[["KEL"]], aucinfo = aucinf_o, c0 = c_0)
+          aucinf_oc <- auc_inf_oc(kel = kel_v[["KEL"]], aucinfo = aucinf_o, c0 = obs_c_0)
         }
 ###        if("AUCINFPC" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFP" %in% parameter_list) {
         if(comp_required[["AUCINFPC"]]) {
-          aucinf_pc <- auc_inf_pc(kel = kel_v[["KEL"]], aucinfp = aucinf_p, c0 = c_0)
+          aucinf_pc <- auc_inf_pc(kel = kel_v[["KEL"]], aucinfp = aucinf_p, c0 = obs_c_0)
         }
 ###        if("AUCINFODN" %in% parameter_list && "AUCINFO" %in% parameter_list) {
         if(comp_required[["AUCINFODN"]]) {
@@ -2032,8 +2038,6 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               est_idx <- est_idx + 1
             }
           }
-          tmp_est_data <- tmp_est_data[order(tmp_est_data$TIME), ]
-          est_data <- rbind(est_data, tmp_est_data)
         }
 
         #computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], unlist(c_max), unlist(c_min), unlist(c_last),
@@ -2058,7 +2062,21 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("C0" %in% parameter_list) {
         if(disp_required[["C0"]]) {
-          row_data <- c(row_data, c_0)
+          tmp_est_c0 <- ifelse((!is.na(est_c_0) && !is.null(est_c_0)), est_c_0$est_c0, NA)
+          row_data <- c(row_data, tmp_est_c0)
+          if(!is.na(tmp_est_c0)) {
+            if(length(est_c_0$time)>0) { 
+              for(jtime in 1:length(est_c_0$time)) {
+                est_idx <- nrow(tmp_est_data) + 1
+                tmp_est_data[est_idx,] <- c(NA, sdeid, est_c_0$time[jtime], NA, NA, NA, est_c_0$conc[jtime], NA)
+              }
+            }
+            tmp_est_data <- tmp_est_data[order(tmp_est_data$TIME), ]
+            est_data <- rbind(est_data, tmp_est_data)
+          }
+        } else {
+          tmp_est_data <- tmp_est_data[order(tmp_est_data$TIME), ]
+          est_data <- rbind(est_data, tmp_est_data)
         }
 ###        if("V0" %in% parameter_list) {
         if(disp_required[["V0"]]) {
