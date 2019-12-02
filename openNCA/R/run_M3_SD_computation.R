@@ -268,7 +268,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     dp <- parameter_required(dependent_parameters(rg), plist)
     comp_required[[i]] <- pr || dp
     disp_required[[i]] <- pr
-###    cat('i: ', i, ' pr: ', pr, ' dp: ', dp, ' comp_required[[', i, ']]: ', comp_required[[i]], ' disp_required[[', i, ']]: ', disp_required[[i]], '\n')
+###    cat('i: ', i, 'rg: ', rg, ' pr: ', pr, ' dp: ', dp, ' comp_required[[', i, ']]: ', comp_required[[i]], ' disp_required[[', i, ']]: ', disp_required[[i]], '\n')
     
 ###    if(comp_required[[i]]) { cat('parameter: ', i, ' regex: ', rg, ' required: ', comp_required[[i]], '\n') }
   }
@@ -362,7 +362,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "CMAX")
     regular_int_type <- c(regular_int_type, "CMAX")
   }
-  if("FLGACCEPTPREDOSECRIT" %in% names(map_data) && ("CMAX" %in% parameter_list)){
+  if(disp_required[["FLGACCEPTPREDOSE"]] && "FLGACCEPTPREDOSECRIT" %in% names(map_data)){
     col_names <- c(col_names, "FLGACCEPTPREDOSE")
   }
   if(disp_required[["CMIN"]]) {
@@ -396,7 +396,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "TMAX")
     regular_int_type <- c(regular_int_type, "TMAX")
   }
-  if("FLGEMESIS" %in% names(map_data) && ("TMAX" %in% parameter_list)){
+  if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data)){
     col_names <- c(col_names, "FLGACCEPTTMAX")
   }
   if(disp_required[["TMIN"]]) {
@@ -453,7 +453,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "KELRSQA")
     regular_int_type <- c(regular_int_type, "KELRSQA")
   }
-  if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
+  if(disp_required[["FLGACCEPTKEL"]] && "FLGACCEPTKELCRIT" %in% names(map_data)) {
     if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
       col_names <- c(col_names, "FLGACCEPTKEL")
     }
@@ -472,7 +472,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "LASTTIME")
     regular_int_type <- c(regular_int_type, "LASTTIME")
   }
-  if("LASTTIMEACCEPTCRIT" %in% names(map_data) && ("LASTTIME" %in% parameter_list)) {
+  if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
     col_names <- c(col_names, "FLGACCEPTTAU")
   }
 ###  if("AUCALL" %in% parameter_list) {
@@ -706,7 +706,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   #                           "AUCINFPC", "AUCINFODN", "AUCINFPDN","AUMCINFO", "AUMCINFP", "MRTLAST", "MRTO", "MRTP", "AUCXPCTO",
   #                           "AUCXPCTP", "AUMCXPTO", "AUMCXPTP", "CLOW", "CLP", "CLPW", "VZO", "VZOW", "VZP", "VZPW")
 
-  if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
+  if("FLGACCEPTKELCRIT" %in% names(map_data)) {
     kel_crit <- unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))
 
     if(length(kel_crit) > 0){
@@ -742,7 +742,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   } else {
     warning("Flag 'FLGACCEPTKELCRIT' is not present in the dataset")
   }
-  if("LASTTIMEACCEPTCRIT" %in% names(map_data) && ("LASTTIME" %in% parameter_list)){
+  if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)){
     if(length(unlist(strsplit(as.character(map_data$LASTTIMEACCEPTCRIT), "[*]"))) == 2){
       last_crit <- unlist(strsplit(as.character(map_data$LASTTIMEACCEPTCRIT), "[*]"))
       if(as.character(gsub(" ", "", last_crit[2])) == "TAUi"){
@@ -777,10 +777,10 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if(!("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data))){
     warning("Flag 'FLGEXSDE' is not present in the dataset")
   }
-  if(!("FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data) && "TMAX" %in% parameter_list)){
+  if(disp_required[["FLGACCEPTTMAX"]] && !("FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data))){
     warning("Flag 'FLGEMESIS' is not present in the dataset")
   }
-  if(!("FLGACCEPTPREDOSECRIT" %in% names(map_data) && "CMAX" %in% parameter_list)){
+  if(disp_required[["FLGACCEPTPREDOSE"]] && !("FLGACCEPTPREDOSECRIT" %in% names(map_data))){
     warning("Flag 'FLGACCEPTPREDOSECRIT' is not present in the dataset")
   } else if("FLGACCEPTPREDOSECRIT" %in% names(map_data)){
     if(!("CMAX" %in% parameter_list)){
@@ -790,7 +790,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       warning("Flag 'FLGACCEPTPREDOSECRIT' does not have valid form! Please try again with numeric value")
     }
   }
-  if(!("LASTTIMEACCEPTCRIT" %in% names(map_data) && "LASTTIME" %in% parameter_list)){
+  if(disp_required[["FLGACCEPTTAU"]] && !("LASTTIMEACCEPTCRIT" %in% names(map_data))){
     warning("Flag 'FLGACCEPTTAU' is not present in the dataset")
   }
   if(!("SPANRATIOCRIT" %in% names(map_data) && "THALFF" %in% parameter_list)){
@@ -1494,7 +1494,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-08-09/TGT/ Following should not require CMAX to be part of the parameter_list. 
 ###                 It could be that CMAX is not called for a result but the criteria 
 ###                 could still rely upon CMAX. This needs to be fixed.
-        if("FLGACCEPTPREDOSECRIT" %in% names(map_data) && ("CMAX" %in% parameter_list)){
+        if(disp_required[["FLGACCEPTPREDOSE"]] && "FLGACCEPTPREDOSECRIT" %in% names(map_data)){
           pre_dose_crit <- suppressWarnings(as.numeric(map_data$FLGACCEPTPREDOSECRIT))
           if(is.numeric(pre_dose_crit)){
 ### 2019-08-09/TGT/ Following assumes that the predose timepoint has a time value of zero "0"
@@ -1534,7 +1534,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           row_data <- c(row_data, t_max)
         }
 ###        if("FLGEMESIS" %in% names(map_data) && ("TMAX" %in% parameter_list)){
-        if("FLGEMESIS" %in% names(map_data) && ("TMAX" %in% parameter_list)){
+        if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data)){
           row_data <- c(row_data, 1)
         }
         if(disp_required[["TMIN"]]) {
@@ -1580,7 +1580,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["KELRSQA"]]){
           row_data <- c(row_data, kelr_v[["KELRSQA"]])
         }
-        if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
+        if(disp_required[["FLGACCEPTKEL"]] && "FLGACCEPTKELCRIT" %in% names(map_data)) {
           if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
             row_data <- c(row_data, 0)
           } else {
@@ -1599,7 +1599,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["LASTTIME"]]) {
           row_data <- c(row_data, last_time)
         }
-        if("LASTTIMEACCEPTCRIT" %in% names(map_data) && ("LASTTIME" %in% parameter_list)) {
+        if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
           if(!is.na(last_crit_factor)){
             if(opt_list[2] %in% names(map_data)){
               if(map_data[, opt_list[2]] %in% names(data_data)) {
@@ -1814,7 +1814,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
 ##  2019-11-13/RD/ Added to account for incorrect handling of FLGACCEPTKELCRIT
 ## 
-  if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
+  if(disp_required[["FLGACCEPTKEL"]] && "FLGACCEPTKELCRIT" %in% names(map_data)) {
     if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
       if(all(as.character(flag_df$VAR) %in% names(computation_df))){
         for(f in 1:length(flag_df$VAR)){
@@ -1831,7 +1831,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
     }
   }
-  if("FLGEMESIS" %in% names(map_data) && ("TMAX" %in% parameter_list)){
+  if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
     for(f in 1:length(unique(computation_df[,map_data$SDEID]))){
       tmp_df <- data_data[data_data[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],]
       emesis_flag_check <- ifelse(any(as.logical(as.numeric(tmp_df[,map_data$FLGEMESIS]))), TRUE, FALSE)

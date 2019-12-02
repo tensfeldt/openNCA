@@ -258,7 +258,12 @@ create_dependency_list <- function() {
 ### 2019-09-01/TGT/ VZTAUi not currently defined in computation engine codebase
     dependency_list[["VZTAUi"]] <- list(callfun=c(), regex="^VZTAU(i{1}?|[0-9]+?)$", unit_class=c(uclass_volume), valid_models=c(m2ss, m3ss), display_list_models=c(), predecessors=c("KEL", "AUCTAUi", "DOSEC", "TAUi", "TOLDi"))
 ### 2019-09-01/TGT/ VZTAUWi not currently defined in computation engine codebase
-    dependency_list[["VZTAUWi"]] <- list(callfun=c(), regex="^VZTAUW(i{1}?|[0-9]+?)$", regex="", unit_class=c(uclass_volwnorm), valid_models=c(m2ss, m3ss), display_list_models=c(), predecessors=c("VZTAUi", "TAUi", "TOLDi"))
-
+    dependency_list[["VZTAUWi"]] <- list(callfun=c(), regex="^VZTAUW(i{1}?|[0-9]+?)$", unit_class=c(uclass_volwnorm), valid_models=c(m2ss, m3ss), display_list_models=c(), predecessors=c("VZTAUi", "TAUi", "TOLDi"))
+    dependency_list[["FLGACCEPTPREDOSE"]] <- list(callfun=c(), regex="^FLGACCEPTPREDOSE$", unit_class=c(), valid_models=c(m1, m2, m3, m4), display_list_models=c(), predecessors=c("CMAX", "CMAXi"))
+    dependency_list[["FLGACCEPTTMAX"]] <- list(callfun=c(), regex="^FLGACCEPTTMAX$", unit_class=c(), valid_models=c(m1, m2, m3, m4), display_list_models=c(), predecessors=c("TMAX", "TMAXi"))
+    dependency_list[["FLGACCEPTKEL"]] <- list(callfun=c(), regex="^FLGACCEPTKEL$", unit_class=c(), valid_models=c(m1, m2, m3, m4), display_list_models=c(), predecessors=c("KEL", "KELNOPT", "AUCXPCTO", "AUCXPCTP"))
+    dependency_list[["FLGACCEPTTAU"]] <- list(callfun=c(), regex="^FLGACCEPTTAU$", unit_class=c(), valid_models=c(m1, m2, m3, m4), display_list_models=c(), predecessors=c("LASTTIME"))
+    
+    
     return(dependency_list)
 }

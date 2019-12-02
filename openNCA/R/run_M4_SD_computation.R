@@ -446,7 +446,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
 ### 2019-09-09/TGT/
 ###  if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
-  if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
+  if(disp_required[["FLGACCEPTKEL"]] && "FLGACCEPTKELCRIT" %in% names(map_data)) {
     if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
       col_names <- c(col_names, "FLGACCEPTKEL")
     }
@@ -637,7 +637,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   } else {
     warning("Flag 'FLGACCEPTKELCRIT' is not present in the dataset")
   }
-  if("LASTTIMEACCEPTCRIT" %in% names(map_data) && ("LASTTIME" %in% parameter_list)){
+  if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)){
     if(length(unlist(strsplit(as.character(map_data$LASTTIMEACCEPTCRIT), "[*]"))) == 2){
       last_crit <- unlist(strsplit(as.character(map_data$LASTTIMEACCEPTCRIT), "[*]"))
       if(as.character(gsub(" ", "", last_crit[2])) == "TAUi"){
@@ -658,7 +658,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       warning("Flag 'FLGACCEPTTAU' cannot be computed if 'TAUi' is not provided")
     }
   } else {
-    if(!("LASTTIMEACCEPTCRIT" %in% names(map_data))){
+    if(disp_required[["FLGACCEPTTAU"]] && !("LASTTIMEACCEPTCRIT" %in% names(map_data))){
       warning("Flag 'FLGACCEPTTAU' cannot be computed if 'LASTTIMEACCEPTCRIT' is not provided")
     }
   }
@@ -672,10 +672,10 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if(!("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data))){
     warning("Flag 'FLGEXSDE' is not present in the dataset")
   }
-  if(!("FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data))){
+  if(disp_required[["FLGACCEPTTMAX"]] && !("FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data))){
     warning("Flag 'FLGEMESIS' is not present in the dataset")
   }
-  if(!("FLGACCEPTPREDOSECRIT" %in% names(map_data) && "CMAX" %in% parameter_list)){
+  if(disp_required[["FLGACCEPTPREDOSE"]] && !("FLGACCEPTPREDOSECRIT" %in% names(map_data))){
     warning("Flag 'FLGACCEPTPREDOSECRIT' is not present in the dataset")
   } else if("FLGACCEPTPREDOSECRIT" %in% names(map_data)){
     if(!("CMAX" %in% parameter_list)){
@@ -685,7 +685,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       warning("Flag 'FLGACCEPTPREDOSECRIT' does not have valid form! Please try again with numeric value")
     }
   }
-  if(!("LASTTIMEACCEPTCRIT" %in% names(map_data) && "LASTTIME" %in% parameter_list)){
+  if(disp_required[["FLGACCEPTTAU"]] && !("LASTTIMEACCEPTCRIT" %in% names(map_data))){
     warning("Flag 'FLGACCEPTTAU' is not present in the dataset")
   }
   if(!("SPANRATIOCRIT" %in% names(map_data) && "THALFF" %in% parameter_list)){
@@ -1380,7 +1380,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###                 the "old" standard that denoted the criteria in the MCT via "commas". Currently, it's expected
 ###                 that the criteria now represents a single boolean expression rather than a series of them
 ###        if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
-        if("FLGACCEPTKELCRIT" %in% names(map_data)) {
+        if(disp_required[["FLGACCEPTKEL"]] && "FLGACCEPTKELCRIT" %in% names(map_data)) {
           if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
             row_data <- c(row_data, 0)
           } else {
@@ -1515,7 +1515,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     })
   }
 
-  if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
+  if(disp_required[["FLGACCEPTKEL"]] && "FLGACCEPTKELCRIT" %in% names(map_data)) {
     if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
       if(all(as.character(flag_df$VAR) %in% names(computation_df))){
         for(f in 1:length(flag_df$VAR)){

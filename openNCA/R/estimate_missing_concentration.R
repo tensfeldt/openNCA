@@ -43,14 +43,18 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
             conc_s_tmp <- exp(-1*k*na.omit(tmp)[["time"]][1]) * na.omit(tmp)[["conc"]][1] 
           }
         } else {
-          if(dosing_type == "SD"){
-            conc_s_tmp <- 0
-          } else if(dosing_type == "SS"){
-            conc_s_tmp <- cmin(conc = conc, time = time)
+          if(model != "M4"){
+            if(dosing_type == "SD"){
+              conc_s_tmp <- 0
+            } else if(dosing_type == "SS"){
+              conc_s_tmp <- cmin(conc = conc, time = time)
+            } 
+          } else {
+            conc_s_tmp <- NULL
           }
         }
         if(time[1] == told){
-          if(isTRUE(extrapolate)){
+          if(isTRUE(extrapolate) && !is.null(conc_s_tmp)){
             conc[1] <- conc_s_tmp
             tmp$INT_EXT[1] <- "EXT" 
           }
