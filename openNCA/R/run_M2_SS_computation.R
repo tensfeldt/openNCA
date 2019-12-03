@@ -2240,8 +2240,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             if(paste0("TAU",di_col) %in% names(map_data)){
               if(map_data[, paste0("TAU",di_col)] %in% names(data_data)) {
                 tau_val <- unique(tmp_df[, map_data[, paste0("TAU",di_col)]])[1]
-                lt_accept_crit <- tau_val * last_crit_factor
-                if(is.numeric(tau_val) && is.numeric(last_crit_factor)){
+                if(!is.na(tau_val) && is.numeric(tau_val) && !is.na(last_crit_factor) && is.numeric(last_crit_factor)){
+                  lt_accept_crit <- tau_val * last_crit_factor
                   row_data <- c(row_data, ifelse(last_time >= lt_accept_crit, 1, 0))
                 } else {
                   row_data <- c(row_data, 0)

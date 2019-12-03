@@ -454,13 +454,13 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
                     #print(tau_i)
                     if(is.na(told_i) || is.na(tau_i)){
                       if(is.na(told_i)){
-                        #if(casefold(map_data$ORGTIME)=='actual'){
-                        #  told <- s_time[told < s_time][1]
-                        #  told_i <- match(told, s_time)
-                        #  tau_i <- match((tau+told), e_time)
-                        #} else {
+                        if(casefold(map_data$ORGTIME)=='actual'){
+                          told <- s_time[told < s_time][1]
+                          told_i <- match(told, s_time)
+                          tau_i <- match((tau+told), e_time)
+                        } else {
                           stop("8 Unable to generate dosing interval for Steady State data! TOLD value not found in the provided TIME data")
-                        #}
+                        }
                       }
                       if(is.na(tau_i)){
                         if(length(e_time[e_time < (tau+told)]) > 0){
@@ -525,13 +525,13 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
                     #print(tau_i)
                     if(is.na(told_i) || is.na(tau_i)){
                       if(is.na(told_i)){
-                        #if(casefold(map_data$ORGTIME)=='actual'){
-                        #  told <- tmp_time[told < tmp_time][1]
-                        #  told_i <- match(told, tmp_time)
-                        #  tau_i <- match((tau+told), tmp_time)
-                        #} else {
+                        if(casefold(map_data$ORGTIME)=='actual'){
+                          told <- tmp_time[told < tmp_time][1]
+                          told_i <- match(told, tmp_time)
+                          tau_i <- match((tau+told), tmp_time)
+                        } else {
                           stop("10 Unable to generate dosing interval for Steady State data! TOLD value not found in the provided TIME data") 
-                        #}
+                        }
                       }
                       if(is.na(tau_i)){
                         if(length(tmp_time[tmp_time < (tau+told)]) > 0){
