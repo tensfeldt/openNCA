@@ -61,24 +61,28 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
         } else {
           if(isTRUE(interpolate)){
             cold <- ifelse(!is.na(orig_conc[which(told == orig_time)]), orig_conc[which(told == orig_time)], NA)
-            if(auc_method == "LIN"){
-              conc[1] <- interpolate_lin(conc1 = cold, time1 = told, conc2 = orig_conc[1], time2 = orig_time[1], est_time = time[1])
-            } else if(auc_method == "LOG"){
-              conc[1] <- interpolate_log(conc1 = cold, time1 = told, conc2 = orig_conc[1], time2 = orig_time[1], est_time = time[1])
+            if(!is.na(cold) && length(cold) > 0){
+              if(auc_method == "LIN"){
+                conc[1] <- interpolate_lin(conc1 = cold, time1 = told, conc2 = orig_conc[1], time2 = orig_time[1], est_time = time[1])
+              } else if(auc_method == "LOG"){
+                conc[1] <- interpolate_log(conc1 = cold, time1 = told, conc2 = orig_conc[1], time2 = orig_time[1], est_time = time[1])
+              }
+              tmp$INT_EXT[1] <- "INT"
             }
-            tmp$INT_EXT[1] <- "INT"
           }
         }
       } else if((orig_time[1] < time[1]) && (time[1] < orig_time[length(orig_time)])){
         if(isTRUE(interpolate)){
           idx <- which(orig_time < time[1])
           idx <- idx[length(idx)]
-          if(auc_method == "LIN"){
-            conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
-          } else if(auc_method == "LOG"){
-            conc[1] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
+          if(length(idx) > 0){
+            if(auc_method == "LIN"){
+              conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
+            } else if(auc_method == "LOG"){
+              conc[1] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
+            }
+            tmp$INT_EXT[1] <- "INT"
           }
-          tmp$INT_EXT[1] <- "INT"
         }
       } else if(time[1] >= orig_time[length(orig_time)]){
         if(!is.na(kel[["KEL"]])){
@@ -100,12 +104,14 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
         if(isTRUE(interpolate)){
           idx <- which(orig_time < time[nrow(tmp)])
           idx <- idx[length(idx)]
-          if(auc_method == "LIN"){
-            conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
-          } else if(auc_method == "LOG"){
-            conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+          if(length(idx) > 0){
+            if(auc_method == "LIN"){
+              conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+            } else if(auc_method == "LOG"){
+              conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+            }
+            tmp$INT_EXT[nrow(tmp)] <- "INT"
           }
-          tmp$INT_EXT[nrow(tmp)] <- "INT"
         }
       } else {
         if(!is.na(kel[["KEL"]])){

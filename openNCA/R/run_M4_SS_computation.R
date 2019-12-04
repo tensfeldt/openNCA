@@ -474,8 +474,8 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     regular_int_type <- c(regular_int_type, "AURCLAST")
   }
   if(disp_required[["AURCT"]]) {
-    col_names <- c(col_names, rep(paste0("AURC",1:(aet_len-1))), rep(paste0("AURCINT",1:(aet_len-1))))
-    regular_int_type <- c(regular_int_type, paste0("AURC",1:(aet_len-1)))
+    col_names <- c(col_names, rep(paste0("AURC",1:aet_len)), rep(paste0("AURCINT",1:aet_len)))
+    regular_int_type <- c(regular_int_type, paste0("AURC",1:aet_len))
   }
 ###  if("AURCT1_T2" %in% parameter_list) {
   if(disp_required[["AURCT1_T2"]] && auc_pair_check) {
@@ -936,11 +936,11 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 aet_pct <- c(aet_pct, tmp_pct)
               }
             }
-            if(length(ae_t) < aet_col) {
-              ae_t <- c(ae_t, rep(NA, (aet_col - length(ae_t))))
+            if(length(ae_t) < aet_len) {
+              ae_t <- c(ae_t, rep(NA, (aet_len - length(ae_t))))
             }
-            if(length(aet_pct) < aet_col) {
-              aet_pct <- c(aet_pct, rep(NA, (aet_col - length(aet_pct))))
+            if(length(aet_pct) < aet_len) {
+              aet_pct <- c(aet_pct, rep(NA, (aet_len - length(aet_pct))))
             }
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###            amt <- at(conc = tmp_df[,map_data$CONC], amt = tmp_df[,map_data$AMOUNT], time = tmp_df[,map_data[[map_data$TIME]]], amt_units = tmp_df[,map_data$AMOUNTU])

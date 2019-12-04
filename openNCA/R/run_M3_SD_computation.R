@@ -1501,12 +1501,12 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###                 With ACTUAL times being used this may not be the case. This needs to be fixed.
             pre_dose <- tmp_df[,map_data$CONC][tmp_df[,map_data$TIME] == 0][1]
             if(is.numeric(c_max)){
-              row_data <- c(row_data, ifelse(pre_dose > (c_max * pre_dose_crit), 0, 1))
+              row_data <- c(row_data, ifelse(pre_dose > (c_max * pre_dose_crit), 1, 0))
             } else {
-              row_data <- c(row_data, 1)
+              row_data <- c(row_data, 0)
             }
           } else {
-            row_data <- c(row_data, 1)
+            row_data <- c(row_data, 0)
           }
         }
         if(disp_required[["CMIN"]]) {

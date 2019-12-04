@@ -1888,6 +1888,11 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["AUCT"]] || comp_required[["AUCTDN"]]) {
             time <- sort(tmp_df[,map_data$TIME])
             time_di <- sort(tmp_di_df[,map_data$TIME])
+            if(d == di_col){
+              if(sum(time > time_di[length(time_di)]) > 0){
+                time_di <- c(time_di, time[time > time_di[length(time_di)]])
+              }
+            }
             prev_na <- FALSE
             prev_auc <- NA
             prev_auc_dn <- NA
@@ -2251,12 +2256,12 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(is.numeric(pre_dose_crit)){
             pre_dose <- tmp_df[,map_data$CONC][tmp_df[,map_data$TIME] == 0][1]
             if(is.numeric(c_maxi[[1]])){
-              row_data <- c(row_data, ifelse(pre_dose > (c_maxi[[1]] * pre_dose_crit), 0, 1))
+              row_data <- c(row_data, ifelse(pre_dose > (c_maxi[[1]] * pre_dose_crit), 1, 0))
             } else {
-              row_data <- c(row_data, 1)
+              row_data <- c(row_data, 0)
             }
           } else {
-            row_data <- c(row_data, 1)
+            row_data <- c(row_data, 0)
           }
         }
 ###        if("CMIN" %in% parameter_list) {

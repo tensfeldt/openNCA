@@ -1662,6 +1662,11 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(("AUCT" %in% parameter_list || "AUCTDN" %in% parameter_list) && 'TMAXi' %in% parameter_list) {
             time <- sort(tmp_df[,map_data$TIME])
             time_di <- sort(tmp_di_df[,map_data$TIME])
+            if(d == di_col){
+              if(sum(time > time_di[length(time_di)]) > 0){
+                time_di <- c(time_di, time[time > time_di[length(time_di)]])
+              }
+            }
             prev_na <- FALSE
             prev_auc <- NA
             prev_auc_dn <- NA
@@ -2004,12 +2009,12 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###                 With ACTUAL times being used this may not be the case. This needs to be fixed.
             pre_dose <- tmp_df[,map_data$CONC][tmp_df[,map_data$TIME] == 0][1]
             if(is.numeric(c_maxi[[1]])){
-              row_data <- c(row_data, ifelse(pre_dose > (c_maxi[[1]] * pre_dose_crit), 0, 1))
+              row_data <- c(row_data, ifelse(pre_dose > (c_maxi[[1]] * pre_dose_crit), 1, 0))
             } else {
-              row_data <- c(row_data, 1)
+              row_data <- c(row_data, 0)
             }
           } else {
-            row_data <- c(row_data, 1)
+            row_data <- c(row_data, 0)
           }
         }
 ###        if("CMIN" %in% parameter_list) {

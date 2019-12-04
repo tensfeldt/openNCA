@@ -354,6 +354,11 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
           
           for(i in 1:intervals){
             if(ss_dose[i] %in% names(map_data) & ss_tau[i] %in% names(map_data) & ss_told[i] %in% names(map_data)) {
+              ##if(map_data[,ss_dose[i]] == "" && map_data[,ss_tau[i]] == "" && map_data[,ss_told[i]] == ""){
+              ##  map_data[,ss_dose[i]] <- NA
+              ##  map_data[,ss_tau[i]] <- NA
+              ##  map_data[,ss_told[i]] <- NA
+              ##}
               if(!(map_data[,ss_dose[i]] %in% names(merged_data))){
                 stop(paste0("5 Unable to generate dosing interval for Steady State data! '", map_data[,ss_dose[i]], "' is not present in the data"))
               }
