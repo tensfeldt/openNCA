@@ -250,8 +250,56 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
 ### 2019-10-17/TGT/ Prepare IMPUTED Doses
       if(parameter_required("^IMPUTEDOSES$", names(map_data))) {
         imputeddoses <- strsplit(map_data$IMPUTEDOSES, ";")
+        #print(imputeddoses)
         for(id in imputeddoses) {
-          data_data[,id] <- rep(1.0, nrow(data_data))
+          map_data[,id] <- id
+          merged_data[,id] <- rep(1.0, nrow(merged_data))
+        }
+      }
+      if(parameter_required("^IMPUTETAUS$", names(map_data))) {
+        imputedtaus <- strsplit(map_data$IMPUTETAUS, ";")
+        #print(imputedtaus)
+        if("TAU1" %in% imputedtaus){
+          #print("TAU present")
+          for(i in 1:length(unique(merged_data[,map_data$SDEID]))){
+            tmp_logic <- merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[i]
+            tmp_df <- merged_data[tmp_logic,]
+            tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
+            tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
+            tmptold <- tmp_df[1,map_data$TIME]
+            tmptau <- tmp_df[nrow(tmp_df),map_data$TIME]
+            tmptau <- tmptau - tmptold
+            #print(tmptau)
+            map_data[,"TAU1"] <- "TAU1"
+            merged_data[tmp_logic,"TAU1"] <- rep(tmptau, nrow(tmp_df))
+          }
+        } else {
+          for(id in imputedtaus) {
+            map_data[,id] <- id
+            merged_data[,id] <- rep(NA, nrow(merged_data))
+          }
+        }
+      }
+      if(parameter_required("^IMPUTETOLDS$", names(map_data))) {
+        imputedtolds <- strsplit(map_data$IMPUTETOLDS, ";")
+        #print(imputedtolds)
+        if("TOLD1" %in% imputedtolds){
+          #print("TOLD present")
+          for(i in 1:length(unique(merged_data[,map_data$SDEID]))){
+            tmp_logic <- merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[i]
+            tmp_df <- merged_data[tmp_logic,]
+            tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
+            tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
+            tmptold <- tmp_df[1,map_data$TIME]
+            #print(tmptold)
+            map_data[,"TOLD1"] <- "TOLD1"
+            merged_data[tmp_logic,"TOLD1"] <- rep(tmptold, nrow(tmp_df))
+          }
+        } else {
+          for(id in imputedtolds) {
+            map_data[,id] <- id
+            merged_data[,id] <- rep(NA, nrow(merged_data))
+          }
         }
       }
         
@@ -271,15 +319,24 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
           if(any(!as.logical(is.na(map_data[ss_dose[ss_dose %in% names(map_data)]]))) || any(!as.logical(is.na(map_data[ss_tau[ss_tau %in% names(map_data)]]))) || any(!as.logical(is.na(map_data[ss_told[ss_told %in% names(map_data)]])))){
             if(any(!as.logical(is.na(map_data[ss_dose[ss_dose %in% names(map_data)]])))){
               tmp_dose <- map_data[ss_dose[ss_dose %in% names(map_data)]]
-              valid_dose <- names(tmp_dose[!as.logical(is.na(tmp_dose))])
+              #print(tmp_dose)
+              dose_logic <- unlist(lapply(tmp_dose, function(x) { return(is.na(x) || x == "")}))
+              valid_dose <- names(tmp_dose[!as.logical(dose_logic)])
+              #print(valid_dose)
             }
             if(any(!as.logical(is.na(map_data[ss_tau[ss_tau %in% names(map_data)]])))){
               tmp_tau <- map_data[ss_tau[ss_tau %in% names(map_data)]]
-              valid_tau <- names(tmp_tau[!as.logical(is.na(tmp_tau))])
+              #print(tmp_tau)
+              tau_logic <- unlist(lapply(tmp_tau, function(x) { return(is.na(x) || x == "")}))
+              valid_tau <- names(tmp_tau[!as.logical(tau_logic)])
+              #print(valid_tau)
             }
             if(any(!as.logical(is.na(map_data[ss_told[ss_told %in% names(map_data)]])))){
               tmp_told <- map_data[ss_told[ss_told %in% names(map_data)]]
-              valid_told <- names(tmp_told[!as.logical(is.na(tmp_told))])
+              #print(tmp_told)
+              told_logic <- unlist(lapply(tmp_told, function(x) { return(is.na(x) || x == "")}))
+              valid_told <- names(tmp_told[!as.logical(told_logic)])
+              #print(valid_told)
             }
           } else {
             stop(paste("1 Unable to generate dosing interval for Steady State data! Values for", paste(ss_dose, collapse = ", "), "and", paste(ss_tau, collapse = ", "), "and", paste(ss_told, collapse = ", "), "provided via 'map' are not valid!"))
@@ -354,19 +411,14 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
           
           for(i in 1:intervals){
             if(ss_dose[i] %in% names(map_data) & ss_tau[i] %in% names(map_data) & ss_told[i] %in% names(map_data)) {
-              ##if(map_data[,ss_dose[i]] == "" && map_data[,ss_tau[i]] == "" && map_data[,ss_told[i]] == ""){
-              ##  map_data[,ss_dose[i]] <- NA
-              ##  map_data[,ss_tau[i]] <- NA
-              ##  map_data[,ss_told[i]] <- NA
-              ##}
               if(!(map_data[,ss_dose[i]] %in% names(merged_data))){
-                stop(paste0("5 Unable to generate dosing interval for Steady State data! '", map_data[,ss_dose[i]], "' is not present in the data"))
+                stop(paste0("5 Unable to generate dosing interval for Steady State data! '", map_data[,ss_dose[i]], "' value for ", ss_dose[i], " is not present in the data"))
               }
               if(!(map_data[,ss_tau[i]] %in% names(merged_data))){
-                stop(paste0("6 Unable to generate dosing interval for Steady State data! '", map_data[,ss_tau[i]], "' is not present in the data"))
+                stop(paste0("6 Unable to generate dosing interval for Steady State data! '", map_data[,ss_tau[i]], "' value for ", ss_tau[i], " is not present in the data"))
               }
               if(!(map_data[,ss_told[i]] %in% names(merged_data))){
-                stop(paste0("7 Unable to generate dosing interval for Steady State data! '", map_data[,ss_told[i]], "' is not present in the data"))
+                stop(paste0("7 Unable to generate dosing interval for Steady State data! '", map_data[,ss_told[i]], "' value for ", ss_told[i], " is not present in the data"))
               }
               merged_data[c(paste0("DI", i, "F"))] <- NA
               #temp_data <- NA

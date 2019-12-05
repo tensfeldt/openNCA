@@ -56,7 +56,7 @@ auc_lin_log <- function(conc = NULL, time = NULL, exflag = NULL, t_max = NULL, i
   if(!is.null(dosing_type) && (dosing_type != "SD" && dosing_type != "SS")){
     stop("Error in auc_lin_log: 'dosing_type' is not either 'SD' or 'SS'")
   }
-  if(!is.null(told) && !is.numeric(told)){
+  if(!is.null(told) && !is.na(told) && !is.numeric(told)){
     stop("Error in auc_lin_log: 'told' is not a numeric value")
   }
   if(!is.null(interpolate) && is.null(model)){

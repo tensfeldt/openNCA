@@ -182,12 +182,16 @@ validate_timeconc_data <- function(map, data, verbose=FALSE) {
             cat("assuming unit dose amounts for: ", missing_dose_names, "\n")
             warning("assuming unit dose amounts for each dose")
         }
-    }
-    else {
+    } else {
+      if(casefold(map$DOSINGTYPE) == "ss"){
+        vdose <- "DOSE1"
+        missing_dose_names <- "DOSE1"
+      } else {
         vdose <- "DOSE"
-        vdosedata <- FALSE
         missing_dose_names <- "DOSE"
-        warning("No dose information provided in 'map'. Assuming unit dose amount for a single dose.")
+      }
+      vdosedata <- FALSE
+      warning("No dose information provided in 'map'. Assuming unit dose amount for a single dose.")
     }
     
     ### Assumption is that there is one source of units for dosing regardless the # of doses supporting each individual profile
@@ -214,6 +218,60 @@ validate_timeconc_data <- function(map, data, verbose=FALSE) {
         vdoseudata <- FALSE
         missing_doseu_names <- "DOSEU"
         warning("No dose unit information provided in 'map'.")
+    }
+    
+    missing_tau_names <- c()
+    if(parameter_required("^TAU(i{1}|[0-9]*?)$", names(map))) {
+      vtau <- parameter_indices("^TAU(i{1}|[0-9]*?)$", names(map))
+      vtau <- names(vtau)
+      
+      ### Check that taus appear in concentration dataset
+      ###  any missing tau definitions in MCP will be treated as NA TAUS
+      k <- parameter_indices(paste0("^",map[,vtau],"$"), names(data), simplify=FALSE)
+      ### vtaudata is a boolean indicating whether the values of vtau appear in the input concentration dataset or not        
+      vtaudata <- is.element(map[,vtau], names(k))
+      missing_tau_names <- vtau[!vtaudata]
+      if(length(missing_tau_names)>0) {
+        cat(missing_tau_names, " as defined in 'map', do not appear in input concentration dataset", "\n")
+      }
+    }
+    else {
+      if(casefold(map$DOSINGTYPE) == "ss"){
+        vtau <- "TAU1"
+        missing_tau_names <- "TAU1"
+      } else {
+        vtau <- "TAU"
+        missing_tau_names <- "TAU"
+      }
+      vtaudata <- FALSE
+      warning("No tau information provided in 'map'.")
+    }
+    
+    missing_told_names <- c()
+    if(parameter_required("^TOLD(i{1}|[0-9]*?)$", names(map))) {
+      vtold <- parameter_indices("^TOLD(i{1}|[0-9]*?)$", names(map))
+      vtold <- names(vtold)
+      
+      ### Check that tolds appear in concentration dataset
+      ###  any missing dose definitions in MCP will be treated as NA TOLDS
+      k <- parameter_indices(paste0("^",map[,vtold],"$"), names(data), simplify=FALSE)
+      ### vtolddata is a boolean indicating whether the values of vtold appear in the input concentration dataset or not        
+      vtolddata <- is.element(map[,vtold], names(k))
+      missing_told_names <- vtold[!vtolddata]
+      if(length(missing_told_names)>0) {
+        cat(missing_told_names, " as defined in 'map', do not appear in input concentration dataset", "\n")
+      }
+    }
+    else {
+      if(casefold(map$DOSINGTYPE) == "ss"){
+        vtold <- "TOLD1"
+        missing_told_names <- "TOLD1"
+      } else {
+        vtold <- "TOLD"
+        missing_told_names <- "TOLD"
+      }
+      vtolddata <- FALSE
+      warning("No told information provided in 'map'.")
     }
         
 ###    if(parameter_required("^DOSEU$", names(map))) { vdoseu <- map$DOSEU }
@@ -245,6 +303,12 @@ validate_timeconc_data <- function(map, data, verbose=FALSE) {
     results[["imputedoses"]] <- missing_dose_names
     results[["doseu"]]       <- vdoseu
     results[["doseudata"]]   <- vdoseudata
+    results[["tau"]]         <- vtau
+    results[["taudata"]]     <- vtaudata
+    results[["imputetaus"]]  <- missing_tau_names
+    results[["told"]]        <- vtold
+    results[["tolddata"]]    <- vtolddata
+    results[["imputetolds"]] <- missing_told_names
     
     return(results)
 }

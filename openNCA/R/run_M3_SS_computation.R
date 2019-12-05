@@ -2009,12 +2009,12 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###                 With ACTUAL times being used this may not be the case. This needs to be fixed.
             pre_dose <- tmp_df[,map_data$CONC][tmp_df[,map_data$TIME] == 0][1]
             if(is.numeric(c_maxi[[1]])){
-              row_data <- c(row_data, ifelse(pre_dose > (c_maxi[[1]] * pre_dose_crit), 1, 0))
+              row_data <- c(row_data, ifelse(pre_dose > (c_maxi[[1]] * pre_dose_crit), 0, 1))
             } else {
-              row_data <- c(row_data, 0)
+              row_data <- c(row_data, 1)
             }
           } else {
-            row_data <- c(row_data, 0)
+            row_data <- c(row_data, 1)
           }
         }
 ###        if("CMIN" %in% parameter_list) {

@@ -69,21 +69,73 @@ update_mct_data <- function(map, data, flag, verbose=FALSE) {
     if(parameter_required("imputedoses", names(timeconcvalues))) {
         map$IMPUTEDOSES <- paste(timeconcvalues$imputedoses, collapse=";") 
 ###        cat(function_name, ' timeconcvalues$imputedoses: ', timeconcvalues$imputedoses, ' str(timeconcvalues$imputedoses): ', str(timeconcvalues$imputedoses), "map$IMPUTEDOSES: ", map$IMPUTEDOSES, '\n')
-   }
+    }
+    
+    ### TAUS to impute
+    if(parameter_required("imputetaus", names(timeconcvalues))) {
+      map$IMPUTETAUS <- paste(timeconcvalues$imputetaus, collapse=";") 
+    }
+    
+    ### TOLDS to impute
+    if(parameter_required("imputetolds", names(timeconcvalues))) {
+      map$IMPUTETOLDS <- paste(timeconcvalues$imputetolds, collapse=";") 
+    }
 
     ### DOSE information
     if(parameter_required("^DOSE(i{1}|[0-9]*?)$", names(map)))  {
         for(i in 1:length(timeconcvalues$dose)) { map[,paste0("ORGDOSE",i)]  <- timeconcvalues$dose[i] }
         map$DOSELIST <- paste(timeconcvalues$dose, collapse=";")
+    } else {
+      if(casefold(map$DOSINGTYPE) == "ss"){
+        map$ORGDOSE1  <- NA 
+        map$DOSE1  <- NA 
+        map$DOSELIST <- "DOSE1"
+      } else {
+        map$ORGDOSE  <- NA 
+        map$DOSE  <- NA 
+        map$DOSELIST <- "DOSE"
+      }
     }
-    else { map$ORGDOSE  <- NA }
 
     ### DOSEU information
     if(parameter_required("^DOSE(i{1}|[0-9]*?)U$", names(map)))  {
         for(i in 1:length(timeconcvalues$doseu)) { map[,paste0("ORGDOSE",i,"U")]  <- timeconcvalues$doseu[i] }
         map$DOSEULIST <- paste(timeconcvalues$doseu, collapse=";")
+    } else { 
+      map$ORGDOSEu  <- NA 
     }
-    else { map$ORGDOSEu  <- NA }
+    
+    ### TAU information
+    if(parameter_required("^TAU(i{1}|[0-9]*?)$", names(map)))  {
+      for(i in 1:length(timeconcvalues$tau)) { map[,paste0("ORGTAU",i)]  <- timeconcvalues$tau[i] }
+      map$TAULIST <- paste(timeconcvalues$tau, collapse=";")
+    } else { 
+      if(casefold(map$DOSINGTYPE) == "ss"){
+        map$ORGTAU1  <- NA 
+        map$TAU1  <- NA
+        map$TAULIST <- "TAU1"
+      } else {
+        map$ORGTAU  <- NA 
+        map$TAU  <- NA
+        map$TAULIST <- "TAU"
+      }
+    }
+    
+    ### TOLD information
+    if(parameter_required("^TOLD(i{1}|[0-9]*?)$", names(map)))  {
+      for(i in 1:length(timeconcvalues$told)) { map[,paste0("ORGTOLD",i)]  <- timeconcvalues$told[i] }
+      map$TOLDLIST <- paste(timeconcvalues$told, collapse=";")
+    } else { 
+      if(casefold(map$DOSINGTYPE) == "ss"){
+        map$ORGTOLD1  <- NA 
+        map$TOLD1  <- NA 
+        map$TOLDLIST <- "TOLD1"
+      } else {
+        map$ORGTOLD  <- NA 
+        map$TOLD  <- NA
+        map$TOLDLIST <- "TOLD"
+      }
+    }
 #    if(parameter_required("^DOSEU$", names(map))) { map$ORGDOSEU <- timeconcvalues$doseu } else { map$ORGDOSEU <- NA }
 
     ### create FLGTIME column name in map to map into flags and data once data and flags are merged
