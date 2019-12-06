@@ -443,7 +443,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "KELRSQA")
     regular_int_type <- c(regular_int_type, "KELRSQA")
   }
-  if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
+  if(disp_required[["FLGACCEPTKEL"]] && "FLGACCEPTKELCRIT" %in% names(map_data)) {
     if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
       col_names <- c(col_names, "FLGACCEPTKEL")
     }
@@ -473,7 +473,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "AURCLAST")
     regular_int_type <- c(regular_int_type, "AURCLAST")
   }
-  if(disp_required[["AURCT"]]) {
+  if(disp_required[["AURCT"]] && aet_len > 0) {
     col_names <- c(col_names, rep(paste0("AURC",1:aet_len)), rep(paste0("AURCINT",1:aet_len)))
     regular_int_type <- c(regular_int_type, paste0("AURC",1:aet_len))
   }
@@ -708,7 +708,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(comp_required[["AETAUPTi"]]) {
         aetau_pt_i <- list()
       }
-      if(comp_required[["AURCT"]]) {
+      if(comp_required[["AURCT"]] && aet_len > 0) {
         aurct <- list()
         aurc_int <- list()
       }
@@ -816,11 +816,15 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         if(comp_required[["TLAST"]]) {
           t_last <- tlast(conc = rt, time = mid_pt)
+        } else {
+          t_last <- NULL
         }
 ###        if("KEL" %in% parameter_list || "KELTMLO" %in% parameter_list || "KELTMHI" %in% parameter_list || "KELNOPT" %in% parameter_list || "THALF" %in% parameter_list || "THALFF" %in% parameter_list) {
         if(comp_required[["KEL"]] || comp_required[["KELTMLO"]] || comp_required[["KELTMHI"]] || comp_required[["KELNOPT"]] || comp_required[["THALF"]] || comp_required[["THALFF"]]) {
           span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
           kel_v <- kel(conc = rt, time = mid_pt, exflag = kel_flag, spanratio = span_ratio)
+        } else {
+          kel_v <- NULL
         }
 ###        if("KELRSQ" %in% parameter_list || "KELRSQA" %in% parameter_list) {
         if(comp_required[["KELR"]] || comp_required[["KELRSQ"]] || comp_required[["KELRSQA"]]) {
@@ -952,7 +956,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["AETAUPTi"]]) {
             aetau_pt_i[[d]] <- aepct(ae = aetau_i[[d]], dose = tmp_dose)
           }
-          if(comp_required[["AURCT"]]) {
+          if(comp_required[["AURCT"]] && aet_len > 0) {
             prev_na <- FALSE
             prev_aurc <- NA
             
@@ -1258,6 +1262,8 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          } else {
 ###            cest_kel <- rep(NA, length(conc))
           }
+        } else {
+          pkdataid <- NULL
         }
 
         tmp_est_data <- data.frame(matrix(ncol = length(elist), nrow = 0))
@@ -1286,7 +1292,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           for(e in 1:length(pkdataid)){
             est_row <- c(pkdataid[e], unique(data_data[,map_data$SDEID])[i], time[e], cest_kel[e], NA, NA, NA, NA)
             ## 2019-11-24/RD Added check for NA to account for all NAs concentration data
-            if(!is.na(t_last)){ if(time[e]==t_last) { est_row[8] <- c_est } }
+            if(comp_required[["TLAST"]]) { if(!is.na(t_last)){ if(time[e]==t_last) { est_row[8] <- c_est } } }
             
             if(nrow(cest_tmp) > 0){
               cest_idx <- which(cest_tmp$TIME == time[e])
@@ -1435,7 +1441,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["AURCLAST"]]) {
           row_data <- c(row_data, aurclast)
         }
-        if(disp_required[["AURCT"]]) {
+        if(disp_required[["AURCT"]] && aet_len > 0) {
           row_data <- c(row_data, unlist(aurct), unlist(aurc_int))
         }
 ###        if("AURCT1_T2" %in% parameter_list) {

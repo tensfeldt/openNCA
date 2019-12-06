@@ -510,15 +510,15 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     regular_int_type <- c(regular_int_type, "AUMCLAST")
   }
 ###  if("AUCT" %in% parameter_list && "TMAX" %in% parameter_list) {
-  if(disp_required[["AUCT"]]) {
+  if(disp_required[["AUCT"]] && auc_len > 0) {
     col_names <- c(col_names, rep(paste0("AUC",1:auc_len)))
     regular_int_type <- c(regular_int_type, paste0("AUC",1:auc_len))
   }
-  if(disp_required[["AUCTDN"]]){
+  if(disp_required[["AUCTDN"]] && auc_len > 0){
     col_names <- c(col_names, rep(paste0("AUC",1:auc_len,"DN")))
     regular_int_type <- c(regular_int_type, paste0("AUC",1:auc_len,"DN"))
   }
-  if(disp_required[["AUCT"]] || disp_required[["AUCTDN"]]){
+  if((disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) && auc_len > 0){
     col_names <- c(col_names, rep(paste0("AUCINT",1:auc_len)))
   }
 ###  if("AUCT1_T2" %in% parameter_list && "TMAX" %in% parameter_list && auc_pair_check) {
@@ -929,6 +929,8 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if(parameter_required("^TLAST$", parameter_list) || length(dependent_parameters("^TLAST$"))>0) {
         if(comp_required[["TLAST"]]) {
           t_last <- tlast(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        } else {
+          t_last <- NULL
         }
 ### 2019-09-04/TGT/ Add in dependency checking
 ###        if("AUCLAST" %in% parameter_list) {
@@ -1087,6 +1089,8 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(comp_required[["KEL"]] || comp_required[["KELC0"]] || comp_required[["KELTMLO"]] || comp_required[["KELTMHI"]] || comp_required[["KELNOPT"]] || comp_required[["THALF"]] || comp_required[["THALF"]]) {
           span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
           kel_v <- kel(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], exflag = kel_flag, spanratio = span_ratio)
+        } else {
+          kel_v <- NULL
         }
 ### 2019-09-03/TGT/ Add in dependency checking
 ###        if("KELRSQ" %in% parameter_list || "KELRSQA" %in% parameter_list) {
@@ -1123,8 +1127,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("AUCLASTC" %in% parameter_list && "AUCLAST" %in% parameter_list && "KEL" %in% parameter_list && "TLAST" %in% parameter_list) {
 ###        if(parameter_required("^AUCLASTC$", parameter_list) || length(dependent_parameters("^AUCLASTC$"))>0) {
         if(comp_required[["AUCLASTC"]] && parameter_required("KEL", names(kel_v))) {
-            auclast_c <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclast, c0 = c_0
-                                 , tlast = t_last)
+            auclast_c <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclast, c0 = c_0, tlast = t_last)
         }
 ###        if("AUCLASTDN" %in% parameter_list && "AUCLAST" %in% parameter_list) {
 ###        if(parameter_required("^AUCLASTDN$", parameter_list) || length(dependent_parameters("^AUCLASTDN$"))>0) {
@@ -1140,11 +1143,11 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
 ###        if("AUCT" %in% parameter_list && 'TMAX' %in% parameter_list) {
 ###        if(parameter_required("^AUCT$", parameter_list) || length(dependent_parameters("^AUCT$"))>0) {
-        if(comp_required[["AUCT"]] || comp_required[["AUCTDN"]]) {
+        if((comp_required[["AUCT"]] || comp_required[["AUCTDN"]]) && auc_len > 0) {
           auct <- NULL
           auctdn <- NULL
           auc_int <- NULL
-          for(t in 2:(auc_len+1)){
+          for(t in 2:(auc_len+1)){ 
             tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = tmp_df[,map_data$TIME][1], t2 = tmp_df[,map_data$TIME][t], method = method, exflag = auc_flag, t_max = t_max)
             tmp_dn <- auc_dn(auc = tmp, dose = tmp_dose)
             if(!is.na(unique(tmp_df[,map_data$TIME])[1]) && !is.na(unique(tmp_df[,map_data$TIME])[t])){
@@ -1374,17 +1377,18 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ### 2019-09-05/TGT/
 ###        if(parameter_required("^KEL$", parameter_list) || length(dependent_parameters("^KEL$"))>0){
-        exflag <- !as.logical(kel_flag)
+        if(comp_required[["KEL"]]) {
+          exflag <- !as.logical(kel_flag)
 
-        pkdataid <- tmp_df[,"PKDATAROWID"][exflag]
+          pkdataid <- tmp_df[,"PKDATAROWID"][exflag]
 ### 2019-08-05/TGT/ Following incorrectly identifies CONC for TIME
 ###          time <- tmp_df[,map_data$CONC][exflag]
-        time <- tmp_df[,map_data$TIME][exflag]
+          time <- tmp_df[,map_data$TIME][exflag]
 ### 2019-08-05/TGT/ Following incorrectly identifies TIME for CONC
 ###          conc <- tmp_df[,map_data$TIME][exflag]
-        conc <- tmp_df[,map_data$CONC][exflag]
-        cest_kel <- rep(NA, length(conc))
-        if(!is.na(kel_v[["KEL"]])){
+          conc <- tmp_df[,map_data$CONC][exflag]
+          cest_kel <- rep(NA, length(conc))
+          if(!is.na(kel_v[["KEL"]])){
 ### 2019-08-05/TGT/ following algorithm for estimation of intercept is not correct            
 ###            intercept <- sum(conc-(-1*kel_v[["KEL"]]*time))/length(conc)
 ### is is replaced with
@@ -1395,9 +1399,10 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### the equivalent of    cest_kel <- exp(intercept + (slope)*time)
 ###            cest_kel <- cest(time, conc, slope=kel_v[["KEL"]])
 ### in new function estimate_concentration
-          cest_kel <- estimate_concentration(time, conc, slope=kel_v[["KEL"]])
+            cest_kel <- estimate_concentration(time, conc, slope=kel_v[["KEL"]])
+          }
         } else {
-          cest_kel <- rep(NA, length(conc))
+          pkdataid <- NULL  
         }
         
 ##################################################################################################################################
@@ -1431,7 +1436,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             est_row <- c(pkdataid[e], unique(data_data[,map_data$SDEID])[i], time[e], cest_kel[e], NA, NA, NA, NA)
             ### 2019-10-06/TGT/ Add CEST at TLAST
             ## 2019-11-24/RD Added check for NA to account for all NAs concentration data
-            if(!is.na(t_last)){ if(time[e]==t_last) { est_row[8] <- c_est } }
+            if(comp_required[["TLAST"]]) { if(!is.na(t_last)){ if(time[e]==t_last) { est_row[8] <- c_est } } }
           
             if(nrow(cest_tmp) > 0){
               cest_idx <- which(cest_tmp$TIME == time[e])
@@ -1648,13 +1653,13 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           row_data <- c(row_data, aumclast)
         }
 ###        if("AUCT" %in% parameter_list && "TMAX" %in% parameter_list) {
-        if(disp_required[["AUCT"]]) {
+        if(disp_required[["AUCT"]] && auc_len > 0) {
           row_data <- c(row_data, auct)
         }
-        if(disp_required[["AUCTDN"]]) {
+        if(disp_required[["AUCTDN"]] && auc_len > 0) {
           row_data <- c(row_data, auctdn)
         }
-        if(disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) {
+        if((disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) && auc_len > 0) {
           row_data <- c(row_data, auc_int)
         }
 ###        if("AUCT1_T2" %in% parameter_list && "TMAX" %in% parameter_list && auc_pair_check) {

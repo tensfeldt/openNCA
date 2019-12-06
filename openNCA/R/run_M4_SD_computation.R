@@ -481,7 +481,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "AURCLAST")
     regular_int_type <- c(regular_int_type, "AURCLAST")
   }
-  if(disp_required[["AURCT"]]) {
+  if(disp_required[["AURCT"]] && aet_len > 0) {
     col_names <- c(col_names, rep(paste0("AURC",1:aet_len)), rep(paste0("AURCINT",1:aet_len)))
     regular_int_type <- c(regular_int_type, paste0("AURC",1:aet_len))
   }
@@ -839,12 +839,16 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         if(comp_required[["TLAST"]]) {
           t_last <- tlast(conc = rt, time = mid_pt)
+        } else {
+          t_last <- NULL
         }
 ###        if("KEL" %in% parameter_list || "KELTMLO" %in% parameter_list || "KELTMHI" %in% parameter_list || "KELNOPT" %in% parameter_list || "THALF" %in% parameter_list || "THALFF" %in% parameter_list) {
 ###        if(parameter_required("^KEL$", parameter_list) || parameter_required(dependent_parameters("^KEL$"), parameter_list)) {
         if(comp_required[["KEL"]]) {
           span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
           kel_v <- kel(conc = rt, time = mid_pt, exflag = kel_flag, spanratio = span_ratio)
+        } else {
+          kel_v <- NULL
         }
 ###        if("KELRSQ" %in% parameter_list || "KELRSQA" %in% parameter_list) {
 ###        if(parameter_required("^KELR", parameter_list) || parameter_required(dependent_parameters("^KELR"), parameter_list)) {
@@ -1067,7 +1071,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
         }
-        if(comp_required[["AURCT"]]) {
+        if(comp_required[["AURCT"]] && aet_len > 0) {
           aurct <- NULL
           aurc_int <- NULL
           if(length(mid_pt) > 2){
@@ -1200,6 +1204,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ### 2019-09-05/TGT/
 ###        if("KEL" %in% parameter_list){
+        if(comp_required[["KEL"]]) {
           exflag <- !as.logical(kel_flag)
 
           pkdataid <- tmp_df[,"PKDATAROWID"][exflag]
@@ -1214,7 +1219,6 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           cest_kel <- rep(NA, length(conc))
 ###          if(parameter_required("^KEL$", parameter_list) || length(dependent_parameters("^KEL$"))>0) {
 ###        if(parameter_required("^KEL$", parameter_list) || parameter_required(dependent_parameters("^KEL$"), parameter_list)) {
-        if(comp_required[["KEL"]]) {
           if(!is.na(kel_v[["KEL"]])){
 ### 2019-08-05/TGT/ following algorithm for estimation of intercept is not correct            
 ###            intercept <- sum(conc-(-1*kel_v[["KEL"]]*time))/length(conc)
@@ -1230,6 +1234,8 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          } else {
 ###            cest_kel <- rep(NA, length(conc))
           }
+        } else {
+          pkdataid <- NULL
         }
 
         tmp_est_data <- data.frame(matrix(ncol = length(elist), nrow = 0))
@@ -1258,7 +1264,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           for(e in 1:length(pkdataid)){
             est_row <- c(pkdataid[e], unique(data_data[,map_data$SDEID])[i], time[e], cest_kel[e], NA, NA, NA, NA)
             ## 2019-11-24/RD Added check for NA to account for all NAs concentration data
-            if(!is.na(t_last)){ if(time[e]==t_last) { est_row[8] <- c_est } }
+            if(comp_required[["TLAST"]]) { if(!is.na(t_last)){ if(time[e]==t_last) { est_row[8] <- c_est } } }
             
             if(nrow(cest_tmp) > 0){
               cest_idx <- which(cest_tmp$TIME == time[e])
@@ -1418,7 +1424,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["AURCLAST"]]) {
           row_data <- c(row_data, aurclast)
         }
-        if(disp_required[["AURCT"]]) {
+        if(disp_required[["AURCT"]] && aet_len > 0) {
           row_data <- c(row_data, aurct, aurc_int)
         }
 ###        if("AURCT1_T2" %in% parameter_list) {

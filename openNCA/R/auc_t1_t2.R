@@ -207,12 +207,11 @@ auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1
     conc <- c(conc, NA)
     exflag <- c(exflag, 0)
   }
-  #if(isTRUE(interpolate) || isTRUE(extrapolate)){
-  #} else {
-  #  if(sum(conc, na.rm = T) == 0){
-  #    return(0)
-  #  }
-  #}
+  if(is.null(interpolate) && is.null(extrapolate)){
+    if(sum(conc, na.rm = T) == 0){
+      return(0)
+    }
+  }
   
   if(length(time) != length(conc)){
     stop("Error in auc_t1_t2: length of 'time' and 'conc' vectors are not equal")

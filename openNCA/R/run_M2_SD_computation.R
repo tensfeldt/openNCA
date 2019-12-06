@@ -488,15 +488,15 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     regular_int_type <- c(regular_int_type, "AUMCLAST")
   }
 ###  if("AUCT" %in% parameter_list && "TMAX" %in% parameter_list) {
-  if(disp_required[["AUCT"]]) {
+  if(disp_required[["AUCT"]] && auc_len > 0) {
     col_names <- c(col_names, rep(paste0("AUC",1:auc_len)))
     regular_int_type <- c(regular_int_type, paste0("AUC",1:auc_len))
   }
-  if(disp_required[["AUCTDN"]]){
+  if(disp_required[["AUCTDN"]] && auc_len > 0){
     col_names <- c(col_names, rep(paste0("AUC",1:auc_len,"DN")))
     regular_int_type <- c(regular_int_type, paste0("AUC",1:auc_len,"DN"))
   }
-  if(disp_required[["AUCT"]] || disp_required[["AUCTDN"]]){
+  if((disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) && auc_len > 0){
     col_names <- c(col_names, rep(paste0("AUCINT",1:auc_len)))
   }
 ###  if("AUCT1_T2" %in% parameter_list && "TMAX" %in% parameter_list && auc_pair_check) {
@@ -918,6 +918,8 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         if(comp_required[["TLAST"]]) {
           t_last <- tlast(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        } else {
+          t_last <- NULL
         }
         if(comp_required[["AUCLAST"]]) {
           auclast <- auc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag)
@@ -1051,6 +1053,8 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(comp_required[["KEL"]] || comp_required[["KELC0"]] || comp_required[["KELTMLO"]] || comp_required[["KELTMHI"]] || comp_required[["KELNOPT"]] || comp_required[["THALF"]] || comp_required[["THALFF"]]) {
           span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
           kel_v <- kel(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], exflag = kel_flag, spanratio = span_ratio)
+        } else {
+          kel_v <- NULL
         }
 ###        if("KELRSQ" %in% parameter_list || "KELRSQA" %in% parameter_list) {
         if(comp_required[["KELR"]] || comp_required[["KELRSQ"]] || comp_required[["KELRSQA"]]) {
@@ -1093,7 +1097,7 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           aumclast <- aumc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag)
         }
 ###        if("AUCT" %in% parameter_list && 'TMAX' %in% parameter_list) {
-        if(comp_required[["AUCT"]]) {
+        if((comp_required[["AUCT"]] || comp_required[["AUCTDN"]]) && auc_len > 0) {
           auct <- NULL
           auctdn <- NULL
           auc_int <- NULL
@@ -1378,64 +1382,68 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          } else {
 ###            cest_kel <- rep(NA, length(conc))
           }
+        } else {
+          pkdataid <- NULL
+        }
 
-          tmp_est_data <- data.frame(matrix(ncol = length(elist), nrow = 0))
-          names(tmp_est_data) <- elist 
-          est_idx <- 1
-          if(length(pkdataid) > 0){
-            ## 2019-11-25/RD Added logic to account for Interpolated/Extrapolated values that are generated before CEST KEL timepoints
-            if(nrow(cest_tmp) > 0){
-              cest_idx0 <- c()
-              for(c in 1:nrow(cest_tmp)){
-                if(cest_tmp[c,"TIME"] < time[1]){
-                  if(cest_tmp[c,"INT_EXT"] == "INT"){
-                    tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, cest_tmp[c,"CONC"], NA, NA, NA) 
-                  } else if(cest_tmp[c,"INT_EXT"] == "EXT"){
-                    tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, NA, cest_tmp[c,"CONC"], NA, NA)
-                  }
-                  cest_idx0 <- c(cest_idx0, c)
-                  tmp_est_data[est_idx,] <- tmp_est_row
-                  est_idx <- est_idx + 1
+        tmp_est_data <- data.frame(matrix(ncol = length(elist), nrow = 0))
+        names(tmp_est_data) <- elist 
+        est_idx <- 1
+        if(length(pkdataid) > 0){
+          ## 2019-11-25/RD Added logic to account for Interpolated/Extrapolated values that are generated before CEST KEL timepoints
+          if(nrow(cest_tmp) > 0){
+            cest_idx0 <- c()
+            for(c in 1:nrow(cest_tmp)){
+              if(cest_tmp[c,"TIME"] < time[1]){
+                if(cest_tmp[c,"INT_EXT"] == "INT"){
+                  tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, cest_tmp[c,"CONC"], NA, NA, NA) 
+                } else if(cest_tmp[c,"INT_EXT"] == "EXT"){
+                  tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, NA, cest_tmp[c,"CONC"], NA, NA)
                 }
-              }
-              if(length(cest_idx0) > 0){
-                cest_tmp <- cest_tmp[-cest_idx0,]
+                cest_idx0 <- c(cest_idx0, c)
+                tmp_est_data[est_idx,] <- tmp_est_row
+                est_idx <- est_idx + 1
               }
             }
-            for(e in 1:length(pkdataid)){
-              est_row <- c(pkdataid[e], unique(data_data[,map_data$SDEID])[i], time[e], cest_kel[e], NA, NA, NA, NA)
-### 2019-10-06/TGT/ Add CEST at TLAST
-              ## 2019-11-24/RD Added check for NA to account for all NAs concentration data
-              if(!is.na(t_last)){ if(time[e]==t_last) { est_row[8] <- c_est } }
-              
-              if(nrow(cest_tmp) > 0){
-                cest_idx <- which(cest_tmp$TIME == time[e])
-                if(length(cest_idx) > 0){
-                  curr_cest <- cest_tmp[cest_idx,]
-                  if(curr_cest[,"INT_EXT"] == "INT"){
-                    est_row[5] <- curr_cest[,"CONC"]
-                  } else if(curr_cest[,"INT_EXT"] == "EXT"){
-                    est_row[6] <- curr_cest[,"CONC"]
-                  }
-                  cest_tmp <- cest_tmp[-cest_idx,]
-                }
-              }
-              tmp_est_data[est_idx,] <- est_row
-              est_idx <- est_idx + 1
+            if(length(cest_idx0) > 0){
+              cest_tmp <- cest_tmp[-cest_idx0,]
             }
           }
-          if(nrow(cest_tmp) > 0){
-            for(c in 1:nrow(cest_tmp)){
-              if(cest_tmp[c,"INT_EXT"] == "INT"){
-                tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, cest_tmp[c,"CONC"], NA, NA, NA) 
-              } else if(cest_tmp[c,"INT_EXT"] == "EXT"){
-                tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, NA, cest_tmp[c,"CONC"], NA, NA)
+          for(e in 1:length(pkdataid)){
+            est_row <- c(pkdataid[e], unique(data_data[,map_data$SDEID])[i], time[e], cest_kel[e], NA, NA, NA, NA)
+### 2019-10-06/TGT/ Add CEST at TLAST
+            ## 2019-11-24/RD Added check for NA to account for all NAs concentration data
+            if(comp_required[["TLAST"]]) { if(!is.na(t_last)){ if(time[e]==t_last) { est_row[8] <- c_est } } }
+            
+            if(nrow(cest_tmp) > 0){
+              cest_idx <- which(cest_tmp$TIME == time[e])
+              if(length(cest_idx) > 0){
+                curr_cest <- cest_tmp[cest_idx,]
+                if(curr_cest[,"INT_EXT"] == "INT"){
+                  est_row[5] <- curr_cest[,"CONC"]
+                } else if(curr_cest[,"INT_EXT"] == "EXT"){
+                  est_row[6] <- curr_cest[,"CONC"]
+                }
+                cest_tmp <- cest_tmp[-cest_idx,]
               }
-              tmp_est_data[est_idx,] <- tmp_est_row
-              est_idx <- est_idx + 1
             }
+            tmp_est_data[est_idx,] <- est_row
+            est_idx <- est_idx + 1
           }
         }
+        if(nrow(cest_tmp) > 0){
+          for(c in 1:nrow(cest_tmp)){
+            if(cest_tmp[c,"INT_EXT"] == "INT"){
+              tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, cest_tmp[c,"CONC"], NA, NA, NA) 
+            } else if(cest_tmp[c,"INT_EXT"] == "EXT"){
+              tmp_est_row <- c(NA, unique(data_data[,map_data$SDEID])[i], cest_tmp[c,"TIME"], NA, NA, cest_tmp[c,"CONC"], NA, NA)
+            }
+            tmp_est_data[est_idx,] <- tmp_est_row
+            est_idx <- est_idx + 1
+          }
+        }
+        tmp_est_data <- tmp_est_data[order(tmp_est_data$TIME), ]
+        est_data <- rbind(est_data, tmp_est_data)
   
         #computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], c_0, v_0, c_max, c_last, c_max_c, cmaxdn, t_max, t_last,
         #                        kel_v[["KEL"]], kel_v[["KELTMLO"]], kel_v[["KELTMHI"]], kel_v[["KELNOPT"]], kelr_v[["KELR"]],
@@ -1618,13 +1626,13 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           row_data <- c(row_data, aumclast)
         }
 ###        if("AUCT" %in% parameter_list && "TMAX" %in% parameter_list) {
-        if(disp_required[["AUCT"]]) {
+        if(disp_required[["AUCT"]] && auc_len > 0) {
           row_data <- c(row_data, auct)
         }
-        if(disp_required[["AUCTDN"]]) {
+        if(disp_required[["AUCTDN"]] && auc_len > 0) {
           row_data <- c(row_data, auctdn)
         }
-        if(disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) {
+        if((disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) && auc_len > 0) {
           row_data <- c(row_data, auc_int)
         }
 ###        if("AUCT1_T2" %in% parameter_list && "TMAX" %in% parameter_list && auc_pair_check) {

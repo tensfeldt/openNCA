@@ -143,17 +143,17 @@ create_dependency_list <- function() {
     dependency_list[["DOSEC"]] <- list(callfun=c(), regex="^DOSEC$", unit_class=c(), valid_models=c(m1, m2, m3, m4), display_list_models=c(), predecessors=c())
     dependency_list[["DOSECi"]] <- list(callfun=c(), regex="^DOSEC(i{1}?|[0-9]+?)$", unit_class=c(), valid_models=c(m1ss, m2ss, m3ss, m4ss), display_list_models=c(), predecessors=c())
 ### 2019-09-01/TGT/ F not currently defined in computation engine codebase
-    dependency_list[["F"]] <- list(callfun=c(), regex="^F$", unit_class=c(uclass_ratio), valid_models=c(m1sd, m2sd, m3sd), display_list_models=c(), predecessors=c("AUCINFP"))
+###    dependency_list[["F"]] <- list(callfun=c(), regex="^F$", unit_class=c(uclass_ratio), valid_models=c(m1sd, m2sd, m3sd), display_list_models=c(), predecessors=c("AUCINFP"))
 ### 2019-09-01/TGT/ FREL not currently defined in computation engine codebase
-    dependency_list[["FREL"]] <- list(callfun=c(), regex="^FREL$", unit_class=c(uclass_ratio), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c("AUCINFP"))
+###    dependency_list[["FREL"]] <- list(callfun=c(), regex="^FREL$", unit_class=c(uclass_ratio), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c("AUCINFP"))
 ### 2019-09-01/TGT/ FRELLAST not currently defined in computation engine codebase
-    dependency_list[["FRELLAST"]] <- list(callfun=c(), regex="^FRELLAST$", unit_class=c(uclass_ratio), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c("AUCLAST"))
+###    dependency_list[["FRELLAST"]] <- list(callfun=c(), regex="^FRELLAST$", unit_class=c(uclass_ratio), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c("AUCLAST"))
 ### 2019-09-01/TGT/ FRELLASTi not currently defined in computation engine codebase
-    dependency_list[["FRELLASTi"]] <- list(callfun=c(), regex="^FRELLAST(i{1}?|[0-9]+?)$", unit_class=c(uclass_ratio), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("AUCLASTi", "TAUi", "TOLDi"))
+###    dependency_list[["FRELLASTi"]] <- list(callfun=c(), regex="^FRELLAST(i{1}?|[0-9]+?)$", unit_class=c(uclass_ratio), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("AUCLASTi", "TAUi", "TOLDi"))
 ### 2019-09-01/TGT/ FA not currently defined in computation engine codebase
-    dependency_list[["FA"]] <- list(callfun=c(), regex="^FA$", unit_class=c(uclass_percent), valid_models=c(m4), display_list_models=c(), predecessors=c("AE", "AEPCT"))
+###    dependency_list[["FA"]] <- list(callfun=c(), regex="^FA$", unit_class=c(uclass_percent), valid_models=c(m4), display_list_models=c(), predecessors=c("AE", "AEPCT"))
 ### 2019-09-01/TGT/ FTAUi not currently defined in computation engine codebase
-    dependency_list[["FTAUi"]] <- list(callfun=c(), regex="^FTAU(i{1}?|[0-9]+?)$", unit_class=c(uclass_ratio), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("AUCTAUi", "AUCINFPi", "AUCINFP", "TAUi", "TOLDi"))
+###    dependency_list[["FTAUi"]] <- list(callfun=c(), regex="^FTAU(i{1}?|[0-9]+?)$", unit_class=c(uclass_ratio), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("AUCTAUi", "AUCINFPi", "AUCINFP", "TAUi", "TOLDi"))
     dependency_list[["KEL"]] <- list(callfun=c(), regex="^KEL$", unit_class=c(uclass_slope), valid_models=c(m1, m2, m3), display_list_models=c(m1sd, m1ss, m2sd, m3sd, m3ss), predecessors=c())
     dependency_list[["KELC0"]] <- list(callfun=c(), regex="^KELC0$", unit_class=c(uclass_amtvol), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c())
     dependency_list[["KELNOPT"]] <- list(callfun=c(), regex="^KELNOPT$", unit_class=c(uclass_none), valid_models=c(m1, m2, m3), display_list_models=c(m1sd, m1ss, m2sd, m3sd, m3ss), predecessors=c())
@@ -193,11 +193,11 @@ create_dependency_list <- function() {
 ### 2019-09-01/TGT/ PTROUGHRENDi not currently defined in computation engine codebase
     dependency_list[["PTROUGHRENDi"]] <- list(callfun=c(), regex="^PTROUGHREND(i{1}?|[0-9]+?)$", unit_class=c(uclass_ratio), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("TAUi", "TOLDi"))
 ### 2019-09-01/TGT/ RACi not currently defined in computation engine codebase
-    dependency_list[["RACi"]] <- list(callfun=c(), regex="^RAC(i{1}?|[0-9]+?)$", unit_class=c(uclass_ratio), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("TAUi", "TOLDi"))
+###    dependency_list[["RACi"]] <- list(callfun=c(), regex="^RAC(i{1}?|[0-9]+?)$", unit_class=c(uclass_ratio), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("TAUi", "TOLDi"))
 ### 2019-09-01/TGT/ RACCMAXi not currently defined in computation engine codebase
-    dependency_list[["RACCMAXi"]] <- list(callfun=c(), regex="^RACCMAX(i{1}?|[0-9]+?)$", unit_class=c(uclass_ratio), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("TAUi", "TOLDi"))
+###    dependency_list[["RACCMAXi"]] <- list(callfun=c(), regex="^RACCMAX(i{1}?|[0-9]+?)$", unit_class=c(uclass_ratio), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("TAUi", "TOLDi"))
 ### 2019-09-01/TGT/ RACCMINi not currently defined in computation engine codebase
-    dependency_list[["RACCMINi"]] <- list(callfun=c(), regex="^RACCMIN(i{1}?|[0-9]+?)$", unit_class=c(uclass_ratio), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("TAUi", "TOLDi"))
+###    dependency_list[["RACCMINi"]] <- list(callfun=c(), regex="^RACCMIN(i{1}?|[0-9]+?)$", unit_class=c(uclass_ratio), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("TAUi", "TOLDi"))
     dependency_list[["RATELAST"]] <- list(callfun=c(), regex="^RATELAST$", unit_class=c(uclass_rate), valid_models=c(m4), display_list_models=c(), predecessors=c("TAUi", "TOLDi"))
     dependency_list[["RATELASTi"]] <- list(callfun=c(), regex="^RATELAST(i{1}?|[0-9]+?)$", unit_class=c(uclass_rate), valid_models=c(m4), display_list_models=c(), predecessors=c("TAUi", "TOLDi"))
     dependency_list[["RATE"]] <- list(callfun=c(), regex="^RATE$", unit_class=c(uclass_rate), valid_models=c(m4), display_list_models=c(), predecessors=c())
@@ -209,7 +209,7 @@ create_dependency_list <- function() {
     dependency_list[["RATEN"]] <- list(callfun=c(), regex="^RATEN$", unit_class=c(uclass_rate), valid_models=c(m4), display_list_models=c(), predecessors=c())
     dependency_list[["RATENi"]] <- list(callfun=c(), regex="^RATEN(i{1}?|[0-9]+?)$", unit_class=c(uclass_rate), valid_models=c(m4), display_list_models=c(), predecessors=c())
 ### 2019-09-01/TGT/ RSSi not currently defined in computation engine codebase
-    dependency_list[["RSSi"]] <- list(callfun=c(), regex="^RSS(i{1}?|[0-9]+?)$", unit_class=c(uclass_ratio), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("TAUi", "TOLDi"))
+###    dependency_list[["RSSi"]] <- list(callfun=c(), regex="^RSS(i{1}?|[0-9]+?)$", unit_class=c(uclass_ratio), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("TAUi", "TOLDi"))
     dependency_list[["TAU"]] <- list(callfun=c(), regex="^TAU(i{1}?|[0-9]+?)$", unit_class=c(uclass_time), valid_models=c(m1ss, m2ss, m3ss, m4ss), display_list_models=c(), predecessors=c("TAUi", "TOLDi"))
     dependency_list[["TAUi"]] <- list(callfun=c(), regex="^TAU(i{1}?|[0-9]+?)$", unit_class=c(uclass_time), valid_models=c(m1ss, m2ss, m3ss, m4ss), display_list_models=c(), predecessors=c("TAUi", "TOLDi"))
 ### 2019-09-01/TGT/ TENDINF not currently defined in computation engine codebase
