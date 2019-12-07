@@ -618,19 +618,19 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
 ###  if("AUCT" %in% parameter_list && "TMAXi" %in% parameter_list) {
 ###  if(parameter_required("^AUCT$", parameter_list) || length(dependent_parameters("^AUCT$"))>0){
-  if(disp_required[["AUCT"]] && auc_len > 0){
+  if(disp_required[["AUCT"]] && auc_len > 1){
     col_names <- c(col_names, rep(paste0("AUC",1:auc_len)))
     regular_int_type <- c(regular_int_type, paste0("AUC",1:auc_len))
   }
 ###  if("AUCTDN" %in% parameter_list && "TMAXi" %in% parameter_list) {
 ###  if(parameter_required("^AUCTDN$", parameter_list) || length(dependent_parameters("^AUCTDN$"))>0){
-  if(disp_required[["AUCTDN"]] && auc_len > 0){
+  if(disp_required[["AUCTDN"]] && auc_len > 1){
     col_names <- c(col_names, rep(paste0("AUC",1:auc_len,"DN")))
     regular_int_type <- c(regular_int_type, paste0("AUC",1:auc_len,"DN"))
   }
 ###  if("AUCT" %in% parameter_list || "AUCTDN" %in% parameter_list){
 ###  if(parameter_required("^AUCT$", parameter_list) || parameter_required("^AUCTDN$", parameter_list)){
-  if((disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) && auc_len > 0){
+  if((disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) && auc_len > 1){
     col_names <- c(col_names, rep(paste0("AUCINT",1:auc_len)))
   }
 ###  if("AUCT1_T2" %in% parameter_list && "TMAXi" %in% parameter_list && auc_pair_check) {
@@ -1601,17 +1601,17 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
 ###        if("AUCT" %in% parameter_list && 'TMAXi' %in% parameter_list) {
 ###        if(parameter_required("^AUCT$", parameter_list) || length(dependent_parameters("^AUCT$"))>0){
-        if(comp_required[["AUCT"]] && auc_len > 0){
+        if(comp_required[["AUCT"]] && auc_len > 1){
           auct <- list()
         }
 ###        if("AUCTDN" %in% parameter_list && 'TMAXi' %in% parameter_list) {
 ###        if(parameter_required("^AUCTDN$", parameter_list) || length(dependent_parameters("^AUCTDN$"))>0){
-        if(comp_required[["AUCTDN"]] && auc_len > 0){
+        if(comp_required[["AUCTDN"]] && auc_len > 1){
           auctdn <- list()
         }
 ###        if("AUCT" %in% parameter_list || 'AUCTDN' %in% parameter_list) {
 ###        if(parameter_required("^AUCT(DN)*?$", parameter_list) || length(dependent_parameters("^AUCT(DN)*?$"))>0){
-        if((comp_required[["AUCTDN"]] || comp_required[["AUCT"]]) && auc_len > 0){
+        if((comp_required[["AUCTDN"]] || comp_required[["AUCT"]]) && auc_len > 1){
           auc_int <- list()
         }
 ###        if("AUCT1_T2" %in% parameter_list && 'TMAXi' %in% parameter_list && auc_pair_check) {
@@ -1889,7 +1889,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             vzf_tauw[[d]] <- vzftauw(vzftau = vzf_tau[[d]], normbs = norm_bs)
           }
 ###          if(("AUCT" %in% parameter_list || "AUCTDN" %in% parameter_list) && 'TMAXi' %in% parameter_list) {
-          if((comp_required[["AUCT"]] || comp_required[["AUCTDN"]]) && auc_len > 0) {
+          if((comp_required[["AUCT"]] || comp_required[["AUCTDN"]]) && auc_len > 1) {
             time <- sort(tmp_df[,map_data$TIME])
             time_di <- sort(tmp_di_df[,map_data$TIME])
             if(d == di_col){
@@ -1901,76 +1901,82 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             prev_auc <- NA
             prev_auc_dn <- NA
 
-            for(t in 2:(length(time))){
-              if(time[t] %in% time_di[-1]) {
-                tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = time_di[1], t2 = time[t], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
-                tmp_dn <- auc_dn(auc = tmp, dose = tmp_dose)
-                tmp_int <- paste0(time[1], "_", time[t])
-              } else {
-                tmp <- NA
-                tmp_dn <- NA
-                tmp_int <- paste0(time[1], "_", time[t])
-              }
-
-              if(d == 1){
-### 2019-09-19/TGT/
-###                if("AUCT" %in% parameter_list){
-                if(comp_required[["AUCT"]]){
-                  auct[[t-1]] <- tmp
-                }
-### 2019-09-19/TGT/                  
-###                if("AUCTDN" %in% parameter_list){
-                if(comp_required[["AUCTDN"]]){
-                  auctdn[[t-1]] <- tmp_dn
-                }
-                auc_int[[t-1]] <- tmp_int
-              } else {
-                if(prev_na){
-                  prev_na <- FALSE
-                  if(is.numeric(tmp)){
-### 2019-09-19/TGT/
-###                    if("AUCT" %in% parameter_list){
-                    if(comp_required[["AUCT"]]){
-                      prev_auc <- unlist(auct[[t-2]])
-                      auct[[t-1]] <- sum(c(prev_auc, tmp), na.rm = TRUE)
-                    }
-                  }
-                  if(is.numeric(tmp_dn)){
-### 2019-09-19/TGT/
-###                    if("AUCTDN" %in% parameter_list){
-                    if(comp_required[["AUCTDN"]]){
-                      prev_auc_dn <- unlist(auctdn[[t-2]])
-                      auctdn[[t-1]] <- sum(c(prev_auc_dn, tmp_dn), na.rm = TRUE)
-                    }
-                  }
+            if(length(time) >= 2){
+              for(t in 2:(length(time))){
+                if(time[t] %in% time_di[-1]) {
+                  tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = time_di[1], t2 = time[t], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
+                  tmp_dn <- auc_dn(auc = tmp, dose = tmp_dose)
+                  tmp_int <- paste0(time[1], "_", time[t])
                 } else {
-### 2019-09-19/TGT/
-###                  if("AUCT" %in% parameter_list){
+                  tmp <- NA
+                  tmp_dn <- NA
+                  tmp_int <- paste0(time[1], "_", time[t])
+                }
+  
+                if(d == 1){
+  ### 2019-09-19/TGT/
+  ###                if("AUCT" %in% parameter_list){
                   if(comp_required[["AUCT"]]){
-                    if(!is.na(prev_auc)){
-                      auct[[t-1]] <- sum(c(prev_auc, tmp), na.rm = TRUE)
-                    } else {
-                      auct[[t-1]] <- sum(c(auct[[t-1]], tmp), na.rm = TRUE)
-                    }
+                    auct[[t-1]] <- tmp
                   }
-### 2019-09-19/TGT/
-###                  if("AUCTDN" %in% parameter_list){
+  ### 2019-09-19/TGT/                  
+  ###                if("AUCTDN" %in% parameter_list){
                   if(comp_required[["AUCTDN"]]){
-                    if(!is.na(prev_auc_dn)){
-                      auctdn[[t-1]] <- sum(c(prev_auc_dn, tmp_dn), na.rm = TRUE)
-                    } else {
-                      auctdn[[t-1]] <- sum(c(auctdn[[t-1]], tmp_dn), na.rm = TRUE)
+                    auctdn[[t-1]] <- tmp_dn
+                  }
+                  auc_int[[t-1]] <- tmp_int
+                } else {
+                  if(prev_na){
+                    prev_na <- FALSE
+                    if(is.numeric(tmp)){
+  ### 2019-09-19/TGT/
+  ###                    if("AUCT" %in% parameter_list){
+                      if(comp_required[["AUCT"]]){
+                        prev_auc <- unlist(auct[[t-2]])
+                        auct[[t-1]] <- sum(c(prev_auc, tmp), na.rm = TRUE)
+                      }
+                    }
+                    if(is.numeric(tmp_dn)){
+  ### 2019-09-19/TGT/
+  ###                    if("AUCTDN" %in% parameter_list){
+                      if(comp_required[["AUCTDN"]]){
+                        prev_auc_dn <- unlist(auctdn[[t-2]])
+                        auctdn[[t-1]] <- sum(c(prev_auc_dn, tmp_dn), na.rm = TRUE)
+                      }
+                    }
+                  } else {
+  ### 2019-09-19/TGT/
+  ###                  if("AUCT" %in% parameter_list){
+                    if(comp_required[["AUCT"]]){
+                      if(!is.na(prev_auc)){
+                        auct[[t-1]] <- sum(c(prev_auc, tmp), na.rm = TRUE)
+                      } else {
+                        auct[[t-1]] <- sum(c(auct[[t-1]], tmp), na.rm = TRUE)
+                      }
+                    }
+  ### 2019-09-19/TGT/
+  ###                  if("AUCTDN" %in% parameter_list){
+                    if(comp_required[["AUCTDN"]]){
+                      if(!is.na(prev_auc_dn)){
+                        auctdn[[t-1]] <- sum(c(prev_auc_dn, tmp_dn), na.rm = TRUE)
+                      } else {
+                        auctdn[[t-1]] <- sum(c(auctdn[[t-1]], tmp_dn), na.rm = TRUE)
+                      }
                     }
                   }
-                }
-                auc_int[[t-1]] <- ifelse(auc_int[[t-1]] != tmp_int, tmp_int, auc_int[[t-1]])
-
-                if(is.na(tmp)){
-                  prev_na <- TRUE
-                } else {
-                  prev_na <- FALSE
+                  auc_int[[t-1]] <- ifelse(auc_int[[t-1]] != tmp_int, tmp_int, auc_int[[t-1]])
+  
+                  if(is.na(tmp)){
+                    prev_na <- TRUE
+                  } else {
+                    prev_na <- FALSE
+                  }
                 }
               }
+            } else {
+              auct <- rep(NA, auc_len)
+              auctdn <- rep(NA, auc_len)
+              auc_int <- rep(NA, auc_len)
             }
             if(d == di_col){
 ###              if("AUCT" %in% parameter_list){
@@ -2489,17 +2495,17 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("AUCT" %in% parameter_list && "TMAXi" %in% parameter_list) {
 ###        if(parameter_required("^AUCT$", parameter_list) || length(dependent_parameters("^AUCT$"))>0){
-        if(disp_required[["AUCT"]] && auc_len > 0){
+        if(disp_required[["AUCT"]] && auc_len > 1){
           row_data <- c(row_data, unlist(auct))
         }
 ###        if("AUCTDN" %in% parameter_list && "TMAXi" %in% parameter_list) {
 ###        if(parameter_required("^AUCTDN$", parameter_list) || length(dependent_parameters("^AUCTDN$"))>0){
-        if(disp_required[["AUCTDN"]] && auc_len > 0){
+        if(disp_required[["AUCTDN"]] && auc_len > 1){
           row_data <- c(row_data, unlist(auctdn))
         }
 ###        if("AUCT" %in% parameter_list || "AUCTDN" %in% parameter_list) {
 ###        if(parameter_required("^AUCT(DN)*?$", parameter_list) || length(dependent_parameters("^AUCT(DN)*?$"))>0){
-        if((disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) && auc_len > 0){
+        if((disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) && auc_len > 1){
           row_data <- c(row_data, unlist(auc_int))
         }
 ###        if("AUCT1_T2" %in% parameter_list && "TMAXi" %in% parameter_list && auc_pair_check) {

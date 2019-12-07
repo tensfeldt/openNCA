@@ -481,7 +481,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "AURCLAST")
     regular_int_type <- c(regular_int_type, "AURCLAST")
   }
-  if(disp_required[["AURCT"]] && aet_len > 0) {
+  if(disp_required[["AURCT"]] && aet_len > 1) {
     col_names <- c(col_names, rep(paste0("AURC",1:aet_len)), rep(paste0("AURCINT",1:aet_len)))
     regular_int_type <- c(regular_int_type, paste0("AURC",1:aet_len))
   }
@@ -1071,7 +1071,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
         }
-        if(comp_required[["AURCT"]] && aet_len > 0) {
+        if(comp_required[["AURCT"]] && aet_len > 1) {
           aurct <- NULL
           aurc_int <- NULL
           if(length(mid_pt) > 2){
@@ -1424,7 +1424,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["AURCLAST"]]) {
           row_data <- c(row_data, aurclast)
         }
-        if(disp_required[["AURCT"]] && aet_len > 0) {
+        if(disp_required[["AURCT"]] && aet_len > 1) {
           row_data <- c(row_data, aurct, aurc_int)
         }
 ###        if("AURCT1_T2" %in% parameter_list) {

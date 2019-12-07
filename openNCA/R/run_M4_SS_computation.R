@@ -473,7 +473,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "AURCLAST")
     regular_int_type <- c(regular_int_type, "AURCLAST")
   }
-  if(disp_required[["AURCT"]] && aet_len > 0) {
+  if(disp_required[["AURCT"]] && aet_len > 1) {
     col_names <- c(col_names, rep(paste0("AURC",1:aet_len)), rep(paste0("AURCINT",1:aet_len)))
     regular_int_type <- c(regular_int_type, paste0("AURC",1:aet_len))
   }
@@ -708,7 +708,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(comp_required[["AETAUPTi"]]) {
         aetau_pt_i <- list()
       }
-      if(comp_required[["AURCT"]] && aet_len > 0) {
+      if(comp_required[["AURCT"]] && aet_len > 1) {
         aurct <- list()
         aurc_int <- list()
       }
@@ -956,49 +956,54 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["AETAUPTi"]]) {
             aetau_pt_i[[d]] <- aepct(ae = aetau_i[[d]], dose = tmp_dose)
           }
-          if(comp_required[["AURCT"]] && aet_len > 0) {
+          if(comp_required[["AURCT"]] && aet_len > 1) {
             prev_na <- FALSE
             prev_aurc <- NA
             
-            for(t in 2:(length(mid_pt))){
-              if(mid_pt[t] %in% tmp_mid_pt[-1]) {
-                tmp <- auc_t1_t2(conc = rt, time =  mid_pt, t1 = tmp_mid_pt[1], t2 = mid_pt[t], method = method, exflag = auc_flag, t_max = tmax_rate_i[[d]])
-                tmp_int <- paste0(mid_pt[1], "_", mid_pt[t])
-              } else {
-                tmp <- NA
-                tmp_int <- paste0(mid_pt[1], "_", mid_pt[t])
-              }
-              
-              if(d == 1){
-                aurct[[t-1]] <- tmp
-                aurc_int[[t-1]] <- tmp_int
-              } else {
-                if(prev_na){
-                  prev_na <- FALSE
-                  if(is.numeric(tmp)){
-                    prev_aurc <- unlist(aurct[[t-2]])
-                    aurct[[t-1]] <- sum(c(prev_aurc, tmp), na.rm = TRUE)
-                  }
+            if(length(mid_pt) >= 2){
+              for(t in 2:(length(mid_pt))){
+                if(mid_pt[t] %in% tmp_mid_pt[-1]) {
+                  tmp <- auc_t1_t2(conc = rt, time =  mid_pt, t1 = tmp_mid_pt[1], t2 = mid_pt[t], method = method, exflag = auc_flag, t_max = tmax_rate_i[[d]])
+                  tmp_int <- paste0(mid_pt[1], "_", mid_pt[t])
                 } else {
-                  if(!is.na(prev_auc)){
-                    aurct[[t-1]] <- sum(c(prev_aurc, tmp), na.rm = TRUE)
-                  } else {
-                    aurct[[t-1]] <- sum(c(aurct[[t-1]], tmp), na.rm = TRUE)
-                  }
+                  tmp <- NA
+                  tmp_int <- paste0(mid_pt[1], "_", mid_pt[t])
                 }
-                aurc_int[[t-1]] <- ifelse(aurc_int[[t-1]] != tmp_int, tmp_int, aurc_int[[t-1]])
                 
-                if(is.na(tmp)){
-                  prev_na <- TRUE
+                if(d == 1){
+                  aurct[[t-1]] <- tmp
+                  aurc_int[[t-1]] <- tmp_int
                 } else {
-                  prev_na <- FALSE
+                  if(prev_na){
+                    prev_na <- FALSE
+                    if(is.numeric(tmp)){
+                      prev_aurc <- unlist(aurct[[t-2]])
+                      aurct[[t-1]] <- sum(c(prev_aurc, tmp), na.rm = TRUE)
+                    }
+                  } else {
+                    if(!is.na(prev_auc)){
+                      aurct[[t-1]] <- sum(c(prev_aurc, tmp), na.rm = TRUE)
+                    } else {
+                      aurct[[t-1]] <- sum(c(aurct[[t-1]], tmp), na.rm = TRUE)
+                    }
+                  }
+                  aurc_int[[t-1]] <- ifelse(aurc_int[[t-1]] != tmp_int, tmp_int, aurc_int[[t-1]])
+                  
+                  if(is.na(tmp)){
+                    prev_na <- TRUE
+                  } else {
+                    prev_na <- FALSE
+                  }
                 }
               }
+            } else {
+              aurct <- rep(NA, aet_len)
+              aurc_int <- rep(NA, aet_len)
             }
             if(d == di_col){
               if(length(aurct) < (aet_len-1)) {
                 aurct <- c(aurct, rep(NA, ((aet_len-1) - length(aurct))))
-              } 
+              }
               if(length(aurc_int) < aet_len) {
                 aurc_int <- c(aurc_int, rep(NA, ((aet_len-1) - length(aurc_int))))
               }
@@ -1441,7 +1446,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["AURCLAST"]]) {
           row_data <- c(row_data, aurclast)
         }
-        if(disp_required[["AURCT"]] && aet_len > 0) {
+        if(disp_required[["AURCT"]] && aet_len > 1) {
           row_data <- c(row_data, unlist(aurct), unlist(aurc_int))
         }
 ###        if("AURCT1_T2" %in% parameter_list) {
