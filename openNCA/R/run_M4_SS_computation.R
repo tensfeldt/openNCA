@@ -244,7 +244,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   aet_col <- ifelse(sum(aet_list %in% parameter_list) >= 1, sum(aet_list %in% parameter_list), 0)
   tmp_aet_col <- ifelse("AET" %in% parameter_list, aet_col+1, aet_col)
 ##  aurc_par_len <- ifelse(auc_list %in% parameter_list && 'AUCNPAIR' %in% names(map_data), ifelse(!(is.null(map_data$AUCNPAIR) || is.na(suppressWarnings(as.numeric(map_data$AUCNPAIR)))), suppressWarnings(as.numeric(map_data$AUCNPAIR)), 0), 0)
-  col <- reg_col + (tmp_aet_col * aet_len) + (mid_col * mid_len) + (interval_col * di_col) + 1 + (2 * (aet_len))
+  col <- reg_col + (tmp_aet_col * aet_len-1) + (mid_col * mid_len) + (interval_col * di_col) + 1 + (2 * (aet_len))
 ###
 ###  cat('tmp_mid_pt:', tmp_mid_pt, '\n')
 ###  cat(' mid_len: ', mid_len, ' mid_col: ', mid_col, ' interval_col: ', interval_col, ' reg_col: ', reg_col, ' aet_col: ', aet_col, ' tmp_aet_col: ', tmp_aet_col, ' aurc_par_len: ', aurc_par_len, ' col: ', col, '\n')
@@ -473,9 +473,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "AURCLAST")
     regular_int_type <- c(regular_int_type, "AURCLAST")
   }
-  if(disp_required[["AURCT"]] && aet_len > 1) {
-    col_names <- c(col_names, rep(paste0("AURC",1:aet_len)), rep(paste0("AURCINT",1:aet_len)))
-    regular_int_type <- c(regular_int_type, paste0("AURC",1:aet_len))
+  if(disp_required[["AURCT"]] && (aet_len-1) > 1) {
+    col_names <- c(col_names, rep(paste0("AURC",1:(aet_len-1))), rep(paste0("AURCINT",1:(aet_len-1))))
+    regular_int_type <- c(regular_int_type, paste0("AURC",1:(aet_len-1)))
   }
 ###  if("AURCT1_T2" %in% parameter_list) {
   if(disp_required[["AURCT1_T2"]] && auc_pair_check) {
@@ -684,7 +684,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
 
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
-###      cat("############### SDEID: ", i, '\n')
+###    cat("############### SDEID: ", i, '\n')
     tryCatch({
 ###      if("DIi" %in% parameter_list) {
       if(comp_required[["DIi"]]) {
@@ -956,7 +956,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["AETAUPTi"]]) {
             aetau_pt_i[[d]] <- aepct(ae = aetau_i[[d]], dose = tmp_dose)
           }
-          if(comp_required[["AURCT"]] && aet_len > 1) {
+          if(comp_required[["AURCT"]] && (aet_len-1) > 1) {
             prev_na <- FALSE
             prev_aurc <- NA
             
@@ -997,14 +997,14 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 }
               }
             } else {
-              aurct <- rep(NA, aet_len)
-              aurc_int <- rep(NA, aet_len)
+              aurct <- rep(NA, (aet_len-1))
+              aurc_int <- rep(NA, (aet_len-1))
             }
             if(d == di_col){
               if(length(aurct) < (aet_len-1)) {
                 aurct <- c(aurct, rep(NA, ((aet_len-1) - length(aurct))))
               }
-              if(length(aurc_int) < aet_len) {
+              if(length(aurc_int) < (aet_len-1)) {
                 aurc_int <- c(aurc_int, rep(NA, ((aet_len-1) - length(aurc_int))))
               }
             }
@@ -1446,7 +1446,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["AURCLAST"]]) {
           row_data <- c(row_data, aurclast)
         }
-        if(disp_required[["AURCT"]] && aet_len > 1) {
+        if(disp_required[["AURCT"]] && (aet_len-1) > 1) {
           row_data <- c(row_data, unlist(aurct), unlist(aurc_int))
         }
 ###        if("AURCT1_T2" %in% parameter_list) {

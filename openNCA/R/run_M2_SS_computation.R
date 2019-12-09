@@ -326,11 +326,9 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
     }
   }
-  if("KEL" %in% parameter_list){
-    elist <- c("PKDATAROWID", "SDEID","TIME","CEST_KEL","CEST_INT","CEST_EXT","CEST_C0","CEST_TLAST")
-    est_data <- data.frame(matrix(ncol = length(elist), nrow = 0))
-    names(est_data) <- elist
-  }
+  elist <- c("PKDATAROWID", "SDEID","TIME","CEST_KEL","CEST_INT","CEST_EXT","CEST_C0","CEST_TLAST")
+  est_data <- data.frame(matrix(ncol = length(elist), nrow = 0))
+  names(est_data) <- elist
 ### 2018-08-09/TGT/ Re-position timing of creation of template computation_df
 ###                 and base it on "length(col_names)" rather than "col"
 ###  computation_df <- data.frame(matrix(ncol = col, nrow = 0))

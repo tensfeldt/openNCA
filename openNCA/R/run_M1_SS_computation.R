@@ -2057,7 +2057,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
 ###        if("AUCLASTC" %in% parameter_list && "AUCLAST" %in% parameter_list && "TLAST" %in% parameter_list && "KEL" %in% parameter_list) {
 ###        if(parameter_required("^AUCLAST$", parameter_list) || length(dependent_parameters("^AUCLAST$"))>0){
-        if(comp_required[["AUCLAST"]]){
+        if(comp_required[["AUCLASTC"]]){
           auclastc <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclast, c0 = c_0, tlast = t_last)
         }
 ###        if("AUCLASTDN" %in% parameter_list && "AUCLAST" %in% parameter_list) {

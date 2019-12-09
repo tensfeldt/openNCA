@@ -1670,7 +1670,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           row_data <- c(row_data, auc_int)
         }
 ###        if("AUCT1_T2" %in% parameter_list && "TMAX" %in% parameter_list && auc_pair_check) {
-        if("AUCT1_T2" %in% parameter_list && "TMAX" %in% parameter_list && auc_pair_check) {
+        if(disp_required[["AUCT1_T2"]] && auc_pair_check) {
           row_data <- c(row_data, auct1_t2)
         }
 ###        if("AUCINFO" %in% parameter_list) {
