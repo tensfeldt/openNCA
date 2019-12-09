@@ -1112,7 +1112,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         
         testunit <- testunit && outputUnitFormat
         if(testunit){
-            testunit <- testunit && length(outputUnit9) == 4 && length(auc_unit_tmp) == 2
+            testunit <- testunit && length(outputUnit9) == 4 && length(aumc_unit_tmp) == 2
         }
 
 ### Added formattedinputUnit and formattedoutputUnit to simplify output
@@ -1245,7 +1245,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         
         testunit <- testunit && outputUnitFormat
         if(testunit){
-            testunit <- testunit && length(outputUnit10) == 4 && length(auc_unit_tmp) == 2
+            testunit <- testunit && length(outputUnit10) == 4 && length(aucdn_unit_tmp) == 2
         }
 
 ### Added formattedinputUnit and formattedoutputUnit to simplify output
