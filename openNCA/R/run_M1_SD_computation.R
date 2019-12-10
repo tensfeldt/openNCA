@@ -682,7 +682,6 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###  computation_df <- data.frame(matrix(ncol = col, nrow = 0))
   computation_df <- data.frame(matrix(ncol = length(col_names), nrow = length(unique(data_data[,map_data$SDEID]))))
   names(computation_df) <- col_names
-  print(computation_df)
   #names(computation_df) <- c("SDEID", "CMAX", "CMIN", "CLAST", "CMAXC", "CMAXDN", "TMAX", "TMIN", "TLAST", "TLAG", "KEL", "KELTMLO", "KELTHMI",
   #                           "KELNOPT", "KELR", "KELRSQ", "KELRSQA", "THALF", "LASTTIME", "AUCALL", "AUCDN", "AUCLAST", "AUCLASTC", "AUCLASTDN", "AUMCLAST",
   #                           rep(paste0("AUC",1:auc_col)), rep(paste0("AUCINT",1:auc_col)), "AUCINFO", "AUCINFP", "AUCINFOC", "AUCINFPC",
