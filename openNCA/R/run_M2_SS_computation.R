@@ -1771,7 +1771,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             prev_auc <- NA
             prev_auc_dn <- NA
 
-            if(length(time) >= 2){
+            if(length(time) > 1){
               for(t in 2:(length(time))){
                 if(time[t] %in% time_di[-1]) {
                   tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = time_di[1], t2 = time[t], method = method, exflag = auc_flag, t_max = t_maxi[[d]])

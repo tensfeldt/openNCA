@@ -1074,7 +1074,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(comp_required[["AURCT"]] && aet_len > 1) {
           aurct <- NULL
           aurc_int <- NULL
-          if(length(mid_pt) > 2){
+          if(length(mid_pt) > 1){
             for(t in 2:(length(mid_pt))){
               tmp <- auc_t1_t2(conc = rt, time = mid_pt, t1 = mid_pt[1], t2 = mid_pt[t], method = method, exflag = auc_flag, t_max = tmax_rate)
               if(!is.na(unique(tmp_df[,map_data$TIME])[1]) && !is.na(unique(tmp_df[,map_data$TIME])[t])){

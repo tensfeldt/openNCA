@@ -1139,40 +1139,34 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           auct <- NULL
           auctdn <- NULL
           auc_int <- NULL
-          if(length(auc_len) >= 2){
-            for(t in 2:(auc_len+1)){
-              tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = tmp_df[,map_data$TIME][1], t2 = tmp_df[,map_data$TIME][t], method = method, exflag = auc_flag, t_max = t_max)
-              tmp_dn <- auc_dn(auc = tmp, dose = tmp_dose)
-              if(!is.na(unique(tmp_df[,map_data$TIME])[1]) && !is.na(unique(tmp_df[,map_data$TIME])[t])){
-                tmp_int <- paste0(unique(tmp_df[,map_data$TIME])[1], "_", unique(tmp_df[,map_data$TIME])[t])
+          for(t in 2:(auc_len+1)){
+            tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = tmp_df[,map_data$TIME][1], t2 = tmp_df[,map_data$TIME][t], method = method, exflag = auc_flag, t_max = t_max)
+            tmp_dn <- auc_dn(auc = tmp, dose = tmp_dose)
+            if(!is.na(unique(tmp_df[,map_data$TIME])[1]) && !is.na(unique(tmp_df[,map_data$TIME])[t])){
+              tmp_int <- paste0(unique(tmp_df[,map_data$TIME])[1], "_", unique(tmp_df[,map_data$TIME])[t])
+            } else {
+              tmp_int <- NA
+            }
+
+            if(comp_required[["AUCT"]]){
+              if(is.null(auct)){
+                auct <- tmp
               } else {
-                tmp_int <- NA
-              }
-  
-              if(comp_required[["AUCT"]]){
-                if(is.null(auct)){
-                  auct <- tmp
-                } else {
-                  auct <- c(auct, tmp)
-                }
-              }
-              if(comp_required[["AUCTDN"]]){
-                if(is.null(auctdn)){
-                  auctdn <- tmp_dn
-                } else {
-                  auctdn <- c(auctdn, tmp_dn)
-                }
-              }
-              if(is.null(auc_int)){
-                auc_int <- tmp_int
-              } else {
-                auc_int <- c(auc_int, tmp_int)
+                auct <- c(auct, tmp)
               }
             }
-          } else {
-            auct <- rep(NA, auc_len)
-            auctdn <- rep(NA, auc_len)
-            auc_int <- rep(NA, auc_len)
+            if(comp_required[["AUCTDN"]]){
+              if(is.null(auctdn)){
+                auctdn <- tmp_dn
+              } else {
+                auctdn <- c(auctdn, tmp_dn)
+              }
+            }
+            if(is.null(auc_int)){
+              auc_int <- tmp_int
+            } else {
+              auc_int <- c(auc_int, tmp_int)
+            }
           }
           if(comp_required[["AUCT"]]){
             if(length(auct) < auc_col) {

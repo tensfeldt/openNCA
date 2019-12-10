@@ -546,7 +546,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   #                           rep(paste0("AE", unique(data_data[,map_data$NOMENDTIME])[1:aet_col])), "AE",
   #                           "KEL", "KELTMLO", "KELTHMI", "KELNOPT", "KELR", "KELRSQ", "KELRSQA", "THALF")
 
-  if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
+  if("FLGACCEPTKELCRIT" %in% names(map_data)) {
     kel_crit <- unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))
 
     if(length(kel_crit) > 0){
@@ -960,7 +960,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             prev_na <- FALSE
             prev_aurc <- NA
             
-            if(length(mid_pt) >= 2){
+            if(length(mid_pt) > 1){
               for(t in 2:(length(mid_pt))){
                 if(mid_pt[t] %in% tmp_mid_pt[-1]) {
                   tmp <- auc_t1_t2(conc = rt, time =  mid_pt, t1 = tmp_mid_pt[1], t2 = mid_pt[t], method = method, exflag = auc_flag, t_max = tmax_rate_i[[d]])

@@ -645,7 +645,8 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
             }
           }
         } else {
-          stop("12 Unable to generate dosing interval for Steady State data! Please provide a valid 'DOSEx', 'TAUx' and 'TOLDx' parameters via 'map'")
+          merged_data[[c(paste0("DI", i, "F"))]] <- rep(1, nrow(merged_data))
+          warning(paste0("Unable to generate dosing interval for Steady State data since no TAUx, TOLDx or DOSEx was provided! Using the entire profile as the dosing interval!"))
         }
 ### end DOSINGTYPE==SS
 ###        cat("2: valid_tau: ", valid_tau, "valid_told: ", valid_told, "valid_dose: ", valid_dose, " intervals: ", intervals, "\n")

@@ -82,7 +82,7 @@ create_dependency_list <- function() {
     dependency_list[["AUMCINFPi"]] <- list(callfun=c(), regex="^AUMCINFP(i{1}?|[0-9]+?)$", unit_class=c(uclass_aumc), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("CEST", "AUCLASTi", "KEL", "TLASTi", "TAUi", "TOLDi"))
     dependency_list[["AUMCLAST"]] <- list(callfun=c(), regex="^AUMCLAST$", unit_class=c(uclass_aumc), valid_models=c(m1sd, m2sd, m3sd), display_list_models=c(), predecessors=c("TMAX"))
     dependency_list[["AUMCLASTi"]] <- list(callfun=c("aumclasti"), regex="^AUMCLAST(i{1}?|[0-9]+?)$", unit_class=c(uclass_aumc), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("TMAXi", "TAUi", "TOLDi"))
-    dependency_list[["AUMCTAUi"]] <- list(callfun=c(), regex="^AUMCTAU(i{1}?|[0-9]+?)$", unit_class=c(uclass_aumc), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("TAUi", "TOLDi"))
+    dependency_list[["AUMCTAUi"]] <- list(callfun=c(), regex="^AUMCTAU(i{1}?|[0-9]+?)$", unit_class=c(uclass_aumc), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("TMAXi", "TAUi", "TOLDi"))
     dependency_list[["AUMCXPTO"]] <- list(callfun=c(), regex="^AUMCXPTO$", unit_class=c(uclass_percent), valid_models=c(m1sd, m2sd, m3sd), display_list_models=c(), predecessors=c("AUMCINFO", "AUMCLAST"))
     dependency_list[["AUMCXPTOi"]] <- list(callfun=c(), regex="^AUMCXPTO(i{1}?|[0-9]+?)$", unit_class=c(uclass_percent), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("AUMCINFOi", "AUMCLASTi", "TAUi", "TOLDi"))
     dependency_list[["AUMCXPTP"]] <- list(callfun=c(), regex="^AUMCXPTP$", unit_class=c(uclass_percent), valid_models=c(m1sd, m2sd, m3sd), display_list_models=c(), predecessors=c("AUMCINFP", "AUMCLAST"))
