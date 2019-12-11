@@ -53,13 +53,12 @@ aumc_lin_log <- function(conc = NULL, time = NULL, exflag = NULL, t_max = NULL){
           aumc_df[i] <- aumc_df_p1 - aumc_df_p2
         }
       }
+      aumc_df <- as.numeric(aumc_df)
+      aumc <- sum(aumc_df, na.rm = TRUE)
     } else {
-      stop("Error in aumc_lin_log: 'tmax' is NA")
+      aumc <- NA
+      warning("Error in aumc_lin_log: 'tmax' is NA")
     }
-
-
-    aumc_df <- as.numeric(aumc_df)
-    aumc <- sum(aumc_df, na.rm = TRUE)
   }
   return(aumc)
 }

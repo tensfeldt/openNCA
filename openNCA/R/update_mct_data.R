@@ -102,7 +102,15 @@ update_mct_data <- function(map, data, flag, verbose=FALSE) {
         for(i in 1:length(timeconcvalues$doseu)) { map[,paste0("ORGDOSE",i,"U")]  <- timeconcvalues$doseu[i] }
         map$DOSEULIST <- paste(timeconcvalues$doseu, collapse=";")
     } else { 
-      map$ORGDOSEu  <- NA 
+      if(casefold(map$DOSINGTYPE) == "ss"){
+        map$ORGDOSE1U  <- NA 
+        map$DOSE1U  <- NA 
+        map$DOSEULIST <- "DOSE1U"
+      } else {
+        map$ORGDOSEU  <- NA 
+        map$DOSEU  <- NA 
+        map$DOSEULIST <- "DOSEU"
+      }
     }
     
     ### TAU information

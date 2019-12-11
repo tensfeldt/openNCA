@@ -60,15 +60,37 @@ dosec <- function(data = NULL, map = NULL, idose = NULL){
   ### Determine First DOSE and DOSE unit from map
   xdoseu <- map_data[,unlist(strsplit(map_data$DOSEULIST, ";"))[idose]]
   xdose <- map_data[,unlist(strsplit(map_data$DOSELIST, ";"))[idose]]
+##  if(";" %in% map_data$DOSEULIST){
+##    xdoseu <- map_data[,unlist(strsplit(map_data$DOSEULIST, ";"))[idose]]
+##  } else {
+##    xdoseu <- NULL
+##  }
+##  if(";" %in% map_data$DOSELIST){
+##    xdose <- map_data[,unlist(strsplit(map_data$DOSELIST, ";"))[idose]]
+##  } else {
+##    xdose <- NULL
+##  }
   
   ### Create a pseudo results (resulting parameters) dataset to drive unit_conversion
   vlist <- c(map_data$CONCU, xdoseu, xdose)
+##  vlist <- c(map_tc12$SDEID, map_data$CONCU)
+##  if(!is.null(xdoseu)){
+##    vlist <- c(vlist, xdoseu)
+##  }
+##  if(!is.null(xdose)){
+##    vlist <- c(vlist, xdose)
+##  }
   vlist <- unlist(vlist)
 
   data_data <- data_data[!duplicated(data_data[,xdose]), vlist]
+##  if(!is.null(xdose) && all(xdose %in% names(data_data)) && all(vlist %in% names(data_data))){
+##    data_data <- data_data[!duplicated(data_data[,xdose]), vlist] 
+##  } else {
+##    data_data <- data_data[, vlist]
+##  }
   
   df <- unit_conversion(data = data_data, map = map_data, result = data_data, unit_class = "DOSEU", verbose=FALSE)
   dose_c <- df[,xdose]
-
+  
   return(dose_c)
 }

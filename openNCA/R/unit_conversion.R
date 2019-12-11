@@ -295,40 +295,125 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
 
     DOSEUPARAM <- parameters_by_class("DOSEU", names(result_data))
 
-    doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
-    dosevar <- unlist(strsplit(map_data[,doselist], ";"))
-    doseulist <- names(parameter_indices("^DOSEULIST$", names(map_data), simplify=FALSE))
-    doseuvar <- unlist(strsplit(map_data[,doseulist], ";"))
-###    cat('dosevar:', dosevar, ' class(dosevar): ', class(dosevar), '\n')
-###    cat('doseuvar:', doseuvar, ' class(doseuvar): ', class(doseuvar), '\n')
+    if(length(DOSEUPARAM)>0 && parameter_required("^DOSELIST$", names(map_data)) && parameter_required("^DOSEULIST$", names(map_data))){
+      doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
+      dosevar <- unlist(strsplit(map_data[,doselist], ";"))
+      doseulist <- names(parameter_indices("^DOSEULIST$", names(map_data), simplify=FALSE))
+      doseuvar <- unlist(strsplit(map_data[,doseulist], ";"))
+###      cat('dosevar:', dosevar, ' class(dosevar): ', class(dosevar), '\n')
+###      cat('doseuvar:', doseuvar, ' class(doseuvar): ', class(doseuvar), '\n')
 
-    interval_len <- length(dosevar)
-###    cat(function_name, ': dosevar: ', ' interval_len: ', interval_len, '\n')
-###    print(dosevar)
-##    dosevar <- map[,dosevar]
-##    interval_len <- length(doseIdx)
+      interval_len <- length(dosevar)
+###      cat(function_name, ': dosevar: ', ' interval_len: ', interval_len, '\n')
+###      print(dosevar)
+##      dosevar <- map[,dosevar]
+##      interval_len <- length(doseIdx)
     
-    if(interval_len > 1){
-###      if(length(doseIdx) > 1) {
-###        DOSEUPARAM <- c(DOSEUPARAM, names(result_data[doseIdx]))
-###      }
+      if(interval_len > 1){
+###        if(length(doseIdx) > 1) {
+###          DOSEUPARAM <- c(DOSEUPARAM, names(result_data[doseIdx]))
+###        }
 
-      DOSEUPARAM <- c(DOSEUPARAM, dosevar)
+        DOSEUPARAM <- c(DOSEUPARAM, dosevar)
         
-###      for(i in 1:interval_len){
-      for(i in 1:length(doseuvar)){
-### 2019-08-30/TGT/ update to parameter_required
-###        if(paste0("DOSE", i, "U") %in% names(map_data)) {
-###        if(parameter_required(paste0("^DOSE", i, "U$"),names(map_data))) {
-        if(parameter_required(paste0("^", doseuvar[i], "$"),names(map_data))) {
+###        for(i in 1:interval_len){
+        for(i in 1:length(doseuvar)){
+###   2019-08-30/TGT/ update to parameter_required
+###          if(paste0("DOSE", i, "U") %in% names(map_data)) {
+###          if(parameter_required(paste0("^DOSE", i, "U$"),names(map_data))) {
+          if(parameter_required(paste0("^", doseuvar[i], "$"),names(map_data))) {
 ###          if(map_data[, paste0("DOSE", i, "U")] %in% names(data_data)){
 ###          if(parameter_required(map_data[, paste0("DOSE", i, "U")], names(data_data))) {
-          if(parameter_required(map_data[, doseuvar[i]], names(data_data))) {
-###            inputUnit3 <- unique(data_data[, map_data[, paste0("DOSE", i, "U")]])[1]
+            if(parameter_required(map_data[, doseuvar[i]], names(data_data))) {
+###              inputUnit3 <- unique(data_data[, map_data[, paste0("DOSE", i, "U")]])[1]
               inputUnit3 <- unique(data_data[, map_data[, doseuvar[i]]])[1]
-###              cat('i: ', i, ' inputUnit3: ', inputUnit3, '\n')
-#            outputUnit3 <- as.character(map_data$DOSEOUTPUTUNIT)
+###                cat('i: ', i, ' inputUnit3: ', inputUnit3, '\n')
+#              outputUnit3 <- as.character(map_data$DOSEOUTPUTUNIT)
 
+              outputUnitLabel <- "DOSEOUTPUTUNIT"
+              testunit <- is.element(outputUnitLabel, names(map))
+              outputUnitFormat <- FALSE
+              if(testunit) {
+                  outputUnit3 <- as.character(map_data[[outputUnitLabel]])
+                  outputUnitFormat <- length(outputUnit3)>0 & !is.na(outputUnit3)
+              }
+              testunit <- testunit && outputUnitFormat
+            
+### Added formattedinputUnit and formattedoutputUnit to simplify output
+              formattedinputUnit   <- inputUnit3
+              formattedoutputUnit  <- outputUnit3
+###            cat('formattedinputUnit: ', formattedinputUnit, ' formattedoutputUnit: ', formattedoutputUnit, '\n')
+            
+              if(testunit){
+                inputMatch3 <- match(inputUnit3, units, nomatch = 21)
+                outputMatch3 <- match(outputUnit3, units, nomatch = 21)
+  
+                if(inputMatch3 != 21 && outputMatch3 != 21) {
+                  inputMScale3 <- val[inputMatch3]
+                  outputMScale3 <- val[outputMatch3]
+                  if(class[inputMatch3] == "M" && class[outputMatch3] == "M") {
+                    doseUScaler <- inputMScale3/outputMScale3
+                  } else {
+                    doseUScaler <- 1
+###                    warning(paste0("'", paste0("DOSE", i, "U"), "' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion"))
+                    warning(paste0("'", i, "' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion"))
+                  }
+                } else {
+                  doseUScaler <- 1
+###                  warning(paste0("'", paste0("DOSE", i, "U"), "' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion"))
+                  warning(paste0("'", i, "' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion"))
+                }
+  
+###                dose_col <- names(result_data)[names(result_data) %in% c(paste0("DOSE", i), paste0("DOSEC", i))]
+                dose_col <- names(result_data)[names(result_data) %in% dosevar[i]]
+                result_data[dose_col] <- result_data[dose_col] * doseUScaler
+###                result_data[paste0("DOSE", i, "U")] <- ifelse(doseUScaler == 1, inputUnit3, outputUnit3)
+###                result_data[paste0("DOSE", i, "U")] <- ifelse(doseUScaler == 1, formattedinputUnit, formattedoutputUnit)
+                result_data[doseuvar[i]] <- ifelse(doseUScaler == 1, formattedinputUnit, formattedoutputUnit)
+                if(verbose) { cat(function_name, ': Unit Class 3 (Dose) dose_col: ', dose_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', doseUScaler, '\n') }
+              } else {
+###   retain original input unit
+###                  result_data$DOSEU <- formattedinputUnit
+###                  result_data[paste0("DOSE", i, "U")] <- formattedinputUnit
+                  result_data[doseuvar[i]] <- formattedinputUnit
+                  if(outputUnitFormat){
+                    warning("'", outputUnitLabel, "' is not present in the proper form! Please try again using 'Dose Amount' format!")
+                  }
+               }
+            } else {
+              #result_data[paste0("DOSE", i, "U")] <- unique(data_data[, map_data[, paste0("DOSE", i, "U")]])[1]
+###              result_data[paste0("DOSE", i, "U")] <- NA
+              result_data[dosevar[i]] <- NA
+###              warning(paste0("'", paste0("DOSE", i, "U"), "' value provided via 'map' is not present in the dataset provided via 'data'"))
+              warning(paste0("'", doseuvar[i], "' value provided via 'map' is not present in the dataset provided via 'data'"))
+            }
+          } else {
+            #result_data[paste0("DOSE", i, "U")] <- unique(data_data[, map_data[, paste0("DOSE", i, "U")]])[1]
+###            result_data[paste0("DOSE", i, "U")] <- NA
+            result_data[doseuvar[i]] <- NA
+###            warning(paste0("'", paste0("DOSE", i, "U"), "' #3# is not present in the dataset provided via 'map'"))
+            warning(paste0("'", doseuvar[i], "' #3# is not present in the dataset provided via 'map'"))
+          }
+        }
+###   2019-08-12/TGT/ modify check (Not sure at this time why CONCOUTPUTUNIT is being checked here. Need to verify this
+###        if(!is.na(map_data$CONCOUTPUTUNIT)){
+        if(!is.element("CONCOUTPUTUNIT", names(map))){
+          warning("'CONCOUTPUTUNIT' is not present in the proper form! Please try again using 'Amount/Volume' format!")
+        }
+      } else {
+###   2019-08-30/TGT/ update to parameter_required
+###        if("DOSE1U" %in% names(map_data)){
+###   change to "DOSEU"
+###          if(parameter_required("^DOSE1U$", names(map_data))){
+###          if(parameter_required("^DOSEU$", names(map_data))){
+          if(parameter_required(doseuvar, names(map_data))){
+###          if(map_data$DOSE1U %in% names(data_data)){
+###          if(parameter_required(map_data$DOSEU, names(data_data))){
+          if(parameter_required(map_data[,doseuvar], names(data_data))){
+###            inputUnit3 <- unique(data_data[, map_data$DOSEU])[1]
+            inputUnit3 <- unique(data_data[, map_data[,doseuvar]])[1]
+###            outputUnit3 <- as.character(map_data$DOSEOUTPUTUNIT)
+  
             outputUnitLabel <- "DOSEOUTPUTUNIT"
             testunit <- is.element(outputUnitLabel, names(map))
             outputUnitFormat <- FALSE
@@ -337,8 +422,8 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                 outputUnitFormat <- length(outputUnit3)>0 & !is.na(outputUnit3)
             }
             testunit <- testunit && outputUnitFormat
-            
-### Added formattedinputUnit and formattedoutputUnit to simplify output
+              
+###   Added formattedinputUnit and formattedoutputUnit to simplify output
             formattedinputUnit   <- inputUnit3
             formattedoutputUnit  <- outputUnit3
 ###            cat('formattedinputUnit: ', formattedinputUnit, ' formattedoutputUnit: ', formattedoutputUnit, '\n')
@@ -346,7 +431,6 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
             if(testunit){
               inputMatch3 <- match(inputUnit3, units, nomatch = 21)
               outputMatch3 <- match(outputUnit3, units, nomatch = 21)
-
               if(inputMatch3 != 21 && outputMatch3 != 21) {
                 inputMScale3 <- val[inputMatch3]
                 outputMScale3 <- val[outputMatch3]
@@ -354,117 +438,35 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                   doseUScaler <- inputMScale3/outputMScale3
                 } else {
                   doseUScaler <- 1
-###                  warning(paste0("'", paste0("DOSE", i, "U"), "' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion"))
-                  warning(paste0("'", i, "' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion"))
+                  warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
                 }
               } else {
                 doseUScaler <- 1
-###                warning(paste0("'", paste0("DOSE", i, "U"), "' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion"))
-                warning(paste0("'", i, "' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion"))
+                warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion")
               }
-
-###              dose_col <- names(result_data)[names(result_data) %in% c(paste0("DOSE", i), paste0("DOSEC", i))]
-              dose_col <- names(result_data)[names(result_data) %in% dosevar[i]]
+  
+###              dose_col <- names(result_data)[names(result_data) %in% c("DOSE1", "DOSEC")]
+              dose_col <- names(result_data)[names(result_data) %in% DOSEUPARAM]
               result_data[dose_col] <- result_data[dose_col] * doseUScaler
-###              result_data[paste0("DOSE", i, "U")] <- ifelse(doseUScaler == 1, inputUnit3, outputUnit3)
-###              result_data[paste0("DOSE", i, "U")] <- ifelse(doseUScaler == 1, formattedinputUnit, formattedoutputUnit)
-              result_data[doseuvar[i]] <- ifelse(doseUScaler == 1, formattedinputUnit, formattedoutputUnit)
+###              result_data$DOSE1U <- ifelse(doseUScaler == 1, inputUnit3, outputUnit3)
+              result_data$DOSEU <- ifelse(doseUScaler == 1, formattedinputUnit, formattedoutputUnit)
               if(verbose) { cat(function_name, ': Unit Class 3 (Dose) dose_col: ', dose_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', doseUScaler, '\n') }
             } else {
-### retain original input unit
-###                result_data$DOSEU <- formattedinputUnit
-###                result_data[paste0("DOSE", i, "U")] <- formattedinputUnit
-                result_data[doseuvar[i]] <- formattedinputUnit
-                if(outputUnitFormat){
-                  warning("'", outputUnitLabel, "' is not present in the proper form! Please try again using 'Dose Amount' format!")
-                }
-             }
-          } else {
-            #result_data[paste0("DOSE", i, "U")] <- unique(data_data[, map_data[, paste0("DOSE", i, "U")]])[1]
-###            result_data[paste0("DOSE", i, "U")] <- NA
-            result_data[dosevar[i]] <- NA
-###            warning(paste0("'", paste0("DOSE", i, "U"), "' value provided via 'map' is not present in the dataset provided via 'data'"))
-            warning(paste0("'", doseuvar[i], "' value provided via 'map' is not present in the dataset provided via 'data'"))
-          }
-        } else {
-          #result_data[paste0("DOSE", i, "U")] <- unique(data_data[, map_data[, paste0("DOSE", i, "U")]])[1]
-###          result_data[paste0("DOSE", i, "U")] <- NA
-          result_data[doseuvar[i]] <- NA
-###          warning(paste0("'", paste0("DOSE", i, "U"), "' #3# is not present in the dataset provided via 'map'"))
-          warning(paste0("'", doseuvar[i], "' #3# is not present in the dataset provided via 'map'"))
-        }
-      }
-### 2019-08-12/TGT/ modify check (Not sure at this time why CONCOUTPUTUNIT is being checked here. Need to verify this
-###      if(!is.na(map_data$CONCOUTPUTUNIT)){
-      if(!is.element("CONCOUTPUTUNIT", names(map))){
-        warning("'CONCOUTPUTUNIT' is not present in the proper form! Please try again using 'Amount/Volume' format!")
-      }
-    } else {
-### 2019-08-30/TGT/ update to parameter_required
-###      if("DOSE1U" %in% names(map_data)){
-### change to "DOSEU"
-###        if(parameter_required("^DOSE1U$", names(map_data))){
-###        if(parameter_required("^DOSEU$", names(map_data))){
-        if(parameter_required(doseuvar, names(map_data))){
-###        if(map_data$DOSE1U %in% names(data_data)){
-###        if(parameter_required(map_data$DOSEU, names(data_data))){
-        if(parameter_required(map_data[,doseuvar], names(data_data))){
-###          inputUnit3 <- unique(data_data[, map_data$DOSEU])[1]
-          inputUnit3 <- unique(data_data[, map_data[,doseuvar]])[1]
-###          outputUnit3 <- as.character(map_data$DOSEOUTPUTUNIT)
-
-          outputUnitLabel <- "DOSEOUTPUTUNIT"
-          testunit <- is.element(outputUnitLabel, names(map))
-          outputUnitFormat <- FALSE
-          if(testunit) {
-              outputUnit3 <- as.character(map_data[[outputUnitLabel]])
-              outputUnitFormat <- length(outputUnit3)>0 & !is.na(outputUnit3)
-          }
-          testunit <- testunit && outputUnitFormat
-            
-### Added formattedinputUnit and formattedoutputUnit to simplify output
-          formattedinputUnit   <- inputUnit3
-          formattedoutputUnit  <- outputUnit3
-###          cat('formattedinputUnit: ', formattedinputUnit, ' formattedoutputUnit: ', formattedoutputUnit, '\n')
-          
-          if(testunit){
-            inputMatch3 <- match(inputUnit3, units, nomatch = 21)
-            outputMatch3 <- match(outputUnit3, units, nomatch = 21)
-            if(inputMatch3 != 21 && outputMatch3 != 21) {
-              inputMScale3 <- val[inputMatch3]
-              outputMScale3 <- val[outputMatch3]
-              if(class[inputMatch3] == "M" && class[outputMatch3] == "M") {
-                doseUScaler <- inputMScale3/outputMScale3
-              } else {
-                doseUScaler <- 1
-                warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
+###   retain original input unit
+###               result_data$DOSE1U <- inputUnit3
+                result_data$DOSEU <- formattedinputUnit
+              if(outputUnitFormat){
+                warning("'", outputUnitLabel, "' is not present in the proper form! Please try again using 'Dose Amount' format!")
               }
-            } else {
-              doseUScaler <- 1
-              warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion")
             }
-
-###            dose_col <- names(result_data)[names(result_data) %in% c("DOSE1", "DOSEC")]
-            dose_col <- names(result_data)[names(result_data) %in% DOSEUPARAM]
-            result_data[dose_col] <- result_data[dose_col] * doseUScaler
-###            result_data$DOSE1U <- ifelse(doseUScaler == 1, inputUnit3, outputUnit3)
-            result_data$DOSEU <- ifelse(doseUScaler == 1, formattedinputUnit, formattedoutputUnit)
-            if(verbose) { cat(function_name, ': Unit Class 3 (Dose) dose_col: ', dose_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', doseUScaler, '\n') }
           } else {
-### retain original input unit
-###             result_data$DOSE1U <- inputUnit3
-              result_data$DOSEU <- formattedinputUnit
-            if(outputUnitFormat){
-              warning("'", outputUnitLabel, "' is not present in the proper form! Please try again using 'Dose Amount' format!")
-            }
+            result_data$DOSEU <- NA
+            warning("'DOSEU' value provided via 'map' is not present in the dataset provided via 'data'")
           }
         } else {
           result_data$DOSEU <- NA
-          warning("'DOSEU' value provided via 'map' is not present in the dataset provided via 'data'")
+          warning("'DOSEU' #4# is not present in the dataset provided via 'map'")
         }
-      } else {
-        result_data$DOSEU <- NA
-        warning("'DOSEU' #4# is not present in the dataset provided via 'map'")
       }
     }
   }
