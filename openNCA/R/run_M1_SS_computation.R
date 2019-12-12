@@ -879,8 +879,8 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###                 the generation of "col_names" and use planned "length(col_names)"
 ###                 instead of "col"
 ###  computation_df <- data.frame(matrix(ncol = col, nrow = 0))
-  computation_df <- data.frame(matrix(ncol = length(col_names), nrow = 0))
-    names(computation_df) <- c(col_names)
+  computation_df <- data.frame(matrix(ncol = length(col_names), nrow = length(unique(data_data[,map_data$SDEID]))))
+  names(computation_df) <- c(col_names)
 ###
 ###  df <- data.frame(index=1:length(col_names), col_names=col_names)
 ###  print(df)
@@ -2222,28 +2222,34 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-10-19/TGT/ Comment to indicate that this is where the "placeholders" are created to reserve space for results in row_data
 ##################################################################################################################################
         
-        row_data <- c(unique(data_data[,map_data$SDEID])[i])
+##        row_data <- c(unique(data_data[,map_data$SDEID])[i])
+        computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]
 ### 2019-10-19/TGT/ Reposition DOSEi to just before CMAX/after SDEID
 ###        cat('unlist(dose):\n')
 ###        print(unlist(dose))
         if(disp_required[["DOSEi"]]){
-          row_data <- c(row_data, unlist(dose))
+##          row_data <- c(row_data, unlist(dose))
+          computation_df[i, paste0("DOSE",1:di_col)] <- unlist(dose)
         }
         if(disp_required[["DOSEC"]]) {
-          row_data <- c(row_data, dose_c)
+##          row_data <- c(row_data, dose_c)
+          computation_df[i, "DOSEC"] <- dose_c
         }
         if(disp_required[["DOSECi"]]) {
-          row_data <- c(row_data, unlist(dose_ci))
+##          row_data <- c(row_data, unlist(dose_ci))
+          computation_df[i, paste0("DOSEC",1:di_col)] <- unlist(dose_ci)
         }
 ###        if("CMAX" %in% parameter_list) {
 ###        if(parameter_required("^CMAX$", parameter_list) || length(dependent_parameters("^CMAX$"))>0){
         if(disp_required[["CMAX"]]){
-          row_data <- c(row_data, c_max)
+##          row_data <- c(row_data, c_max)
+          computation_df[i, "CMAX"] <- c_max
         }
 ###        if("CMAXi" %in% parameter_list) {
 ###        if(parameter_required("^CMAXi$", parameter_list) || length(dependent_parameters("^CMAXi$"))>0){
         if(disp_required[["CMAXi"]]){
-          row_data <- c(row_data, unlist(c_maxi))
+##          row_data <- c(row_data, unlist(c_maxi))
+          computation_df[i, paste0("CMAX",1:di_col)] <- unlist(c_maxi)
         }
 ### 2019-08-30/TGT/ Remove "CMAXC" since only valid for M2 Bolus administration applications
 ###        if("CMAXC" %in% parameter_list && "CMAX" %in% parameter_list && "TMAX" %in% parameter_list && "KEL" %in% parameter_list) {
@@ -2256,122 +2262,148 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("CMAXDN" %in% parameter_list && "CMAX" %in% parameter_list) {
 ###        if(parameter_required("^CMAXDN$", parameter_list) || length(dependent_parameters("^CMAXDN$"))>0){
         if(disp_required[["CMAXDN"]]){
-          row_data <- c(row_data, c_maxdn)
+##          row_data <- c(row_data, c_maxdn)
+          computation_df[i, "CMAXDN"] <- c_maxdn
         }
 ###        if("CMAXDNi" %in% parameter_list && "CMAXi" %in% parameter_list) {
 ###        if(parameter_required("^CMAXDNi$", parameter_list) || length(dependent_parameters("^CMAXDNi$"))>0){
         if(disp_required[["CMAXDNi"]]){
-          row_data <- c(row_data, unlist(c_maxdni))
+##          row_data <- c(row_data, unlist(c_maxdni))
+          computation_df[i, paste0("CMAXDN",1:di_col)] <- unlist(c_maxdni)
         }
         if(disp_required[["FLGACCEPTPREDOSE"]] && "FLGACCEPTPREDOSECRIT" %in% names(map_data)){
           pre_dose_crit <- suppressWarnings(as.numeric(map_data$FLGACCEPTPREDOSECRIT))
           if(is.numeric(pre_dose_crit)){
             pre_dose <- tmp_df[,map_data$CONC][tmp_df[,map_data$TIME] == 0][1]
             if(is.numeric(c_maxi[[1]])){
-              row_data <- c(row_data, ifelse(pre_dose > (c_maxi[[1]] * pre_dose_crit), 0, 1))
+##              row_data <- c(row_data, ifelse(pre_dose > (c_maxi[[1]] * pre_dose_crit), 0, 1))
+              computation_df[i, "FLGACCEPTPREDOSE"] <- ifelse(pre_dose > (c_maxi[[1]] * pre_dose_crit), 0, 1)
             } else {
-              row_data <- c(row_data, 1)
+##              row_data <- c(row_data, 1)
+              computation_df[i, "FLGACCEPTPREDOSE"] <- 1
             }
           } else {
-            row_data <- c(row_data, 1)
+##            row_data <- c(row_data, 1)
+            computation_df[i, "FLGACCEPTPREDOSE"] <- 1
           }
         }
 ###        if("CMIN" %in% parameter_list) {
 ###        if(parameter_required("^CMIN$", parameter_list) || length(dependent_parameters("^CMIN$"))>0){
         if(disp_required[["CMIN"]]){
-          row_data <- c(row_data, c_min)
+##          row_data <- c(row_data, c_min)
+          computation_df[i, "CMIN"] <- c_min
         }
 ###        if("CMINi" %in% parameter_list) {
 ###        if(parameter_required("^CMINi$", parameter_list) || length(dependent_parameters("^CMINi$"))>0){
         if(disp_required[["CMINi"]]){
-          row_data <- c(row_data, unlist(c_mini))
+##          row_data <- c(row_data, unlist(c_mini))
+          computation_df[i, paste0("CMIN",1:di_col)] <- unlist(c_mini)
         }
 ###        if("CLAST" %in% parameter_list) {
 ###        if(parameter_required("^CLAST$", parameter_list) || length(dependent_parameters("^CLAST$"))>0){
         if(disp_required[["CLAST"]]){
-          row_data <- c(row_data, c_last)
+##          row_data <- c(row_data, c_last)
+          computation_df[i, "CLAST"] <- c_last
         }
 ###        if("CLASTi" %in% parameter_list) {
 ###        if(parameter_required("^CLASTi$", parameter_list) || length(dependent_parameters("^CLASTi$"))>0){
         if(disp_required[["CLASTi"]]){
-          row_data <- c(row_data, unlist(c_lasti))
+##          row_data <- c(row_data, unlist(c_lasti))
+          computation_df[i, paste0("CLAST",1:di_col)] <- unlist(c_lasti)
         }
 ###        if("TMAX" %in% parameter_list) {
 ###        if(parameter_required("^TMAX$", parameter_list) || length(dependent_parameters("^TMAX$"))>0){
         if(disp_required[["TMAX"]]){
-          row_data <- c(row_data, t_max)
+##          row_data <- c(row_data, t_max)
+          computation_df[i, "TMAX"] <- t_max
         }
 ###        if("TMAXi" %in% parameter_list) {
 ###        if(parameter_required("^TMAXi$", parameter_list) || length(dependent_parameters("^TMAXi$"))>0){
         if(disp_required[["TMAXi"]]){
-          row_data <- c(row_data, unlist(t_maxi))
+##          row_data <- c(row_data, unlist(t_maxi))
+          computation_df[i, paste0("TMAX",1:di_col)] <- unlist(t_maxi)
         }
         if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data)){
-          row_data <- c(row_data, 1)
+##          row_data <- c(row_data, 1)
+          computation_df[i, "FLGACCEPTTMAX"] <- 1
         }
 ###        if("TMIN" %in% parameter_list) {
 ###        if(parameter_required("^TMIN$", parameter_list) || length(dependent_parameters("^TMIN$"))>0){
         if(disp_required[["TMIN"]]){
-          row_data <- c(row_data, t_min)
+##          row_data <- c(row_data, t_min)
+          computation_df[i, "TMIN"] <- t_min
         }
 ###        if("TMINi" %in% parameter_list) {
 ###        if(parameter_required("^TMINi$", parameter_list) || length(dependent_parameters("^TMINi$"))>0){
         if(disp_required[["TMINi"]]){
-          row_data <- c(row_data, unlist(t_mini))
+##          row_data <- c(row_data, unlist(t_mini))
+          computation_df[i, paste0("TMIN",1:di_col)] <- unlist(t_mini)
         }
 ###        if("TLAST" %in% parameter_list) {
 ###        if(parameter_required("^TLAST$", parameter_list) || length(dependent_parameters("^TLAST$"))>0){
         if(disp_required[["TLAST"]]){
-          row_data <- c(row_data, t_last)
+##          row_data <- c(row_data, t_last)
+          computation_df[i, "TLAST"] <- t_last
         }
 ###        if("TLASTi" %in% parameter_list) {
 ###        if(parameter_required("^TLASTi$", parameter_list) || length(dependent_parameters("^TLASTi$"))>0){
         if(disp_required[["TLASTi"]]){
-          row_data <- c(row_data, unlist(t_lasti))
+##          row_data <- c(row_data, unlist(t_lasti))
+          computation_df[i, paste0("TLAST",1:di_col)] <- unlist(t_lasti)
         }
 ###        if("TLAG" %in% parameter_list) {
 ###        if(parameter_required("^TLAG$", parameter_list) || length(dependent_parameters("^TLAG$"))>0){
         if(disp_required[["TLAG"]]){
-          row_data <- c(row_data, unlist(t_lag))
+##          row_data <- c(row_data, t_lag)
+          computation_df[i, "TLAG"] <- t_lag
         }
         if(disp_required[["CTROUGHi"]]){
-          row_data <- c(row_data, unlist(c_troughi))
+##          row_data <- c(row_data, unlist(c_troughi))
+          computation_df[i, paste0("CTROUGH",1:di_col)] <- unlist(c_troughi)
         }
         if(disp_required[["CTROUGHENDi"]]){
-          row_data <- c(row_data, unlist(c_troughendi))
+##          row_data <- c(row_data, unlist(c_troughendi))
+          computation_df[i, paste0("CTROUGHEND",1:di_col)] <- unlist(c_troughendi)
         }
         if(disp_required[["PTROUGHRi"]]){
-          row_data <- c(row_data, unlist(p_troughri))
+##          row_data <- c(row_data, unlist(p_troughri))
+          computation_df[i, paste0("PTROUGHR",1:di_col)] <- unlist(p_troughri)
         }
         if(disp_required[["PTROUGHRENDi"]]){
-          row_data <- c(row_data, unlist(p_troughrendi))
+##          row_data <- c(row_data, unlist(p_troughrendi))
+          computation_df[i, paste0("PTROUGHREND",1:di_col)] <- unlist(p_troughrendi)
         }
 ###        if("KEL" %in% parameter_list) {
 ###        if(parameter_required("^KEL$", parameter_list) || length(dependent_parameters("^KEL$"))>0){
         if(disp_required[["KEL"]]){
-          row_data <- c(row_data, kel_v[["KEL"]])
+##          row_data <- c(row_data, kel_v[["KEL"]])
+          computation_df[i, "KEL"] <- ifelse("KEL" %in% names(kel_v), kel_v[["KEL"]], NA)
         }
 ###        if("KELC0" %in% parameter_list) {
 ###        if(parameter_required("^KELC0$", parameter_list) || length(dependent_parameters("^KELC0$"))>0){
         if(disp_required[["KELC0"]]){
 ###
 ###            cat('kel_v[["KELC0"]]: ', kel_v[["KELC0"]], '\n')
-          row_data <- c(row_data, kel_v[["KELC0"]])
+##          row_data <- c(row_data, kel_v[["KELC0"]])
+          computation_df[i, "KELC0"] <- ifelse("KELC0" %in% names(kel_v), kel_v[["KELC0"]], NA)
         }
 ###        if("KELTMLO" %in% parameter_list) {
 ###        if(parameter_required("^KELTMLO$", parameter_list) || length(dependent_parameters("^KELTMLO$"))>0){
         if(disp_required[["KELTMLO"]]){
-          row_data <- c(row_data, kel_v[["KELTMLO"]])
+##          row_data <- c(row_data, kel_v[["KELTMLO"]])
+          computation_df[i, "KELTMLO"] <- ifelse("KELTMLO" %in% names(kel_v), kel_v[["KELTMLO"]], NA)
         }
 ###        if("KELTMHI" %in% parameter_list) {
 ###        if(parameter_required("^KELTMHI$", parameter_list) || length(dependent_parameters("^KELTMHI$"))>0){
         if(disp_required[["KELTMHI"]]){
-          row_data <- c(row_data, kel_v[["KELTMHI"]])
+##          row_data <- c(row_data, kel_v[["KELTMHI"]])
+          computation_df[i, "KELTMHI"] <- ifelse("KELTMHI" %in% names(kel_v), kel_v[["KELTMHI"]], NA)
         }
 ###        if("KELNOPT" %in% parameter_list) {
 ###        if(parameter_required("^KELNOPT$", parameter_list) || length(dependent_parameters("^KELNOPT$"))>0){
         if(disp_required[["KELNOPT"]]){
-          row_data <- c(row_data, kel_v[["KELNOPT"]])
+##          row_data <- c(row_data, kel_v[["KELNOPT"]])
+          computation_df[i, "KELNOPT"] <- ifelse("KELNOPT" %in% names(kel_v), kel_v[["KELNOPT"]], NA)
         }
 ### 2019-08-12/TGT/ Modify this to explicitly refer to KELR rather than impute it
 ###        if("KELRSQ" %in% parameter_list || "KELRSQA" %in% parameter_list){
@@ -2380,46 +2412,55 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ######        if(parameter_required("^KELR$", parameter_list)){
 ###        if(parameter_required("^KELR$", parameter_list) || length(dependent_parameters("^KELR$"))>0){
         if(disp_required[["KELR"]]){
-          row_data <- c(row_data, kelr_v[["KELR"]])
+##          row_data <- c(row_data, kelr_v[["KELR"]])
+          computation_df[i, "KELR"] <- ifelse("KELR" %in% names(kelr_v), kelr_v[["KELR"]], NA)
         }
 ###        if("KELRSQ" %in% parameter_list){
 ###        if(parameter_required("^KELRSQ$", parameter_list) || length(dependent_parameters("^KELRSQ$"))>0){
         if(disp_required[["KELRSQ"]]){
-          row_data <- c(row_data, kelr_v[["KELRSQ"]])
+##          row_data <- c(row_data, kelr_v[["KELRSQ"]])
+          computation_df[i, "KELRSQ"] <- ifelse("KELRSQ" %in% names(kelr_v), kelr_v[["KELRSQ"]], NA)
         }
 ###        if("KELRSQA" %in% parameter_list){
 ###        if(parameter_required("^KELRSQA$", parameter_list) || length(dependent_parameters("^KELRSQA$"))>0){
         if(disp_required[["KELRSQA"]]){
-          row_data <- c(row_data, kelr_v[["KELRSQA"]])
+##          row_data <- c(row_data, kelr_v[["KELRSQA"]])
+          computation_df[i, "KELRSQA"] <- ifelse("KELRSQA" %in% names(kelr_v), kelr_v[["KELRSQA"]], NA)
         }
         if(disp_required[["FLGACCEPTKEL"]] && "FLGACCEPTKELCRIT" %in% names(map_data)) {
           if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
-            row_data <- c(row_data, 0)
+##            row_data <- c(row_data, 0)
+            computation_df[i, "FLGACCEPTKEL"] <- 0
           } else {
-            row_data <- c(row_data, 0)
-          }
+##            row_data <- c(row_data, 0)
+            computation_df[i, "FLGACCEPTKEL"] <- 0
+		      }
         }
 ###        if("THALF" %in% parameter_list) {
 ###        if(parameter_required("^THALF$", parameter_list) || length(dependent_parameters("^THALF$"))>0){
         if(disp_required[["THALF"]]){
-          row_data <- c(row_data, kel_v[["THALF"]])
+##          row_data <- c(row_data, kel_v[["THALF"]])
+          computation_df[i, "THALF"] <- ifelse("THALF" %in% names(kel_v), kel_v[["THALF"]], NA)
         }
 ###        if("THALFF" %in% parameter_list) {
 ###        if(parameter_required("^THALFF$", parameter_list) || length(dependent_parameters("^THALFF$"))>0){
         if(disp_required[["THALFF"]]){
 ###
 ###            cat('kel_v[["THALFF"]]: ', kel_v[["THALFF"]], '\n')
-          row_data <- c(row_data, kel_v[["THALFF"]])
+##          row_data <- c(row_data, kel_v[["THALFF"]])
+          computation_df[i, "THALFF"] <- ifelse("THALFF" %in% names(kel_v), kel_v[["THALFF"]], NA)
         }
 ###        if("LASTTIME" %in% parameter_list) {
 ###        if(parameter_required("^LASTTIME$", parameter_list) || length(dependent_parameters("^LASTTIME$"))>0){
         if(disp_required[["LASTTIME"]]){
-          row_data <- c(row_data, last_time)
+##          row_data <- c(row_data, last_time)
+          computation_df[i, "LASTTIME"] <- last_time
         }
 ###        if("LASTTIMEi" %in% parameter_list) {
 ###        if(parameter_required("^LASTTIMEi$", parameter_list) || length(dependent_parameters("^LASTTIMEi$"))>0){
         if(disp_required[["LASTTIMEi"]]){
-          row_data <- c(row_data, unlist(last_timei))
+##          row_data <- c(row_data, unlist(last_timei))
+          computation_df[i, paste0("LASTTIME",1:di_col)] <- unlist(last_timei)
         }
 ### 2019-09-05/TGT/ 
 ###        if("LASTTIMEACCEPTCRIT" %in% names(map_data) && ("LASTTIME" %in% parameter_list)) {
@@ -2431,24 +2472,30 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 tau_val <- as.numeric(unique(tmp_df[, map_data[, paste0("TAU",di_col)]])[1])
                 if(!is.na(tau_val) && is.numeric(tau_val) && !is.na(last_crit_factor) && is.numeric(last_crit_factor)){
                   lt_accept_crit <- tau_val * last_crit_factor
-                  row_data <- c(row_data, ifelse(last_time >= lt_accept_crit, 1, 0))
+##                  row_data <- c(row_data, ifelse(last_time >= lt_accept_crit, 1, 0))
+                  computation_df[i, "FLGACCEPTTAU"] <- ifelse(last_time >= lt_accept_crit, 1, 0)
                 } else {
-                  row_data <- c(row_data, 0)
+##                  row_data <- c(row_data, 0)
+                  computation_df[i, "FLGACCEPTTAU"] <- 0
                 }
               } else {
-                row_data <- c(row_data, 0)
+##                row_data <- c(row_data, 0)
+                computation_df[i, "FLGACCEPTTAU"] <- 0
               }
             } else {
-              row_data <- c(row_data, 0)
+##              row_data <- c(row_data, 0)
+              computation_df[i, "FLGACCEPTTAU"] <- 0
             }
           } else {
-            row_data <- c(row_data, 0)
+##            row_data <- c(row_data, 0)
+            computation_df[i, "FLGACCEPTTAU"] <- 0
           }
         }
 ###        if("AUCALL" %in% parameter_list && 'TMAX' %in% parameter_list) {
 ###        if(parameter_required("^AUCALL$", parameter_list) || length(dependent_parameters("^AUCALL$"))>0){
         if(disp_required[["AUCALL"]]){
-          row_data <- c(row_data, aucall)
+ ##         row_data <- c(row_data, aucall)
+          computation_df[i, "AUCALL"] <- aucall
         }
 ###        if("AUCDN" %in% parameter_list && "AUCALL" %in% parameter_list) {
 ###        if(parameter_required("^AUCDN$", parameter_list) || length(dependent_parameters("^AUCDN$"))>0){
@@ -2456,192 +2503,230 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if(disp_required[["AUCDN"]]){
 ###          row_data <- c(row_data, unlist(aucdn))
         if(disp_required[["AUCALLDN"]]){
-          row_data <- c(row_data, unlist(aucalldn))
+##          row_data <- c(row_data, unlist(aucalldn))
+          computation_df[i, paste0("AUCALLDN",1:di_col)] <- unlist(aucalldn)
         }
 ###        if("AUCLAST" %in% parameter_list && 'TMAX' %in% parameter_list && 'TLAST' %in% parameter_list) {
 ###        if(parameter_required("^AUCLAST$", parameter_list) || length(dependent_parameters("^AUCLAST$"))>0){
         if(disp_required[["AUCLAST"]]){
-          row_data <- c(row_data, auclast)
+##          row_data <- c(row_data, auclast)
+          computation_df[i, "AUCLAST"] <- auclast
         }
 ###        if("AUCLASTC" %in% parameter_list && "AUCLAST" %in% parameter_list && "TLAST" %in% parameter_list && "KEL" %in% parameter_list){
 ###        if(parameter_required("^AUCLASTC$", parameter_list) || length(dependent_parameters("^AUCLASTC$"))>0){
         if(disp_required[["AUCLASTC"]]){
-            row_data <- c(row_data, auclastc)
+##            row_data <- c(row_data, auclastc)
+          computation_df[i, "AUCLASTC"] <- auclastc
         }
 ###        if("AUCLASTDN" %in% parameter_list && "AUCLAST" %in% parameter_list) {
 ###        if(parameter_required("^AUCLASTDN$", parameter_list) || length(dependent_parameters("^AUCLASTDN$"))>0){
         if(disp_required[["AUCLASTDN"]]){
-            row_data <- c(row_data, auclastdn)
+##            row_data <- c(row_data, auclastdn)
+          computation_df[i, "AUCLASTDN"] <- auclastdn
         }
 ###        if("AUCLASTi" %in% parameter_list && 'TMAXi' %in% parameter_list && 'TLASTi' %in% parameter_list) {
 ###        if(parameter_required("^AUCLASTi$", parameter_list) || length(dependent_parameters("^AUCLASTi$"))>0){
         if(disp_required[["AUCLASTi"]]){
-          row_data <- c(row_data, unlist(auclasti))
+##          row_data <- c(row_data, unlist(auclasti))
+          computation_df[i, paste0("AUCLAST",1:di_col)] <- unlist(auclasti)
         }
 ###        if("AUCLASTCi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "TLASTi" %in% parameter_list && "KEL" %in% parameter_list){
 ###        if(parameter_required("^AUCLASTCi$", parameter_list) || length(dependent_parameters("^AUCLASTCi$"))>0){
         if(disp_required[["AUCLASTCi"]]){
-          row_data <- c(row_data, unlist(auclasti_c))
+##          row_data <- c(row_data, unlist(auclasti_c))
+          computation_df[i, paste0("AUCLASTC",1:di_col)] <- unlist(auclasti_c)
         }
 ###        if("AUCLASTDNi" %in% parameter_list && "AUCLASTi" %in% parameter_list) {
 ###        if(parameter_required("^AUCLASTDNi$", parameter_list) || length(dependent_parameters("^AUCLASTDNi$"))>0){
         if(disp_required[["AUCLASTDNi"]]){
-          row_data <- c(row_data, unlist(auclasti_dn))
+##          row_data <- c(row_data, unlist(auclasti_dn))
+          computation_df[i, paste0("AUCLASTDN",1:di_col)] <- unlist(auclasti_dn)
         }
 ###        if("AUMCLASTi" %in% parameter_list && 'TMAXi' %in% parameter_list && 'TLASTi' %in% parameter_list) {
 ###        if(parameter_required("^AUMCLASTi$", parameter_list) || length(dependent_parameters("^AUMCLASTi$"))>0){
         if(disp_required[["AUMCLASTi"]]){
-          row_data <- c(row_data, unlist(aumclasti))
+##          row_data <- c(row_data, unlist(aumclasti))
+          computation_df[i, paste0("AUMCLAST",1:di_col)] <- unlist(aumclasti)
         }
 ###        if("AUCT" %in% parameter_list && "TMAXi" %in% parameter_list) {
 ###        if(parameter_required("^AUCT$", parameter_list) || length(dependent_parameters("^AUCT$"))>0){
         if(disp_required[["AUCT"]] && auc_len > 1){
-          row_data <- c(row_data, unlist(auct))
+##          row_data <- c(row_data, unlist(auct))
+          computation_df[i, paste0("AUC",1:auc_len)] <- unlist(auct)
         }
 ###        if("AUCTDN" %in% parameter_list && "TMAXi" %in% parameter_list) {
 ###        if(parameter_required("^AUCTDN$", parameter_list) || length(dependent_parameters("^AUCTDN$"))>0){
         if(disp_required[["AUCTDN"]] && auc_len > 1){
-          row_data <- c(row_data, unlist(auctdn))
+##          row_data <- c(row_data, unlist(auctdn))
+          computation_df[i, paste0("AUC",1:auc_len,"DN")] <- unlist(auctdn)
         }
 ###        if("AUCT" %in% parameter_list || "AUCTDN" %in% parameter_list) {
 ###        if(parameter_required("^AUCT(DN)*?$", parameter_list) || length(dependent_parameters("^AUCT(DN)*?$"))>0){
         if((disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) && auc_len > 1){
-          row_data <- c(row_data, unlist(auc_int))
+##          row_data <- c(row_data, unlist(auc_int))
+          computation_df[i, paste0("AUCINT",1:auc_len)] <- unlist(auc_int)
         }
 ###        if("AUCT1_T2" %in% parameter_list && "TMAXi" %in% parameter_list && auc_pair_check) {
 ###        if((parameter_required("^AUCT1_T2$", parameter_list) || length(dependent_parameters("^AUCT1_T2$"))>0) && auc_pair_check){
         if(disp_required[["AUCT1_T2"]] && auc_pair_check){
-          row_data <- c(row_data, unlist(auct1_t2))
+##          row_data <- c(row_data, unlist(auct1_t2))
+          computation_df[i, paste0("AUC", map_data[,rep(paste0("AUC.", 1:auc_par_len, ".T1"))], "_", map_data[,rep(paste0("AUC.", 1:auc_par_len, ".T2"))])] <- unlist(auct1_t2)
         }
 ###        if("AUCINFO" %in% parameter_list && "AUCLAST" %in% parameter_list && "CLAST" %in% parameter_list && "KEL" %in% parameter_list) {
 ###        if(parameter_required("^AUCINFO$", parameter_list) || length(dependent_parameters("^AUCINFO$"))>0){
         if(disp_required[["AUCINFO"]]){
-          row_data <- c(row_data, aucinf_o)
+##          row_data <- c(row_data, aucinf_o)
+          computation_df[i, "AUCINFO"] <- aucinf_o
         }
 ###        if("AUCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
 ###        if(parameter_required("^AUCINFOi$", parameter_list) || length(dependent_parameters("^AUCINFOi$"))>0){
         if(disp_required[["AUCINFOi"]]){
-          row_data <- c(row_data, unlist(aucinfoi))
+##          row_data <- c(row_data, unlist(aucinfoi))
+          computation_df[i, paste0("AUCINFO",1:di_col)] <- unlist(aucinfoi)
         }
 ###        if("AUCINFOC" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFO" %in% parameter_list) {
 ###        if(parameter_required("^AUCINFOC$", parameter_list) || length(dependent_parameters("^AUCINFOC$"))>0){
         if(disp_required[["AUCINFOC"]]){
-          row_data <- c(row_data, aucinf_oc)
+##          row_data <- c(row_data, aucinf_oc)
+          computation_df[i, "AUCINFOC"] <- aucinf_oc
         }
 ###        if("AUCINFODN" %in% parameter_list && "AUCINFO" %in% parameter_list) {
 ###        if(parameter_required("^AUCINFODN$", parameter_list) || length(dependent_parameters("^AUCINFODN$"))>0){
         if(disp_required[["AUCINFODN"]]){
-          row_data <- c(row_data, aucinf_odn)
+##          row_data <- c(row_data, aucinf_odn)
+          computation_df[i, "AUCINFODN"] <- aucinf_odn
         }
 ###        if("CEST" %in% parameter_list && "TLAST" %in% parameter_list && "KEL" %in% parameter_list) {
 ###        if(parameter_required("^CEST$", parameter_list) || length(dependent_parameters("^CEST$"))>0){
         if(disp_required[["CEST"]]){
-          row_data <- c(row_data, c_est)
+##          row_data <- c(row_data, c_est)
+          computation_df[i, "CEST"] <- c_est
         }
 ###        if("AUCINFP" %in% parameter_list && "CEST" %in% parameter_list && "AUCLAST" %in% parameter_list && "TLAST" %in% parameter_list && "KEL" %in% parameter_list) {
 ###        if(parameter_required("^AUCINFP$", parameter_list) || length(dependent_parameters("^AUCINFP$"))>0){
         if(disp_required[["AUCINFP"]]){
-          row_data <- c(row_data, aucinf_p)
+##          row_data <- c(row_data, aucinf_p)
+          computation_df[i, "AUCINFP"] <- aucinf_p
         }
 ###        if("AUCINFPi" %in% parameter_list && "CEST" %in% parameter_list && "AUCLASTi" %in% parameter_list && "TLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
 ###        if(parameter_required("^AUCINFPi$", parameter_list) || length(dependent_parameters("^AUCINFPi$"))>0){
         if(disp_required[["AUCINFPi"]]){
-          row_data <- c(row_data, unlist(aucinfpi))
+##           row_data <- c(row_data, unlist(aucinfpi))
+          computation_df[i, paste0("AUCINFP",1:di_col)] <- unlist(aucinfpi) 
         }
 ###        if("AUCINFPC" %in% parameter_list && "KEL" %in% parameter_list && "AUCINFP" %in% parameter_list) {
 ###        if(parameter_required("^AUCINFPC$", parameter_list) || length(dependent_parameters("^AUCINFPC$"))>0){
         if(disp_required[["AUCINFPC"]]){
-          row_data <- c(row_data, aucinf_pc)
+##          row_data <- c(row_data, aucinf_pc)
+          computation_df[i, "AUCINFPC"] <- aucinf_pc
         }
 ###        if("AUCINFPDN" %in% parameter_list && "AUCINFP" %in% parameter_list) {
 ###        if(parameter_required("^AUCINFPDN$", parameter_list) || length(dependent_parameters("^AUCINFPDN$"))>0){
         if(disp_required[["AUCINFPDN"]]){
-          row_data <- c(row_data, aucinf_pdn)
+##          row_data <- c(row_data, aucinf_pdn)
+          computation_df[i, "AUCINFPDN"] <- aucinf_pdn
         }
 ###        if("AUMCINFOi" %in% parameter_list && "AUMCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
 ###        if(parameter_required("^AUMCINFOi$", parameter_list) || length(dependent_parameters("^AUMCINFOi$"))>0){
         if(disp_required[["AUMCINFOi"]]){
-          row_data <- c(row_data, unlist(aumcinfoi))
+##          row_data <- c(row_data, unlist(aumcinfoi))
+          computation_df[i, paste0("AUMCINFO",1:di_col)] <- unlist(aumcinfoi)
         }
 ###        if("AUMCINFPi" %in% parameter_list && "CEST" %in% parameter_list && "AUMCLASTi" %in% parameter_list && "TLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
 ###        if(parameter_required("^AUMCINFPi$", parameter_list) || length(dependent_parameters("^AUMCINFPi$"))>0){
         if(disp_required[["AUMCINFPi"]]){
-          row_data <- c(row_data, unlist(aumcinfpi))
+##          row_data <- c(row_data, unlist(aumcinfpi))
+          computation_df[i, paste0("AUMCINFP",1:di_col)] <- unlist(aumcinfpi)
         }
 ###        if("AUCTAUi" %in% parameter_list) {
 ###        if(parameter_required("^AUCTAUi$", parameter_list) || length(dependent_parameters("^AUCTAUi$"))>0){
         if(disp_required[["AUCTAUi"]]){
-          row_data <- c(row_data, unlist(auctau))
+##          row_data <- c(row_data, unlist(auctau))
+          computation_df[i, paste0("AUCTAU",1:di_col)] <- unlist(auctau)
         }
 ###        if("AUCTAUDNi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###        if(parameter_required("^AUCTAUDNi$", parameter_list) || length(dependent_parameters("^AUCTAUDNi$"))>0){
         if(disp_required[["AUCTAUDNi"]]){
-          row_data <- c(row_data, unlist(auctaudn))
+##          row_data <- c(row_data, unlist(auctaudn))
+          computation_df[i, paste0("AUCTAUDN",1:di_col)] <- unlist(auctaudn)
         }
 ###        if("AUMCTAUi" %in% parameter_list && "TMAXi" %in% parameter_list) {
 ###        if(parameter_required("^AUMCTAUi$", parameter_list) || length(dependent_parameters("^AUMCTAUi$"))>0){
         if(disp_required[["AUMCTAUi"]]){
-          row_data <- c(row_data, unlist(aumctaui))
+##          row_data <- c(row_data, unlist(aumctaui))
+          computation_df[i, paste0("AUMCTAU",1:di_col)] <- unlist(aumctaui)
         }
 ###        if("MRTLAST" %in% parameter_list && "AUCLAST" %in% parameter_list && "AUMCLAST" %in% parameter_list) {
 ###        if(parameter_required("^MRTLAST$", parameter_list) || length(dependent_parameters("^MRTLAST$"))>0){
         if(disp_required[["MRTLAST"]]){
-          row_data <- c(row_data, mrtlast)
+##          row_data <- c(row_data, mrtlast)
+          computation_df[i, "MRTLAST"] <- mrtlast
         }
 ###        if("MRTLASTi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "AUMCLASTi" %in% parameter_list) {
 ###        if(parameter_required("^MRTLASTi$", parameter_list) || length(dependent_parameters("^MRTLASTi$"))>0){
         if(disp_required[["MRTLASTi"]]){
-          row_data <- c(row_data, unlist(mrtlasti))
+##          row_data <- c(row_data, unlist(mrtlasti))
+          computation_df[i, paste0("MRTLAST",1:di_col)] <- unlist(mrtlasti)
         }
 ###        if("MRTEVIFOi" %in% parameter_list && "AUCINFOi" %in% parameter_list && "AUCTAUi" %in% parameter_list && "AUMCTAUi" %in% parameter_list){
 ###        if(parameter_required("^MRTEVIFO(i)*?$", parameter_list) || length(dependent_parameters("^MRTEVIFO(i)*?$"))>0) {
         if(disp_required[["MRTEVIFOi"]]) {
-          row_data <- c(row_data, unlist(mrtevifoi))
+##          row_data <- c(row_data, unlist(mrtevifoi))
+          computation_df[i, paste0("MRTEVIFO",1:di_col)] <- unlist(mrtevifoi)
         }
 ###        if("MRTEVIFPi" %in% parameter_list && "AUCINFPi" %in% parameter_list && "AUCTAUi" %in% parameter_list && "AUMCTAUi" %in% parameter_list){
 ###        if(parameter_required("^MRTEVIFP(i)*?$", parameter_list) || length(dependent_parameters("^MRTEVIFP(i)*?$"))>0) {
         if(disp_required[["MRTEVIFPi"]]) {
-          row_data <- c(row_data, unlist(mrtevifpi))
+##          row_data <- c(row_data, unlist(mrtevifpi))
+          computation_df[i, paste0("MRTEVIFP",1:di_col)] <- unlist(mrtevifpi)
         }
 ###        if("AUCXPCTO" %in% parameter_list && "AUCINFO" %in% parameter_list && "AUCLAST" %in% parameter_list){
 ###        if(parameter_required("^AUCXPCTO$", parameter_list) || length(dependent_parameters("^AUCXPCTO$"))>0){
         if(disp_required[["AUCXPCTO"]]){
-          row_data <- c(row_data, aucxpcto)
+##          row_data <- c(row_data, aucxpcto)
+          computation_df[i, "AUCXPCTO"] <- aucxpcto
         }
 ###        if("AUCXPCTOi" %in% parameter_list && "AUCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list){
 ###        if(parameter_required("^AUCXPCTOi$", parameter_list) || length(dependent_parameters("^AUCXPCTOi$"))>0){
         if(disp_required[["AUCXPCTOi"]]){
-          row_data <- c(row_data, unlist(aucxpctoi))
+##          row_data <- c(row_data, unlist(aucxpctoi))
+          computation_df[i, paste0("AUCXPCTO",1:di_col)] <- unlist(aucxpctoi)
         }
 ###        if("AUCXPCTP" %in% parameter_list && "AUCINFP" %in% parameter_list && "AUCLAST" %in% parameter_list){
 ###        if(parameter_required("^AUCXPCTP$", parameter_list) || length(dependent_parameters("^AUCXPCTP$"))>0){
         if(disp_required[["AUCXPCTP"]]){
-          row_data <- c(row_data, aucxpctp)
+##          row_data <- c(row_data, aucxpctp)
+          computation_df[i, "AUCXPCTP"] <- aucxpctp
         }
 ###        if("AUCXPCTPi" %in% parameter_list && "AUCINFPi" %in% parameter_list && "AUCLASTi" %in% parameter_list){
 ###        if(parameter_required("^AUCXPCTPi$", parameter_list) || length(dependent_parameters("^AUCXPCTPi$"))>0){
         if(disp_required[["AUCXPCTPi"]]){
-          row_data <- c(row_data, unlist(aucxpctpi))
+##          row_data <- c(row_data, unlist(aucxpctpi))
+          computation_df[i, paste0("AUCXPCTP",1:di_col)] <- unlist(aucxpctpi)
         }
 ###        if("AUMCXPTO" %in% parameter_list && "AUMCINFO" %in% parameter_list && "AUMCLAST" %in% parameter_list){
 ###        if(parameter_required("^AUMCXPTO$", parameter_list) || length(dependent_parameters("^AUMCXPTO$"))>0){
         if(disp_required[["AUMCXPTO"]]){
-          row_data <- c(row_data, aumcxpto)
+##          row_data <- c(row_data, aumcxpto)
+          computation_df[i, "AUMCXPTO"] <- aumcxpto
         }
 ###        if("AUMCXPTOi" %in% parameter_list && "AUMCINFOi" %in% parameter_list && "AUMCLAST" %in% parameter_list){
 ###        if(parameter_required("^AUMCXPTOi$", parameter_list) || length(dependent_parameters("^AUMCXPTOi$"))>0){
         if(disp_required[["AUMCXPTOi"]]){
-          row_data <- c(row_data, unlist(aumcxptoi))
+##          row_data <- c(row_data, unlist(aumcxptoi))
+          computation_df[i, paste0("AUMCXPTO",1:di_col)] <- unlist(aumcxptoi)
         }
 ###        if("AUMCXPTP" %in% parameter_list && "AUMCINFP" %in% parameter_list && "AUMCLAST" %in% parameter_list){
 ###        if(parameter_required("^AUMCXPTP$", parameter_list) || length(dependent_parameters("^AUMCXPTP$"))>0){
         if(disp_required[["AUMCXPTP"]]){
-          row_data <- c(row_data, aumcxptp)
+##          row_data <- c(row_data, aumcxptp)
+          computation_df[i, "AUMCXPTP"] <- aumcxptp
         }
 ###        if("AUMCXPTPi" %in% parameter_list && "AUMCINFPi" %in% parameter_list && "AUMCLAST" %in% parameter_list){
 ###        if(parameter_required("^AUMCXPTPi$", parameter_list) || length(dependent_parameters("^AUMCXPTPi$"))>0){
         if(disp_required[["AUMCXPTPi"]]){
-          row_data <- c(row_data, unlist(aumcxptpi))
+##          row_data <- c(row_data, unlist(aumcxptpi))
+          computation_df[i, paste0("AUMCXPTP",1:di_col)] <- unlist(aumcxptpi)
         }
         
 ###        if("CLFO" %in% parameter_list && "AUCINFO" %in% parameter_list) {
@@ -2653,58 +2738,70 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("CAVi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###        if(parameter_required("^CAVi$", parameter_list) || length(dependent_parameters("^CAVi$"))>0){
         if(disp_required[["CAVi"]]){
-          row_data <- c(row_data, unlist(ca_v))
+##          row_data <- c(row_data, unlist(ca_v))
+          computation_df[i, paste0("CAV",1:di_col)] <- unlist(ca_v)
         }
 ###        if("CLFTAUi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###        if(parameter_required("^CLFTAUi$", parameter_list) || length(dependent_parameters("^CLFTAUi$"))>0){
         if(disp_required[["CLFTAUi"]]){
-          row_data <- c(row_data, unlist(clf_tau))
+##          row_data <- c(row_data, unlist(clf_tau))
+          computation_df[i, paste0("CLFTAU",1:di_col)] <- unlist(clf_tau)
         }
 ###        if("CLFTAUWi" %in% parameter_list && "CLFTAUi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###        if(parameter_required("^CLFTAUWi$", parameter_list) || length(dependent_parameters("^CLFTAUWi$"))>0){
         if(disp_required[["CLFTAUWi"]]){
-          row_data <- c(row_data, unlist(clf_tauw))
+##          row_data <- c(row_data, unlist(clf_tauw))
+          computation_df[i, paste0("CLFTAUW",1:di_col)] <- unlist(clf_tauw)
         }
 ###        if("PTFi" %in% parameter_list && "CMAXi" %in% parameter_list && "CMINi" %in% parameter_list && "CAVi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###        if(parameter_required("^PTFi$", parameter_list) || length(dependent_parameters("^PTFi$"))>0){
         if(disp_required[["PTFi"]]){
-          row_data <- c(row_data, unlist(pt_f))
+##          row_data <- c(row_data, unlist(pt_f))
+          computation_df[i, paste0("PTF",1:di_col)] <- unlist(pt_f)
         }
 ###        if("PTRi" %in% parameter_list && "CMAXi" %in% parameter_list && "CMINi" %in% parameter_list) {
 ###        if(parameter_required("^PTRi$", parameter_list) || length(dependent_parameters("^PTRi$"))>0){
         if(disp_required[["PTRi"]]){
-          row_data <- c(row_data, unlist(pt_r))
+##          row_data <- c(row_data, unlist(pt_r))
+          computation_df[i, paste0("PTR",1:di_col)] <- unlist(pt_r)
         }
 ###        if("VZFTAUi" %in% parameter_list && "KEL" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###        if(parameter_required("^VZFTAUi$", parameter_list) || length(dependent_parameters("^VZFTAUi$"))>0){
         if(disp_required[["VZFTAUi"]]){
-          row_data <- c(row_data, unlist(vzf_tau))
+##          row_data <- c(row_data, unlist(vzf_tau))
+          computation_df[i, paste0("VZFTAU",1:di_col)] <- unlist(vzf_tau)
         }
 ###        if("VZFTAUWi" %in% parameter_list && "VZFTAUi" %in% parameter_list && "KEL" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###        if(parameter_required("^VZFTAUWi$", parameter_list) || length(dependent_parameters("^VZFTAUWi$"))>0){
         if(disp_required[["VZFTAUWi"]]){
-          row_data <- c(row_data, unlist(vzf_tauw))
+##          row_data <- c(row_data, unlist(vzf_tauw))
+          computation_df[i, paste0("VZFTAUW",1:di_col)] <- unlist(vzf_tauw)
         }
-        row_data <- c(row_data,
-                      c(tmp_df[,map_data$CONC], rep(NA, ((auc_len+1) - length(tmp_df[,map_data$CONC])))),
-                      c(tmp_df[,map_data$TIME], rep(NA, ((auc_len+1) - length(tmp_df[,map_data$TIME]))))
-                     )
+##        row_data <- c(row_data,
+##                      c(tmp_df[,map_data$CONC], rep(NA, ((auc_len+1) - length(tmp_df[,map_data$CONC])))),
+##                      c(tmp_df[,map_data$TIME], rep(NA, ((auc_len+1) - length(tmp_df[,map_data$TIME]))))
+##                     )
+        computation_df[i, paste0("CONC",1:(auc_len+1))] <- c(tmp_df[,map_data$CONC], rep(NA, ((auc_len+1) - length(tmp_df[,map_data$CONC]))))
+        computation_df[i, paste0("CONCTIME",1:(auc_len+1))] <- c(tmp_df[,map_data$TIME], rep(NA, ((auc_len+1) - length(tmp_df[,map_data$TIME]))))
 ###        if("DIi" %in% parameter_list) {
 ###        if(parameter_required("^DIi$", parameter_list) || length(dependent_parameters("^DIi$"))>0){
         if(disp_required[["DIi"]]){
-          row_data <- c(row_data, unlist(di))
+##          row_data <- c(row_data, unlist(di))
+          computation_df[i, paste0("DI",1:di_col)] <- unlist(di)
         }
 ###        if("TAUi" %in% parameter_list) {
 ###        if(parameter_required("^TAU(i)*?$", parameter_list) || length(dependent_parameters("^TAU(i)*?$"))>0){
         if(disp_required[["TAUi"]]){
 ### print(parameter_required("^TAU(i)*?$", parameter_list, simplify=FALSE))
-          row_data <- c(row_data, unlist(tau))
-      }
+##          row_data <- c(row_data, unlist(tau))
+          computation_df[i, paste0("TAU",1:di_col)] <- unlist(tau)
+        }
 ###        if("TOLD" %in% parameter_list) {
 ###        if(parameter_required("^TOLD(i)*?$", parameter_list) || length(dependent_parameters("^TOLD(i)*?$"))>0){
         if(disp_required[["TOLDi"]]){
 ### print(parameter_required("^TOLD(i)*?$", parameter_list, simplify=FALSE))
-          row_data <- c(row_data, unlist(told))
+##          row_data <- c(row_data, unlist(told))
+          computation_df[i, paste0("TOLD",1:di_col)] <- unlist(told)
         }
 ### 2019-10-19/TGT/ Reposition DOSEi to just before CMAX/after SDEID
 ###        if("DOSEi" %in% parameter_list) {
@@ -2721,20 +2818,21 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        print(tmp_di_df[,c("SDEID", "SUBJID", "PKPTMS", "PKATPD", "PKCNCN")])
 ###        
         nc <- length(col_names)
-        nr <- length(row_data)
-        r_data <- as.character(row_data)
+        nr <- length(computation_df[i,])
+        r_data <- as.character(computation_df[i,])
         c_name <- as.character(col_names)
         if(nc>nr) { r_data <- c(r_data, rep("added", nc-nr)) }
         if(nr>nc) { c_name <- c(c_name, rep("added", nr-nc)) }
         rdf <- data.frame(col_names=c_name, row_data=r_data)
 ###        print(rdf)
         
-        computation_df[i,] <- row_data
+##        computation_df[i,] <- row_data
       } else {
         if(isTRUE(optimize_kel)){
           kel_flag_optimized <- c(kel_flag_optimized, kel_flag)
         }
-        computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], rep(NA, length(names(computation_df))-1))
+##        computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], rep(NA, length(names(computation_df))-1))
+        computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]
       }
     }, error = function(e) {
       stop(paste0(e, "For SDEID ", unique(data_data[,map_data$SDEID])[i]))
@@ -2758,6 +2856,11 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       } else {
         warning(paste0("Flag 'FLGACCEPTKELCRIT' values provided via 'map' does not have a parameter name that is generated as an output '", as.character(flag_df$VAR)[as.character(flag_df$VAR) %in% names(computation_df)], "'"))
       }
+    }
+  }
+  if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
+    if(nrow(computation_df[computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
+      computation_df[computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
     }
   }
   if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){

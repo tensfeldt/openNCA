@@ -591,7 +591,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###                 the generation of "col_names" and use planned "length(col_names)"
 ###                 instead of "col"
 ###  computation_df <- data.frame(matrix(ncol = col, nrow = 0))
-  computation_df <- data.frame(matrix(ncol = length(col_names), nrow = 0))
+  computation_df <- data.frame(matrix(ncol = length(col_names), nrow = length(unique(data_data[,map_data$SDEID]))))
   names(computation_df) <- col_names
 
   #names(computation_df) <- c("SDEID", rep(paste0("AMT", unique(data_data[,map_data[[map_data$ENDTIME]]])[1:aet_col])),
@@ -1302,90 +1302,108 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         #                        kel_v[["KELTMHI"]], kel_v[["KELNOPT"]], kelr_v[["KELR"]], kelr_v[["KELRSQ"]],
         #                        kelr_v[["KELRSQA"]], kel_v[["THALF"]])
 
-        row_data <- c(unique(data_data[,map_data$SDEID])[i])
-          
+##        row_data <- c(unique(data_data[,map_data$SDEID])[i])
+        computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]        
         if(disp_required[["DOSE"]] || disp_required[["DOSEi"]]) {
-          row_data <- c(row_data, unique(tmp_df[, dosevar])[1])
+##          row_data <- c(row_data, unique(tmp_df[, dosevar])[1])
+          computation_df[i, dosevar] <- unique(tmp_df[, dosevar])[1]
         }
         
 ###        if("AET" %in% parameter_list) {
 ###        if(parameter_required("^AET$", parameter_list) || parameter_required(dependent_parameters("^AET$"), parameter_list)) {
         if(disp_required[["AET"]]) {
-          row_data <- c(row_data, amt, ae_t)
+##          row_data <- c(row_data, amt, ae_t)
+          computation_df[i, paste0("AMT.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- amt
+          computation_df[i, paste0("AE.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- ae_t
         }
 ###        if("AETPCT" %in% parameter_list && "AET" %in% parameter_list) {
 ###        if(parameter_required("^AETPCT$", parameter_list) || parameter_required(dependent_parameters("^AETPCT$"), parameter_list)) {
         if(disp_required[["AETPCT"]]) {
-          row_data <- c(row_data, aet_pct)
+##          row_data <- c(row_data, aet_pct)
+          computation_df[i, paste0("AEPCT.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- aet_pct
         }
 ###        if("AE" %in% parameter_list) {
 ###        if(parameter_required("^AE$", parameter_list) || parameter_required(dependent_parameters("^AE$"), parameter_list)) {
         if(disp_required[["AE"]]) {
-            row_data <- c(row_data, a_e)
+##            row_data <- c(row_data, a_e)
+          computation_df[i, "AE"] <- a_e
         }
 ###        if("AEPCT" %in% parameter_list && "AE" %in% parameter_list) {
         if(disp_required[["AEPCT"]]) {
-          row_data <- c(row_data, ae_pct)
+##          row_data <- c(row_data, ae_pct)
+          computation_df[i, "AEPCT"] <- ae_pct
         }
 ###        if("MAXRATE" %in% parameter_list) {
 ###        if(parameter_required("^MAXRATE$", parameter_list) || parameter_required(dependent_parameters("^MAXRATE$"), parameter_list)) {
         if(disp_required[["MAXRATE"]]) {
-            row_data <- c(row_data, max_rate)
+##            row_data <- c(row_data, max_rate)
+          computation_df[i, "MAXRATE"] <- max_rate
         }
 ###        if("TMAXRATE" %in% parameter_list) {
 ###        if(parameter_required("^TMAXRATE$", parameter_list) || parameter_required(dependent_parameters("^TMAXRATE$"), parameter_list)) {
         if(disp_required[["TMAXRATE"]]) {
-          row_data <- c(row_data, tmax_rate)
+##          row_data <- c(row_data, tmax_rate)
+          computation_df[i, "TMAXRATE"] <- tmax_rate
         }
 ###        if("RATELAST" %in% parameter_list) {
 ###        if(parameter_required("^RATELAST$", parameter_list) || parameter_required(dependent_parameters("^RATELAST$"), parameter_list)) {
         if(disp_required[["RATELAST"]]) {
-          row_data <- c(row_data, rate_last)
+##          row_data <- c(row_data, rate_last)
+          computation_df[i, "RATELAST"] <- rate_last
         }
 ###        if("MIDPTLAST" %in% parameter_list) {
 ###        if(parameter_required("^MIDPTLAST$", parameter_list) || parameter_required(dependent_parameters("^MIDPTLAST$"), parameter_list)) {
         if(disp_required[["MIDPTLAST"]]) {
-          row_data <- c(row_data, midpt_last)
+##          row_data <- c(row_data, midpt_last)
+          computation_df[i, "MIDPTLAST"] <- midpt_last
         }
 ###        if("TLAG" %in% parameter_list) {
 ###        if(parameter_required("^TLAG$", parameter_list) || parameter_required(dependent_parameters("^TLAG$"), parameter_list)) {
         if(disp_required[["TLAG"]]) {
-          row_data <- c(row_data, t_lag)
+##          row_data <- c(row_data, t_lag)
+          computation_df[i, "TLAG"] <- t_lag
         }
 ###        if("KEL" %in% parameter_list) {
 ###        if(parameter_required("^KEL$", parameter_list) || parameter_required(dependent_parameters("^KEL$"), parameter_list)) {
         if(disp_required[["KEL"]]) {
-          row_data <- c(row_data, kel_v[["KEL"]])
+##          row_data <- c(row_data, kel_v[["KEL"]])
+          computation_df[i, "KEL"] <- ifelse("KEL" %in% names(kel_v), kel_v[["KEL"]], NA)
         }
 ###        if("KELTMLO" %in% parameter_list) {
 ###        if(parameter_required("^KELTMLO$", parameter_list) || parameter_required(dependent_parameters("^KELTMLO$"), parameter_list)) {
         if(disp_required[["KELTMLO"]]) {
-          row_data <- c(row_data, kel_v[["KELTMLO"]])
+##          row_data <- c(row_data, kel_v[["KELTMLO"]])
+          computation_df[i, "KELTMLO"] <- ifelse("KELTMLO" %in% names(kel_v), kel_v[["KELTMLO"]], NA)
         }
 ###        if("KELTMHI" %in% parameter_list) {
 ###        if(parameter_required("^KELTMHI$", parameter_list) || parameter_required(dependent_parameters("^KELTMHI$"), parameter_list)) {
         if(disp_required[["KELTMHI"]]) {
-          row_data <- c(row_data, kel_v[["KELTMHI"]])
+##          row_data <- c(row_data, kel_v[["KELTMHI"]])
+          computation_df[i, "KELTMHI"] <- ifelse("KELTMHI" %in% names(kel_v), kel_v[["KELTMHI"]], NA)
         }
 ###        if("KELNOPT" %in% parameter_list) {
 ###        if(parameter_required("^KELNOPT$", parameter_list) || parameter_required(dependent_parameters("^KELNOPT$"), parameter_list)) {
         if(disp_required[["KELNOPT"]]) {
-          row_data <- c(row_data, kel_v[["KELNOPT"]])
+##          row_data <- c(row_data, kel_v[["KELNOPT"]])
+          computation_df[i, "KELNOPT"] <- ifelse("KELNOPT" %in% names(kel_v), kel_v[["KELNOPT"]], NA)
         }
 ###        if("KELRSQ" %in% parameter_list || "KELRSQA" %in% parameter_list){
 ###        if(parameter_required("^KELR$", parameter_list) || parameter_required(dependent_parameters("^KELR$"), parameter_list)) {
         if(disp_required[["KELR"]]) {
-          row_data <- c(row_data, kelr_v[["KELR"]])
+##          row_data <- c(row_data, kelr_v[["KELR"]])
+          computation_df[i, "KELR"] <- ifelse("KELR" %in% names(kelr_v), kelr_v[["KELR"]], NA)
         }
 ###        if("KELRSQ" %in% parameter_list){
 ###        if(parameter_required("^KELRSQ$", parameter_list) || parameter_required(dependent_parameters("^KELRSQ$"), parameter_list)) {
         if(disp_required[["KELRSQ"]]) {
-          row_data <- c(row_data, kelr_v[["KELRSQ"]])
+##          row_data <- c(row_data, kelr_v[["KELRSQ"]])
+          computation_df[i, "KELRSQ"] <- ifelse("KELRSQ" %in% names(kelr_v), kelr_v[["KELRSQ"]], NA)
         }
 ###        if("KELRSQA" %in% parameter_list){
 ###        if(parameter_required("^KELRSQA$", parameter_list) || parameter_required(dependent_parameters("^KELRSQA$"), parameter_list)) {
         if(disp_required[["KELRSQA"]]) {
-          row_data <- c(row_data, kelr_v[["KELRSQA"]])
+##          row_data <- c(row_data, kelr_v[["KELRSQA"]])
+          computation_df[i, "KELRSQA"] <- ifelse("KELRSQA" %in% names(kelr_v), kelr_v[["KELRSQA"]], NA)
         }
 ### 2019-08-11/TGT/ FLGACCEPTKELCRIT is not being processed correctly. Here note that this code reflects
 ###                 the "old" standard that denoted the criteria in the MCT via "commas". Currently, it's expected
@@ -1393,20 +1411,24 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
         if(disp_required[["FLGACCEPTKEL"]] && "FLGACCEPTKELCRIT" %in% names(map_data)) {
           if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
-            row_data <- c(row_data, 0)
+##            row_data <- c(row_data, 0)
+            computation_df[i, "FLGACCEPTKEL"] <- 0
           } else {
-            row_data <- c(row_data, 0)
+##            row_data <- c(row_data, 0)
+            computation_df[i, "FLGACCEPTKEL"] <- 0
           }
         }
 ###        if("THALF" %in% parameter_list) {
 ###        if(parameter_required("^THALF$", parameter_list) || parameter_required(dependent_parameters("^THALF$"), parameter_list)) {
         if(disp_required[["THALF"]]) {
-          row_data <- c(row_data, kel_v[["THALF"]])
+##          row_data <- c(row_data, kel_v[["THALF"]])
+          computation_df[i, "THALF"] <- ifelse("THALF" %in% names(kel_v), kel_v[["THALF"]], NA)
         }
 ###        if("THALFF" %in% parameter_list) {
 ###        if(parameter_required("^THALFF$", parameter_list) || parameter_required(dependent_parameters("^THALFF$"), parameter_list)) {
         if(disp_required[["THALFF"]]) {
-          row_data <- c(row_data, kel_v[["THALFF"]])
+##          row_data <- c(row_data, kel_v[["THALFF"]])
+          computation_df[i, "THALFF"] <- ifelse("THALFF" %in% names(kel_v), kel_v[["THALFF"]], NA)
         }
 ###        if("AUCDN" %in% parameter_list) {
 ###        if(parameter_required("^AUCDN$", parameter_list) || parameter_required(dependent_parameters("^AUCDN$"), parameter_list)) {
@@ -1417,46 +1439,56 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("AURCALL" %in% parameter_list) {
 ###        if(parameter_required("^AURCALL$", parameter_list) || parameter_required(dependent_parameters("^AURCALL$"), parameter_list)) {
         if(disp_required[["AURCALL"]]) {
-          row_data <- c(row_data, aurcall)
+##          row_data <- c(row_data, aurcall)
+          computation_df[i, "AURCALL"] <- aurcall
         }
 ###        if("AURCLAST" %in% parameter_list) {
 ###        if(parameter_required("^AURCLAST$", parameter_list) || parameter_required(dependent_parameters("^AURCLAST$"), parameter_list)) {
         if(disp_required[["AURCLAST"]]) {
-          row_data <- c(row_data, aurclast)
+##          row_data <- c(row_data, aurclast)
+          computation_df[i, "AURCLAST"] <- aurclast
         }
         if(disp_required[["AURCT"]] && aet_len > 1) {
-          row_data <- c(row_data, aurct, aurc_int)
+##          row_data <- c(row_data, aurct, aurc_int)
+          computation_df[i, paste0("AURC",1:aet_len)] <- aurct
+          computation_df[i, paste0("AURCINT",1:aet_len)] <- aurc_int
         }
 ###        if("AURCT1_T2" %in% parameter_list) {
 ###        if(parameter_required("^AURCT1_T2$", parameter_list) || parameter_required(dependent_parameters("^AURCT1_T2$"), parameter_list)) {
         if(disp_required[["AURCT1_T2"]] && auc_pair_check) {
-          row_data <- c(row_data, aurct1_t2)
+##          row_data <- c(row_data, aurct1_t2)
+          computation_df[i, paste0("AURC", map_data[,rep(paste0("AUC.", 1:aurc_par_len, ".T1"))], "_", map_data[,rep(paste0("AUC.", 1:aurc_par_len, ".T2"))])] <- aurct1_t2
         }
 ###        if("AURCINFO" %in% parameter_list) {
 ###        if(parameter_required("^AURCINFO$", parameter_list) || parameter_required(dependent_parameters("^AURCINFO$"), parameter_list)) {
         if(disp_required[["AURCINFO"]]) {
-          row_data <- c(row_data, aurcinf_o)
+##          row_data <- c(row_data, aurcinf_o)
+          computation_df[i, "AURCINFO"] <- aurcinf_o
         }
 ###        if("AURCINFP" %in% parameter_list) {
 ###        if(parameter_required("^AURCINFP$", parameter_list) || parameter_required(dependent_parameters("^AURCINFP$"), parameter_list)) {
         if(disp_required[["AURCINFP"]]) {
-          row_data <- c(row_data, aurcinf_p)
+##          row_data <- c(row_data, aurcinf_p)
+          computation_df[i, "AURCINFP"] <- aurcinf_p
         }
 ###        if("AURCXPCTO" %in% parameter_list){
 ###        if(parameter_required("^AURCXPCTO$", parameter_list) || parameter_required(dependent_parameters("^AURCXPCTO$"), parameter_list)) {
         if(disp_required[["AURCXPCTO"]]) {
-          row_data <- c(row_data, aurcxpcto)
+##          row_data <- c(row_data, aurcxpcto)
+          computation_df[i, "AURCXPCTO"] <- aurcxpcto
         }
 ###        if("AURCXPCTP" %in% parameter_list){
 ###        if(parameter_required("^AURCXPCTP$", parameter_list) || parameter_required(dependent_parameters("^AURCXPCTP$"), parameter_list)) {
         if(disp_required[["AURCXPCTP"]]) {
-          row_data <- c(row_data, aurcxpctp)
+##          row_data <- c(row_data, aurcxpctp)
+          computation_df[i, "AURCXPCTP"] <- aurcxpctp
         }
 ### 2019-08-29/TGT/ Add VOLSUM
 ###        if(parameter_required("VOLSUM", parameter_list)){
 ###        if(parameter_required("^VOLSUM$", parameter_list) || parameter_required(dependent_parameters("^VOLSUM$"), parameter_list)) {
         if(disp_required[["VOLSUM"]]) {
-          row_data <- c(row_data, volsum)
+##          row_data <- c(row_data, volsum)
+          computation_df[i, "VOLSUM"] <- volsum
         }
 ### 2018-08-11/TGT/ Addition of RATEs and MIDPTs needs to be distinguished by Actual/Nominal Time and
 ###                 provided condition addition to the list of results in row_data. The current code
@@ -1469,19 +1501,23 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if(parameter_required("^(RATE)([0-9]*?|A|N)$", display_list, simplify=TRUE)) {
         if(parameter_required("^(RATE)([0-9]*?|A|N)$", parameter_list) || parameter_required(dependent_parameters("^(RATE)([0-9]*?|A|N)$"), parameter_list)) {
 ###        if(disp_required[["RATE"]]) {
-          row_data <- c(row_data, c(rt, rep(NA, ((aet_len+1) - length(rt)))))
+##          row_data <- c(row_data, c(rt, rep(NA, ((aet_len+1) - length(rt)))))
+          computation_df[i, paste0("RATE",1:(aet_len+1))] <- c(rt, rep(NA, ((aet_len+1) - length(rt))))
         }
 ###        if(parameter_required("^(MIDPT)([0-9]*?|A|N)$", display_list, simplify=TRUE)) {
         if(parameter_required("^(MIDPT)([0-9]*?|A|N)$", parameter_list) || parameter_required(dependent_parameters("^(MIDPT)([0-9]*?|A|N)$"), parameter_list)) {
 ###        if(disp_required[["MIDPT"]]) {
-          row_data <- c(row_data, c(mid_pt, rep(NA, ((aet_len+1) - length(mid_pt)))))
+##          row_data <- c(row_data, c(mid_pt, rep(NA, ((aet_len+1) - length(mid_pt)))))
+          computation_df[i, paste0("MIDPT",1:(aet_len+1))] <- c(mid_pt, rep(NA, ((aet_len+1) - length(mid_pt))))
         }
           
-        row_data <- c(row_data,
-                      c(tmp_df[,map_data$CONC], rep(NA, ((aet_len+1) - length(tmp_df[,map_data$CONC])))),
-                      c(tmp_df[,map_data$TIME], rep(NA, ((aet_len+1) - length(tmp_df[,map_data$TIME]))))
-                      )
-
+##        row_data <- c(row_data,
+##                      c(tmp_df[,map_data$CONC], rep(NA, ((aet_len+1) - length(tmp_df[,map_data$CONC])))),
+##                      c(tmp_df[,map_data$TIME], rep(NA, ((aet_len+1) - length(tmp_df[,map_data$TIME]))))
+##                      )
+        computation_df[i, paste0("CONC",1:(aet_len+1))] <- c(tmp_df[,map_data$CONC], rep(NA, ((aet_len+1) - length(tmp_df[,map_data$CONC]))))
+        computation_df[i, paste0("CONCTIME",1:(aet_len+1))] <- c(tmp_df[,map_data$TIME], rep(NA, ((aet_len+1) - length(tmp_df[,map_data$TIME]))))
+        
 ### 2019-08-29/TGT/ must move "DOSEi" to "DOSE1". Will make these interoperable subsequently  
 ###        if("DOSEi" %in% parameter_list && opt_list[1] %in% names(map_data)){
 ###        if("DOSE1" %in% parameter_list && opt_list[1] %in% names(map_data)){
@@ -1513,13 +1549,14 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        df <- data.frame(SDEID=rep(i, length(col_names)), col_names=col_names, row_data=c(row_data, "temp"))
 ###        df <- data.frame(SDEID=rep(i, length(col_names)), col_names=col_names, row_data=c(row_data))
 
-        computation_df[i,] <- row_data
+##        computation_df[i,] <- row_data
 ###        cat('i: ', i, ' computation_df[i,]: \n'); print(computation_df[i,])  
       } else {
         if(isTRUE(optimize_kel)){
           kel_flag_optimized <- c(kel_flag_optimized, kel_flag)
         }
-        computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], rep(NA, length(names(computation_df))-1))
+##        computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], rep(NA, length(names(computation_df))-1))
+        computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]
       }
     }, error = function(e) {
       stop(paste0(e, "For SDEID ", unique(data_data[,map_data$SDEID])[i]))
@@ -1541,6 +1578,11 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       } else {
         warning(paste0("Flag 'FLGACCEPTKELCRIT' values provided via 'map' does not have a parameter name that is generated as an output '", as.character(flag_df$VAR)[as.character(flag_df$VAR) %in% names(computation_df)], "'"))
       }
+    }
+  }
+  if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
+    if(nrow(computation_df[computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
+      computation_df[computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
     }
   }
   

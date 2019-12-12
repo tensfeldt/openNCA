@@ -1876,6 +1876,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           kel_flag_optimized <- c(kel_flag_optimized, kel_flag)
         }
 ##        computation_df[i,] <- c(unique(data_data[,map_data$SDEID])[i], rep(NA, length(names(computation_df))-1))
+        computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]
       }
     }, error = function(e) {
       stop(paste0(e, "For SDEID ", unique(data_data[,map_data$SDEID])[i]))
@@ -1898,6 +1899,11 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       } else {
         warning(paste0("Flag 'FLGACCEPTKELCRIT' values provided via 'map' does not have a parameter name that is generated as an output '", as.character(flag_df$VAR)[as.character(flag_df$VAR) %in% names(computation_df)], "'"))
       }
+    }
+  }
+  if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
+    if(nrow(computation_df[computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
+      computation_df[computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
     }
   }
   if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
@@ -1932,7 +1938,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   computation_df <- unit_conversion(data = data_data, map = map_data, result = computation_df, unit_class = "ALL")
 
 ### 2019-09-16/TGT/ Need to make merge of return_list optional
-###                 but always create results_list
+###                 but always create results_list 
   if(is.list(return_list) && !is.null(return_list) && length(return_list) > 0){
     if(!map_data$SDEID %in% return_list && length(return_list) > 0){
       return_list[[length(return_list)+1]] <- map_data$SDEID
