@@ -893,6 +893,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##        warning(paste0("Detected duplicate TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "', cannot generate any parameters!"))
 ##      }
       cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
+      norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_df), unique(tmp_df[,map_data$NORMBS])[1], NA), NA)
       tmp_dose <- unique(tmp_df[, dosevar])[1]
       
 ##      2019-11-08/RD Added for Interpolation to account for INCLUDEINTERPOLATION Flag
@@ -1069,7 +1070,6 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 
 ### 2019-10-11/TGT/ Normalized Body Size/Weight Value        
-        norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_df), unique(tmp_df[,map_data$NORMBS])[1], NA), NA)
         if(comp_required[["CMIN"]]) {
           c_min <- cmin(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
         }
@@ -1139,7 +1139,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           auctdn <- NULL
           auc_int <- NULL
           for(t in 2:(auc_len+1)){
-            tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = tmp_df[,map_data$TIME][1], t2 = tmp_df[,map_data$TIME][t], method = method, exflag = auc_flag, t_max = t_max)
+            tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], t1 = tmp_df[,map_data$TIME][1], t2 = tmp_df[,map_data$TIME][t], method = method, exflag = auc_flag, t_max = t_max)
             tmp_dn <- auc_dn(auc = tmp, dose = tmp_dose)
             if(!is.na(unique(tmp_df[,map_data$TIME])[1]) && !is.na(unique(tmp_df[,map_data$TIME])[t])){
               tmp_int <- paste0(unique(tmp_df[,map_data$TIME])[1], "_", unique(tmp_df[,map_data$TIME])[t])
@@ -1203,7 +1203,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##            2019-11-08/RD Changed the call for partial AUCs to account for interpolation
 ##
             if((isTRUE(interpolation) || isTRUE(extrapolation))){
-              tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, interpolate = interpolation, extrapolate = extrapolation, model = "M3", dosing_type = "SD", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time, includeNA = TRUE)
+              tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, interpolate = interpolation, extrapolate = extrapolation, model = "M3", dosing_type = "SD", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time, includeNA = TRUE)
               if(is.list(tmp)){
                 tmp_auc <- tmp[[1]]
                 if(t == 1){
@@ -1216,7 +1216,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 tmp_auc <- tmp
               }
             } else {
-              tmp_auc <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, includeNA = TRUE)
+              tmp_auc <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, includeNA = TRUE)
             }
             
             if(is.null(auct1_t2)){
@@ -1335,7 +1335,6 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("VZOW" %in% parameter_list) {
         if(comp_required[["VZOW"]]) {
-          norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_df), unique(tmp_df[,map_data$NORMBS])[1], NA), NA)
           vz_ow <- vzow(vzo = vz_o, normbs = norm_bs)
         }
 ###        if("VZP" %in% parameter_list) {
@@ -1346,7 +1345,6 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("VZPW" %in% parameter_list) {
         if(comp_required[["VZPW"]]) {
-          norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_df), unique(tmp_df[,map_data$NORMBS])[1], NA), NA)
           vz_pw <- vzpw(vzp = vz_p, normbs = norm_bs)
         }
 ### 2019-10-10/TGT/ Added VSSO
@@ -1915,8 +1913,8 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     }
   }
   if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
-    if(nrow(computation_df[computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
-      computation_df[computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
+    if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
+      computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
     }
   }
   if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){

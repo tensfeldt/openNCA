@@ -1455,6 +1455,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           #tau_val <- unique(tmp_df[,as.character(map_data[c(paste0("TAU",d))])])[1]
           tmp_di_df <- tmp_df[tmp_df[c(paste0("DI", d, "F"))] == 1,]
           tmp_di_df <- tmp_di_df[order(tmp_di_df[,map_data$TIME]),]
+          norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_di_df), tmp_di_df[,map_data$NORMBS][1], NA), NA)
           tmp_dose <- tmp_di_df[, as.character(map_data[c(paste0("DOSE",d))])][1]
 
           if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]) {
@@ -1477,6 +1478,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("TAUi" %in% parameter_list) {
           if(comp_required[["TAUi"]] || comp_required[["TAU"]]) {
             tau[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TAU",d))])][1]
+            tau[[d]] <- as.numeric(tau[[d]])
           }
 ###          if("CMAXi" %in% parameter_list) {
           if(comp_required[["CMAXi"]]) {
@@ -1593,6 +1595,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("TOLD" %in% parameter_list) {
           if(comp_required[["TOLD"]]) {
             told[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
+            told[[d]] <- as.numeric(told[[d]])
           }
 ###          if("AUMCTAUi" %in% parameter_list && "TMAXi" %in% parameter_list) {
           if(comp_required[["AUMCTAUi"]]) {
@@ -1633,7 +1636,6 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
 ###          if("CLTAUWi" %in% parameter_list && "CLTAUi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
           if(comp_required[["CLTAUWi"]]) {
-            norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_di_df), tmp_di_df[,map_data$NORMBS][1], NA), NA)
             cl_tauw[[d]] <- cltauw(cltau = cl_tau[[d]], normbs = norm_bs)
           }
 ###          if("PTFi" %in% parameter_list && "CMAXi" %in% parameter_list && "CMINi" %in% parameter_list && "CAVi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
@@ -1678,7 +1680,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             if(length(time) > 1){
               for(t in 2:(length(time))){
                 if(time[t] %in% time_di[-1]) {
-                  tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = time_di[1], t2 = time[t], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
+                  tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], t1 = time_di[1], t2 = time[t], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
                   tmp_dn <- auc_dn(auc = tmp, dose = tmp_dose)
                   tmp_int <- paste0(time[1], "_", time[t])
                 } else {
@@ -1777,7 +1779,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               if((isTRUE(interpolation) || isTRUE(extrapolation)) && !(map_data[, c(paste0("TOLD",d))] %in% names(tmp_di_df))){
                 stop(paste0("Dataset provided via 'data' does not contain the required columns for interpolating partial areas ", paste0("TOLD",d)))
               } else if((isTRUE(interpolation) || isTRUE(extrapolation)) && (map_data[, c(paste0("TOLD",d))] %in% names(tmp_di_df))){
-                tmp_told <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
+                tmp_told <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1])
               } else {
                 tmp_told <- NA
               }
@@ -1793,7 +1795,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##              2019-11-08/RD Changed the call for partial AUCs to account for interpolation
 ##
               if((isTRUE(interpolation) || isTRUE(extrapolation))){
-                tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, interpolate = interpolation, extrapolate = extrapolation, model = "M3", dosing_type = "SS", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time, includeNA = TRUE)
+                tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, interpolate = interpolation, extrapolate = extrapolation, model = "M3", dosing_type = "SS", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time, includeNA = TRUE)
                 if(is.list(tmp)){
                   tmp_auc <- tmp[[1]]
                   if(t == 1){
@@ -1806,7 +1808,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                   tmp_auc <- tmp
                 }
               } else {
-                tmp_auc <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, includeNA = TRUE)
+                tmp_auc <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, includeNA = TRUE)
               }
               
               if(d == 1){
@@ -2521,8 +2523,8 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     }
   }
   if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
-    if(nrow(computation_df[computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
-      computation_df[computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
+    if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
+      computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
     }
   }
   if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){

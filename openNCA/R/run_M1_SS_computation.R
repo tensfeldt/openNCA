@@ -1629,6 +1629,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         for(d in 1:di_col){
           tmp_di_df  <- tmp_df[tmp_df[c(paste0("DI", d, "F"))] == 1,]
           tmp_di_df <- tmp_di_df[order(tmp_di_df[,map_data$TIME]),]
+          norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_di_df), tmp_di_df[,map_data$NORMBS][1], NA), NA)
           tmp_dose   <- tmp_di_df[, as.character(map_data[c(paste0("DOSE",d))])][1]
 
           if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]) {
@@ -1863,7 +1864,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("CLFTAUWi" %in% parameter_list && "CLFTAUi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###          if(parameter_required("^CLFTAUWi$", parameter_list) || length(dependent_parameters("^CLFTAUWi$"))>0){
           if(comp_required[["CLFTAUWi"]]){
-            norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_di_df), tmp_di_df[,map_data$NORMBS][1], NA), NA)
             clf_tauw[[d]] <- clftauw(clftau = clf_tau[[d]], normbs = norm_bs)
           }
 ###          if("PTFi" %in% parameter_list && "CMAXi" %in% parameter_list && "CMINi" %in% parameter_list && "CAVi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
@@ -1885,7 +1885,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("VZFTAUWi" %in% parameter_list && "VZFTAUi" %in% parameter_list && "KEL" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###          if(parameter_required("^VZFTAUWi$", parameter_list) || length(dependent_parameters("^VZFTAUWi$"))>0){
           if(comp_required[["VZFTAUWi"]]){
-            norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_di_df), tmp_di_df[,map_data$NORMBS][1], NA), NA)
             vzf_tauw[[d]] <- vzftauw(vzftau = vzf_tau[[d]], normbs = norm_bs)
           }
 ###          if(("AUCT" %in% parameter_list || "AUCTDN" %in% parameter_list) && 'TMAXi' %in% parameter_list) {
@@ -1904,7 +1903,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             if(length(time) > 1){
               for(t in 2:(length(time))){
                 if(time[t] %in% time_di[-1]) {
-                  tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = time_di[1], t2 = time[t], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
+                  tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], t1 = time_di[1], t2 = time[t], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
                   tmp_dn <- auc_dn(auc = tmp, dose = tmp_dose)
                   tmp_int <- paste0(time[1], "_", time[t])
                 } else {
@@ -2011,7 +2010,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               if((isTRUE(interpolation) || isTRUE(extrapolation)) && !(map_data[, c(paste0("TOLD",d))] %in% names(tmp_di_df))){
                 stop(paste0("Dataset provided via 'data' does not contain the required columns for interpolating partial areas ", paste0("TOLD",d)))
               } else if((isTRUE(interpolation) || isTRUE(extrapolation)) && (map_data[, c(paste0("TOLD",d))] %in% names(tmp_di_df))){
-                tmp_told <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
+                tmp_told <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1])
               } else {
                 tmp_told <- NA
               }
@@ -2027,7 +2026,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##              2019-11-08/RD Changed the call for partial AUCs to account for interpolation
 ##
               if((isTRUE(interpolation) || isTRUE(extrapolation))){
-                tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, interpolate = interpolation, extrapolate = extrapolation, model = "M1", dosing_type = "SS", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time, includeNA = TRUE)
+                tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, interpolate = interpolation, extrapolate = extrapolation, model = "M1", dosing_type = "SS", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time, includeNA = TRUE)
                 if(is.list(tmp)){  
                   tmp_auc <- tmp[[1]]
                   if(t == 1){
@@ -2040,7 +2039,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                   tmp_auc <- tmp
                 }
               } else {
-                tmp_auc <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = na.omit(tmp_df[,map_data$TIME]), t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, includeNA = TRUE)
+                tmp_auc <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_max, includeNA = TRUE)
               }
 
               if(d == 1){
@@ -2859,8 +2858,8 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     }
   }
   if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
-    if(nrow(computation_df[computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
-      computation_df[computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
+    if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
+      computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
     }
   }
   if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){

@@ -893,10 +893,12 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("TAUi" %in% parameter_list) {
           if(comp_required[["TAUi"]]) {
             tau[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TAU",d))])][1]
+            tau[[d]] <- as.numeric(tau[[d]])
           }
 ###          if("TOLD" %in% parameter_list) {
           if(comp_required[["TOLD"]]) {
             told[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
+            told[[d]] <- as.numeric(told[[d]])
           }
 ###          if("DIi" %in% parameter_list) {
           if(comp_required[["DIi"]]) {
@@ -1047,7 +1049,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               if((isTRUE(interpolation) || isTRUE(extrapolation)) && !(map_data[, c(paste0("TOLD",d))] %in% names(tmp_di_df))){
                 stop(paste0("Dataset provided via 'data' does not contain the required columns for interpolating partial areas ", paste0("TOLD",d)))
               } else if((isTRUE(interpolation) || isTRUE(extrapolation)) && (map_data[, c(paste0("TOLD",d))] %in% names(tmp_di_df))){
-                tmp_told <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
+                tmp_told <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1])
               } else {
                 tmp_told <- NA
               }
@@ -1588,8 +1590,8 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     }
   }
   if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
-    if(nrow(computation_df[computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
-      computation_df[computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
+    if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
+      computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
     }
   }
 

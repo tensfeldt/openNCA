@@ -216,7 +216,7 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = N
         if(is.null(t_max)){
           t_max <- tmax(conc = conc, time = time)
         }
-        if(tau <= t_max){
+        if(!is.na(t_max) & tau <= t_max){
           tau_conc <- interpolate_lin(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = tau)
         } else {
           tau_conc <- interpolate_log(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = tau)
