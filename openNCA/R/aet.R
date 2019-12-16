@@ -94,7 +94,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-aet <- function(amt = NULL, time = NULL, t = NULL){
+aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, returnNA=FALSE){
   if(is.null(amt) && is.null(time) && is.null(t)) {
     stop("Error in aet: 'amt' and 'time' vectors and value 't' are NULL")
   } else if(is.null(amt) && is.null(time)) {
@@ -118,8 +118,14 @@ aet <- function(amt = NULL, time = NULL, t = NULL){
   if(!(is.numeric(amt) && is.vector(amt))){
     stop("Error in aet: 'amt' is not a numeric vector")
   }
-
-  if(any(is.na(amt))) {
+  
+  if(is.null(orig_time)){
+    amt_check <- any(is.na(amt))
+  } else {
+    amt_check <- FALSE
+  }
+  
+  if(isTRUE(amt_check)) {
     a_e <- NA
   } else {
     if(t %in% time) {
@@ -129,9 +135,13 @@ aet <- function(amt = NULL, time = NULL, t = NULL){
       } else {
         stop("Error in aet: value 't' cannot be used to subset 'time' vector")
       }
-      a_e <- sum(tmp_amt[!is.na(tmp_time)])
+      a_e <- sum(tmp_amt[!is.na(tmp_time)], na.rm = TRUE)
     } else {
-      stop("Error in aet: value 't' is not present in 'time' vector")
+      if(is.logical(returnNA) && !isTRUE(returnNA)){
+        stop("Error in aet: value 't' is not present in 'time' vector") 
+      } else {
+        a_e <- NA
+      }
     }
   }
   return(a_e)

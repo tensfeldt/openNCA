@@ -1082,7 +1082,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
     
     AUMCUPARAM <- parameters_by_class("AUMCU", names(result_data))
 
-###    cat('AUCUPARAM: ', AUCUPARAM, '\n')
+###    cat('AUMCUPARAM: ', AUMCUPARAM, '\n')
 ###      cat('map_data$TIMEU: ', map_data$TIMEU, '\n')
 ###      cat('map_data$TIMEU %in% names(map_data): ', map_data$TIMEU %in% names(map_data), '\n')
 ###      cat('map_data$CONCU: ', map_data$CONCU, '\n')
@@ -1238,7 +1238,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         outputUnitFormat <- FALSE
         if(testunit) {
             outputUnit10 <- as.character(map_data[[outputUnitLabel]])
-            outputUnitFormat <- length(outputUnit9)>0 & !is.na(outputUnit10)
+            outputUnitFormat <- length(outputUnit10)>0 & !is.na(outputUnit10)
             if(outputUnitFormat) {
                 if(length(grep("/", outputUnit10)) > 0) { outputUnit10 <- unlist(strsplit(outputUnit10, "[./^]", perl=TRUE)) } else { outputUnitFormat <- FALSE }
             }

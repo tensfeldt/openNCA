@@ -86,7 +86,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-ae <- function(amt = NULL, time = NULL){
+ae <- function(amt = NULL, time = NULL, orig_time = NULL){
   if(is.null(amt) && is.null(time)) {
     stop("Error in ae: 'amt' and 'time' vectors is NULL")
   } else if(is.null(amt)) {
@@ -106,7 +106,13 @@ ae <- function(amt = NULL, time = NULL){
   if(any(is.na(amt))) {
     a_e <- NA
   } else {
-    a_e <- sum(amt[!is.na(time)])
+    if(is.null(orig_time)){
+      a_e <- sum(amt[!is.na(time)])
+    } else {
+      tmp_time <- time[!is.na(time)]
+      tmp_time <- orig_time[orig_time %in% tmp_time]
+      a_e <- sum(amt[tmp_time])
+    }
   }
 
   return(a_e)
