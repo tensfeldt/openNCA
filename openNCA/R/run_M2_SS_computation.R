@@ -2137,7 +2137,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         if(disp_required[["FLGACCEPTPREDOSE"]] && "FLGACCEPTPREDOSECRIT" %in% names(map_data)){
           pre_dose_crit <- suppressWarnings(as.numeric(map_data$FLGACCEPTPREDOSECRIT))
-          if(is.numeric(pre_dose_crit)){
+          if(is.numeric(pre_dose_crit) && !is.na(pre_dose_crit)){
             pre_dose <- tmp_df[,map_data$CONC][tmp_df[,map_data$TIME] == 0][1]
             if(is.numeric(c_maxi[[1]])){
 ##              row_data <- c(row_data, ifelse(pre_dose > (c_maxi[[1]] * pre_dose_crit), 0, 1))

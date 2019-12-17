@@ -347,7 +347,6 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if(disp_required[["AET"]]) {
 ### 2019-08-29/TGT/ remap map_data[[map_data$ENDTIME]] to map_data$ENDTIME
     col_names <- c(col_names, rep(paste0("AMT.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))), rep(paste0("AE.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))))
-      print(col_names)
 ### 2019-08-29/TGT/ remap map_data[[map_data$ENDTIME]] to map_data$ENDTIME
     regular_int_type <- c(regular_int_type, rep(paste0("AMT.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))), rep(paste0("AE.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))))
 ###      print(regular_int_type)
@@ -1102,11 +1101,11 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             aurct <- rep(NA, aet_len)
             aurc_int <- rep(NA, aet_len)
           }
-          if(length(aurct) < (aet_len-1)) {
-            aurct <- c(aurct, rep(NA, ((aet_len-1) - length(aurct))))
+          if(length(aurct) < (aet_len)) {
+            aurct <- c(aurct, rep(NA, ((aet_len) - length(aurct))))
           }
-          if(length(aurc_int) < (aet_len-1)) {
-            aurc_int <- c(aurc_int, rep(NA, ((aet_len-1) - length(aurc_int))))
+          if(length(aurc_int) < (aet_len)) {
+            aurc_int <- c(aurc_int, rep(NA, ((aet_len) - length(aurc_int))))
           }
         }
 ###        if("AURCT1_T2" %in% parameter_list && "TMAXRATE" %in% parameter_list) {

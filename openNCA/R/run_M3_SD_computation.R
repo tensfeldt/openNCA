@@ -1506,7 +1506,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###                 could still rely upon CMAX. This needs to be fixed.
         if(disp_required[["FLGACCEPTPREDOSE"]] && "FLGACCEPTPREDOSECRIT" %in% names(map_data)){
           pre_dose_crit <- suppressWarnings(as.numeric(map_data$FLGACCEPTPREDOSECRIT))
-          if(is.numeric(pre_dose_crit)){
+          if(is.numeric(pre_dose_crit) && !is.na(pre_dose_crit)){
 ### 2019-08-09/TGT/ Following assumes that the predose timepoint has a time value of zero "0"
 ###                 With ACTUAL times being used this may not be the case. This needs to be fixed.
             pre_dose <- tmp_df[,map_data$CONC][tmp_df[,map_data$TIME] == 0][1]

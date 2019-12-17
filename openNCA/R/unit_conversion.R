@@ -173,7 +173,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           time_col <- names(result_data)[names(result_data) %in% TIMEUPARAM]
           result_data[time_col] <- result_data[time_col] * timeUScaler
 ###          result_data$TIMEU <- ifelse(timeUScaler == 1, inputUnit1, outputUnit1)
-          result_data$TIMEU <- ifelse(timeUScaler == 1, formattedinputUnit, formattedoutputUnit)
+          result_data$TIMEU <- ifelse(timeUScaler == 1, as.character(formattedinputUnit), as.character(formattedoutputUnit))
           if(verbose) { cat(function_name, ': Unit Class 1 (Time) time_col: ', time_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', timeUScaler, '\n') }
         } else {
 ### retain original input unit
@@ -262,7 +262,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           amount_col <- names(result_data)[names(result_data) %in% AMOUNTUPARAM]
           result_data[amount_col] <- result_data[amount_col] * amountUScaler
 ###          result_data$AMOUNTU <- ifelse(amountUScaler == 1, inputUnit2, outputUnit2)
-          result_data$AMOUNTU <- ifelse(amountUScaler == 1, formattedinputUnit, formattedoutputUnit)
+          result_data$AMOUNTU <- ifelse(amountUScaler == 1, as.character(formattedinputUnit), as.character(formattedoutputUnit))
           if(verbose) { cat(function_name, ': Unit Class 2 (Amount) amount_col: ', amount_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', amountUScaler, '\n') }
         } else {
 ### retain original input unit
@@ -369,7 +369,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                 result_data[dose_col] <- result_data[dose_col] * doseUScaler
 ###                result_data[paste0("DOSE", i, "U")] <- ifelse(doseUScaler == 1, inputUnit3, outputUnit3)
 ###                result_data[paste0("DOSE", i, "U")] <- ifelse(doseUScaler == 1, formattedinputUnit, formattedoutputUnit)
-                result_data[doseuvar[i]] <- ifelse(doseUScaler == 1, formattedinputUnit, formattedoutputUnit)
+                result_data[doseuvar[i]] <- ifelse(doseUScaler == 1, as.character(formattedinputUnit), as.character(formattedoutputUnit))
                 if(verbose) { cat(function_name, ': Unit Class 3 (Dose) dose_col: ', dose_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', doseUScaler, '\n') }
               } else {
 ###   retain original input unit
@@ -449,7 +449,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
               dose_col <- names(result_data)[names(result_data) %in% DOSEUPARAM]
               result_data[dose_col] <- result_data[dose_col] * doseUScaler
 ###              result_data$DOSE1U <- ifelse(doseUScaler == 1, inputUnit3, outputUnit3)
-              result_data$DOSEU <- ifelse(doseUScaler == 1, formattedinputUnit, formattedoutputUnit)
+              result_data$DOSEU <- ifelse(doseUScaler == 1, as.character(formattedinputUnit), as.character(formattedoutputUnit))
               if(verbose) { cat(function_name, ': Unit Class 3 (Dose) dose_col: ', dose_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', doseUScaler, '\n') }
             } else {
 ###   retain original input unit
@@ -532,7 +532,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           volume_col <- names(result_data)[names(result_data) %in% VOLUMEUPARAM]
           result_data[volume_col] <- result_data[volume_col] * volumeUScaler
 ###          result_data$VOLUMEU <- ifelse(volumeUScaler == 1, inputUnit4, outputUnit4)
-          result_data$VOLUMEU <- ifelse(volumeUScaler == 1, formattedinputUnit, formattedoutputUnit)
+          result_data$VOLUMEU <- ifelse(volumeUScaler == 1, as.character(formattedinputUnit), as.character(formattedoutputUnit))
           if(verbose) { cat(function_name, ': Unit Class 4 (Volume) volume_col: ', volume_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', volumeUScaler, '\n') }
         } else {
 ### retain original input unit
@@ -660,7 +660,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           conc_col <- names(result_data)[names(result_data) %in% CONCUPARAM]
           result_data[conc_col] <- result_data[conc_col] * concUFinalScaler
 ###          result_data$CONCU <- ifelse(concUFinalScaler == 1, as.character(unique(data_data[, map_data$CONCU])), as.character(map_data[[outputUnitLabel]]))
-          result_data$CONCU <- ifelse(concUFinalScaler == 1, formattedinputUnit, formattedoutputUnit)
+          result_data$CONCU <- ifelse(concUFinalScaler == 1, as.character(formattedinputUnit), as.character(formattedoutputUnit))
           if(verbose) { cat(function_name, ': Unit Class 5 (Amount/Volume) conc_col: ', conc_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', concUFinalScaler, '\n') }
         } else {
 ### retain original input unit
@@ -1028,7 +1028,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           auc_col <- names(result_data)[names(result_data) %in% AUCUPARAM]
           result_data[auc_col] <- result_data[auc_col] * aucUFinalScaler
 ###          result_data$AUCU <- ifelse(aucUFinalScaler == 1, as.character(paste0(auc_unit_tmp[1], ".", as.character(unique(data_data[, map_data$TIMEU])[[1]]), "/", auc_unit_tmp[2])), as.character(map_data[[outputUnitLabel]]))
-          result_data$AUCU <- ifelse(aucUFinalScaler == 1, formattedinputUnit, formattedoutputUnit)
+          result_data$AUCU <- ifelse(aucUFinalScaler == 1, as.character(formattedinputUnit), as.character(formattedoutputUnit))
           if(verbose) { cat(function_name, ': Unit Class 8: (Amount.Time/Volume) auc_col: ', auc_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', aucUFinalScaler, '\n') }
         } else {
 ### retain original input unit
@@ -1152,7 +1152,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           aumc_col <- names(result_data)[names(result_data) %in% AUMCUPARAM]
           result_data[aumc_col] <- result_data[aumc_col] * aumcUFinalScaler
 ###          result_data$AUMCU <- ifelse(aumcUFinalScaler == 1, as.character(paste0(aumc_unit_tmp[1], ".", aumc_unit_tmp2, ".", aumc_unit_tmp2, "/", aumc_unit_tmp[2])), as.character(map_data[[outputUnitLabel]]))
-          result_data$AUMCU <- ifelse(aumcUFinalScaler == 1, formattedinputUnit, formattedoutputUnit)
+          result_data$AUMCU <- ifelse(aumcUFinalScaler == 1, as.character(formattedinputUnit), as.character(formattedoutputUnit))
           if(verbose) { cat(function_name, ': Unit Class 9: (Amount.Time.Time/Volume) aumc_col: ', aumc_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', aumcUFinalScaler, '\n') }
         } else {
 ### retain original input unit
@@ -1285,7 +1285,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           aucdn_col <- names(result_data)[names(result_data) %in% AUCNORMUPARAM]
           result_data[aucdn_col] <- result_data[aucdn_col] * aucdnUFinalScaler
 ###          result_data$AUCNORMU <- ifelse(aucdnUFinalScaler == 1, as.character(paste0(aucdn_unit_tmp[1], ".", aucdn_unit_tmp2, "/", aucdn_unit_tmp[2], "/", aucdn_unit_tmp3)), as.character(map_data[[outputUnitLabel]]))
-          result_data$AUCNORMU <- ifelse(aucdnUFinalScaler == 1, formattedinputUnit, formattedoutputUnit)
+          result_data$AUCNORMU <- ifelse(aucdnUFinalScaler == 1, as.character(formattedinputUnit), as.character(formattedoutputUnit))
           if(verbose) { cat(function_name, ': Unit Class 10: ([Amount.Time/Volume]/Amount) aucdn_col: ', aucdn_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', aucdnUFinalScaler, '\n') }
         } else {
 ### retain original input unit
@@ -1410,7 +1410,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           aurc_col <- names(result_data)[names(result_data) %in% AURCUPARAM]
           result_data[aurc_col] <- result_data[aurc_col] * aurcUFinalScaler
 ###          result_data$AURCU <- ifelse(aurcUFinalScaler == 1, as.character(paste0(aurc_unit_tmp[2], ".", aurc_unit_tmp[1], "/", aurc_unit_tmp[2])), as.character(map_data[[outputUnitLabel]]))
-          result_data$AURCU <- ifelse(aurcUFinalScaler == 1, formattedinputUnit, formattedoutputUnit)
+          result_data$AURCU <- ifelse(aurcUFinalScaler == 1, as.character(formattedinputUnit), as.character(formattedoutputUnit))
           if(verbose) { cat(function_name, ': Unit Class 11: ([Volume.Amount]/Volume) aurc_col: ', aurc_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', aurcUFinalScaler, '\n') }
         } else {
 ### retain original input unit
@@ -1517,7 +1517,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           concdn_col <- names(result_data)[names(result_data) %in% CONCNORMUPARAM]
           result_data[concdn_col] <- result_data[concdn_col] * concdnUFinalScaler
 ###          result_data$CONCNORMU <- ifelse(concdnUFinalScaler == 1, as.character(paste0(conc_unit_tmp[1], "/", conc_unit_tmp[2], "/", conc_unit_tmp2)), as.character(map_data[[outputUnitLabel]]))
-          result_data$CONCNORMU <- ifelse(concdnUFinalScaler == 1, formattedinputUnit, formattedoutputUnit)
+          result_data$CONCNORMU <- ifelse(concdnUFinalScaler == 1, as.character(formattedinputUnit), as.character(formattedoutputUnit))
           if(verbose) { cat(function_name, ': Unit Class 12: ([Amount/Volume]/Amount) concdn_col: ', concdn_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', concdnUFinalScaler, '\n') }
         } else {
 ### retain original input unit
@@ -1616,7 +1616,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           rate_col <- names(result_data)[names(result_data) %in% RATEUPARAM]
           result_data[rate_col] <- result_data[rate_col] * rateUFinalScaler
 ###          result_data$RATEU <- ifelse(rateUFinalScaler == 1, as.character(paste0(rate_unit_tmp[1], "/", as.character(unique(data_data[, map_data$TIMEU])[[1]]))), as.character(map_data[[outputUnitLabel]]))
-          result_data$RATEU <- ifelse(rateUFinalScaler == 1, formattedinputUnit, formattedoutputUnit)
+          result_data$RATEU <- ifelse(rateUFinalScaler == 1, as.character(formattedinputUnit), as.character(formattedoutputUnit))
           if(verbose) { cat(function_name, ': Unit Class 13: (Amount/Time) rate_col: ', rate_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', rateUFinalScaler, '\n') }
         } else {
 ### retain original input unit
@@ -1724,7 +1724,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           volumew_col <- names(result_data)[names(result_data) %in% VOLUMEWUPARAM]
           result_data[volumew_col] <- result_data[volumew_col] * volumewUFinalScaler
 ###          result_data$VOLUMEWU <- ifelse(volumewUFinalScaler == 1, as.character(paste0(vwu_unit_tmp[2], "/", as.character(unique(data_data[, map_data$NORMBSU])[1]))), as.character(map_data[[outputUnitLabel]]))
-          result_data$VOLUMEWU <- ifelse(volumewUFinalScaler == 1, formattedinputUnit, formattedoutputUnit)
+          result_data$VOLUMEWU <- ifelse(volumewUFinalScaler == 1, as.character(formattedinputUnit), as.character(formattedoutputUnit))
           if(verbose) { cat(function_name, ': Unit Class 14: (Volume/Body Weight) volumew_col: ', volumew_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', volumewUFinalScaler, '\n') }
         } else {
 ### retain original input unit
@@ -1832,7 +1832,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           clw_col <- names(result_data)[names(result_data) %in% CLWUPARAM]
           result_data[clw_col] <- result_data[clw_col] * clwUFinalScaler
 ###          result_data$CLWU <- ifelse(clwUFinalScaler == 1, as.character(paste0(clwu_unit_tmp[2], "/", as.character(unique(data_data[, map_data$TIMEU])[[1]]), "/", as.character(unique(data_data[, map_data$NORMBSU])[1]))), as.character(map_data[[outputUnitLabel]]))
-          result_data$CLWU <- ifelse(clwUFinalScaler == 1, formattedinputUnit, formattedoutputUnit)
+          result_data$CLWU <- ifelse(clwUFinalScaler == 1, as.character(formattedinputUnit), as.character(formattedoutputUnit))
           if(verbose) { cat(function_name, ': Unit Class 15: (Volume/Time/Body Weight) clw_col: ', clw_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', clwUFinalScaler, '\n') }
         } else {
 ### retain original input unit

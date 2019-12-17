@@ -2234,6 +2234,22 @@ if(FALSE) {
     return_list <- list()
     warning("Dataset provided via 'map' does not contain the 'RETURNCOLS' column")
   }
+  
+  if(parameterset=="PARAMETERDISPLAYLIST") { 
+    if("DATADISPLAYLIST" %in% names(map_data)){
+      if(!is.null(map_data$DATADISPLAY) && !is.na(map_data$DATADISPLAYLIST) && map_data$DATADISPLAYLIST != ""){
+        if(length(return_list) > 0){
+          return_list <- as.list(c(strsplit(map_data$DATADISPLAYLIST, ";")[[1]], unlist(return_list)))
+        } else {
+          return_list <- as.list(strsplit(map_data$DATADISPLAYLIST, ";")[[1]])
+        }
+      } else {
+        warning("'DATADISPLAYLIST' values provided via 'map' are not used for this computation")
+      }
+    } else {
+      warning("Dataset provided via 'map' does not contain the 'DATADISPLAYLIST' column")
+    }
+  }
 
 if(FALSE) {  
   if("PARAMETERDISPLAYLIST" %in% names(map_data)){
