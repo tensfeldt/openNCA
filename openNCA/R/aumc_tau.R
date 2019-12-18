@@ -196,10 +196,12 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = 
     }
 
     if(orig_time[1] < tau && tau < orig_time[length(orig_time)]){
-      time_1 <- time[length(time)]
-      conc_1 <- conc[length(conc)]
-      time_2 <- orig_time[!orig_time < tau][1]
-      conc_2 <- orig_conc[orig_time %in% time_2]
+      idx <- which(orig_time < tau)
+      idx <- idx[length(idx)]
+      time_1 <- orig_time[idx]
+      conc_1 <- orig_conc[idx]
+      time_2 <- orig_time[idx+1]
+      conc_2 <- orig_conc[idx+1]
 
       tau_conc <- NA
       if(method == 1){
@@ -222,14 +224,10 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = 
           tau_conc <- interpolate_log(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = tau)
         }
       }
-      new_time <- c(time, tau)
-      new_time <- sort(new_time)
-      index <- sum(new_time <= tau)
-      if(index > length(conc)){
-        new_conc <- c(conc[1:(index-1)], tau_conc)
-      } else {
-        new_conc <- c(conc[1:(index-1)], tau_conc, conc[index:length(conc)])
-      }
+      tmp_data <- data.frame(time = time, conc = conc)
+      tmp_data[nrow(tmp_data)+1,] <- c(tau, tau_conc)
+      new_time <- tmp_data[order(tmp_data$time),]$time
+      new_conc <- tmp_data[order(tmp_data$time),]$conc
 
       if(method == 1){
         return(aumc_lin_log(conc = new_conc, time = new_time, exflag = exflag, t_max = t_max))

@@ -747,12 +747,18 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_kel_flg <- as.numeric(tmp_df[,map_data$FLGEXKEL])
       if("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data)){
         ex_flag <- as.numeric(tmp_df[,map_data$FLGEXSDE])
+        if(all(is.na(ex_flag))){
+          ex_flag[is.na(ex_flag)] <- 0
+        }
         tmp_df <- tmp_df[!as.logical(ex_flag),]
       } else {
         ex_flag <- NULL
       }
       if("FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
         kel_flag <- as.numeric(tmp_df[,map_data$FLGEXKEL])
+        if(all(is.na(kel_flag))){
+          kel_flag[is.na(kel_flag)] <- 0
+        }
         if(isTRUE(optimize_kel)){
           kel_flag <- rep(1, length(tmp_kel_flg))
         }
@@ -761,11 +767,17 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
       if("FLGEXAUC" %in% names(map_data) && map_data$FLGEXAUC %in% names(data_data)){
         auc_flag <- as.numeric(tmp_df[,map_data$FLGEXAUC])
+        if(all(is.na(auc_flag))){
+          auc_flag[is.na(auc_flag)] <- 0
+        }
       } else {
         auc_flag <- NULL
       }
       if("FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
         emesis_flag <- as.numeric(tmp_df[,map_data$FLGEMESIS])
+        if(all(is.na(emesis_flag))){
+          emesis_flag[is.na(emesis_flag)] <- 0
+        }
       } else {
         emesis_flag <- NULL
       }

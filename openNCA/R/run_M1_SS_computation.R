@@ -1264,12 +1264,18 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_kel_flg <- as.numeric(tmp_df[,map_data$FLGEXKEL])
       if("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data)){
         ex_flag <- as.numeric(tmp_df[,map_data$FLGEXSDE])
+        if(all(is.na(ex_flag))){
+          ex_flag[is.na(ex_flag)] <- 0
+        }
         tmp_df <- tmp_df[!as.logical(ex_flag),]
       } else {
         ex_flag <- NULL
       }
       if("FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
         kel_flag <- as.numeric(tmp_df[,map_data$FLGEXKEL])
+        if(all(is.na(kel_flag))){
+          kel_flag[is.na(kel_flag)] <- 0
+        }
         if(isTRUE(optimize_kel)){
           kel_flag <- rep(1, length(tmp_kel_flg))
         }
@@ -1278,11 +1284,17 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
       if("FLGEXAUC" %in% names(map_data) && map_data$FLGEXAUC %in% names(data_data)){
         auc_flag <- as.numeric(tmp_df[,map_data$FLGEXAUC])
+        if(all(is.na(auc_flag))){
+          auc_flag[is.na(auc_flag)] <- 0
+        }
       } else {
         auc_flag <- NULL
       }
       if("FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
         emesis_flag <- as.numeric(tmp_df[,map_data$FLGEMESIS])
+        if(all(is.na(emesis_flag))){
+          emesis_flag[is.na(emesis_flag)] <- 0
+        }
       } else {
         emesis_flag <- NULL
       }
@@ -1950,7 +1962,11 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                       if(!is.na(prev_auc)){
                         auct[[t-1]] <- sum(c(prev_auc, tmp), na.rm = TRUE)
                       } else {
-                        auct[[t-1]] <- sum(c(auct[[t-1]], tmp), na.rm = TRUE)
+                        if(is.na(auct[[t-1]]) && is.na(tmp)){
+                          auct[[t-1]] <- NA
+                        } else {
+                          auct[[t-1]] <- sum(c(auct[[t-1]], tmp), na.rm = TRUE)
+                        }
                       }
                     }
   ### 2019-09-19/TGT/
@@ -1959,7 +1975,11 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                       if(!is.na(prev_auc_dn)){
                         auctdn[[t-1]] <- sum(c(prev_auc_dn, tmp_dn), na.rm = TRUE)
                       } else {
-                        auctdn[[t-1]] <- sum(c(auctdn[[t-1]], tmp_dn), na.rm = TRUE)
+                        if(is.na(auctdn[[t-1]]) && is.na(tmp_dn)){
+                          auctdn[[t-1]] <- NA
+                        } else {
+                          auctdn[[t-1]] <- sum(c(auctdn[[t-1]], tmp_dn), na.rm = TRUE)
+                        }
                       }
                     }
                   }
@@ -2130,7 +2150,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-08-05/TGT/ Following incorrectly identifies TIME for CONC
 ###          conc <- tmp_df[,map_data$TIME][exflag]
           conc <- tmp_df[,map_data$CONC][exflag]
-
+          cest_kel <- rep(NA, length(conc))
           if(!is.na(kel_v[["KEL"]])){
 ### 2019-08-05/TGT/ following algorithm for estimation of intercept is not correct            
 ###            intercept <- sum(conc-(-1*kel_v[["KEL"]]*time))/length(conc)
