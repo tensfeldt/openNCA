@@ -791,6 +791,15 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   } else {
     optimize_kel <- FALSE
   }
+  if(isTRUE(optimize_kel)){
+    comp_required[["KEL"]] <- TRUE
+    comp_required[["TMAX"]] <- TRUE
+    comp_required[["TLAST"]] <- TRUE
+    comp_required[["CMAX"]] <- TRUE
+    comp_required[["CLAST"]] <- TRUE 
+    comp_required[["AUCLAST"]] <- TRUE
+    disp_required[["KEL"]] <- TRUE
+  }
 ##  2019-11-08/RD Added for Interpolation to account for error handling
 ##
   if("INCLUDEINTERPOLATION" %in% names(map_data) && (map_data[, "INCLUDEINTERPOLATION"] != 0 && map_data[, "INCLUDEINTERPOLATION"] != 1)){

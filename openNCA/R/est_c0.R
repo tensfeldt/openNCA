@@ -95,12 +95,16 @@ est_c0 <- function(conc = NULL, time = NULL, npts=2, verbose=FALSE, returnall=TR
   if(nrow(tmp) > 1) {
     x <- tmp$time
     y <- tmp$conc
-    m <- lm(log(y)~x)
-    slope <- coef(m)["x"]
-    intercept <- coef(m)["(Intercept)"]
-    x <- range(x)
-    y <- exp(intercept + slope*x)
-    est_c0 <- exp(intercept)
+    if(!all(is.na(x)) && !all(is.na(y))){
+      m <- lm(log(y)~x)
+      slope <- coef(m)["x"]
+      intercept <- coef(m)["(Intercept)"]
+      x <- range(x)
+      y <- exp(intercept + slope*x)
+      est_c0 <- exp(intercept)
+    } else {
+      est_c0 <- NA
+    }
   }
   if(verbose) { cat("est_c0: ", est_c0, " slope: ", slope, " intercept: ", intercept, " x: ", x, " y: ", y, "\n") }
 

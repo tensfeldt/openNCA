@@ -32,7 +32,6 @@ tmaxrate <- function(midpt = NULL, rate = NULL){
     return(NA)
   }
   
-  
   if(!(is.numeric(midpt) && is.vector(midpt))){
     stop("Error in tmaxrate: 'midpt' is not a numeric vector")
   }
@@ -43,6 +42,6 @@ tmaxrate <- function(midpt = NULL, rate = NULL){
     stop("Error in tmaxrate: length of 'midpt' and 'rate' vectors are not equal")
   }
 
-  tmax_rate <- midpt[rate %in% max(rate)]
+  tmax_rate <- midpt[rate %in% max(rate)][1]
   return(tmax_rate)
 }

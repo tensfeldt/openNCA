@@ -315,10 +315,15 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
         valid_dose <- NULL
         valid_tau <- NULL
         valid_told <- NULL
-        if(any(ss_dose %in% names(map_data) || ss_tau %in% names(map_data) || ss_told %in% names(map_data))){
-          if(any(!as.logical(is.na(map_data[ss_dose[ss_dose %in% names(map_data)]]))) || any(!as.logical(is.na(map_data[ss_tau[ss_tau %in% names(map_data)]]))) || any(!as.logical(is.na(map_data[ss_told[ss_told %in% names(map_data)]])))){
-            if(any(!as.logical(is.na(map_data[ss_dose[ss_dose %in% names(map_data)]])))){
+        if("DOSE" %in% names(map_data) || any(ss_dose %in% names(map_data) || ss_tau %in% names(map_data) || ss_told %in% names(map_data))){
+          test_dose <- ifelse("DOSE" %in% names(map_data), !as.logical(is.na(map_data[,"DOSE"])), FALSE)
+          if(test_dose || any(!as.logical(is.na(map_data[ss_dose[ss_dose %in% names(map_data)]]))) || any(!as.logical(is.na(map_data[ss_tau[ss_tau %in% names(map_data)]]))) || any(!as.logical(is.na(map_data[ss_told[ss_told %in% names(map_data)]])))){
+            if(test_dose || any(!as.logical(is.na(map_data[ss_dose[ss_dose %in% names(map_data)]])))){
               tmp_dose <- map_data[ss_dose[ss_dose %in% names(map_data)]]
+              if(ncol(tmp_dose) == 0){
+                tmp_dose <- map_data['DOSE']
+                map_data["DOSE1"] <- map_data['DOSE']
+              }
               #print(tmp_dose)
               dose_logic <- unlist(lapply(tmp_dose, function(x) { return(is.na(x) || x == "")}))
               valid_dose <- names(tmp_dose[!as.logical(dose_logic)])
@@ -392,27 +397,51 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
               }
             }
           } else {
-            error_str <- "4 Unable to generate dosing interval for Steady State data! Please provide same number of interval values of data parameters, you provided:"
-            if(length(valid_dose) > 0){
-              error_str <- paste(error_str, paste(valid_dose, collapse = ", "))
-            }
+##            error_str <- "4 Unable to generate dosing interval for Steady State data! Please provide same number of interval values of data parameters, you provided:"
+##            if(length(valid_dose) > 0){
+##              error_str <- paste(error_str, paste(valid_dose, collapse = ", "))
+##            }
+##            if(length(valid_tau) > 0){
+##              error_str <- paste(error_str, paste(valid_tau, collapse = ", "))
+##            }
+##            if(length(valid_told) > 0){
+##              error_str <- paste(error_str, paste(valid_told, collapse = ", "))
+##            }
+##            error_str <- paste(error_str, "which is/are uneven!")
+##            stop(error_str)
             if(length(valid_tau) > 0){
-              error_str <- paste(error_str, paste(valid_tau, collapse = ", "))
+              map_data[,valid_tau] <- valid_tau
             }
             if(length(valid_told) > 0){
-              error_str <- paste(error_str, paste(valid_told, collapse = ", "))
+              map_data[,valid_told] <- valid_told
             }
-            error_str <- paste(error_str, "which is/are uneven!")
-            stop(error_str)
+            for(j in 1:length(unique(merged_data[,map_data$SDEID]))){
+              tmp_df <- merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],]
+              tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
+              print(tmp_df[,map_data$TIME])
+              if(nrow(tmp_df) > 0){
+                merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][,valid_told] <- tmp_df[1,map_data$TIME] 
+                merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][,valid_tau] <- tmp_df[nrow(tmp_df),map_data$TIME] - tmp_df[1,map_data$TIME] 
+              }
+            }
           }
 
           intervals <- length(valid_dose)
 ###          cat('intervals: ', intervals, '\n')
           
           for(i in 1:intervals){
-            if(ss_dose[i] %in% names(map_data) & ss_tau[i] %in% names(map_data) & ss_told[i] %in% names(map_data)) {
-              if(!(map_data[,ss_dose[i]] %in% names(merged_data))){
-                stop(paste0("5 Unable to generate dosing interval for Steady State data! '", map_data[,ss_dose[i]], "' value for ", ss_dose[i], " is not present in the data"))
+            if((("DOSE" %in% names(map_data)) || ss_dose[i] %in% names(map_data)) & ss_tau[i] %in% names(map_data) & ss_told[i] %in% names(map_data)) {
+              if(!("DOSE" %in% names(map_data))){
+                stop(paste0("5 Unable to generate dosing interval for Steady State data! '", map_data[,"DOSE"], "' value for DOSE is not present in the data"))
+              }
+              if(ss_dose[i] %in% names(map_data)){
+                if(!(map_data[,ss_dose[i]] %in% names(merged_data))){
+                  stop(paste0("5 Unable to generate dosing interval for Steady State data! '", map_data[,ss_dose[i]], "' value for ", ss_dose[i], " is not present in the data"))
+                }
+              } else {
+                if(!("DOSE" %in% names(map_data))){
+                  stop(paste0("5 Unable to generate dosing interval for Steady State data! '", ss_dose[i], "' is not present in the 'map'"))
+                }
               }
               if(!(map_data[,ss_tau[i]] %in% names(merged_data))){
                 stop(paste0("6 Unable to generate dosing interval for Steady State data! '", map_data[,ss_tau[i]], "' value for ", ss_tau[i], " is not present in the data"))

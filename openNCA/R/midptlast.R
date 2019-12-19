@@ -42,6 +42,11 @@ midptlast <- function(midpt = NULL, rate = NULL){
     stop("Error in midptlast: length of 'midpt' and 'rate' vectors are not equal")
   }
   
-  midpt_last <- midpt[length(rate[rate > 0])]
+  idx <- length(rate[rate > 0])
+  if(idx > 0){
+    midpt_last <- midpt[idx]
+  } else {
+    midpt_last <- NA 
+  }
   return(midpt_last)
 }

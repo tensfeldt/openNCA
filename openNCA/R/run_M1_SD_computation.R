@@ -280,9 +280,9 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###    if(comp_required[[i]]) { cat('parameter: ', i, ' regex: ', rg, ' required: ', comp_required[[i]], '\n') }
   }
 ###cat('comp_required: \n')
-###print(names(comp_required))
+###print(names(comp_required)[unlist(comp_required)])
 ###cat('disp_required: \n')
-###print(names(disp_required))
+###print(names(disp_required)[unlist(disp_required)])
   
   if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
     if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
@@ -798,6 +798,15 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     }
   } else {
     optimize_kel <- FALSE
+  }
+  if(isTRUE(optimize_kel)){
+    comp_required[["KEL"]] <- TRUE
+    comp_required[["TMAX"]] <- TRUE
+    comp_required[["TLAST"]] <- TRUE
+    comp_required[["CMAX"]] <- TRUE
+    comp_required[["CLAST"]] <- TRUE 
+    comp_required[["AUCLAST"]] <- TRUE
+    disp_required[["KEL"]] <- TRUE
   }
 ##  2019-11-08/RD Added for Interpolation to account for error handling
 ##

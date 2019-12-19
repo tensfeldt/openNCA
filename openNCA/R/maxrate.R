@@ -27,6 +27,11 @@ maxrate <- function(rate = NULL){
   if(!(is.numeric(rate) && is.vector(rate))){
     stop("Error in maxrate: 'rate' is not a numeric vector")
   }
+  
+  max_rate <- max(rate, na.rm = TRUE)
+  if(is.infinite(max_rate)){
+    max_rate <- NA
+  }
 
-  return(max(rate, na.rm = TRUE))
+  return(max_rate)
 }

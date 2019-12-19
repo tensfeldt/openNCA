@@ -355,9 +355,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     regular_int_type <- c(regular_int_type, "AE")
   }
 ###  if("AEPCT" %in% parameter_list && "AE" %in% parameter_list) {
-  if(disp_required[["AEPCT"]]) {
-    col_names <- c(col_names, "AEPCT")
-    regular_int_type <- c(regular_int_type, "AEPCT")
+  if(disp_required[["AEPCTi"]]) {
+    col_names <- c(col_names, rep(paste0("AEPCT",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("AEPCT",1:di_col)))
   }
   if(disp_required[["AETAUi"]]){
     col_names <- c(col_names, rep(paste0("AETAU",1:di_col)))
@@ -657,6 +657,15 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   } else {
     optimize_kel <- FALSE
   }
+  if(isTRUE(optimize_kel)){
+    comp_required[["KEL"]] <- TRUE
+    comp_required[["TMAXi"]] <- TRUE
+    comp_required[["TLASTi"]] <- TRUE
+    comp_required[["CMAXi"]] <- TRUE
+    comp_required[["CLASTi"]] <- TRUE 
+    comp_required[["AUCLASTi"]] <- TRUE
+    disp_required[["KEL"]] <- TRUE
+  }
   
   if("INCLUDEINTERPOLATION" %in% names(map_data) && (map_data[, "INCLUDEINTERPOLATION"] != 0 && map_data[, "INCLUDEINTERPOLATION"] != 1)){
     warning("Flag 'INCLUDEINTERPOLATION' does not have a valid value! Please try again with numeric value (either 0 or 1)")
@@ -701,6 +710,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###      if("DOSEi" %in% parameter_list) {
       if(comp_required[["DOSEi"]]) {
         dose <- list()
+      }
+      if(comp_required[["AEPCTi"]]) {
+        ae_pct_i <- list()
       }
       if(comp_required[["AETAUi"]]) {
         aetau_i <- list()
@@ -929,8 +941,8 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             dose[[d]] <- tmp_dose
           }
 ###          if("AEPCT" %in% parameter_list && "AE" %in% parameter_list) {
-          if(comp_required[["AEPCT"]]) {
-            ae_pct <- aepct(ae = a_e, dose = tmp_dose)
+          if(comp_required[["AEPCTi"]]) {
+            ae_pct_i[[d]] <- aepct(ae = a_e, dose = tmp_dose)
           }
 ###          if("AET" %in% parameter_list) {
 ### 2019-09-23/TGT/ Note the following computes "AE" (amt) "AET" (ae_t) and "AETPCT" (aet_pct)
@@ -1367,9 +1379,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           computation_df[i, "AE"] <- a_e
         }
 ###        if("AEPCT" %in% parameter_list && "AE" %in% parameter_list) {
-        if(disp_required[["AEPCT"]]) {
+        if(disp_required[["AEPCTi"]]) {
 ##          row_data <- c(row_data, ae_pct)
-          computation_df[i, "AEPCT"] <- ae_pct
+          computation_df[i, paste0("AEPCT",1:di_col)] <- unlist(ae_pct_i)
         }
         if(disp_required[["AETAUi"]]) {
 ##          row_data <- c(row_data, unlist(aetau_i))

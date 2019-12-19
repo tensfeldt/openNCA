@@ -158,6 +158,11 @@ auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1
   if(!(is.numeric(time) && is.vector(time)) ){
     stop("Error in auc_t1_t2: 'time' is not a numeric vector")
   }
+  if(is.null(interpolate) && is.null(extrapolate)){
+    if(sum(conc, na.rm = T) == 0){
+      return(0)
+    }
+  }
   if(is.null(t1) || is.na(t1)){
     return(NA)
   }
@@ -206,11 +211,6 @@ auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1
     time <- c(time, t2)
     conc <- c(conc, NA)
     exflag <- c(exflag, 0)
-  }
-  if(is.null(interpolate) && is.null(extrapolate)){
-    if(sum(conc, na.rm = T) == 0){
-      return(0)
-    }
   }
   
   if(length(time) != length(conc)){

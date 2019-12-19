@@ -32,6 +32,10 @@ ratelast <- function(rate = NULL){
   
   tmp <- rate[!is.na(rate)]
   tmp <- tmp[tmp > 0]
-  rate_last <- tmp[length(tmp)]
+  if(length(tmp) > 0){
+    rate_last <- tmp[length(tmp)]
+  } else {
+    rate_last <- NA
+  }
   return(rate_last)
 }

@@ -43,6 +43,7 @@ create_dependency_list <- function() {
     dependency_list <- list()
     dependency_list[["AE"]] <- list(callfun=c("ae"), regex="^AE(.[0-9]+?.[0-9]+?)*?$", unit_class=c(uclass_amount), valid_models=c(m4), display_list_models=c(m4sd, m4ss), predecessors=c())
     dependency_list[["AEPCT"]] <- list(callfun=c("aepct"), regex="^AEPCT$", unit_class=c(uclass_percent), valid_models=c(m4), display_list_models=c(m4sd, m4ss), predecessors=c("AE"))
+    dependency_list[["AEPCTi"]] <- list(callfun=c("aepct"), regex="^AEPCT(i{1}?|[0-9]+?)$", unit_class=c(uclass_percent), valid_models=c(m4), display_list_models=c(m4ss), predecessors=c("AE"))
     dependency_list[["AET"]] <- list(callfun=c("aet"), regex="^(AET|AMT(.[0-9]+?.[0-9]+?)*?)$", unit_class=c(uclass_amount), valid_models=c(m4), display_list_models=c(m4sd, m4ss), predecessors=c())
     dependency_list[["AETAUi"]] <- list(callfun=c("aet"), regex="^AETAU(i{1}?|[0-9]+?)$", unit_class=c(uclass_amount), valid_models=c(m4), display_list_models=c(m4ss), predecessors=c())
     dependency_list[["AETAUPTi"]] <- list(callfun=c("aetpct"), regex="^AETAUPT(i{1}?|[0-9]+?)$", unit_class=c(uclass_percent), valid_models=c(m4), display_list_models=c(m4ss), predecessors=c("AETAUi", "TAUi"))
