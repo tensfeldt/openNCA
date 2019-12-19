@@ -12,7 +12,6 @@
 #' @param orig_conc The original (full) concentration data (given in a numeric vector)
 #' @param orig_time The original (full) time data (given in a numeric vector)
 #' 
-#' 
 estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate = NULL, extrapolate = NULL, auc_method = NULL, model = NULL, dosing_type = NULL, told = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL) {
   if(is.null(auc_method)){
     stop("Error in estimate_missing_concentration: 'auc_method' is NULL")

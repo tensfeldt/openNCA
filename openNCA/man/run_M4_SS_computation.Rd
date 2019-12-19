@@ -48,7 +48,6 @@ This function will compute all the relevant parameters for a M4 model Stedy Stat
  a step basis for each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear
  trapezoidal rule is used.
 }
-You can specify the options to subset the list of parameters that are returned, please refer to \code{\link{mct_template}} for more information. \cr
 The following are the functions that this function uses to generate parameters: \cr
 \strong{Return List options} \cr
 \enumerate{

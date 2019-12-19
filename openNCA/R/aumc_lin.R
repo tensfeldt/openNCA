@@ -1,3 +1,12 @@
+#' Linear Trapezoidal Area Under the First Moment Curve (AUMC) Calculation Method
+#'
+#' The AUMC linear method is used for the entire profile.
+#' 
+#' @param conc The concentration data (given in a vector form)
+#' @param time The time data (given in a vector form)
+#' @param exflag The exclude flag data (given in a numeric vector)
+#' 
+#! @export
 aumc_lin <- function(conc = NULL, time = NULL, exflag = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in aumc_lin: 'conc' and 'time' vectors are NULL")

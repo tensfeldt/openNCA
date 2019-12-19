@@ -1,10 +1,8 @@
-#! Estimate concentrations from results of linear regression of the time-conc data
-#!
+#' Estimate concentrations from results of linear regression of the time-conc data
+#'
 #' @param tine The vector of time point data
 #' @param conc The vector of concentration data
 #' @param slope The slope of the log-lin regression of the time-conc data generated following selection of the data points
-#!
-#! 2019-08-05/TGT/ estimate_concentration
 #'
 #' @author
 #' \itemize{
@@ -14,6 +12,8 @@
 #' }
 #' 
 #! @export
+#!
+#! 2019-08-05/TGT/ estimate_concentration
 estimate_concentration <- function(time, conc, slope) {
     d <- data.frame(time=time, conc=conc)
     

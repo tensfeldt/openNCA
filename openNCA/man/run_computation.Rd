@@ -19,9 +19,6 @@ run_computation(data = NULL, map = NULL, flag = NULL,
 \description{
 This function will compute all the relevant parameters for based specified fields provided via map argument.\cr
 }
-\details{
-Please refer to \code{\link{mct_template}} for more details on what the 'map' argument dataframe should contain.
-}
 \section{Returns}{
 
 \strong{List} \cr

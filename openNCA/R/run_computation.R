@@ -2,9 +2,6 @@
 #'
 #' This function will compute all the relevant parameters for based specified fields provided via map argument.\cr
 #'
-#' @details
-#' Please refer to \code{\link{mct_template}} for more details on what the 'map' argument dataframe should contain.
-#'
 #' @param data The dataframe that contains the raw data
 #' @param map The dataframe that contains the map data
 #' @param flag The dataframe that contains the flag data

@@ -1,3 +1,31 @@
+#' Parameter List 
+#' 
+#' This function will guide which parameters belong to with model/dosing type and help generate dependency parameters for the respective parameter.\cr
+#' 
+#' @section Returns:
+#' \strong{List} \cr
+#' \itemize{
+#'  \item PARAMETER: callfun, regex, unit_class, valid_models, display_list_models, and predecessors
+#'    \itemize{
+#'      \item callfun: represents the function that will be used to generate the parameters
+#'      \item regex: regular expression that is used to identify the parameter
+#'      \item unit_class: unit class that the parameter belongs to and is used for unit conversion
+#'      \item valid_models: represents which model/dosing type the parameter belongs to for computation
+#'      \item display_list_models: represents which model/dosing type the parameter will be displayed as an output for 
+#'      \item predecessors: list of parameters that the specified parameters belong to
+#'    }
+#' }
+#' 
+#' @examples
+#' create_dependency_list()
+#'
+#' @author
+#' \itemize{
+#'  \item \strong{Thomas Tensfeldt, Pfizer}
+#'  \item website: \url{www.pfizer.com}
+#'  \item email: \url{thomas.g.tensfeldt@pfizer.com}
+#' }
+#' 
 ### 2019-09-01/TGT/
 ### valid_models
 ###  M1   - applies to M1 both SD and SS models

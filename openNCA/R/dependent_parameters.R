@@ -1,3 +1,27 @@
+#' Dependant Parameters
+#' 
+#' This function will generate a list of dependant parameters based on the specified parameter\cr
+#' 
+#' @param parameter Parameter Name
+#' @param dl Dependency List
+#' @param depth Logical Value to enable sub-dependant parameters
+#' 
+#' @section Returns:
+#' \strong{List} \cr
+#' \itemize{
+#'  \item List of dependant parameters
+#' }
+#' 
+#' @examples
+#' No appropriate examples
+#'
+#' @author
+#' \itemize{
+#'  \item \strong{Thomas Tensfeldt, Pfizer}
+#'  \item website: \url{www.pfizer.com}
+#'  \item email: \url{thomas.g.tensfeldt@pfizer.com}
+#' }
+#' 
 dependent_parameters <- function(parameter, dl=create_dependency_list(), depth=TRUE) {
   y <- lapply(dl, FUN=function(x) { if(parameter_required(parameter, x$predecessors)) { return(TRUE) } else { return(FALSE) }  })
   k <- y[y==TRUE]

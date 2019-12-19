@@ -16,10 +16,6 @@ parameter_indices(parameter_names, parameter_list, simplify = FALSE)
 \description{
 This function returns the locations of parameter name values in the provided parameter_list character vector
 }
-\section{Note}{
-
-}
-
 \section{Returns}{
 
 \strong{TRUE} \cr

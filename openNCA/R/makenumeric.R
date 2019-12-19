@@ -5,7 +5,7 @@
 #' @param x vector to force to numeric
 #' @return numeric vector
 #'
-#' #' @author
+#' @author
 #' \itemize{
 #'  \item \strong{Thomas Tensfeldt, Pfizer}
 #'  \item website: \url{www.pfizer.com}

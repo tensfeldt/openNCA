@@ -3,8 +3,6 @@
 #' This function determines whether one or more parameter names have been specified
 #' in the PARAMETERLIST from the Model Configuration Template.
 #'
-#' @section Note:
-#'
 #' @param parameter_names The vector of character values of the regular expression to search in the parameter_list
 #' @param parameter_list  The character vector of parameter names from the PARAMETERLIST of the Model Configuration Template
 #' @param simplify        If simplify is TRUE, default = TRUE, then return a single boolean of whether ALL of the required parameter_names are present in parameter_list. If FALSE, return a list

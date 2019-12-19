@@ -5,7 +5,8 @@
 \title{Cumulative (running sum) amount of drug recovered unchanged in the urine up to time t post-dose,
 where t can have a numerical value.}
 \usage{
-aet(amt = NULL, time = NULL, t = NULL)
+aet(amt = NULL, time = NULL, t = NULL, orig_time = NULL,
+  returnNA = FALSE)
 }
 \arguments{
 \item{amt}{The amount data (given in a vector form) either represents the volume or weight}

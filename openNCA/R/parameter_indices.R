@@ -2,8 +2,6 @@
 #'
 #' This function returns the locations of parameter name values in the provided parameter_list character vector
 #'
-#' @section Note:
-#'
 #' @param parameter_names The character value, optionally vector of character values, of the regular expression(s) to search in the parameter_list
 #' @param parameter_list  The character vector of parameter names from the PARAMETERLIST of the Model Configuration Template
 #' @param simplify	  If simplify is TRUE, default = TRUE, then return a single vector of indices. If FALSE, return a list of indices, named by entries in parameter_name

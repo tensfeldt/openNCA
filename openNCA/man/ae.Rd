@@ -4,7 +4,7 @@
 \alias{ae}
 \title{Total amount of drug recovered unchanged in the urine, from time zero to infinity}
 \usage{
-ae(amt = NULL, time = NULL)
+ae(amt = NULL, time = NULL, orig_time = NULL)
 }
 \arguments{
 \item{amt}{The amount data (given in a vector form)}

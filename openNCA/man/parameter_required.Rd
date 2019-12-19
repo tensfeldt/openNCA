@@ -17,10 +17,6 @@ parameter_required(parameter_names, parameter_list, simplify = TRUE)
 This function determines whether one or more parameter names have been specified
 in the PARAMETERLIST from the Model Configuration Template.
 }
-\section{Note}{
-
-}
-
 \section{Returns}{
 
 \strong{TRUE} \cr

@@ -1,3 +1,15 @@
+#' Linear-Log Trapezoidal Area Under the First Moment Curve (AUMC) Calculation Method
+#'
+#' The Linear-Log Trapezoidal Rule is applied with this AUMC method. The linear method is used
+#' up to Tmax (the first occurrence of Cmax), and the log trapezoidal method is used for the
+#' remainder of the profile. If Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
+#' 
+#' @param conc The concentration data (given in a vector form)
+#' @param time The time data (given in a vector form)
+#' @param exflag The exclude flag data (given in a numeric vector)
+#' @param t_max The first time at which CMAXi is observed within the dosing interval (numeric value)
+#' 
+#! @export
 aumc_lin_log <- function(conc = NULL, time = NULL, exflag = NULL, t_max = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in aumc_lin_log: 'conc' and 'time' vectors are NULL")

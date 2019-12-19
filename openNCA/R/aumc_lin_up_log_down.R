@@ -1,3 +1,15 @@
+#' Linear Up-Log Down Trapezoidal Area Under the First Moment Curve (AUMC) Calculation Method
+#'
+#' Linear trapezoidal while concentrations are increasing, and log trapezoidal while
+#' concentrations are decreasing; the assessment is made on a step by step basis for
+#' each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear trapezoidal
+#' rule is used.
+#' 
+#' @param conc The concentration data (given in a vector form)
+#' @param time The time data (given in a vector form)
+#' @param exflag The exclude flag data (given in a numeric vector)
+#' 
+#! @export
 aumc_lin_up_log_down <- function(conc = NULL, time = NULL, exflag = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in aumc_lin_up_log_down: 'conc' and 'time' vectors are NULL")
