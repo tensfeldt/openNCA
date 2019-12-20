@@ -250,7 +250,9 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
   dosevar <- unlist(strsplit(map_data[,doselist], ";"))
   ### assuming here there is a single dose
-  dosevar <- map[,dosevar]
+  if(!any(duplicated(as.character(unlist(map[,dosevar]))))){
+    dosevar <- map[,dosevar] 
+  }
     
 ###  cat('opt_list: ', opt_list, '\n')
 ###  cat('dosevar: ', dosevar, '\n')
@@ -751,7 +753,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
-      
+    
       tmp_kel_flg <- as.numeric(tmp_df[,map_data$FLGEXKEL])
       if("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data)){
         ex_flag <- as.numeric(tmp_df[,map_data$FLGEXSDE])
@@ -792,20 +794,37 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       test_df <- tmp_df[,c(map_data$CONC, map_data$TIME)]
       if(any(duplicated(test_df))){
         tmp_df <- tmp_df[!duplicated(test_df),]
+        if(!is.null(ex_flag)){
+          ex_flag <- ex_flag[!duplicated(test_df)]
+        }
+        if(!is.null(kel_flag)){
+          kel_flag <- kel_flag[!duplicated(test_df)]
+        }
+        if(!is.null(auc_flag)){
+          auc_flag <- auc_flag[!duplicated(test_df)]
+        }
+        if(!is.null(emesis_flag)){
+          emesis_flag <- emesis_flag[!duplicated(test_df)]
+        }
         warning(paste0("Removing duplicate CONC and TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
       }
       test_df_2 <- tmp_df[,c(map_data$TIME)]
       if(any(duplicated(test_df_2))){
-        tmp_df <- tmp_df[rep(FALSE, nrow(tmp_df)),]
+        tmp_df <- tmp_df[!duplicated(test_df_2),]
+        if(!is.null(ex_flag)){
+          ex_flag <- ex_flag[!duplicated(test_df_2)]
+        }
+        if(!is.null(kel_flag)){
+          kel_flag <- kel_flag[!duplicated(test_df_2)]
+        }
+        if(!is.null(auc_flag)){
+          auc_flag <- auc_flag[!duplicated(test_df_2)]
+        }
+        if(!is.null(emesis_flag)){
+          emesis_flag <- emesis_flag[!duplicated(test_df_2)]
+        }
         warning(paste0("Removing SDEID: '", unique(data_data[,map_data$SDEID])[i], "' due to duplicate TIME but different CONC values"))
       }
-##      2019-11-26/RD Added to account for duplicate TIME but different CONC values
-##
-##      test_df2 <- tmp_df[,c(map_data$TIME)]
-##      if(any(duplicated(test_df2))){
-##        tmp_df <- tmp_df[0,]
-##        warning(paste0("Detected duplicate TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "', cannot generate any parameters!"))
-##      }
       cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
       tmp_dose <- unique(tmp_df[, dosevar])[1]
       
@@ -895,10 +914,13 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          ae_pct <- aepct(ae = a_e, dose = unique(tmp_df[,map_data$DOSE1])[1])
 ###          ae_pct_dose <- unique(tmp_df[,map_data$DOSE])[1]
 ###          ae_pct_dose <- unique(tmp_df[,map_data[,dosevar]])[1]
-          ae_pct_dose <- unique(tmp_df[,dosevar])[1]
+          tmp_map <- map_data
+          tmp_map$DOSEOUTPUTUNIT <- as.character(unique(tmp_df[,map_data$AMOUNTU]))
+          tmp_res <- tmp_df[,c(map_data$SDEID, dosevar)]
+          ae_pct_dose <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "DOSEU", verbose = FALSE)[,dosevar])[1]
 ###          ae_pct <- aepct(ae = a_e, dose = unique(tmp_df[,map_data$DOSE])[1])
 ###          ae_pct <- aepct(ae = a_e, dose = unique(tmp_df[,map_data[,dosevar]])[1])
-          ae_pct <- aepct(ae = a_e, dose = unique(tmp_df[,dosevar])[1])
+          ae_pct <- aepct(ae = a_e, dose = ae_pct_dose)
 ###          cat("ae_pct: ", ae_pct, " ae_pct_dose: ", ae_pct_dose, "\n")
         }
 ###        if("MAXRATE" %in% parameter_list) {
@@ -930,7 +952,8 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###          cat('unique(tmp_df[,map_data$TIME]): ', unique(tmp_df[,map_data$TIME]), '\n')
 ###          cat('length(unique(tmp_df[,map_data$TIME])): ', length(unique(tmp_df[,map_data$TIME])), '\n')
-          for(t in 1:length(unique(data_data[,map_data$TIME]))){
+         
+           for(t in 2:length(unique(data_data[,map_data$TIME]))){
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
             tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$TIME])), t = sort(unique(data_data[,map_data$TIME]))[t], orig_time = sort(unique(data_data[,map_data$TIME])), returnNA = TRUE)
 ###            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data$DOSE1])[1])
@@ -1629,7 +1652,6 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       suppressWarnings(computation_df[,names(computation_df) == as.character(regular_int_type[n])] <- as.numeric(computation_df[,names(computation_df) == as.character(regular_int_type[n])]))
     }
   }
-  
   computation_df <- unit_conversion(data = data_data, map = map_data, result = computation_df, unit_class = "ALL")
 
 ###  print(head(computation_df))

@@ -247,7 +247,9 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
   dosevar <- unlist(strsplit(map_data[,doselist], ";"))
   ### assuming here there is a single dose
-  dosevar <- map[,dosevar]
+  if(!any(duplicated(as.character(unlist(map[,dosevar]))))){
+    dosevar <- map[,dosevar] 
+  }
 
 ### 2019-09-09/TGT/ identify DOSE/DOSE1 from map
 ###  dosevar <- names(parameter_indices("^DOSE(i{1}|[0-9]*?)$", names(map_data), simplify=FALSE))
@@ -898,20 +900,37 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       test_df <- tmp_df[,c(map_data$CONC, map_data$TIME)]
       if(any(duplicated(test_df))){
         tmp_df <- tmp_df[!duplicated(test_df),]
+        if(!is.null(ex_flag)){
+          ex_flag <- ex_flag[!duplicated(test_df)]
+        }
+        if(!is.null(kel_flag)){
+          kel_flag <- kel_flag[!duplicated(test_df)]
+        }
+        if(!is.null(auc_flag)){
+          auc_flag <- auc_flag[!duplicated(test_df)]
+        }
+        if(!is.null(emesis_flag)){
+          emesis_flag <- emesis_flag[!duplicated(test_df)]
+        }
         warning(paste0("Removing duplicate CONC and TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
       }
       test_df_2 <- tmp_df[,c(map_data$TIME)]
       if(any(duplicated(test_df_2))){
-        tmp_df <- tmp_df[rep(FALSE, nrow(tmp_df)),]
+        tmp_df <- tmp_df[!duplicated(test_df_2),]
+        if(!is.null(ex_flag)){
+          ex_flag <- ex_flag[!duplicated(test_df_2)]
+        }
+        if(!is.null(kel_flag)){
+          kel_flag <- kel_flag[!duplicated(test_df_2)]
+        }
+        if(!is.null(auc_flag)){
+          auc_flag <- auc_flag[!duplicated(test_df_2)]
+        }
+        if(!is.null(emesis_flag)){
+          emesis_flag <- emesis_flag[!duplicated(test_df_2)]
+        }
         warning(paste0("Removing SDEID: '", unique(data_data[,map_data$SDEID])[i], "' due to duplicate TIME but different CONC values"))
       }
-##      2019-11-26/RD Added to account for duplicate TIME but different CONC values
-##
-##      test_df2 <- tmp_df[,c(map_data$TIME)]
-##      if(any(duplicated(test_df2))){
-##        tmp_df <- tmp_df[0,]
-##        warning(paste0("Detected duplicate TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "', cannot generate any parameters!"))
-##      }
       cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
       norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_df), unique(tmp_df[,map_data$NORMBS])[1], NA), NA)
       tmp_dose <- unique(tmp_df[, dosevar])[1]
@@ -1900,6 +1919,8 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 }
             }
         }
+        print(names(computation_df))
+        print(computation_df)
 ##        computation_df[i,] <- row_data
       } else {
         if(isTRUE(optimize_kel)){
@@ -1972,7 +1993,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###  print(map_data$AUCOUTPUTUNIT)
   
   computation_df <- unit_conversion(data = data_data, map = map_data, result = computation_df, unit_class = "ALL")
-###  print(computation_df)
+  print(computation_df)
   
   if(is.list(return_list) && !is.null(return_list) && length(return_list) > 0){
     if(!map_data$SDEID %in% return_list && length(return_list) > 1){

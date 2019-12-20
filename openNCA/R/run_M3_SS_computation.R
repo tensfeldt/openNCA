@@ -256,7 +256,9 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   ### Determine DOSEs in dosevar, a vector of dose names pointing into map_data
   doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
   dosevar <- unlist(strsplit(map_data[,doselist], ";"))
-  dosevar <- map[,dosevar]
+  if(!any(duplicated(as.character(unlist(map[,dosevar]))))){
+    dosevar <- map[,dosevar] 
+  }
 
   ### 2019-09-17/TGT/ Precompute list of required parameters for col_names, parameter function evaluation and row_data generation  
   comp_required <- list()
@@ -1219,15 +1221,37 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       test_df <- tmp_df[,c(map_data$CONC, map_data$TIME)]
       if(any(duplicated(test_df))){
         tmp_df <- tmp_df[!duplicated(test_df),]
+        if(!is.null(ex_flag)){
+          ex_flag <- ex_flag[!duplicated(test_df)]
+        }
+        if(!is.null(kel_flag)){
+          kel_flag <- kel_flag[!duplicated(test_df)]
+        }
+        if(!is.null(auc_flag)){
+          auc_flag <- auc_flag[!duplicated(test_df)]
+        }
+        if(!is.null(emesis_flag)){
+          emesis_flag <- emesis_flag[!duplicated(test_df)]
+        }
         warning(paste0("Removing duplicate CONC and TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
       }
-##      2019-11-26/RD Added to account for duplicate TIME but different CONC values
-##
-##      test_df2 <- tmp_df[,c(map_data$TIME)]
-##      if(any(duplicated(test_df2))){
-##        tmp_df <- tmp_df[0,]
-##        warning(paste0("Detected duplicate TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "', cannot generate any parameters!"))
-##      }
+      test_df_2 <- tmp_df[,c(map_data$TIME)]
+      if(any(duplicated(test_df_2))){
+        tmp_df <- tmp_df[!duplicated(test_df_2),]
+        if(!is.null(ex_flag)){
+          ex_flag <- ex_flag[!duplicated(test_df_2)]
+        }
+        if(!is.null(kel_flag)){
+          kel_flag <- kel_flag[!duplicated(test_df_2)]
+        }
+        if(!is.null(auc_flag)){
+          auc_flag <- auc_flag[!duplicated(test_df_2)]
+        }
+        if(!is.null(emesis_flag)){
+          emesis_flag <- emesis_flag[!duplicated(test_df_2)]
+        }
+        warning(paste0("Removing SDEID: '", unique(data_data[,map_data$SDEID])[i], "' due to duplicate TIME but different CONC values"))
+      }
       cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
       
 ##      2019-11-08/RD Added for Interpolation to account for INCLUDEINTERPOLATION Flag
@@ -1999,7 +2023,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]
         if(disp_required[["DOSEi"]]) {
 ##          row_data <- c(row_data, unlist(dose))
-          computation_df[i, paste0("DOSE",1:di_col)] <- unlist(dose)
+          computation_df[i, unlist(dosevar)] <- unlist(dose)
         }
         if(disp_required[["DOSEC"]]) {
 ##          row_data <- c(row_data, dose_c)

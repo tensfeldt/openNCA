@@ -215,7 +215,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###  aet_len <- length(unique(data_data[,map_data[[map_data$TIME]]]))
 ### 2019-09-19/TGT/ aet_len must be done on NOMTIME basis
-  aet_len <- length(unique(data_data[,map_data$TIME]))
+  aet_len <- length(unique(data_data[,map_data$ENDTIME]))-1
 
 ###
 ###  cat('map_data$TIME: ', map_data$TIME, ' ', 'map_data$NOMTIME: ', map_data$NOMTIME, ' ', length(unique(data_data[,map_data$TIME])), '\n')
@@ -252,7 +252,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
   dosevar <- unlist(strsplit(map_data[,doselist], ";"))
   ### assuming here there is a single dose
-  dosevar <- map[,dosevar]
+  if(!any(duplicated(as.character(unlist(map[,dosevar]))))){
+    dosevar <- map[,dosevar] 
+  }
    
   ### 2019-09-19/TGT/ Precompute list of required parameters for col_names, parameter function evaluation and row_data generation  
   comp_required <- list()
@@ -472,9 +474,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "AURCLAST")
     regular_int_type <- c(regular_int_type, "AURCLAST")
   }
-  if(disp_required[["AURCT"]] && (aet_len-1) > 1) {
-    col_names <- c(col_names, rep(paste0("AURC",1:(aet_len-1))), rep(paste0("AURCINT",1:(aet_len-1))))
-    regular_int_type <- c(regular_int_type, paste0("AURC",1:(aet_len-1)))
+  if(disp_required[["AURCT"]] && aet_len > 1) {
+    col_names <- c(col_names, rep(paste0("AURC",1:aet_len)), rep(paste0("AURCINT",1:aet_len)))
+    regular_int_type <- c(regular_int_type, paste0("AURC",1:aet_len))
   }
 ###  if("AURCT1_T2" %in% parameter_list) {
   if(disp_required[["AURCT1_T2"]] && auc_pair_check) {
@@ -785,20 +787,37 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       test_df <- tmp_df[,c(map_data$CONC, map_data$TIME)]
       if(any(duplicated(test_df))){
         tmp_df <- tmp_df[!duplicated(test_df),]
+        if(!is.null(ex_flag)){
+          ex_flag <- ex_flag[!duplicated(test_df)]
+        }
+        if(!is.null(kel_flag)){
+          kel_flag <- kel_flag[!duplicated(test_df)]
+        }
+        if(!is.null(auc_flag)){
+          auc_flag <- auc_flag[!duplicated(test_df)]
+        }
+        if(!is.null(emesis_flag)){
+          emesis_flag <- emesis_flag[!duplicated(test_df)]
+        }
         warning(paste0("Removing duplicate CONC and TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
       }
       test_df_2 <- tmp_df[,c(map_data$TIME)]
       if(any(duplicated(test_df_2))){
-        tmp_df <- tmp_df[rep(FALSE, nrow(tmp_df)),]
+        tmp_df <- tmp_df[!duplicated(test_df_2),]
+        if(!is.null(ex_flag)){
+          ex_flag <- ex_flag[!duplicated(test_df_2)]
+        }
+        if(!is.null(kel_flag)){
+          kel_flag <- kel_flag[!duplicated(test_df_2)]
+        }
+        if(!is.null(auc_flag)){
+          auc_flag <- auc_flag[!duplicated(test_df_2)]
+        }
+        if(!is.null(emesis_flag)){
+          emesis_flag <- emesis_flag[!duplicated(test_df_2)]
+        }
         warning(paste0("Removing SDEID: '", unique(data_data[,map_data$SDEID])[i], "' due to duplicate TIME but different CONC values"))
       }
-##      2019-11-26/RD Added to account for duplicate TIME but different CONC values
-##
-##      test_df2 <- tmp_df[,c(map_data$TIME)]
-##      if(any(duplicated(test_df2))){
-##        tmp_df <- tmp_df[0,]
-##        warning(paste0("Detected duplicate TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "', cannot generate any parameters!"))
-##      }
       cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
       
       if("INCLUDEINTERPOLATION" %in% names(map_data)){
@@ -820,6 +839,10 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###      amt <- at(conc = tmp_df[,map_data$CONC], amt = as.numeric(tmp_df[,map_data$AMOUNT]), time = tmp_df[,map_data[[map_data$TIME]]], amt_units = tmp_df[,map_data$AMOUNTU])
       amt <- at(conc = tmp_df[,map_data$CONC], amt = as.numeric(tmp_df[,map_data$AMOUNT]), time = tmp_df[,map_data$TIME], amt_units = tmp_df[,map_data$AMOUNTU])
+      if(length(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])) > length(tmp_df[,map_data$TIME])){
+        tmp_amt <- data.frame(amt = amt, time = tmp_df[,map_data$TIME])
+        amt <- as.numeric(unlist(lapply(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len]), function(x){ return(ifelse(!(x %in% tmp_df[,map_data$TIME]), NA, tmp_amt[tmp_amt$time == x,"amt"])) })))
+      }
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME, map_data[map_data$ENDTIME]] to map_data$ENDTIME
 ###      rt <- rate(start_time = tmp_df[,map_data[[map_data$TIME]]], end_time = tmp_df[,map_data[[map_data$ENDTIME]]], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]))
 ### 2019-10-03/TGT/ rt <- rate(start_time = tmp_df[,map_data$TIME], end_time = tmp_df[,map_data$ENDTIME], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]))
@@ -950,10 +973,10 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             aet_pct <- NULL
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###            for(t in 1:length(unique(tmp_df[,map_data[[map_data$TIME]]]))){
-            for(t in 1:length(unique(tmp_df[,map_data$TIME]))){
+            for(t in 2:length(unique(data_data[,map_data$TIME]))){
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###              tmp <- aet(amt = amt, time = na.omit(tmp_df[,map_data[[map_data$TIME]]]), t = na.omit(tmp_df[,map_data[[map_data$TIME]]])[t])
-              tmp <- aet(amt = amt, time = na.omit(tmp_df[,map_data$TIME]), t = na.omit(tmp_df[,map_data$TIME])[t])
+              tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$TIME])), t = sort(unique(data_data[,map_data$TIME]))[t], orig_time = sort(unique(data_data[,map_data$TIME])), returnNA = TRUE)
               tmp_pct <-  aetpct(aet = tmp, dose = tmp_dose)
 ###              cat('i: ', i, ' tmp_dose: ', tmp_dose, ' d: ', d, ' dose[[d]]: ', dose[[d]], '\n')
 
@@ -973,7 +996,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###            amt <- at(conc = tmp_df[,map_data$CONC], amt = tmp_df[,map_data$AMOUNT], time = tmp_df[,map_data[[map_data$TIME]]], amt_units = tmp_df[,map_data$AMOUNTU])
-            amt <- at(conc = tmp_df[,map_data$CONC], amt = tmp_df[,map_data$AMOUNT], time = tmp_df[,map_data$TIME], amt_units = tmp_df[,map_data$AMOUNTU])
+            #amt <- at(conc = tmp_df[,map_data$CONC], amt = tmp_df[,map_data$AMOUNT], time = tmp_df[,map_data$TIME], amt_units = tmp_df[,map_data$AMOUNTU])
           }
           if(comp_required[["AETAUi"]]){
             aetau_i[[d]] <- aetau(aet = ae_t, time = na.omit(tmp_df[,map_data$TIME]), t = tau[[d]])
@@ -1022,15 +1045,15 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 }
               }
             } else {
-              aurct <- rep(NA, (aet_len-1))
-              aurc_int <- rep(NA, (aet_len-1))
+              aurct <- rep(NA, aet_len)
+              aurc_int <- rep(NA, aet_len)
             }
             if(d == di_col){
-              if(length(aurct) < (aet_len-1)) {
-                aurct <- c(aurct, rep(NA, ((aet_len-1) - length(aurct))))
+              if(length(aurct) < aet_len) {
+                aurct <- c(aurct, rep(NA, (aet_len - length(aurct))))
               }
-              if(length(aurc_int) < (aet_len-1)) {
-                aurc_int <- c(aurc_int, rep(NA, ((aet_len-1) - length(aurc_int))))
+              if(length(aurc_int) < aet_len) {
+                aurc_int <- c(aurc_int, rep(NA, (aet_len - length(aurc_int))))
               }
             }
           }
@@ -1569,7 +1592,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("DOSEi" %in% parameter_list) {
         if(disp_required[["DOSEi"]]) {
 ##          row_data <- c(row_data, unlist(dose))
-          computation_df[i, paste0("DOSE",1:di_col)] <- unlist(dose)
+          computation_df[i, unlist(dosevar)] <- unlist(dose)
         }
         #print(row_data)
 ###
