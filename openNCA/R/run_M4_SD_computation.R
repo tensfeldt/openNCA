@@ -915,12 +915,13 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          ae_pct_dose <- unique(tmp_df[,map_data$DOSE])[1]
 ###          ae_pct_dose <- unique(tmp_df[,map_data[,dosevar]])[1]
           tmp_map <- map_data
-          tmp_map$DOSEOUTPUTUNIT <- as.character(unique(tmp_df[,map_data$AMOUNTU]))
           tmp_res <- tmp_df[,c(map_data$SDEID, dosevar)]
+          tmp_res$AE <- a_e
           ae_pct_dose <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "DOSEU", verbose = FALSE)[,dosevar])[1]
+          ae_pct_ae <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "AMOUNTU", verbose = FALSE)[,"AE"])[1]
 ###          ae_pct <- aepct(ae = a_e, dose = unique(tmp_df[,map_data$DOSE])[1])
 ###          ae_pct <- aepct(ae = a_e, dose = unique(tmp_df[,map_data[,dosevar]])[1])
-          ae_pct <- aepct(ae = a_e, dose = ae_pct_dose)
+          ae_pct <- aepct(ae = ae_pct_ae, dose = ae_pct_dose)
 ###          cat("ae_pct: ", ae_pct, " ae_pct_dose: ", ae_pct_dose, "\n")
         }
 ###        if("MAXRATE" %in% parameter_list) {
@@ -959,7 +960,12 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data$DOSE1])[1])
 #            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data$DOSE])[1])
 ###            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data[,dosevar]])[1])
-            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,dosevar])[1])
+            tmp_map <- map_data
+            tmp_res <- tmp_df[,c(map_data$SDEID, dosevar)]
+            tmp_res$AET <- tmp
+            aet_pct_dose <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "DOSEU", verbose = FALSE)[,dosevar])[1]
+            aet_pct_aet <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "AMOUNTU", verbose = FALSE)[,"AET"])[1]
+            tmp_pct <-  aetpct(aet = aet_pct_aet, dose = aet_pct_dose)
             
             if(is.null(ae_t)){
               ae_t <- tmp

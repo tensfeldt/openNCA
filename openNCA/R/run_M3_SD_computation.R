@@ -1919,8 +1919,6 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 }
             }
         }
-        print(names(computation_df))
-        print(computation_df)
 ##        computation_df[i,] <- row_data
       } else {
         if(isTRUE(optimize_kel)){
@@ -1993,7 +1991,6 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###  print(map_data$AUCOUTPUTUNIT)
   
   computation_df <- unit_conversion(data = data_data, map = map_data, result = computation_df, unit_class = "ALL")
-  print(computation_df)
   
   if(is.list(return_list) && !is.null(return_list) && length(return_list) > 0){
     if(!map_data$SDEID %in% return_list && length(return_list) > 1){

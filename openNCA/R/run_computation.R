@@ -2442,7 +2442,7 @@ if(FALSE) {
 ###  print(head(data_out))
   
   results_list <- list()
-  if(optimize_kel && toupper(map_data$MODEL) != 'M4'){
+  if(optimize_kel){
     if("KEL" %in% parameter_list){
       results_list$data_out <- data_out$data_out
       results_list$flag_data <- flag_data
