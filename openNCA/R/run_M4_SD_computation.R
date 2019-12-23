@@ -203,7 +203,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   mid_col <- ifelse(sum(auc_list %in% parameter_list) == 1, 2, 0)
 
 ### 2019-08-29/TGT/ remap map_data[[map_data$ENDTIME]] to map_data$ENDTIME
-  aet_len <- length(unique(data_data[,map_data$ENDTIME]))-1
+  aet_len <- length(unique(data_data[,map_data$ENDTIME]))
 ###  cat('aet_len: ', aet_len, '\n')
   reg_col <- sum(regular_list %in% parameter_list) + ifelse(any(c("KELRSQ","KELRSQA") %in% parameter_list), 1, 0)
   aet_col <- ifelse(sum(aet_list %in% parameter_list) > 1, sum(aet_list %in% parameter_list)+1, 0)
@@ -481,7 +481,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "AURCLAST")
     regular_int_type <- c(regular_int_type, "AURCLAST")
   }
-  if(disp_required[["AURCT"]] && aet_len > 1) {
+  if(disp_required[["AURCT"]] && aet_len >= 2) {
     col_names <- c(col_names, rep(paste0("AURC",1:aet_len)), rep(paste0("AURCINT",1:aet_len)))
     regular_int_type <- c(regular_int_type, paste0("AURC",1:aet_len))
   }
@@ -534,20 +534,20 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###  if(parameter_required("^(RATE)([0-9]*?|A|N)$", display_list, simplify=TRUE)) {
   if(parameter_required("^(RATE)([0-9]*?|A|N)$", parameter_list) || parameter_required(dependent_parameters("^(RATE)([0-9]*?|A|N)$"), parameter_list)) {
 ###  if(disp_required[["RATE"]]) {
-      col_names <- c(col_names, rep(paste0("RATE",1:(aet_len+1))))
-      regular_int_type <- c(regular_int_type, rep(paste0("RATE",1:(aet_len+1))))
+      col_names <- c(col_names, rep(paste0("RATE",1:(aet_len))))
+      regular_int_type <- c(regular_int_type, rep(paste0("RATE",1:(aet_len))))
   }
 ### 2019-08-29/TGT/ Add RATE# and MIDPT# placeholders into column names here
 ###  if(parameter_required("^(MIDPT)([0-9]*?|A|N)$", display_list, simplify=TRUE)) {
   if(parameter_required("^(MIDPT)([0-9]*?|A|N)$", parameter_list) || parameter_required(dependent_parameters("^(MIDPT)([0-9]*?|A|N)$"), parameter_list)) {
 ###  if(disp_required[["MIDPT"]]) {
-      col_names <- c(col_names, rep(paste0("MIDPT",1:(aet_len+1))))
-      regular_int_type <- c(regular_int_type, rep(paste0("MIDPT",1:(aet_len+1))))
+      col_names <- c(col_names, rep(paste0("MIDPT",1:(aet_len))))
+      regular_int_type <- c(regular_int_type, rep(paste0("MIDPT",1:(aet_len))))
   }
 
 ### 2019-10-20/TGT/ Added CONC and CONCTIME values to results output
-  col_names <- c(col_names, rep(paste0("CONC",1:(aet_len+1))), rep(paste0("CONCTIME",1:(aet_len+1))))
-  regular_int_type <- c(regular_int_type, rep(paste0("CONC",1:(aet_len+1))), rep(paste0("CONCTIME",1:(aet_len+1))))
+  col_names <- c(col_names, rep(paste0("CONC",1:(aet_len))), rep(paste0("CONCTIME",1:(aet_len))))
+  regular_int_type <- c(regular_int_type, rep(paste0("CONC",1:(aet_len))), rep(paste0("CONCTIME",1:(aet_len))))
     
 ### 2019-08-29/TGT/ must move "DOSEi" to "DOSE1". Will make these interoperable subsequently  
 ###  if("DOSEi" %in% parameter_list && opt_list[1] %in% names(map_data)) {
@@ -954,7 +954,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          cat('unique(tmp_df[,map_data$TIME]): ', unique(tmp_df[,map_data$TIME]), '\n')
 ###          cat('length(unique(tmp_df[,map_data$TIME])): ', length(unique(tmp_df[,map_data$TIME])), '\n')
          
-           for(t in 2:length(unique(data_data[,map_data$TIME]))){
+           for(t in 1:length(unique(data_data[,map_data$TIME]))){
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
             tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$TIME])), t = sort(unique(data_data[,map_data$TIME]))[t], orig_time = sort(unique(data_data[,map_data$TIME])), returnNA = TRUE)
 ###            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data$DOSE1])[1])
@@ -1123,7 +1123,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
         }
-        if(comp_required[["AURCT"]] && aet_len > 1) {
+        if(comp_required[["AURCT"]] && aet_len > 2) {
           aurct <- NULL
           aurc_int <- NULL
           if(length(mid_pt) > 1){
@@ -1365,6 +1365,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if(parameter_required("^AET$", parameter_list) || parameter_required(dependent_parameters("^AET$"), parameter_list)) {
         if(disp_required[["AET"]]) {
 ##          row_data <- c(row_data, amt, ae_t)
+          print(ae_t)
           computation_df[i, paste0("AMT.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- amt
           computation_df[i, paste0("AE.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- ae_t
         }
@@ -1500,7 +1501,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##          row_data <- c(row_data, aurclast)
           computation_df[i, "AURCLAST"] <- aurclast
         }
-        if(disp_required[["AURCT"]] && aet_len > 1) {
+        if(disp_required[["AURCT"]] && aet_len > 2) {
 ##          row_data <- c(row_data, aurct, aurc_int)
           computation_df[i, paste0("AURC",1:aet_len)] <- aurct
           computation_df[i, paste0("AURCINT",1:aet_len)] <- aurc_int
@@ -1554,21 +1555,21 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(parameter_required("^(RATE)([0-9]*?|A|N)$", parameter_list) || parameter_required(dependent_parameters("^(RATE)([0-9]*?|A|N)$"), parameter_list)) {
 ###        if(disp_required[["RATE"]]) {
 ##          row_data <- c(row_data, c(rt, rep(NA, ((aet_len+1) - length(rt)))))
-          computation_df[i, paste0("RATE",1:(aet_len+1))] <- c(rt, rep(NA, ((aet_len+1) - length(rt))))
+          computation_df[i, paste0("RATE",1:(aet_len))] <- c(rt, rep(NA, ((aet_len) - length(rt))))
         }
 ###        if(parameter_required("^(MIDPT)([0-9]*?|A|N)$", display_list, simplify=TRUE)) {
         if(parameter_required("^(MIDPT)([0-9]*?|A|N)$", parameter_list) || parameter_required(dependent_parameters("^(MIDPT)([0-9]*?|A|N)$"), parameter_list)) {
 ###        if(disp_required[["MIDPT"]]) {
 ##          row_data <- c(row_data, c(mid_pt, rep(NA, ((aet_len+1) - length(mid_pt)))))
-          computation_df[i, paste0("MIDPT",1:(aet_len+1))] <- c(mid_pt, rep(NA, ((aet_len+1) - length(mid_pt))))
+          computation_df[i, paste0("MIDPT",1:(aet_len))] <- c(mid_pt, rep(NA, ((aet_len) - length(mid_pt))))
         }
           
 ##        row_data <- c(row_data,
 ##                      c(tmp_df[,map_data$CONC], rep(NA, ((aet_len+1) - length(tmp_df[,map_data$CONC])))),
 ##                      c(tmp_df[,map_data$TIME], rep(NA, ((aet_len+1) - length(tmp_df[,map_data$TIME]))))
 ##                      )
-        computation_df[i, paste0("CONC",1:(aet_len+1))] <- c(tmp_df[,map_data$CONC], rep(NA, ((aet_len+1) - length(tmp_df[,map_data$CONC]))))
-        computation_df[i, paste0("CONCTIME",1:(aet_len+1))] <- c(tmp_df[,map_data$TIME], rep(NA, ((aet_len+1) - length(tmp_df[,map_data$TIME]))))
+        computation_df[i, paste0("CONC",1:(aet_len))] <- c(tmp_df[,map_data$CONC], rep(NA, ((aet_len) - length(tmp_df[,map_data$CONC]))))
+        computation_df[i, paste0("CONCTIME",1:(aet_len))] <- c(tmp_df[,map_data$TIME], rep(NA, ((aet_len) - length(tmp_df[,map_data$TIME]))))
         
 ### 2019-08-29/TGT/ must move "DOSEi" to "DOSE1". Will make these interoperable subsequently  
 ###        if("DOSEi" %in% parameter_list && opt_list[1] %in% names(map_data)){
