@@ -854,7 +854,16 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       amt <- at(conc = tmp_df[,map_data$CONC], amt = as.numeric(tmp_df[,map_data$AMOUNT]), time = tmp_df[,map_data$TIME], amt_units = tmp_df[,map_data$AMOUNTU])
       if(length(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])) > length(tmp_df[,map_data$TIME])){
         tmp_amt <- data.frame(amt = amt, time = tmp_df[,map_data$TIME])
-        amt <- as.numeric(unlist(lapply(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len]), function(x){ return(ifelse(!(x %in% tmp_df[,map_data$TIME]), NA, tmp_amt[tmp_amt$time == x,"amt"])) })))
+        amt <- as.numeric(unlist(lapply(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len]), function(x){
+          idx <- tmp_df[,map_data$ENDTIME] == x
+          tmp_s_val <- tmp_df[,map_data$TIME][idx]
+          tmp_e_val <- tmp_df[,map_data$ENDTIME][idx]
+          if(length(tmp_s_val) > 0 && length(tmp_e_val) > 0){
+            return(tmp_amt[tmp_amt$time == tmp_s_val,"amt"]) 
+          } else {
+            return(NA)  
+          }
+        })))
       }
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ### 2019-08-29/TGT/ remap map_data[[map_data$ENDTIME]] to map_data$ENDTIME
@@ -904,7 +913,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if(parameter_required("^AE$", parameter_list) || parameter_required(dependent_parameters("^AE$"), parameter_list)) {
         if(comp_required[["AE"]]) {
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
-          a_e <- ae(amt = amt, time = tmp_df[,map_data$TIME])
+          a_e <- ae(amt = amt, time = tmp_df[,map_data$TIME], orig_time = sort(unique(data_data[,map_data$TIME])))
 ###          cat("a_e: ", a_e, "\n")
         }
 ###        if("AEPCT" %in% parameter_list && "AE" %in% parameter_list) {
@@ -956,7 +965,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
          
            for(t in 1:length(unique(data_data[,map_data$TIME]))){
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
-            tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$TIME])), t = sort(unique(data_data[,map_data$TIME]))[t], orig_time = sort(unique(data_data[,map_data$TIME])), returnNA = TRUE)
+            tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$TIME])), t = sort(unique(data_data[,c(map_data$TIME, map_data$ENDTIME)])[,map_data$TIME])[t], orig_time = unique(data_data[,c(map_data$TIME, map_data$ENDTIME)]), returnNA = TRUE)
 ###            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data$DOSE1])[1])
 #            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data$DOSE])[1])
 ###            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data[,dosevar]])[1])
@@ -1016,29 +1025,32 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           tmp_time <- orig_time
           tmp_conc <- orig_conc
           
-          if("FLGNOCMAX" %in% names(map_data) && (map_data$FLGNOCMAX == 1 || map_data$FLGNOCMAX == 0)){
-            flg_no_cmax <- as.logical(as.numeric(map_data$FLGNOCMAX))
-            if(isTRUE(flg_no_cmax)){
-              if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
-                s_time <- match(t_max, orig_time)+1
-                e_time <- match(t_last, orig_time)
-                tmp_time <- orig_time[s_time:e_time]
-              }
-              if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
-                s_conc <- match(c_max, orig_conc)+1
-                e_conc <- match(c_last, orig_conc)
-                tmp_conc <- orig_conc[s_conc:e_conc]
-              }
-            } else {
-              if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
-                s_time <- match(t_max, orig_time)
-                e_time <- match(t_last, orig_time)
-                tmp_time <- orig_time[s_time:e_time]
-              }
-              if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
-                s_conc <- match(c_max, orig_conc)
-                e_conc <- match(c_last, orig_conc)
-                tmp_conc <- orig_conc[s_conc:e_conc]
+          flg_no_cmax_check <- FALSE
+          if("FLGNOCMAX" %in% names(map_data)){
+            if(!is.na(map_data$FLGNOCMAX) && (map_data$FLGNOCMAX == 1 || map_data$FLGNOCMAX == 0)){
+              flg_no_cmax <- as.logical(as.numeric(map_data$FLGNOCMAX))
+              if(isTRUE(flg_no_cmax)){
+                if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
+                  s_time <- match(t_max, orig_time)+1
+                  e_time <- match(t_last, orig_time)
+                  tmp_time <- orig_time[s_time:e_time]
+                }
+                if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
+                  s_conc <- match(c_max, orig_conc)+1
+                  e_conc <- match(c_last, orig_conc)
+                  tmp_conc <- orig_conc[s_conc:e_conc]
+                }
+              } else {
+                if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
+                  s_time <- match(t_max, orig_time)
+                  e_time <- match(t_last, orig_time)
+                  tmp_time <- orig_time[s_time:e_time]
+                }
+                if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
+                  s_conc <- match(c_max, orig_conc)
+                  e_conc <- match(c_last, orig_conc)
+                  tmp_conc <- orig_conc[s_conc:e_conc]
+                }
               }
             }
           } else {
@@ -1051,6 +1063,10 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               s_conc <- match(c_max, orig_conc)+1
               e_conc <- match(c_last, orig_conc)
               tmp_conc <- orig_conc[s_conc:e_conc]
+            }
+            if(!isTRUE(flg_no_cmax_check)){
+              warning("Flag 'FLGNOCMAX' value provided via 'map' does not have a proper format! Please make sure the value is either '1' or '0'!")             
+              flg_no_cmax_check <- TRUE
             }
           }
           
@@ -1365,7 +1381,6 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if(parameter_required("^AET$", parameter_list) || parameter_required(dependent_parameters("^AET$"), parameter_list)) {
         if(disp_required[["AET"]]) {
 ##          row_data <- c(row_data, amt, ae_t)
-          print(ae_t)
           computation_df[i, paste0("AMT.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- amt
           computation_df[i, paste0("AE.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- ae_t
         }

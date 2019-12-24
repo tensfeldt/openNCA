@@ -1404,29 +1404,32 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           tmp_time <- orig_time
           tmp_conc <- orig_conc
           
+          flg_no_cmax_check <- FALSE
           if("FLGNOCMAX" %in% names(map_data) && (map_data$FLGNOCMAX == 1 || map_data$FLGNOCMAX == 0)){
-            flg_no_cmax <- as.logical(as.numeric(map_data$FLGNOCMAX))
-            if(isTRUE(flg_no_cmax)){
-              if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
-                s_time <- match(t_max, orig_time)+1
-                e_time <- match(t_last, orig_time)
-                tmp_time <- orig_time[s_time:e_time]
-              }
-              if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
-                s_conc <- match(c_max, orig_conc)+1
-                e_conc <- match(c_last, orig_conc)
-                tmp_conc <- orig_conc[s_conc:e_conc]
-              }
-            } else {
-              if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
-                s_time <- match(t_max, orig_time)
-                e_time <- match(t_last, orig_time)
-                tmp_time <- orig_time[s_time:e_time]
-              }
-              if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
-                s_conc <- match(c_max, orig_conc)
-                e_conc <- match(c_last, orig_conc)
-                tmp_conc <- orig_conc[s_conc:e_conc]
+            if(!is.na(map_data$FLGNOCMAX) && (map_data$FLGNOCMAX == 1 || map_data$FLGNOCMAX == 0)){
+              flg_no_cmax <- as.logical(as.numeric(map_data$FLGNOCMAX))
+              if(isTRUE(flg_no_cmax)){
+                if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
+                  s_time <- match(t_max, orig_time)+1
+                  e_time <- match(t_last, orig_time)
+                  tmp_time <- orig_time[s_time:e_time]
+                }
+                if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
+                  s_conc <- match(c_max, orig_conc)+1
+                  e_conc <- match(c_last, orig_conc)
+                  tmp_conc <- orig_conc[s_conc:e_conc]
+                }
+              } else {
+                if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
+                  s_time <- match(t_max, orig_time)
+                  e_time <- match(t_last, orig_time)
+                  tmp_time <- orig_time[s_time:e_time]
+                }
+                if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
+                  s_conc <- match(c_max, orig_conc)
+                  e_conc <- match(c_last, orig_conc)
+                  tmp_conc <- orig_conc[s_conc:e_conc]
+                }
               }
             }
           } else {
@@ -1439,6 +1442,10 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               s_conc <- match(c_max, orig_conc)+1
               e_conc <- match(c_last, orig_conc)
               tmp_conc <- orig_conc[s_conc:e_conc]
+            }
+            if(!isTRUE(flg_no_cmax_check)){
+              warning("Flag 'FLGNOCMAX' value provided via 'map' does not have a proper format! Please make sure the value is either '1' or '0'!")             
+              flg_no_cmax_check <- TRUE
             }
           }
 

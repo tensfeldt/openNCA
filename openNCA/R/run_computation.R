@@ -2244,32 +2244,32 @@ if(FALSE) {
 #  print(j)
 ###  stop("here")
   
-  if("RETURNCOLS" %in% names(map_data)){
-    if(!is.null(map_data$RETURNCOLS) && !is.na(map_data$RETURNCOLS) && map_data$RETURNCOLS != ""){
-      return_list <- as.list(strsplit(map_data$RETURNCOLS, ";")[[1]])
+  if(parameterset=="PARAMETERLIST"){
+    if("RETURNCOLS" %in% names(map_data)){
+      if(!is.null(map_data$RETURNCOLS) && !is.na(map_data$RETURNCOLS) && map_data$RETURNCOLS != ""){
+        return_list <- as.list(strsplit(map_data$RETURNCOLS, ";")[[1]])
+      } else {
+        return_list <- list()
+###   2019-08-15/TGT/ Change wording
+###       warning("'RETURNCOLS' values provided via 'map' is not used for this computation")
+        warning("'RETURNCOLS' values provided via 'map' are not used for this computation")
+      }
     } else {
       return_list <- list()
-### 2019-08-15/TGT/ Change wording
-###      warning("'RETURNCOLS' values provided via 'map' is not used for this computation")
-      warning("'RETURNCOLS' values provided via 'map' are not used for this computation")
+      warning("Dataset provided via 'map' does not contain the 'RETURNCOLS' column")
     }
-  } else {
-    return_list <- list()
-    warning("Dataset provided via 'map' does not contain the 'RETURNCOLS' column")
   }
   
   if(parameterset=="PARAMETERDISPLAYLIST") { 
     if("DATADISPLAYLIST" %in% names(map_data)){
       if(!is.null(map_data$DATADISPLAY) && !is.na(map_data$DATADISPLAYLIST) && map_data$DATADISPLAYLIST != ""){
-        if(length(return_list) > 0){
-          return_list <- as.list(c(strsplit(map_data$DATADISPLAYLIST, ";")[[1]], unlist(return_list)))
-        } else {
-          return_list <- as.list(strsplit(map_data$DATADISPLAYLIST, ";")[[1]])
-        }
+        return_list <- as.list(strsplit(map_data$DATADISPLAYLIST, ";")[[1]])
       } else {
+        return_list <- list()
         warning("'DATADISPLAYLIST' values provided via 'map' are not used for this computation")
       }
     } else {
+      return_list <- list()
       warning("Dataset provided via 'map' does not contain the 'DATADISPLAYLIST' column")
     }
   }
@@ -2445,14 +2445,14 @@ if(FALSE) {
   if(optimize_kel){
     if("KEL" %in% parameter_list){
       results_list$data_out <- data_out$data_out
-      results_list$flag_data <- flag_data
+      results_list$flag_data <- flag_data[1:nrow(merged_data),]
       if(!is.null(data_out$optimized_kel_flag)){
         results_list$flag_data[,map_data$FLGEXKEL] <- data_out$optimized_kel_flag
       }
       results_list$est_data <- data_out$est_data
     } else {
       results_list$data_out <- data_out$data_out
-      results_list$flag_data <- flag_data
+      results_list$flag_data <- flag_data[1:nrow(merged_data),]
       if(!is.null(data_out$optimized_kel_flag)){
         results_list$flag_data[,map_data$FLGEXKEL] <- data_out$optimized_kel_flag
       }
@@ -2460,11 +2460,11 @@ if(FALSE) {
   } else {
     if("KEL" %in% parameter_list){
       results_list$data_out <- data_out$data_out
-      results_list$flag_data <- flag_data
+      results_list$flag_data <- flag_data[1:nrow(merged_data),]
       results_list$est_data <- data_out$est_data
     } else {
       results_list$data_out <- data_out$data_out
-      results_list$flag_data <- flag_data
+      results_list$flag_data <- flag_data[1:nrow(merged_data),]
     }
   }
 ###  print(head(results_list$data_out))

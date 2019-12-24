@@ -35,7 +35,7 @@ update_mct_data <- function(map, data, flag, verbose=FALSE) {
     function_name <- as.list(sys.call())[[1]]
 
     ### call timeconcvalues to determine TIME/CONC values provided
-    timeconcvalues <- validate_timeconc_data(map, data, verbose=verbose)
+    timeconcvalues <- validate_timeconc_data(map, data, flag, verbose=verbose)
     if(verbose) { cat(function_name, ' timeconcvalues: \n'); print(timeconcvalues) }
     ### timeconcvalues should all be column names/fields in data at this point, rather than pointers to other values in map
 

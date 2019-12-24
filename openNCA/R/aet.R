@@ -124,18 +124,32 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, returnNA=FALS
   } else {
     amt_check <- FALSE
   }
-  
+  #print('in aet')
+  #print(time)
+  #print(amt)
+  #print(paste0("t: ", t))
   if(isTRUE(amt_check)) {
     a_e <- NA
   } else {
     if(t %in% time) {
       tmp_time <- time[time <= t]
+      #print("tmp_time")
+      #print(tmp_time)
       if(length(tmp_time) > 0) {
         tmp_amt <- amt[1:length(tmp_time)]
+        #print("tmp_amt")
+        #print(tmp_amt)
       } else {
         stop("Error in aet: value 't' cannot be used to subset 'time' vector")
       }
-      a_e <- sum(tmp_amt[!is.na(tmp_time)], na.rm = TRUE)
+      #print(tmp_amt[!is.na(tmp_time)])
+      #print(tmp_amt[!is.na(tmp_time)][1:length(tmp_time)])
+      #print("+++++++++")
+      if(is.logical(returnNA) && isTRUE(returnNA)){
+        a_e <- sum(tmp_amt[!is.na(tmp_time)][1:length(tmp_time)])
+      } else {
+        a_e <- sum(tmp_amt[!is.na(tmp_time)][1:length(tmp_time)], na.rm = TRUE)
+      }
     } else {
       if(is.logical(returnNA) && !isTRUE(returnNA)){
         stop("Error in aet: value 't' is not present in 'time' vector") 
@@ -144,5 +158,7 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, returnNA=FALS
       }
     }
   }
+  #print("final a_e")
+  #print(a_e)
   return(a_e)
 }

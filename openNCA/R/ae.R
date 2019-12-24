@@ -102,16 +102,22 @@ ae <- function(amt = NULL, time = NULL, orig_time = NULL){
   if(!(is.numeric(amt) && is.vector(amt))){
     stop("Error in ae: 'amt' is not a numeric vector")
   }
+  
+  if(is.null(orig_time)){
+    amt_check <- any(is.na(amt))
+  } else {
+    amt_check <- FALSE
+  }
 
-  if(any(is.na(amt))) {
+  if(isTRUE(amt_check)) {
     a_e <- NA
   } else {
     if(is.null(orig_time)){
-      a_e <- sum(amt[!is.na(time)])
+      a_e <- sum(amt[!is.na(time)], na.rm = TRUE)
     } else {
       tmp_time <- time[!is.na(time)]
       tmp_time <- orig_time[orig_time %in% tmp_time]
-      a_e <- sum(amt[tmp_time])
+      a_e <- sum(amt[!is.na(tmp_time)], na.rm = TRUE)
     }
   }
 

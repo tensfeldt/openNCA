@@ -24,7 +24,7 @@
 #' }
 #'
 #' @export
-validate_timeconc_data <- function(map, data, verbose=FALSE) {
+validate_timeconc_data <- function(map, data, flag, verbose=FALSE) {
     results <- list()
     time.pointer  <- NULL
     timeu.pointer <- NULL
@@ -224,15 +224,25 @@ validate_timeconc_data <- function(map, data, verbose=FALSE) {
     if(parameter_required("^TAU(i{1}|[0-9]*?)$", names(map))) {
       vtau <- parameter_indices("^TAU(i{1}|[0-9]*?)$", names(map))
       vtau <- names(vtau)
-      
-      ### Check that taus appear in concentration dataset
-      ###  any missing tau definitions in MCP will be treated as NA TAUS
-      k <- parameter_indices(paste0("^",map[,vtau],"$"), names(data), simplify=FALSE)
-      ### vtaudata is a boolean indicating whether the values of vtau appear in the input concentration dataset or not        
-      vtaudata <- is.element(map[,vtau], names(k))
+
+      k0 <- parameter_indices(paste0("^",map[,vtau],"$"), names(flag), simplify=FALSE)
+      vtaudata <- is.element(map[,vtau], names(k0))
       missing_tau_names <- vtau[!vtaudata]
-      if(length(missing_tau_names)>0) {
-        cat(missing_tau_names, " as defined in 'map', do not appear in input concentration dataset", "\n")
+      ##if(length(missing_tau_names)>0) {
+      ##  cat(missing_tau_names, " as defined in 'map', do not appear in input concentration flag dataset", "\n")
+      ##}
+      if(!all(as.logical(vtaudata))){
+        ### Check that taus appear in concentration dataset
+        ###  any missing tau definitions in MCP will be treated as NA TAUS
+        k <- parameter_indices(paste0("^",map[,vtau],"$"), names(data), simplify=FALSE)
+        ### vtaudata is a boolean indicating whether the values of vtau appear in the input concentration dataset or not        
+        vtaudata <- is.element(map[,vtau], names(k))
+        missing_tau_names <- vtau[!vtaudata]
+        if(length(missing_tau_names)>0) {
+          cat(missing_tau_names, " as defined in 'map', do not appear in input concentration dataset", "\n")
+        }
+      } else {
+        
       }
     }
     else {
@@ -252,14 +262,22 @@ validate_timeconc_data <- function(map, data, verbose=FALSE) {
       vtold <- parameter_indices("^TOLD(i{1}|[0-9]*?)$", names(map))
       vtold <- names(vtold)
       
-      ### Check that tolds appear in concentration dataset
-      ###  any missing dose definitions in MCP will be treated as NA TOLDS
-      k <- parameter_indices(paste0("^",map[,vtold],"$"), names(data), simplify=FALSE)
-      ### vtolddata is a boolean indicating whether the values of vtold appear in the input concentration dataset or not        
-      vtolddata <- is.element(map[,vtold], names(k))
+      k0 <- parameter_indices(paste0("^",map[,vtold],"$"), names(flag), simplify=FALSE)
+      vtolddata <- is.element(map[,vtold], names(k0))
       missing_told_names <- vtold[!vtolddata]
-      if(length(missing_told_names)>0) {
-        cat(missing_told_names, " as defined in 'map', do not appear in input concentration dataset", "\n")
+      ##if(length(missing_told_names)>0) {
+      ##  cat(missing_told_names, " as defined in 'map', do not appear in input concentration flag dataset", "\n")
+      ##}
+      if(!all(as.logical(vtolddata))){
+        ### Check that tolds appear in concentration dataset
+        ###  any missing dose definitions in MCP will be treated as NA TOLDS
+        k <- parameter_indices(paste0("^",map[,vtold],"$"), names(data), simplify=FALSE)
+        ### vtolddata is a boolean indicating whether the values of vtold appear in the input concentration dataset or not        
+        vtolddata <- is.element(map[,vtold], names(k))
+        missing_told_names <- vtold[!vtolddata]
+        if(length(missing_told_names)>0) {
+          cat(missing_told_names, " as defined in 'map', do not appear in input concentration dataset", "\n")
+        }
       }
     }
     else {
