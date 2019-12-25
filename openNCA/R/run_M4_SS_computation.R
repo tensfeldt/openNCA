@@ -474,8 +474,8 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     regular_int_type <- c(regular_int_type, "AURCLAST")
   }
   if(disp_required[["AURCT"]] && aet_len >= 2) {
-    col_names <- c(col_names, rep(paste0("AURC",1:aet_len)), rep(paste0("AURCINT",1:aet_len)))
-    regular_int_type <- c(regular_int_type, paste0("AURC",1:aet_len))
+    col_names <- c(col_names, rep(paste0("AURC",1:(aet_len-1))), rep(paste0("AURCINT",1:(aet_len-1))))
+    regular_int_type <- c(regular_int_type, paste0("AURC",1:(aet_len-1)))
   }
 ###  if("AURCT1_T2" %in% parameter_list) {
   if(disp_required[["AURCT1_T2"]] && auc_pair_check) {
@@ -515,8 +515,14 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "VOLSUM")
     regular_int_type <- c(regular_int_type, "VOLSUM")
   }
-  col_names <- c(col_names, rep(paste0("RATE",1:(aet_len))), rep(paste0("MIDPT",1:(aet_len))))
-  regular_int_type <- c(regular_int_type, rep(paste0("RATE",1:(aet_len))), rep(paste0("MIDPT",1:(aet_len))))
+  if(parameter_required("^(RATE)([0-9]*?|A|N)$", parameter_list) || parameter_required(dependent_parameters("^(RATE)([0-9]*?|A|N)$"), parameter_list)) {
+    col_names <- c(col_names, rep(paste0("RATE",1:(aet_len))))
+    regular_int_type <- c(regular_int_type, rep(paste0("RATE",1:(aet_len))))
+  }
+  if(parameter_required("^(MIDPT)([0-9]*?|A|N)$", parameter_list) || parameter_required(dependent_parameters("^(MIDPT)([0-9]*?|A|N)$"), parameter_list)) {
+    col_names <- c(col_names, rep(paste0("MIDPT",1:(aet_len))))
+    regular_int_type <- c(regular_int_type, rep(paste0("MIDPT",1:(aet_len))))
+  }
 ###  if("DIi" %in% parameter_list) {
   if(disp_required[["DIi"]]) {
     col_names <- c(col_names, rep(paste0("DI",1:di_col)))
@@ -693,7 +699,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
 
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
-###    cat("############### SDEID: ", i, '\n')
+###    cat("############### SDEID: ", unique(data_data[,map_data$SDEID])[i], '\n')
     tryCatch({
 ###      if("DIi" %in% parameter_list) {
       if(comp_required[["DIi"]]) {
@@ -847,7 +853,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-10-03/TGT/ rt <- rate(start_time = tmp_df[,map_data$TIME], end_time = tmp_df[,map_data$ENDTIME], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]))
       type <- ifelse("SAMPLETYPE" %in% names(map_data), ifelse(map_data$SAMPLETYPE %in% names(tmp_df), as.character(unique(tmp_df[,map_data$SAMPLETYPE])[1]), NULL), NULL)
       rt <- rate(start_time = tmp_df[,map_data$TIME], end_time = tmp_df[,map_data$ENDTIME], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]), volu = tmp_df[,map_data$AMOUNTU], type = type, map = map_data)
-      
+
       if(nrow(tmp_df) > 0){
         orig_time <- rt
         orig_conc <- mid_pt
@@ -972,10 +978,13 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             aet_pct <- NULL
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###            for(t in 1:length(unique(tmp_df[,map_data[[map_data$TIME]]]))){
-            for(t in 1:length(unique(data_data[,map_data$TIME]))){
+            for(t in 1:length(unique(data_data[,c(map_data$TIME, map_data$ENDTIME)])[,map_data$TIME])){
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###              tmp <- aet(amt = amt, time = na.omit(tmp_df[,map_data[[map_data$TIME]]]), t = na.omit(tmp_df[,map_data[[map_data$TIME]]])[t])
-              tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$TIME])), t = sort(unique(data_data[,map_data$TIME]))[t], orig_time = sort(unique(data_data[,map_data$TIME])), returnNA = TRUE)
+              tmp_data <- unique(data_data[,c(map_data$TIME, map_data$ENDTIME)]) 
+              tmp_time_t <- tmp_data[order(tmp_data[,map_data$TIME], tmp_data[,map_data$ENDTIME]),]
+              tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$TIME])), t = tmp_time_t[t,map_data$TIME], orig_time = tmp_time_t[t,], all_time = tmp_time_t, returnNA = TRUE)
+              
               tmp_map <- map_data
               tmp_res <- tmp_df[,c(map_data$SDEID, dosevar)]
               tmp_res$AET <- tmp
@@ -1026,14 +1035,14 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                   aurct[[t-1]] <- tmp
                   aurc_int[[t-1]] <- tmp_int
                 } else {
+                  prev_aurc <- ifelse((t-2) >= 0, unlist(aurct[[t-2]]), NA)
                   if(prev_na){
                     prev_na <- FALSE
                     if(is.numeric(tmp)){
-                      prev_aurc <- unlist(aurct[[t-2]])
                       aurct[[t-1]] <- sum(c(prev_aurc, tmp), na.rm = TRUE)
                     }
                   } else {
-                    if(!is.na(prev_auc)){
+                    if(!is.na(prev_aurc)){
                       aurct[[t-1]] <- sum(c(prev_aurc, tmp), na.rm = TRUE)
                     } else {
                       aurct[[t-1]] <- sum(c(aurct[[t-1]], tmp), na.rm = TRUE)
@@ -1049,15 +1058,16 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 }
               }
             } else {
-              aurct <- rep(NA, aet_len)
-              aurc_int <- rep(NA, aet_len)
+              aurct <- rep(NA, aet_len-1)
+              aurc_int <- rep(NA, aet_len-1)
             }
+            
             if(d == di_col){
-              if(length(aurct) < aet_len) {
-                aurct <- c(aurct, rep(NA, (aet_len - length(aurct))))
+              if(length(aurct) < (aet_len-1)) {
+                aurct <- c(aurct, rep(NA, ((aet_len-1) - length(aurct))))
               }
-              if(length(aurc_int) < aet_len) {
-                aurc_int <- c(aurc_int, rep(NA, (aet_len - length(aurc_int))))
+              if(length(aurc_int) < (aet_len-1)) {
+                aurc_int <- c(aurc_int, rep(NA, ((aet_len-1) - length(aurc_int))))
               }
             }
           }
@@ -1226,13 +1236,20 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               }
             }
             
-            kelr_val <- kel_r(conc = rt, time = mid_pt)[["KELRSQ"]]
-            if("AURCXPCTO" %in% flag_df$VAR){
-              aucxpct <- auc_XpctO(conc = rt, time = mid_pt, method = method, aucflag = auc_flag)
-            } else if("AURCXPCTP" %in% flag_df$VAR){
-              aucxpct <- auc_XpctP(conc = rt, time = mid_pt, method = method, aucflag = auc_flag)
-            } else {
-              stop("Error in optimize kel")
+## /2019-11-22/RD This is the old optimize kel logic 
+##            kelr_val <- kel_r(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])[["KELRSQ"]]
+##            if("AUCXPCTO" %in% flag_df$VAR){
+##              aucxpct <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, aucflag = auc_flag)
+##            } else if("AUCXPCTP" %in% flag_df$VAR){
+##              aucxpct <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, aucflag = auc_flag)
+##            } else {
+##              stop("Error in optimize kel")
+##            }
+            kelr_val <- as.numeric(flag_df$CRIT[match("KELRSQ", flag_df$VAR)])
+            if("AUCXPCTO" %in% flag_df$VAR){
+              aucxpct <- as.numeric(flag_df$CRIT[match("AUCXPCTO", flag_df$VAR)])
+            } else if("AUCXPCTP" %in% flag_df$VAR){
+              aucxpct <- as.numeric(flag_df$CRIT[match("AUCXPCTP", flag_df$VAR)])
             }
             
             selected_idx <- NA
@@ -1537,8 +1554,8 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         if(disp_required[["AURCT"]] && (aet_len) >= 2) {
 ##          row_data <- c(row_data, unlist(aurct), unlist(aurc_int))
-          computation_df[i, paste0("AURC",1:aet_len)] <- unlist(aurct)
-          computation_df[i, paste0("AURCINT",1:aet_len)] <- unlist(aurc_int)
+          computation_df[i, paste0("AURC",1:(aet_len-1))] <- unlist(aurct)
+          computation_df[i, paste0("AURCINT",1:(aet_len-1))] <- unlist(aurc_int)
         }
 ###        if("AURCT1_T2" %in% parameter_list) {
         if(disp_required[["AURCT1_T2"]] && auc_pair_check) {

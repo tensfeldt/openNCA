@@ -482,8 +482,8 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     regular_int_type <- c(regular_int_type, "AURCLAST")
   }
   if(disp_required[["AURCT"]] && aet_len >= 2) {
-    col_names <- c(col_names, rep(paste0("AURC",1:aet_len)), rep(paste0("AURCINT",1:aet_len)))
-    regular_int_type <- c(regular_int_type, paste0("AURC",1:aet_len))
+    col_names <- c(col_names, rep(paste0("AURC",1:(aet_len-1))), rep(paste0("AURCINT",1:(aet_len-1))))
+    regular_int_type <- c(regular_int_type, paste0("AURC",1:(aet_len-1)))
   }
 ###  if("AURCT1_T2" %in% parameter_list && "TMAXRATE" %in% parameter_list) {
 ###  if(parameter_required("^AURCT1_T2$", parameter_list) || parameter_required(dependent_parameters("^AURCT1_T2$"), parameter_list)) {
@@ -962,10 +962,11 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###          cat('unique(tmp_df[,map_data$TIME]): ', unique(tmp_df[,map_data$TIME]), '\n')
 ###          cat('length(unique(tmp_df[,map_data$TIME])): ', length(unique(tmp_df[,map_data$TIME])), '\n')
-         
-           for(t in 1:length(unique(data_data[,map_data$TIME]))){
+          for(t in 1:length(unique(data_data[,c(map_data$TIME, map_data$ENDTIME)])[,map_data$TIME])){
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
-            tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$TIME])), t = sort(unique(data_data[,c(map_data$TIME, map_data$ENDTIME)])[,map_data$TIME])[t], orig_time = unique(data_data[,c(map_data$TIME, map_data$ENDTIME)]), returnNA = TRUE)
+            tmp_data <- unique(data_data[,c(map_data$TIME, map_data$ENDTIME)]) 
+            tmp_time_t <- tmp_data[order(tmp_data[,map_data$TIME], tmp_data[,map_data$ENDTIME]),]
+            tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$TIME])), t = tmp_time_t[t,map_data$TIME], orig_time = tmp_time_t[t,], all_time = tmp_time_t, returnNA = TRUE)
 ###            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data$DOSE1])[1])
 #            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data$DOSE])[1])
 ###            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data[,dosevar]])[1])
@@ -1087,13 +1088,20 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               }
             }
             
-            kelr_val <- kel_r(conc = rt, time = mid_pt)[["KELRSQ"]]
-            if("AURCXPCTO" %in% flag_df$VAR){
-              aucxpct <- auc_XpctO(conc = rt, time = mid_pt, method = method, aucflag = auc_flag)
-            } else if("AURCXPCTP" %in% flag_df$VAR){
-              aucxpct <- auc_XpctP(conc = rt, time = mid_pt, method = method, aucflag = auc_flag)
-            } else {
-              stop("Error in optimize kel")
+## /2019-11-22/RD This is the old optimize kel logic 
+##            kelr_val <- kel_r(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])[["KELRSQ"]]
+##            if("AUCXPCTO" %in% flag_df$VAR){
+##              aucxpct <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, aucflag = auc_flag)
+##            } else if("AUCXPCTP" %in% flag_df$VAR){
+##              aucxpct <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, aucflag = auc_flag)
+##            } else {
+##              stop("Error in optimize kel")
+##            }
+            kelr_val <- as.numeric(flag_df$CRIT[match("KELRSQ", flag_df$VAR)])
+            if("AUCXPCTO" %in% flag_df$VAR){
+              aucxpct <- as.numeric(flag_df$CRIT[match("AUCXPCTO", flag_df$VAR)])
+            } else if("AUCXPCTP" %in% flag_df$VAR){
+              aucxpct <- as.numeric(flag_df$CRIT[match("AUCXPCTP", flag_df$VAR)])
             }
             
             selected_idx <- NA
@@ -1163,14 +1171,14 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               }
             }
           } else {
-            aurct <- rep(NA, aet_len)
-            aurc_int <- rep(NA, aet_len)
+            aurct <- rep(NA, aet_len-1)
+            aurc_int <- rep(NA, aet_len-1)
           }
-          if(length(aurct) < (aet_len)) {
-            aurct <- c(aurct, rep(NA, ((aet_len) - length(aurct))))
+          if(length(aurct) < (aet_len-1)) {
+            aurct <- c(aurct, rep(NA, ((aet_len-1) - length(aurct))))
           }
-          if(length(aurc_int) < (aet_len)) {
-            aurc_int <- c(aurc_int, rep(NA, ((aet_len) - length(aurc_int))))
+          if(length(aurc_int) < (aet_len-1)) {
+            aurc_int <- c(aurc_int, rep(NA, ((aet_len-1) - length(aurc_int))))
           }
         }
 ###        if("AURCT1_T2" %in% parameter_list && "TMAXRATE" %in% parameter_list) {
@@ -1518,8 +1526,8 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         if(disp_required[["AURCT"]] && aet_len > 2) {
 ##          row_data <- c(row_data, aurct, aurc_int)
-          computation_df[i, paste0("AURC",1:aet_len)] <- aurct
-          computation_df[i, paste0("AURCINT",1:aet_len)] <- aurc_int
+          computation_df[i, paste0("AURC",1:(aet_len-1))] <- aurct
+          computation_df[i, paste0("AURCINT",1:(aet_len-1))] <- aurc_int
         }
 ###        if("AURCT1_T2" %in% parameter_list) {
 ###        if(parameter_required("^AURCT1_T2$", parameter_list) || parameter_required(dependent_parameters("^AURCT1_T2$"), parameter_list)) {

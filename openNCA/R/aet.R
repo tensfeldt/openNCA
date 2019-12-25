@@ -94,7 +94,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, returnNA=FALSE){
+aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, all_time=NULL, returnNA=FALSE){
   if(is.null(amt) && is.null(time) && is.null(t)) {
     stop("Error in aet: 'amt' and 'time' vectors and value 't' are NULL")
   } else if(is.null(amt) && is.null(time)) {
@@ -124,31 +124,38 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, returnNA=FALS
   } else {
     amt_check <- FALSE
   }
-  #print('in aet')
-  #print(time)
-  #print(amt)
-  #print(paste0("t: ", t))
+  
   if(isTRUE(amt_check)) {
     a_e <- NA
   } else {
     if(t %in% time) {
-      tmp_time <- time[time <= t]
-      #print("tmp_time")
-      #print(tmp_time)
-      if(length(tmp_time) > 0) {
-        tmp_amt <- amt[1:length(tmp_time)]
-        #print("tmp_amt")
-        #print(tmp_amt)
+      if(is.null(all_time)){
+        tmp_time <- time[time <= t]
+        if(length(tmp_time) > 0) {
+          tmp_amt <- amt[1:length(tmp_time)]
+        } else {
+          stop("Error in aet: value 't' cannot be used to subset 'time' vector")
+        }
+        if(is.logical(returnNA) && isTRUE(returnNA)){
+          a_e <- sum(tmp_amt[!is.na(tmp_time)][1:length(tmp_time)])
+        } else {
+          a_e <- sum(tmp_amt[!is.na(tmp_time)][1:length(tmp_time)], na.rm = TRUE)
+          a_e <- ifelse(a_e == 0, NA, a_e)
+        }
       } else {
-        stop("Error in aet: value 't' cannot be used to subset 'time' vector")
-      }
-      #print(tmp_amt[!is.na(tmp_time)])
-      #print(tmp_amt[!is.na(tmp_time)][1:length(tmp_time)])
-      #print("+++++++++")
-      if(is.logical(returnNA) && isTRUE(returnNA)){
-        a_e <- sum(tmp_amt[!is.na(tmp_time)][1:length(tmp_time)])
-      } else {
-        a_e <- sum(tmp_amt[!is.na(tmp_time)][1:length(tmp_time)], na.rm = TRUE)
+        tmp_time <- row.names(all_time) %in% row.names(orig_time)
+        tmp_len <- seq(1:length(tmp_time))[tmp_time]
+        if(any(tmp_time)) {
+          tmp_amt <- amt[tmp_time]
+        } else {
+          stop("Error in aet: value 't' cannot be used to subset 'time' vector")
+        }
+        if(is.logical(returnNA) && isTRUE(returnNA)){
+          a_e <- sum(tmp_amt[1:length(tmp_len)])
+        } else {
+          a_e <- sum(tmp_amt[1:length(tmp_len)], na.rm = TRUE)
+          a_e <- ifelse(a_e == 0, NA, a_e)
+        }
       }
     } else {
       if(is.logical(returnNA) && !isTRUE(returnNA)){
@@ -158,7 +165,6 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, returnNA=FALS
       }
     }
   }
-  #print("final a_e")
-  #print(a_e)
+  
   return(a_e)
 }

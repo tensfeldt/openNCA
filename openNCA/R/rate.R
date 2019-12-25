@@ -63,6 +63,9 @@ rate <- function(start_time = NULL, end_time = NULL, conc = NULL, vol = NULL, vo
   ### 2019-10-03/TGT/ update to include specific gravity adjustment for the rates
   ###    r <- ((conc * vol)/(end_time - start_time))
       r <- ((conc * vol)/(end_time - start_time))/specific_gravity_adjustment(amt_units=volu, map=map)
+      if(any(is.infinite(r))){
+        r[is.infinite(r)] <- 0
+      }
     }
   }
   

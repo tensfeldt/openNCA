@@ -1370,13 +1370,20 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               }
             }
   
-            kelr_val <- kel_r(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])[["KELRSQ"]]
+## /2019-11-22/RD This is the old optimize kel logic 
+##            kelr_val <- kel_r(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])[["KELRSQ"]]
+##            if("AUCXPCTO" %in% flag_df$VAR){
+##              aucxpct <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, aucflag = auc_flag)
+##            } else if("AUCXPCTP" %in% flag_df$VAR){
+##              aucxpct <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, aucflag = auc_flag)
+##            } else {
+##              stop("Error in optimize kel")
+##            }
+            kelr_val <- as.numeric(flag_df$CRIT[match("KELRSQ", flag_df$VAR)])
             if("AUCXPCTO" %in% flag_df$VAR){
-              aucxpct <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, aucflag = auc_flag)
+              aucxpct <- as.numeric(flag_df$CRIT[match("AUCXPCTO", flag_df$VAR)])
             } else if("AUCXPCTP" %in% flag_df$VAR){
-              aucxpct <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, aucflag = auc_flag)
-            } else {
-              stop("Error in optimize kel")
+              aucxpct <- as.numeric(flag_df$CRIT[match("AUCXPCTP", flag_df$VAR)])
             }
   
             selected_idx <- NA
