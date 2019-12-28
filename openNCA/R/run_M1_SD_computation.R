@@ -1602,7 +1602,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##          row_data <- c(row_data, t_max)
           computation_df[i, "TMAX"] <- t_max
         }
-        if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data)){
+        if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
 ##          row_data <- c(row_data, 1)
           computation_df[i, "FLGACCEPTTMAX"] <- 1
         }

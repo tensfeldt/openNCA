@@ -207,6 +207,8 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###  cat('aet_len: ', aet_len, '\n')
   reg_col <- sum(regular_list %in% parameter_list) + ifelse(any(c("KELRSQ","KELRSQA") %in% parameter_list), 1, 0)
   aet_col <- ifelse(sum(aet_list %in% parameter_list) > 1, sum(aet_list %in% parameter_list)+1, 0)
+  row_len <- max(unlist(lapply(unique(data_data[,map_data$SDEID]), function(x){ nrow(data_data[data_data[,map_data$SDEID] == x,]) })))
+  
 ###  cat('aet_list %in% parameter_list:\n')
 ###  print(aet_list %in% parameter_list)
 ###  cat('aet_list:\n');print(aet_list)
@@ -248,10 +250,11 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
   ### Determine DOSEs in dosevar, a vector of dose names pointing into map_data
   doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
-  dosevar <- unlist(strsplit(map_data[,doselist], ";"))
+  dosenames <- unlist(strsplit(map_data[,doselist], ";"))
   ### assuming here there is a single dose
-  if(!any(duplicated(as.character(unlist(map[,dosevar]))))){
-    dosevar <- map[,dosevar] 
+  dosevar <- as.character(map[,dosenames])
+  if(!any(duplicated(as.character(unlist(dosevar))))){
+    dosenames <- dosenames[!duplicated(as.character(unlist(dosevar)))]
   }
     
 ###  cat('opt_list: ', opt_list, '\n')
@@ -339,8 +342,8 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     
 ###  if(parameter_required("^DOSE(i{1}|[0-9]*?)$", parameter_list) || parameter_required(dependent_parameters("^DOSE(i{1}|[0-9]*?)$"), parameter_list)) {
   if(disp_required[["DOSE"]] || disp_required[["DOSEi"]]) {
-    col_names <- c(col_names, dosevar)
-    regular_int_type <- c(regular_int_type, dosevar)
+    col_names <- c(col_names, dosenames)
+    regular_int_type <- c(regular_int_type, dosenames)
   }
   
 ###  if("AET" %in% parameter_list) {
@@ -930,9 +933,10 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          ae_pct_dose <- unique(tmp_df[,map_data$DOSE])[1]
 ###          ae_pct_dose <- unique(tmp_df[,map_data[,dosevar]])[1]
           tmp_map <- map_data
-          tmp_res <- tmp_df[,c(map_data$SDEID, dosevar)]
+          tmp_dosevar <- dosevar[!duplicated(dosevar)]
+          tmp_res <- tmp_df[,c(map_data$SDEID, tmp_dosevar)]
           tmp_res$AE <- a_e
-          ae_pct_dose <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "DOSEU", verbose = FALSE)[,dosevar])[1]
+          ae_pct_dose <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "DOSEU", verbose = FALSE)[,tmp_dosevar])[1]
           ae_pct_ae <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "AMOUNTU", verbose = FALSE)[,"AE"])[1]
 ###          ae_pct <- aepct(ae = a_e, dose = unique(tmp_df[,map_data$DOSE])[1])
 ###          ae_pct <- aepct(ae = a_e, dose = unique(tmp_df[,map_data[,dosevar]])[1])
@@ -977,9 +981,10 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 #            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data$DOSE])[1])
 ###            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data[,dosevar]])[1])
             tmp_map <- map_data
-            tmp_res <- tmp_df[,c(map_data$SDEID, dosevar)]
+            tmp_dosevar <- dosevar[!duplicated(dosevar)]
+            tmp_res <- tmp_df[,c(map_data$SDEID, tmp_dosevar)]
             tmp_res$AET <- tmp
-            aet_pct_dose <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "DOSEU", verbose = FALSE)[,dosevar])[1]
+            aet_pct_dose <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "DOSEU", verbose = FALSE)[,tmp_dosevar])[1]
             aet_pct_aet <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "AMOUNTU", verbose = FALSE)[,"AET"])[1]
             tmp_pct <-  aetpct(aet = aet_pct_aet, dose = aet_pct_dose)
             
@@ -1156,7 +1161,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
         }
-        if(comp_required[["AURCT"]] && aet_len > 2) {
+        if(comp_required[["AURCT"]] && row_len > 2) {
           aurct <- NULL
           aurc_int <- NULL
           if(length(mid_pt) > 1){
@@ -1180,14 +1185,14 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               }
             }
           } else {
-            aurct <- rep(NA, aet_len-1)
-            aurc_int <- rep(NA, aet_len-1)
+            aurct <- rep(NA, row_len-1)
+            aurc_int <- rep(NA, row_len-1)
           }
-          if(length(aurct) < (aet_len-1)) {
-            aurct <- c(aurct, rep(NA, ((aet_len-1) - length(aurct))))
+          if(length(aurct) < (row_len-1)) {
+            aurct <- c(aurct, rep(NA, ((row_len-1) - length(aurct))))
           }
-          if(length(aurc_int) < (aet_len-1)) {
-            aurc_int <- c(aurc_int, rep(NA, ((aet_len-1) - length(aurc_int))))
+          if(length(aurc_int) < (row_len-1)) {
+            aurc_int <- c(aurc_int, rep(NA, ((row_len-1) - length(aurc_int))))
           }
         }
 ###        if("AURCT1_T2" %in% parameter_list && "TMAXRATE" %in% parameter_list) {
@@ -1391,7 +1396,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]        
         if(disp_required[["DOSE"]] || disp_required[["DOSEi"]]) {
 ##          row_data <- c(row_data, unique(tmp_df[, dosevar])[1])
-          computation_df[i, dosevar] <- unique(tmp_df[, dosevar])[1]
+          computation_df[i, unlist(dosenames)] <- unique(tmp_df[, dosevar])[1]
         }
         
 ###        if("AET" %in% parameter_list) {
@@ -1533,10 +1538,10 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##          row_data <- c(row_data, aurclast)
           computation_df[i, "AURCLAST"] <- aurclast
         }
-        if(disp_required[["AURCT"]] && aet_len > 2) {
+        if(disp_required[["AURCT"]] && row_len > 2) {
 ##          row_data <- c(row_data, aurct, aurc_int)
-          computation_df[i, paste0("AURC",1:(aet_len-1))] <- aurct
-          computation_df[i, paste0("AURCINT",1:(aet_len-1))] <- aurc_int
+          computation_df[i, paste0("AURC",1:(row_len-1))] <- aurct
+          computation_df[i, paste0("AURCINT",1:(row_len-1))] <- aurc_int
         }
 ###        if("AURCT1_T2" %in% parameter_list) {
 ###        if(parameter_required("^AURCT1_T2$", parameter_list) || parameter_required(dependent_parameters("^AURCT1_T2$"), parameter_list)) {
@@ -1586,14 +1591,14 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if(parameter_required("^(RATE)([0-9]*?|A|N)$", display_list, simplify=TRUE)) {
         if(parameter_required("^(RATE)([0-9]*?|A|N)$", parameter_list) || parameter_required(dependent_parameters("^(RATE)([0-9]*?|A|N)$"), parameter_list)) {
 ###        if(disp_required[["RATE"]]) {
-##          row_data <- c(row_data, c(rt, rep(NA, ((aet_len+1) - length(rt)))))
-          computation_df[i, paste0("RATE",1:(aet_len))] <- c(rt, rep(NA, ((aet_len) - length(rt))))
+##          row_data <- c(row_data, c(rt, rep(NA, ((row_len+1) - length(rt)))))
+          computation_df[i, paste0("RATE",1:(row_len))] <- c(rt, rep(NA, ((row_len) - length(rt))))
         }
 ###        if(parameter_required("^(MIDPT)([0-9]*?|A|N)$", display_list, simplify=TRUE)) {
         if(parameter_required("^(MIDPT)([0-9]*?|A|N)$", parameter_list) || parameter_required(dependent_parameters("^(MIDPT)([0-9]*?|A|N)$"), parameter_list)) {
 ###        if(disp_required[["MIDPT"]]) {
-##          row_data <- c(row_data, c(mid_pt, rep(NA, ((aet_len+1) - length(mid_pt)))))
-          computation_df[i, paste0("MIDPT",1:(aet_len))] <- c(mid_pt, rep(NA, ((aet_len) - length(mid_pt))))
+##          row_data <- c(row_data, c(mid_pt, rep(NA, ((row_len+1) - length(mid_pt)))))
+          computation_df[i, paste0("MIDPT",1:(row_len))] <- c(mid_pt, rep(NA, ((row_len) - length(mid_pt))))
         }
           
 ##        row_data <- c(row_data,
