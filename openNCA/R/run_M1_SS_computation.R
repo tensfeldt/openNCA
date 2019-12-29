@@ -1017,7 +1017,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     comp_required[["CMAXi"]] <- TRUE
     comp_required[["CLASTi"]] <- TRUE 
     comp_required[["AUCLASTi"]] <- TRUE
-    disp_required[["KEL"]] <- TRUE
   }
 ##  2019-11-08/RD Added for Interpolation to account for error handling
 ##
@@ -1048,9 +1047,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   
   if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
     comp_required[["TMAXi"]] <- TRUE
-    disp_required[["TMAXi"]] <- TRUE
     comp_required[["DOSEi"]] <- TRUE
-    disp_required[["DOSEi"]] <- TRUE
   }
 
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
@@ -2939,7 +2936,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       emesis_flag_check <- ifelse(any(as.logical(as.numeric(tmp_df[,map_data$FLGEMESIS]))), TRUE, FALSE)
       tmp_comp_df <- computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],]
       for(e in 1:di_col){
-        if(paste0("DOSE", e) %in% names(computation_df)){
+        if(all(c(paste0("DOSE", e), paste0("TMAX", e)) %in% names(computation_df))){
           test_df_3 <- computation_df[computation_df[,paste0("DOSE", e)] == tmp_comp_df[,paste0("DOSE", e)],]
           tmp_median <- median(as.numeric(test_df_3[,paste0("TMAX", e)]), na.rm = TRUE) 
         } else {

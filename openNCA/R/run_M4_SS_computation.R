@@ -671,7 +671,6 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     comp_required[["CMAXi"]] <- TRUE
     comp_required[["CLASTi"]] <- TRUE 
     comp_required[["AUCLASTi"]] <- TRUE
-    disp_required[["KEL"]] <- TRUE
   }
   
   if("INCLUDEINTERPOLATION" %in% names(map_data) && (map_data[, "INCLUDEINTERPOLATION"] != 0 && map_data[, "INCLUDEINTERPOLATION"] != 1)){
@@ -701,9 +700,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   
   if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
     comp_required[["TMAXi"]] <- TRUE
-    disp_required[["TMAXi"]] <- TRUE
     comp_required[["DOSEi"]] <- TRUE
-    disp_required[["DOSEi"]] <- TRUE
   }
 
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
