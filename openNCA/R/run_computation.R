@@ -180,11 +180,18 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
   }
   
   merged_data <- merge(x = data_data, y = flag_data, by = map_data$FLGMERGE)
+  check_told <- grep("^TOLD([0-9]+?)$", names(map_data), ignore.case=TRUE, perl=TRUE)
+  check_tau <- grep("^TAU([0-9]+?)$", names(map_data), ignore.case=TRUE, perl=TRUE)
+  tau_told_vals <- as.character(map_data[c(check_tau, check_told)])
+  check_flag_tau_told <- all(tau_told_vals %in% names(flag_data))
+  if(isTRUE(check_flag_tau_told)){
+    merged_data <- merged_data[,!names(merged_data) %in% paste0(tau_told_vals, ".x")]
+  }
   colnames(merged_data) <- gsub('.x','.dataset',names(merged_data))
 ### 2019-09-09/TGT/ accept values of TAU/TOLD from flags
   colnames(merged_data) <- gsub('.y','',names(merged_data))
 ### 2019-08-27/TGT/ replace indirection of map_data[[map_data$TIME]] with map_data$TIME
-  merged_data[,map_data$TIME] <- as.numeric(merged_data[,map_data$TIME])
+  merged_data[,map_data$TIME] <- as.numeric(merged_data[,map_data$TIME]) 
 
 ### 2019-09-11/TGT/ Swap TIME with ALTTIME (and units) if FLGTIME available
   if(parameter_required("^FLGTIME$", names(map_data))) {
@@ -199,9 +206,9 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
   
 ### 2019-08-17/TGT/ add maximum, configurable # of dosing intervals to the Model Configuration Template (MCT) Definition
   if(parameter_required("MAXDOSINGINTERVALS", names(map_data))) {
-      maxdosingintervals <- map_data[["MAXDOSINGINTERVALS"]]
+    maxdosingintervals <- map_data[["MAXDOSINGINTERVALS"]]
   } else if(parameter_required("DOSELIST", names(map_data))) { # read # of doses from MCT/map DOSELIST value if present
-      maxdosingintervals <- length(unlist(strsplit(map_data$DOSELIST, ";")))
+    maxdosingintervals <- length(unlist(strsplit(map_data$DOSELIST, ";")))
   } else { maxdosingintervals <- 5 } # default to 5
   
   if("MODEL" %in% names(map_data)){
