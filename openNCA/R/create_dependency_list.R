@@ -76,6 +76,7 @@ create_dependency_list <- function() {
     dependency_list[["AETAUi"]] <- list(callfun=c("aet"), regex="^AETAU(i{1}?|[0-9]+?)$", unit_class=c(uclass_amount), valid_models=c(m4), display_list_models=c(m4ss), predecessors=c())
     dependency_list[["AETAUPTi"]] <- list(callfun=c("aetpct"), regex="^AETAUPT(i{1}?|[0-9]+?)$", unit_class=c(uclass_percent), valid_models=c(m4), display_list_models=c(m4ss), predecessors=c("AETAUi", "TAUi"))
     dependency_list[["AETPCT"]] <- list(callfun=c("aetpct"), regex="^AETPCT$", unit_class=c(uclass_percent), valid_models=c(m4), display_list_models=c(m4sd, m4ss), predecessors=c("AET"))
+    dependency_list[["AETPCTi"]] <- list(callfun=c("aetpct"), regex="^AETPCT(i{1}?|[0-9]+?)$", unit_class=c(uclass_percent), valid_models=c(m4), display_list_models=c(m4sd, m4ss), predecessors=c("AET"))
     dependency_list[["AUCALL"]] <- list(callfun=c("auc_all"), regex="^AUCALL$", unit_class=c(uclass_auc), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c("TMAX"))
     dependency_list[["AUCALLDN"]] <- list(callfun=c("auc_dn"), regex="^AUCALLDN$", unit_class=c(uclass_aucnorm), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c("AUCALL"))
     dependency_list[["AUCDN"]] <- list(callfun=c("auc_dn"), regex="^AUCDN$", unit_class=c(uclass_aucnorm), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c("AUCALL"))

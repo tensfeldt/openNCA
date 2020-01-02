@@ -531,14 +531,9 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
                   merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][[c(paste0("DI", i, "F"))]] <- rep(0, nrow(tmp_df))
                 } else {
                   if(toupper(map_data$MODEL) == 'M4'){
-                    #print("M4")
-                    #print(time)
                     told_i <- match(told, s_time)
                     tau_i <- match((tau+told), e_time)
-                    #print(told)
-                    #print(tau)
-                    #print(told_i)
-                    #print(tau_i)
+                
                     if(is.na(told_i) || is.na(tau_i)){
                       if(is.na(told_i)){
                         if(casefold(map_data$ORGTIME)=='actual'){
@@ -550,12 +545,13 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
                         }
                       }
                       if(is.na(tau_i)){
-                        if(length(e_time[e_time < (tau+told)]) > 0){
-                          tau <- e_time[e_time < (tau+told)][length(e_time[e_time < (tau+told)])]
+                        if(length(e_time[e_time < (tau+told)]) > 0 || length(e_time) == 1){
+                          if(length(e_time[e_time < (tau+told)]) > 0){
+                            tau <- e_time[e_time < (tau+told)][length(e_time[e_time < (tau+told)])]
+                          } else if(length(e_time) == 1){
+                            tau <- e_time[1]
+                          }
                           tau_i <- match((tau+told), e_time)
-                          #print('updated TAU')
-                          #print(tau)
-                          #print(tau_i)
                         } else {
                           stop("9 Unable to generate dosing interval for Steady State data! TAU value not found in the provided TIME data")
                         }

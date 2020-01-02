@@ -1032,8 +1032,8 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             tmp_res <- tmp_df[,c(map_data$SDEID, tmp_dosevar)]
             tmp_res$AETAU <- aetau_i[[d]]
             aetau_pt_dose <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "DOSEU", verbose = FALSE)[,tmp_dosevar])[1]
-            aetau_pt_ae <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "AMOUNTU", verbose = FALSE)[,"AET"])[1]
-            aetau_pt_i[[d]] <- aepct(ae = aetau_pt_ae, dose = aetau_pt_dose)
+            aetau_pt_aetau <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "AMOUNTU", verbose = FALSE)[,"AETAU"])[1]
+            aetau_pt_i[[d]] <- aepct(ae = aetau_pt_aetau, dose = aetau_pt_dose)
           }
           if(comp_required[["AURCT"]] && (row_len) >= 2) {
             prev_na <- FALSE
