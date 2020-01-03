@@ -94,7 +94,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, all_time=NULL, returnNA=FALSE){
+aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, all_time=NULL, end_time=NULL, returnNA=FALSE){
   if(is.null(amt) && is.null(time) && is.null(t)) {
     stop("Error in aet: 'amt' and 'time' vectors and value 't' are NULL")
   } else if(is.null(amt) && is.null(time)) {
@@ -129,7 +129,7 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, all_time=NULL
     a_e <- NA
   } else {
     if(t %in% time) {
-      if(is.null(all_time)){
+      if(is.null(all_time) || is.null(end_time)){
         tmp_time <- time[time <= t]
         if(length(tmp_time) > 0) {
           tmp_amt <- amt[1:length(tmp_time)]
@@ -143,17 +143,22 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, all_time=NULL
           a_e <- ifelse(a_e == 0, NA, a_e)
         }
       } else {
-        tmp_time <- row.names(all_time) %in% row.names(orig_time)
-        tmp_len <- seq(1:length(tmp_time))[tmp_time]
+        tmp_rows <- row.names(all_time) %in% row.names(orig_time)
+        tmp_end_time <- all_time[tmp_rows,][,2]
+        tmp_time <- end_time %in% tmp_end_time
         if(any(tmp_time)) {
           tmp_amt <- amt[tmp_time]
         } else {
-          stop("Error in aet: value 't' cannot be used to subset 'time' vector")
+          if(is.logical(returnNA) && isTRUE(returnNA)){
+            a_e <- NA
+          } else {
+            stop("Error in aet: value 't' cannot be used to subset 'time' vector") 
+          }
         }
         if(is.logical(returnNA) && isTRUE(returnNA)){
-          a_e <- sum(tmp_amt[1:length(tmp_len)])
+          a_e <- sum(tmp_amt)
         } else {
-          a_e <- sum(tmp_amt[1:length(tmp_len)], na.rm = TRUE)
+          a_e <- sum(tmp_amt, na.rm = TRUE)
           a_e <- ifelse(a_e == 0, NA, a_e)
         }
       }

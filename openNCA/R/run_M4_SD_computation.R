@@ -345,7 +345,10 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, dosenames)
     regular_int_type <- c(regular_int_type, dosenames)
   }
-  
+  if(disp_required[["DOSEC"]]) {
+    col_names <- c(col_names, "DOSEC")
+    regular_int_type <- c(regular_int_type, "DOSEC")
+  }
 ###  if("AET" %in% parameter_list) {
 ###  if(parameter_required("^AET$", parameter_list) || parameter_required(dependent_parameters("^AET$"), parameter_list)) {
   if(disp_required[["AET"]]) {
@@ -889,6 +892,9 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
         c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        if(comp_required[["DOSEC"]]) {
+          dose_c <- dosec(data = tmp_df, map = map_data)
+        }
 ###        if("TLAG" %in% parameter_list) {
 ###        if(parameter_required("^TLAG$", parameter_list) || parameter_required(dependent_parameters("^TLAG$"), parameter_list)) {
         if(comp_required[["TLAG"]]) {
@@ -1395,7 +1401,10 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##          row_data <- c(row_data, unique(tmp_df[, dosevar])[1])
           computation_df[i, unlist(dosenames)] <- unique(tmp_df[, dosevar])[1]
         }
-        
+        if(disp_required[["DOSEC"]]) {
+##          row_data <- c(row_data, dose_c)
+          computation_df[i, "DOSEC"] <- dose_c
+        }
 ###        if("AET" %in% parameter_list) {
 ###        if(parameter_required("^AET$", parameter_list) || parameter_required(dependent_parameters("^AET$"), parameter_list)) {
         if(disp_required[["AET"]]) {

@@ -544,6 +544,14 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, rep(paste0("DOSE",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("DOSE",1:di_col)))
   }
+  if(disp_required[["DOSEC"]]) {
+    col_names <- c(col_names, "DOSEC")
+    regular_int_type <- c(regular_int_type, "DOSEC")
+  }
+  if(disp_required[["DOSECi"]]) {
+    col_names <- c(col_names, rep(paste0("DOSEC",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("DOSEC",1:di_col)))
+  }
 
 ### 2019-09-24/TGT/ Move creation of initial computation_df until after determine all of the disp_required col_names
   computation_df <- data.frame(matrix(ncol = length(col_names), nrow = 0))
@@ -706,6 +714,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
 ###    cat("############### SDEID: ", unique(data_data[,map_data$SDEID])[i], '\n')
     tryCatch({
+      if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]){
+        dose_c_i <- list()
+      }
 ###      if("DIi" %in% parameter_list) {
       if(comp_required[["DIi"]]) {
         di <- list()
@@ -848,10 +859,17 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###      amt <- at(conc = tmp_df[,map_data$CONC], amt = as.numeric(tmp_df[,map_data$AMOUNT]), time = tmp_df[,map_data[[map_data$TIME]]], amt_units = tmp_df[,map_data$AMOUNTU])
       amt <- at(conc = tmp_df[,map_data$CONC], amt = as.numeric(tmp_df[,map_data$AMOUNT]), time = tmp_df[,map_data$TIME], amt_units = tmp_df[,map_data$AMOUNTU])
-
-      if(length(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])) > length(tmp_df[,map_data$TIME])){
-        tmp_amt <- data.frame(amt = amt, time = tmp_df[,map_data$TIME])
-        amt <- as.numeric(unlist(lapply(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len]), function(x){ return(ifelse(!(x %in% tmp_df[,map_data$TIME]), NA, tmp_amt[tmp_amt$time == x,"amt"])) })))
+      
+      if(casefold(map_data$ORGTIME) == "nominal"){
+        if(length(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])) > length(amt)){
+          tmp_amt <- data.frame(amt = amt, time = tmp_df[,map_data$TIME])
+          amt <- as.numeric(unlist(lapply(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len]), function(x){ return(ifelse(!(x %in% tmp_df[,map_data$TIME]), NA, tmp_amt[tmp_amt$time == x,"amt"])) })))
+        }
+      } else if(casefold(map_data$ORGTIME) == "actual"){
+        if(length(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])) > length(amt)){
+          tmp_amt <- data.frame(amt = amt, time = tmp_df[,map_data$ENDTIME])
+          amt <- as.numeric(unlist(lapply(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len]), function(x){ return(ifelse(!(x %in% tmp_df[,map_data$ENDTIME]), NA, tmp_amt[tmp_amt$time == x,"amt"])) })))
+        }
       }
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME, map_data[map_data$ENDTIME]] to map_data$ENDTIME
 ###      rt <- rate(start_time = tmp_df[,map_data[[map_data$TIME]]], end_time = tmp_df[,map_data[[map_data$ENDTIME]]], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]))
@@ -866,6 +884,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###        c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data[[map_data$TIME]]])
         c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        if(comp_required[["DOSEC"]]) {
+          dose_c <- dosec(data = tmp_df, map = map_data)
+        }
 ###        if("TLAG" %in% parameter_list) {
         if(comp_required[["TLAG"]]) {
           t_lag <- tlag(conc = rt, time = mid_pt)
@@ -893,7 +914,59 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(comp_required[["AE"]]) {
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###          a_e <- ae(amt = amt, time = tmp_df[,map_data[[map_data$TIME]]])
-          a_e <- ae(amt = amt, time = tmp_df[,map_data$TIME])
+          a_e <- ae(amt = amt, time = tmp_df[,map_data$TIME], orig_time = tmp_df[,map_data$TIME])
+        }
+###          if("AET" %in% parameter_list) {
+### 2019-09-23/TGT/ Note the following computes "AE" (amt) "AET" (ae_t) and "AETPCT" (aet_pct)
+        if(comp_required[["AET"]]) {
+          #print("Start AET")
+          ae_t <- NULL
+          aet_pct <- NULL
+### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
+###            for(t in 1:length(unique(tmp_df[,map_data[[map_data$TIME]]]))){
+          
+          for(t in 1:length(unique(data_data[,map_data$ENDTIME])[1:aet_len])){
+### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
+###              tmp <- aet(amt = amt, time = na.omit(tmp_df[,map_data[[map_data$TIME]]]), t = na.omit(tmp_df[,map_data[[map_data$TIME]]])[t])
+            curr_end_time <- unique(data_data[,map_data$ENDTIME])[1:aet_len][t]
+            tmp_data <- unique(data_data[,c(map_data$TIME, map_data$ENDTIME)]) 
+            tmp_data <- tmp_data[order(tmp_data[,map_data$TIME], tmp_data[,map_data$ENDTIME]),]
+            tmp_end_data <- unique(data_data[,map_data$ENDTIME])
+            tmp_end_data <- tmp_end_data[order(tmp_end_data)]
+            
+            if(curr_end_time %in% tmp_df[,map_data$ENDTIME]){
+              tmp_time_t <- tmp_df[,c(map_data$TIME, map_data$ENDTIME)]
+              tmp_time_t <- tmp_time_t[tmp_time_t[,map_data$ENDTIME] == curr_end_time,]
+              tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$TIME])), t = as.numeric(tmp_time_t[map_data$TIME]), orig_time = tmp_time_t, all_time = tmp_data, end_time = tmp_end_data, returnNA = TRUE)
+            } else {
+              tmp <- NA
+            }
+            tmp_map <- map_data
+            tmp_dosevar <- dosevar[!duplicated(dosevar)]
+            tmp_res <- tmp_df[,c(map_data$SDEID, tmp_dosevar)]
+            tmp_res$AET <- tmp
+            aet_pct_dose <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "DOSEU", verbose = FALSE)[,tmp_dosevar])[1]
+            aet_pct_aet <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "AMOUNTU", verbose = FALSE)[,"AET"])[1]
+            tmp_pct <-  aetpct(aet = aet_pct_aet, dose = aet_pct_dose)
+###              cat('i: ', i, ' tmp_dose: ', tmp_dose, ' d: ', d, ' dose[[d]]: ', dose[[d]], '\n')
+            
+            if(is.null(ae_t)){
+              ae_t <- tmp
+              aet_pct <- tmp_pct
+            } else {
+              ae_t <- c(ae_t, tmp)
+              aet_pct <- c(aet_pct, tmp_pct)
+            }
+          } 
+          if(length(ae_t) < aet_len) {
+            ae_t <- c(ae_t, rep(NA, (aet_len - length(ae_t))))
+          }
+          if(length(aet_pct) < aet_len) {
+            aet_pct <- c(aet_pct, rep(NA, (aet_len - length(aet_pct))))
+          }
+### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
+###            amt <- at(conc = tmp_df[,map_data$CONC], amt = tmp_df[,map_data$AMOUNT], time = tmp_df[,map_data[[map_data$TIME]]], amt_units = tmp_df[,map_data$AMOUNTU])
+          #amt <- at(conc = tmp_df[,map_data$CONC], amt = tmp_df[,map_data$AMOUNT], time = tmp_df[,map_data$TIME], amt_units = tmp_df[,map_data$AMOUNTU])
         }
         if(comp_required[["MAXRATE"]]) {
           max_rate <- maxrate(rate = rt)
@@ -928,6 +1001,13 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-10-03/TGT/ tmp_rt <- rate(start_time = tmp_di_df[,map_data$TIME], end_time = tmp_di_df[,map_data$NOMENDTIME], conc = tmp_di_df[,map_data$CONC], vol = as.numeric(tmp_di_df[,map_data$AMOUNT]))
           tmp_rt <- rate(start_time = tmp_di_df[,map_data$TIME], end_time = tmp_di_df[,map_data$NOMENDTIME], conc = tmp_di_df[,map_data$CONC], vol = as.numeric(tmp_di_df[,map_data$AMOUNT]), volu = tmp_di_df[,map_data$AMOUNTU], map=map_data)
 
+          if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]) {
+            if(!is.na(tmp_dose)) { 
+              dose_c_i[[d]] <- dosec(data = tmp_di_df, map = map_data, idose=d)
+            } else {
+              dose_c_i[[d]] <- dose_c
+            }
+          }
 ###          if("MAXRATEi" %in% parameter_list) {
           if(comp_required[["MAXRATEi"]]) {
             max_rate_i[[d]] <- maxrate(rate = tmp_rt)
@@ -981,47 +1061,6 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             ae_pct_dose <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "DOSEU", verbose = FALSE)[,tmp_dosevar])[1]
             ae_pct_ae <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "AMOUNTU", verbose = FALSE)[,"AE"])[1]
             ae_pct_i[[d]] <- aepct(ae = ae_pct_ae, dose = ae_pct_dose)
-          }
-###          if("AET" %in% parameter_list) {
-### 2019-09-23/TGT/ Note the following computes "AE" (amt) "AET" (ae_t) and "AETPCT" (aet_pct)
-          if(comp_required[["AET"]]) {
-            ae_t <- NULL
-            aet_pct <- NULL
-### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
-###            for(t in 1:length(unique(tmp_df[,map_data[[map_data$TIME]]]))){
-            for(t in 1:length(unique(data_data[,c(map_data$TIME, map_data$ENDTIME)])[,map_data$TIME])){
-### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
-###              tmp <- aet(amt = amt, time = na.omit(tmp_df[,map_data[[map_data$TIME]]]), t = na.omit(tmp_df[,map_data[[map_data$TIME]]])[t])
-              tmp_data <- unique(data_data[,c(map_data$TIME, map_data$ENDTIME)]) 
-              tmp_time_t <- tmp_data[order(tmp_data[,map_data$TIME], tmp_data[,map_data$ENDTIME]),]
-              tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$TIME])), t = tmp_time_t[t,map_data$TIME], orig_time = tmp_time_t[t,], all_time = tmp_time_t, returnNA = TRUE)
-              
-              tmp_map <- map_data
-              tmp_dosevar <- dosevar[!duplicated(dosevar)]
-              tmp_res <- tmp_df[,c(map_data$SDEID, tmp_dosevar)]
-              tmp_res$AET <- tmp
-              aet_pct_dose <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "DOSEU", verbose = FALSE)[,tmp_dosevar])[1]
-              aet_pct_aet <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "AMOUNTU", verbose = FALSE)[,"AET"])[1]
-              tmp_pct <-  aetpct(aet = aet_pct_aet, dose = aet_pct_dose)
-###              cat('i: ', i, ' tmp_dose: ', tmp_dose, ' d: ', d, ' dose[[d]]: ', dose[[d]], '\n')
-
-              if(is.null(ae_t)){
-                ae_t <- tmp
-                aet_pct <- tmp_pct
-              } else {
-                ae_t <- c(ae_t, tmp)
-                aet_pct <- c(aet_pct, tmp_pct)
-              }
-            }
-            if(length(ae_t) < aet_len) {
-              ae_t <- c(ae_t, rep(NA, (aet_len - length(ae_t))))
-            }
-            if(length(aet_pct) < aet_len) {
-              aet_pct <- c(aet_pct, rep(NA, (aet_len - length(aet_pct))))
-            }
-### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
-###            amt <- at(conc = tmp_df[,map_data$CONC], amt = tmp_df[,map_data$AMOUNT], time = tmp_df[,map_data[[map_data$TIME]]], amt_units = tmp_df[,map_data$AMOUNTU])
-            #amt <- at(conc = tmp_df[,map_data$CONC], amt = tmp_df[,map_data$AMOUNT], time = tmp_df[,map_data$TIME], amt_units = tmp_df[,map_data$AMOUNTU])
           }
           if(comp_required[["AETAUi"]]){
             aetau_i[[d]] <- aetau(aet = ae_t, time = na.omit(tmp_df[,map_data$TIME]), t = tau[[d]])
@@ -1642,6 +1681,14 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["DOSEi"]]) {
 ##          row_data <- c(row_data, unlist(dose))
           computation_df[i, unlist(dosenames)] <- unlist(dose)
+        }
+        if(disp_required[["DOSEC"]]) {
+          ##          row_data <- c(row_data, dose_c)
+          computation_df[i, "DOSEC"] <- dose_c
+        }
+        if(disp_required[["DOSECi"]]) {
+          ##          row_data <- c(row_data, unlist(dose_c_i))
+          computation_df[i, paste0("DOSEC",1:di_col)] <- unlist(dose_c_i)
         }
         #print(row_data)
 ###
