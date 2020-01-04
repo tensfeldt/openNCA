@@ -148,18 +148,19 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, all_time=NULL
         tmp_time <- end_time %in% tmp_end_time
         if(any(tmp_time)) {
           tmp_amt <- amt[tmp_time]
+          
+          if(is.logical(returnNA) && isTRUE(returnNA)){
+            a_e <- sum(tmp_amt)
+          } else {
+            a_e <- sum(tmp_amt, na.rm = TRUE)
+            a_e <- ifelse(a_e == 0, NA, a_e)
+          }
         } else {
           if(is.logical(returnNA) && isTRUE(returnNA)){
             a_e <- NA
           } else {
             stop("Error in aet: value 't' cannot be used to subset 'time' vector") 
           }
-        }
-        if(is.logical(returnNA) && isTRUE(returnNA)){
-          a_e <- sum(tmp_amt)
-        } else {
-          a_e <- sum(tmp_amt, na.rm = TRUE)
-          a_e <- ifelse(a_e == 0, NA, a_e)
         }
       }
     } else {
