@@ -259,10 +259,11 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
   ### Determine DOSEs in dosevar, a vector of dose names pointing into map_data
   doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
-  dosevar <- unlist(strsplit(map_data[,doselist], ";"))
+  dosenames <- unlist(strsplit(map_data[,doselist], ";"))
   ### assuming here there is a single dose
-  if(!any(duplicated(as.character(unlist(map[,dosevar]))))){
-    dosevar <- map[,dosevar] 
+  dosevar <- as.character(map[,dosenames])
+  if(!any(duplicated(as.character(unlist(dosevar))))){
+    dosenames <- dosenames[!duplicated(as.character(unlist(dosevar)))]
   }
   
 ### 2019-09-09/TGT/ Precompute list of required parameters for col_names, parameter function evaluation and row_data generation  
@@ -347,8 +348,8 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###    if(map_data[, dosevar] %in% names(data_data)) {
 ###      col_names <- c(col_names, dosevar)
 ###      regular_int_type <- c(regular_int_type, dosevar)
-      col_names <- c(col_names, dosevar)
-      regular_int_type <- c(regular_int_type, dosevar)
+      col_names <- c(col_names, dosenames)
+      regular_int_type <- c(regular_int_type, dosenames)
 ###    }
   }
   if(disp_required[["DOSEC"]]) {
@@ -1541,7 +1542,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(parameter_required(dosevar, names(data_data))) {
 ###            row_data <- c(row_data, unique(tmp_df[, map_data[, opt_list[1]]])[1])
 ##              row_data <- c(row_data, unique(tmp_df[, dosevar])[1])
-              computation_df[i, dosevar] <- unique(tmp_df[, dosevar])[1]
+              computation_df[i, dosenames] <- unique(tmp_df[, dosevar])[1]
           }
         }
         if(disp_required[["DOSEC"]]) {
@@ -1970,7 +1971,9 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
       tmp_tmax <- as.numeric(tmp_comp_df[,"TMAX"])
       if(!is.null(tmp_median) && !is.na(tmp_median) && !is.null(tmp_tmax) && !is.na(tmp_tmax)){
-        computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],"FLGACCEPTTMAX"] <- ifelse((isTRUE(emesis_flag_check) && (tmp_tmax < (2 * tmp_median))), 1, ifelse(!isTRUE(emesis_flag_check), 1 , 0))  
+        if(computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],"FLGACCEPTTMAX"] != 0){
+          computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],"FLGACCEPTTMAX"] <- ifelse((isTRUE(emesis_flag_check) && (tmp_tmax < (2 * tmp_median))), 1, ifelse(!isTRUE(emesis_flag_check), 1 , 0))  
+        }
       }
     }
   }

@@ -255,9 +255,10 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
   ### Determine DOSEs in dosevar, a vector of dose names pointing into map_data
   doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
-  dosevar <- unlist(strsplit(map_data[,doselist], ";"))
-  if(!any(duplicated(as.character(unlist(map[,dosevar]))))){
-    dosevar <- map[,dosevar] 
+  dosenames <- unlist(strsplit(map_data[,doselist], ";"))
+  dosevar <- as.character(map[,dosenames])
+  if(!any(duplicated(as.character(unlist(dosevar))))){
+    dosenames <- dosenames[!duplicated(as.character(unlist(dosevar)))]
   }
 
   ### 2019-09-17/TGT/ Precompute list of required parameters for col_names, parameter function evaluation and row_data generation  
@@ -339,9 +340,9 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   
   if(disp_required[["DOSEi"]]) {
 ###    col_names <- c(col_names, rep(paste0("DOSE",1:di_col)))
-    col_names <- c(col_names, unlist(dosevar))
+    col_names <- c(col_names, dosenames)
 ###    regular_int_type <- c(regular_int_type, rep(paste0("DOSE",1:di_col)))
-    regular_int_type <- c(regular_int_type, unlist(dosevar))
+    regular_int_type <- c(regular_int_type, dosenames)
   }
   
   if(disp_required[["DOSEC"]]) {
@@ -410,6 +411,14 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if(disp_required[["CMINi"]]) {
     col_names <- c(col_names, rep(paste0("CMIN",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("CMIN",1:di_col)))
+  }
+  if(disp_required[["CMINDN"]]){
+    col_names <- c(col_names, "CMINDN")
+    regular_int_type <- c(regular_int_type, "CMINDN")
+  }
+  if(disp_required[["CMINDNi"]]){
+    col_names <- c(col_names, rep(paste0("CMINDN",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("CMINDN",1:di_col)))
   }
 ###  if("CLAST" %in% parameter_list) {
   if(disp_required[["CLAST"]]) {
@@ -625,10 +634,18 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "AUCINFOC")
     regular_int_type <- c(regular_int_type, "AUCINFOC")
   }
+  if(disp_required[["AUCINFOCi"]]){
+    col_names <- c(col_names, rep(paste0("AUCINFOC",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("AUCINFOC",1:di_col)))
+  }
 ###  if("AUCINFODN" %in% parameter_list && "AUCINFO" %in% parameter_list) {
   if(disp_required[["AUCINFODN"]]) {
     col_names <- c(col_names, "AUCINFODN")
     regular_int_type <- c(regular_int_type, "AUCINFODN")
+  }
+  if(disp_required[["AUCINFODNi"]]){
+    col_names <- c(col_names, rep(paste0("AUCINFODN",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("AUCINFODN",1:di_col)))
   }
 ###  if("CEST" %in% parameter_list && "TLAST" %in% parameter_list && "KEL" %in% parameter_list) {
   if(disp_required[["CEST"]]) {
@@ -650,10 +667,18 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "AUCINFPC")
     regular_int_type <- c(regular_int_type, "AUCINFPC")
   }
+  if(disp_required[["AUCINFPCi"]]){
+    col_names <- c(col_names, rep(paste0("AUCINFPC",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("AUCINFPC",1:di_col)))
+  }
 ###  if("AUCINFPDN" %in% parameter_list && "AUCINFP" %in% parameter_list) {
   if(disp_required[["AUCINFPDN"]]) {
     col_names <- c(col_names, "AUCINFPDN")
     regular_int_type <- c(regular_int_type, "AUCINFPDN")
+  }
+  if(disp_required[["AUCINFPDNi"]]){
+    col_names <- c(col_names, rep(paste0("AUCINFPDN",1:di_col)))
+    regular_int_type <- c(regular_int_type, rep(paste0("AUCINFPDN",1:di_col)))
   }
 ###  if("AUMCINFOi" %in% parameter_list && "AUMCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
   if(disp_required[["AUMCINFOi"]]) {
@@ -1014,6 +1039,9 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(comp_required[["CMINi"]]) {
         c_mini <- list()
       }
+      if(comp_required[["CMINDNi"]]){
+        c_mindni <- list()
+      }
 ###      if("CLASTi" %in% parameter_list) {
       if(comp_required[["CLASTi"]]) {
         c_lasti <- list()
@@ -1050,9 +1078,21 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(comp_required[["AUCINFOi"]]) {
         aucinfoi <- list()
       }
+      if(comp_required[["AUCINFOCi"]]){
+        aucinfoi_c <- list()
+      }
+      if(comp_required[["AUCINFODNi"]]){
+        aucinfoi_dn <- list()
+      }
 ###      if("AUCINFPi" %in% parameter_list && "CEST" %in% parameter_list && "AUCLASTi" %in% parameter_list && "TLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
       if(comp_required[["AUCINFPi"]]) {
         aucinfpi <- list()
+      }
+      if(comp_required[["AUCINFPCi"]]){
+        aucinfpi_c <- list()
+      }
+      if(comp_required[["AUCINFPDNi"]]){
+        aucinfpi_dn <- list()
       }
 ###      if("AUMCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
       if(comp_required[["AUMCINFOi"]]) {
@@ -1446,6 +1486,9 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(comp_required[["CMIN"]]) {
           c_min <- cmin(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
         }
+        if(comp_required[["CMINDN"]]){
+          c_mindn <- cmin_dn(cmin = c_min, dose = unique(tmp_df[,unlist(dosevar)[1]]))
+        }
 ###        if("TMIN" %in% parameter_list) {
         if(comp_required[["TMIN"]]) {
           t_min <- tmin(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
@@ -1561,6 +1604,9 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["CMAXDNi"]]) {
             c_maxdni[[d]] <- cmax_dn(cmax = c_maxi[[d]], dose = tmp_dose)
           }
+          if(comp_required[["CMINDNi"]]){
+            c_mindni[[d]] <- cmin_dn(cmin = c_mini[[d]], dose = tmp_dose)
+          }
 ###          if("TMAXi" %in% parameter_list) {
           if(comp_required[["TMAXi"]]) {
             t_maxi[[d]] <- tmax(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME])
@@ -1586,9 +1632,21 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
             aucinfoi[[d]] <- auc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, spanratio = span_ratio, kel = kel_v)
           }
+          if(comp_required[["AUCINFOCi"]]){
+            aucinfoi_c[[d]] <- auc_inf_oc(kel = kel_v[["KEL"]], aucinfo = aucinfoi[[d]], c0 = c_0)
+          }
+          if(comp_required[["AUCINFODNi"]]){
+            aucinfoi_dn[[d]] <- auc_dn(auc = aucinfoi[[d]], dose = tmp_dose)
+          }
 ###          if("AUCINFPi" %in% parameter_list && "CEST" %in% parameter_list && "AUCLASTi" %in% parameter_list && "TLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
           if(comp_required[["AUCINFPi"]]) {
             aucinfpi[[d]] <- auc_inf_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
+          }
+          if(comp_required[["AUCINFPCi"]]){
+            aucinfpi_c[[d]] <- auc_inf_pc(kel = kel_v[["KEL"]], aucinfp = aucinfpi[[d]], c0 = c_0)
+          }
+          if(comp_required[["AUCINFPDNi"]]){
+            aucinfpi_dn[[d]] <- auc_dn(auc = aucinfpi[[d]], dose = tmp_dose)
           }
 ###          if("AUMCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
           if(comp_required[["AUMCINFOi"]]) {
@@ -2044,7 +2102,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]
         if(disp_required[["DOSEi"]]) {
 ##          row_data <- c(row_data, unlist(dose))
-          computation_df[i, unlist(dosevar)] <- unlist(dose)
+          computation_df[i, dosenames] <- unlist(dose)
         }
         if(disp_required[["DOSEC"]]) {
 ##          row_data <- c(row_data, dose_c)
@@ -2123,6 +2181,12 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["CMIN"]]) {
 ##          row_data <- c(row_data, c_min)
           computation_df[i, "CMIN"] <- c_min
+        }
+        if(disp_required[["CMINDN"]]){
+          computation_df[i, "CMINDN"] <- c_mindn
+        }
+        if(disp_required[["CMINDNi"]]){
+          computation_df[i, paste0("CMINDN",1:di_col)] <- unlist(c_mindni)
         }
 ###        if("CMINi" %in% parameter_list) {
         if(disp_required[["CMINi"]]) {
@@ -2372,10 +2436,16 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##          row_data <- c(row_data, aucinf_oc)
           computation_df[i, "AUCINFOC"] <- aucinf_oc
         }
+        if(disp_required[["AUCINFOCi"]]){
+          computation_df[i, paste0("AUCINFOC",1:di_col)] <- unlist(aucinfoi_c)
+        }
 ###        if("AUCINFODN" %in% parameter_list && "AUCINFO" %in% parameter_list) {
         if(disp_required[["AUCINFODN"]]) {
 ##          row_data <- c(row_data, aucinf_odn)
           computation_df[i, "AUCINFODN"] <- aucinf_odn
+        }
+        if(disp_required[["AUCINFODNi"]]){
+          computation_df[i, paste0("AUCINFODN",1:di_col)] <- unlist(aucinfoi_dn)
         }
 ###        if("CEST" %in% parameter_list && "TLAST" %in% parameter_list && "KEL" %in% parameter_list) {
         if(disp_required[["CEST"]]) {
@@ -2397,10 +2467,16 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##          row_data <- c(row_data, aucinf_pc)
           computation_df[i, "AUCINFPC"] <- aucinf_pc
         }
+        if(disp_required[["AUCINFPCi"]]){
+          computation_df[i, paste0("AUCINFPC",1:di_col)] <- unlist(aucinfpi_c)
+        }
 ###        if("AUCINFPDN" %in% parameter_list && "AUCINFP" %in% parameter_list) {
         if(disp_required[["AUCINFPDN"]]) {
 ##          row_data <- c(row_data, aucinf_pdn)
           computation_df[i, "AUCINFPDN"] <- aucinf_pdn
+        }
+        if(disp_required[["AUCINFPDNi"]]){
+          computation_df[i, paste0("AUCINFPDN",1:di_col)] <- unlist(aucinfpi_dn)
         }
 ###        if("AUMCINFOi" %in% parameter_list && "AUMCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
         if(disp_required[["AUMCINFOi"]]) {
@@ -2614,7 +2690,9 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         tmp_tmax <- as.numeric(tmp_comp_df[,paste0("TMAX", e)])
         if(!is.null(tmp_median) && !is.na(tmp_median) && !is.null(tmp_tmax) && !is.na(tmp_tmax)){
-          computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],"FLGACCEPTTMAX"] <- ifelse((isTRUE(emesis_flag_check) && (tmp_tmax < (2 * tmp_median))), 1, ifelse(!isTRUE(emesis_flag_check), 1 , 0))  
+          if(computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],"FLGACCEPTTMAX"] != 0){
+            computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],"FLGACCEPTTMAX"] <- ifelse((isTRUE(emesis_flag_check) && (tmp_tmax < (2 * tmp_median))), 1, ifelse(!isTRUE(emesis_flag_check), 1 , 0))  
+          }
         }
       }
     }

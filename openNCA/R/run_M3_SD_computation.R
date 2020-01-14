@@ -245,10 +245,11 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
   ### Determine DOSEs in dosevar, a vector of dose names pointing into map_data
   doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
-  dosevar <- unlist(strsplit(map_data[,doselist], ";"))
+  dosenames <- unlist(strsplit(map_data[,doselist], ";"))
   ### assuming here there is a single dose
-  if(!any(duplicated(as.character(unlist(map[,dosevar]))))){
-    dosevar <- map[,dosevar] 
+  dosevar <- as.character(map[,dosenames])
+  if(!any(duplicated(as.character(unlist(dosevar))))){
+    dosenames <- dosenames[!duplicated(as.character(unlist(dosevar)))]
   }
 
 ### 2019-09-09/TGT/ identify DOSE/DOSE1 from map
@@ -335,8 +336,8 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   col_names <- c("SDEID")
   
   if(disp_required[["DOSE"]] || disp_required[["DOSEi"]]) {
-    col_names <- c(col_names, dosevar)
-    regular_int_type <- c(regular_int_type, dosevar)
+    col_names <- c(col_names, dosenames)
+    regular_int_type <- c(regular_int_type, dosenames)
   }
   if(disp_required[["DOSEC"]]) {
     col_names <- c(col_names, "DOSEC")
@@ -1340,6 +1341,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("MRTLAST" %in% parameter_list) {
         if(comp_required[["MRTLAST"]]) {
+          print(dof)
           mrtlast <- mrt_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M3", aucflag = auc_flag, dof = dof)
         }
 ###        if("MRTIVIFO" %in% parameter_list){
@@ -1524,7 +1526,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["DOSE"]] || disp_required[["DOSEi"]]){
           if(parameter_required(dosevar, names(data_data))) {
 ##              row_data <- c(row_data, unique(tmp_df[, dosevar])[1])
-              computation_df[i, dosevar] <- unique(tmp_df[, dosevar])[1]
+              computation_df[i, dosenames] <- unique(tmp_df[, dosevar])[1]
           }
         }
         
@@ -1981,7 +1983,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df <- data_data[data_data[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],]
       emesis_flag_check <- ifelse(any(as.logical(as.numeric(tmp_df[,map_data$FLGEMESIS]))), TRUE, FALSE)
       tmp_comp_df <- computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],]
-      if(all(c(paste0("DOSE", e), paste0("TMAX", e)) %in% names(computation_df))){
+      if("DOSE" %in% names(computation_df)){
         test_df_3 <- computation_df[computation_df[,"DOSE"] == tmp_comp_df[,"DOSE"],]
         tmp_median <- median(as.numeric(test_df_3[,"TMAX"]), na.rm = TRUE) 
       } else {
@@ -1989,7 +1991,9 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
       tmp_tmax <- as.numeric(tmp_comp_df[,"TMAX"])
       if(!is.null(tmp_median) && !is.na(tmp_median) && !is.null(tmp_tmax) && !is.na(tmp_tmax)){
-        computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],"FLGACCEPTTMAX"] <- ifelse((isTRUE(emesis_flag_check) && (tmp_tmax < (2 * tmp_median))), 1, ifelse(!isTRUE(emesis_flag_check), 1 , 0))  
+        if(computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],"FLGACCEPTTMAX"] != 0){
+          computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],"FLGACCEPTTMAX"] <- ifelse((isTRUE(emesis_flag_check) && (tmp_tmax < (2 * tmp_median))), 1, ifelse(!isTRUE(emesis_flag_check), 1 , 0))  
+        }
       }
     }
   }

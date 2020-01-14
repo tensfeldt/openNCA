@@ -118,7 +118,7 @@ ptroughr <- function(cmax = NULL, ctrough = NULL){
   }
   
   p_troughr <- cmax/ctrough
-  p_troughr <- replace(p_troughr, is.infinite(p_troughr), NA)
+  p_troughr <- replace(p_troughr, is.infinite(p_troughr) || is.nan(p_troughr), NA)
   p_troughr <- replace(p_troughr, p_troughr == 0, NA)
   
   return(p_troughr)

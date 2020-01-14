@@ -552,7 +552,6 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, rep(paste0("DOSEC",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("DOSEC",1:di_col)))
   }
-
 ### 2019-09-24/TGT/ Move creation of initial computation_df until after determine all of the disp_required col_names
   computation_df <- data.frame(matrix(ncol = length(col_names), nrow = 0))
   names(computation_df) <- col_names
@@ -859,7 +858,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###      amt <- at(conc = tmp_df[,map_data$CONC], amt = as.numeric(tmp_df[,map_data$AMOUNT]), time = tmp_df[,map_data[[map_data$TIME]]], amt_units = tmp_df[,map_data$AMOUNTU])
       amt <- at(conc = tmp_df[,map_data$CONC], amt = as.numeric(tmp_df[,map_data$AMOUNT]), time = tmp_df[,map_data$TIME], amt_units = tmp_df[,map_data$AMOUNTU])
-      
+
       if(casefold(map_data$ORGTIME) == "nominal"){
         if(length(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])) > length(amt)){
           tmp_amt <- data.frame(amt = amt, time = tmp_df[,map_data$TIME])

@@ -106,6 +106,10 @@ est_c0 <- function(conc = NULL, time = NULL, npts=2, verbose=FALSE, returnall=TR
       est_c0 <- NA
     }
   }
+  if(!0 %in% tmp$time){
+    tmp[nrow(tmp)+1,] <- c(0, est_c0)
+    tmp <- tmp[order(tmp$time), ]
+  }
   if(verbose) { cat("est_c0: ", est_c0, " slope: ", slope, " intercept: ", intercept, " x: ", x, " y: ", y, "\n") }
 
   # Return est_c0 as well as the time and concentration data used to estimate est_c0 if returnall TRUE

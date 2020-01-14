@@ -179,19 +179,57 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
     optimize_kel <- FALSE
   }
   
+  ### 2019-08-17/TGT/ add maximum, configurable # of dosing intervals to the Model Configuration Template (MCT) Definition
+  if(parameter_required("MAXDOSINGINTERVALS", names(map_data))) {
+    maxdosingintervals <- map_data[["MAXDOSINGINTERVALS"]]
+  } else if(parameter_required("DOSELIST", names(map_data))) { # read # of doses from MCT/map DOSELIST value if present
+    maxdosingintervals <- length(unlist(strsplit(map_data$DOSELIST, ";")))
+  } else { maxdosingintervals <- 5 } # default to 5
+  
   merged_data <- merge(x = data_data, y = flag_data, by = map_data$FLGMERGE)
-  check_told <- grep("^TOLD([0-9]+?)$", names(map_data), ignore.case=TRUE, perl=TRUE)
-  check_tau <- grep("^TAU([0-9]+?)$", names(map_data), ignore.case=TRUE, perl=TRUE)
-  tau_told_vals <- as.character(map_data[c(check_tau, check_told)])
-  check_flag_tau_told <- all(tau_told_vals %in% names(flag_data))
-  if(isTRUE(check_flag_tau_told)){
-    merged_data <- merged_data[,!names(merged_data) %in% paste0(tau_told_vals, ".x")]
+  valid_tau_told_check <- TRUE
+  valid_tau_told_names <- c()
+  all_tau_told_names <- c()
+  for(d in 1:maxdosingintervals){
+    check_told <- grep(paste0("^TOLD",d,"$"), names(flag_data), ignore.case=TRUE, perl=TRUE)
+    check_tau <- grep(paste0("^TAU",d,"$"), names(flag_data), ignore.case=TRUE, perl=TRUE)
+    if(length(check_told) > 0 && length(check_tau) > 0){
+      valid_tau_told_names <- c(valid_tau_told_names, names(flag_data[c(check_told, check_tau)]))
+      all_tau_told_names <- c(all_tau_told_names, names(flag_data[c(check_told, check_tau)]))
+    } else {
+      if(length(check_told) == 0 && length(check_tau) == 0){
+        if(d == 1){
+          valid_tau_told_check <- FALSE
+          warning("'TAUs and TOLDs values are not provided via 'flag'! Using values provided via 'data' instead!")
+          break
+        }
+      } else {
+        if(length(check_told) > 0){
+          all_tau_told_names <- c(all_tau_told_names, names(flag_data[c(check_told)]))
+        }
+        if(length(check_tau) > 0){
+          all_tau_told_names <- c(all_tau_told_names, names(flag_data[c(check_tau)]))
+        }
+        valid_tau_told_check <- FALSE
+        warning("'TAUs and TOLDs values are provided via 'flag' are not in a valid format! Using values provided via 'data' instead!")
+        break
+      }
+    }
+  }
+  if(isTRUE(valid_tau_told_check)){
+    merged_data <- merged_data[,!(names(merged_data) %in% paste0(valid_tau_told_names, ".x"))]
+    map_data[,valid_tau_told_names] <- valid_tau_told_names
+  } else if(!isTRUE(valid_tau_told_check) && length(all_tau_told_names) > 0){
+    merged_data <- merged_data[,!(names(merged_data) %in% paste0(all_tau_told_names, ".y"))]
+    if(length(names(merged_data)[names(merged_data) %in% paste0(all_tau_told_names, ".x")]) > 0){
+      names(merged_data)[names(merged_data) %in% paste0(all_tau_told_names, ".x")] <- gsub('.x', '', names(merged_data)[names(merged_data) %in% paste0(all_tau_told_names, ".x")])
+    }
   }
   colnames(merged_data) <- gsub('.x','.dataset',names(merged_data))
 ### 2019-09-09/TGT/ accept values of TAU/TOLD from flags
   colnames(merged_data) <- gsub('.y','',names(merged_data))
 ### 2019-08-27/TGT/ replace indirection of map_data[[map_data$TIME]] with map_data$TIME
-  merged_data[,map_data$TIME] <- as.numeric(merged_data[,map_data$TIME]) 
+  merged_data[,map_data$TIME] <- as.numeric(merged_data[,map_data$TIME])
 
 ### 2019-09-11/TGT/ Swap TIME with ALTTIME (and units) if FLGTIME available
   if(parameter_required("^FLGTIME$", names(map_data))) {
@@ -203,13 +241,6 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
 ### 2019-09-09/TGT/ determine TAU/TOLD from FLAGS
   k <- grep("^(TAU)|(TOLD)(i)*?([0-9]*?)$", names(merged_data), ignore.case=TRUE, perl=TRUE)
 ###  if(length(k)>0) { print(names(merged_data)[k]) }
-  
-### 2019-08-17/TGT/ add maximum, configurable # of dosing intervals to the Model Configuration Template (MCT) Definition
-  if(parameter_required("MAXDOSINGINTERVALS", names(map_data))) {
-    maxdosingintervals <- map_data[["MAXDOSINGINTERVALS"]]
-  } else if(parameter_required("DOSELIST", names(map_data))) { # read # of doses from MCT/map DOSELIST value if present
-    maxdosingintervals <- length(unlist(strsplit(map_data$DOSELIST, ";")))
-  } else { maxdosingintervals <- 5 } # default to 5
   
   if("MODEL" %in% names(map_data)){
     if(!(toupper(map_data$MODEL) %in% c("M1", "M2", "M3", "M4"))){
@@ -260,7 +291,7 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
           merged_data[,id] <- rep(1.0, nrow(merged_data))
         }
       }
-      if(parameter_required("^IMPUTETAUS$", names(map_data))) {
+      if(parameter_required("^IMPUTETAUS$", names(map_data)) && !isTRUE(valid_tau_told_check)) {
         imputedtaus <- strsplit(map_data$IMPUTETAUS, ";")
         #print(imputedtaus)
         if("TAU1" %in% imputedtaus){
@@ -284,7 +315,7 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
           }
         }
       }
-      if(parameter_required("^IMPUTETOLDS$", names(map_data))) {
+      if(parameter_required("^IMPUTETOLDS$", names(map_data)) && !isTRUE(valid_tau_told_check)) {
         imputedtolds <- strsplit(map_data$IMPUTETOLDS, ";")
         #print(imputedtolds)
         if("TOLD1" %in% imputedtolds){
@@ -422,7 +453,6 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
             for(j in 1:length(unique(merged_data[,map_data$SDEID]))){
               tmp_df <- merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],]
               tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
-              print(tmp_df[,map_data$TIME])
               if(nrow(tmp_df) > 0){
                 merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][,valid_told] <- tmp_df[1,map_data$TIME] 
                 merged_data[merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[j],][,valid_tau] <- tmp_df[nrow(tmp_df),map_data$TIME] - tmp_df[1,map_data$TIME] 
@@ -533,7 +563,7 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
                   if(toupper(map_data$MODEL) == 'M4'){
                     told_i <- match(told, s_time)
                     tau_i <- match((tau+told), e_time)
-                
+                    
                     if(is.na(told_i) || is.na(tau_i)){
                       if(is.na(told_i)){
                         if(casefold(map_data$ORGTIME)=='actual'){

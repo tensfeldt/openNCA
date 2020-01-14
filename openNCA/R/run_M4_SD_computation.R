@@ -487,9 +487,9 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "AURCLAST")
     regular_int_type <- c(regular_int_type, "AURCLAST")
   }
-  if(disp_required[["AURCT"]] && aet_len >= 2) {
-    col_names <- c(col_names, rep(paste0("AURC",1:(aet_len-1))), rep(paste0("AURCINT",1:(aet_len-1))))
-    regular_int_type <- c(regular_int_type, paste0("AURC",1:(aet_len-1)))
+  if(disp_required[["AURCT"]] && row_len >= 2) {
+    col_names <- c(col_names, rep(paste0("AURC",1:(row_len-1))), rep(paste0("AURCINT",1:(row_len-1))))
+    regular_int_type <- c(regular_int_type, paste0("AURC",1:(row_len-1)))
   }
 ###  if("AURCT1_T2" %in% parameter_list && "TMAXRATE" %in% parameter_list) {
 ###  if(parameter_required("^AURCT1_T2$", parameter_list) || parameter_required(dependent_parameters("^AURCT1_T2$"), parameter_list)) {
@@ -540,15 +540,15 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###  if(parameter_required("^(RATE)([0-9]*?|A|N)$", display_list, simplify=TRUE)) {
   if(parameter_required("^(RATE)([0-9]*?|A|N)$", parameter_list) || parameter_required(dependent_parameters("^(RATE)([0-9]*?|A|N)$"), parameter_list)) {
 ###  if(disp_required[["RATE"]]) {
-      col_names <- c(col_names, rep(paste0("RATE",1:(aet_len))))
-      regular_int_type <- c(regular_int_type, rep(paste0("RATE",1:(aet_len))))
+      col_names <- c(col_names, rep(paste0("RATE",1:(row_len))))
+      regular_int_type <- c(regular_int_type, rep(paste0("RATE",1:(row_len))))
   }
 ### 2019-08-29/TGT/ Add RATE# and MIDPT# placeholders into column names here
 ###  if(parameter_required("^(MIDPT)([0-9]*?|A|N)$", display_list, simplify=TRUE)) {
   if(parameter_required("^(MIDPT)([0-9]*?|A|N)$", parameter_list) || parameter_required(dependent_parameters("^(MIDPT)([0-9]*?|A|N)$"), parameter_list)) {
 ###  if(disp_required[["MIDPT"]]) {
-      col_names <- c(col_names, rep(paste0("MIDPT",1:(aet_len))))
-      regular_int_type <- c(regular_int_type, rep(paste0("MIDPT",1:(aet_len))))
+      col_names <- c(col_names, rep(paste0("MIDPT",1:(row_len))))
+      regular_int_type <- c(regular_int_type, rep(paste0("MIDPT",1:(row_len))))
   }
 
 ### 2019-10-20/TGT/ Added CONC and CONCTIME values to results output
@@ -1402,7 +1402,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           computation_df[i, unlist(dosenames)] <- unique(tmp_df[, dosevar])[1]
         }
         if(disp_required[["DOSEC"]]) {
-##          row_data <- c(row_data, dose_c)
+          ##          row_data <- c(row_data, dose_c)
           computation_df[i, "DOSEC"] <- dose_c
         }
 ###        if("AET" %in% parameter_list) {

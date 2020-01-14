@@ -137,24 +137,24 @@
 #' @export
 aurc_all <- function(conc = NULL, time = NULL, method = 1){
   if(is.null(conc) && is.null(time)){
-    stop("Error in aucr_all: 'conc' and 'time' vectors are NULL")
+    stop("Error in aurc_all: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
-    stop("Error in aucr_all: 'conc' vector is NULL")
+    stop("Error in aurc_all: 'conc' vector is NULL")
   } else if(is.null(time)) {
-    stop("Error in aucr_all: 'time' vectors is NULL")
+    stop("Error in aurc_all: 'time' vectors is NULL")
   }
 
   if(!(is.numeric(conc) && is.vector(conc)) ){
-    stop("Error in aucr_all: 'conc' is not a numeric vector")
+    stop("Error in aurc_all: 'conc' is not a numeric vector")
   }
   if(!(is.numeric(time) && is.vector(time)) ){
-    stop("Error in aucr_all: 'time' is not a numeric vector")
+    stop("Error in aurc_all: 'time' is not a numeric vector")
   }
   if(length(time) != length(conc)){
-    stop("Error in aucr_all: length of 'time' and 'conc' vectors are not equal")
+    stop("Error in aurc_all: length of 'time' and 'conc' vectors are not equal")
   }
   if(method != 1 && method != 2 && method != 3 && method != 4){
-    stop("Error in aucr_all: the value provided for 'method' is not correct")
+    stop("Error in aurc_all: the value provided for 'method' is not correct")
   }
 
   if(method == 1){
