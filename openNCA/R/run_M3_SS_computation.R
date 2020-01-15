@@ -2724,8 +2724,8 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### remove columns that are empty, note that this may remove columns incorporated into the SDEID/Profile computation
 ### but if they are empty, it should not impact the result of the computation if recomputed even if the SDEIDs themselves
 ### have different values
-    j <- lapply(return_df, FUN=function(x) { all(is.na(x)) } )
-    return_df <- return_df[,-match(names(j[j==TRUE]), names(return_df))]
+###    j <- lapply(return_df, FUN=function(x) { all(is.na(x)) } )
+###    return_df <- return_df[,-match(names(j[j==TRUE]), names(return_df))]
 
 ### 2019-09-19/TGT/ Except for SDEID, remove overlapping elements from return_list
 ### retaining those in parameter dataset

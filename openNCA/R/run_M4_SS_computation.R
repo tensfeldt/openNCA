@@ -907,6 +907,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           kelr_v <- kel_r(conc = rt, time = mid_pt, exflag = kel_flag)
         }
         if(comp_required[["CEST"]] || parameter_required("KEL", names(kel_v)) || parameter_required("KELC0", names(kel_v))) {
+          span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
           c_est <- cest(conc = rt, time = mid_pt, kelflag=kel_flag, t_last=t_last, spanratio=span_ratio, kel=kel_v[["KEL"]], kelc0=kel_v[["KELC0"]])
         }
 ###        if("AE" %in% parameter_list) {
