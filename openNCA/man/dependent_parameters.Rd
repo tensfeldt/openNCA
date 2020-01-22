@@ -26,6 +26,7 @@ This function will generate a list of dependant parameters based on the specifie
 }
 
 \examples{
+No appropriate examples
 
 }
 \author{

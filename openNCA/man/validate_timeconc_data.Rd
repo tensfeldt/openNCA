@@ -4,7 +4,7 @@
 \alias{validate_timeconc_data}
 \title{validate_timeconc_data validates that time, concentration, and dose data were passed via data and map/MCT and are available}
 \usage{
-validate_timeconc_data(map, data, verbose = FALSE)
+validate_timeconc_data(map, data, flag, verbose = FALSE)
 }
 \arguments{
 \item{map}{Model Configuration Template (MCT)}

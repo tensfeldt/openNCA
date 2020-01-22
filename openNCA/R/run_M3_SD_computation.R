@@ -966,26 +966,26 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(comp_required[["DOSEC"]]) {
           dose_c <- dosec(data = tmp_df, map = map_data)
         }
+###        if("CMAX" %in% parameter_list) {
+        if(comp_required[["CMAX"]]) {
+          c_max <- cmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        }
+###        if("TMAX" %in% parameter_list) {
+        if(comp_required[["TMAX"]]) {
+          t_max <- tmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        }
         if(comp_required[["CENDINF"]]){
-          cend_inf <- cendinf(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], dof = dof)
+          cend_inf <- cendinf(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], dof = dof, cmax = c_max)
         }
         if(comp_required[["CENDINFDN"]]){
           cend_infdn <- cendinf_dn(cendinf = cend_inf, dose = tmp_dose)
         }
         if(comp_required[["TENDINF"]]){
-          tend_inf <- tendinf(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], dof = dof)
-        }
-###        if("CMAX" %in% parameter_list) {
-        if(comp_required[["CMAX"]]) {
-          c_max <- cmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+          tend_inf <- tendinf(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], dof = dof, tmax = t_max)
         }
 ###        if("CLAST" %in% parameter_list) {
         if(comp_required[["CLAST"]]) {
           c_last <- clast(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
-        }
-###        if("TMAX" %in% parameter_list) {
-        if(comp_required[["TMAX"]]) {
-          t_max <- tmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
         }
 ###        if("TLAST" %in% parameter_list) {
         if(comp_required[["TLAST"]]) {

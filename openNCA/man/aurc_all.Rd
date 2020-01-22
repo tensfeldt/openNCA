@@ -84,13 +84,13 @@ data <- data.frame(
 )
 #Same data as above, just represented as a dataframe
 
-auc_all()
-#Error in auc_all: 'conc' and 'time' vectors are NULL
+aucr_all()
+#Error in aucr_all: 'conc' and 'time' vectors are NULL
 
 conc_vector <- data$CONC
 time_vector <- data$TIME
 
-auc_all(conc = conc_vector, time = time_vector)
+aucr_all(conc = conc_vector, time = time_vector)
 #12.23956
 
 ############
@@ -113,7 +113,7 @@ data2 <- data.frame(
 conc_vector <- data2$CONC
 time_vector <- data2$TIME
 
-auc_all(conc = conc_vector, time = time_vector)
+aucr_all(conc = conc_vector, time = time_vector)
 #Error in auc_lin_log(conc, time) :
 #  Error in auc_lin_log: 'tmax' is NA
 
@@ -137,7 +137,7 @@ data3 <- data.frame(
 conc_vector <- data3$CONC
 time_vector <- data3$TIME
 
-auc_all(conc = conc_vector, time = time_vector)
+aucr_all(conc = conc_vector, time = time_vector)
 #2.494215
 
 }

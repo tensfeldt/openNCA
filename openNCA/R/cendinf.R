@@ -82,7 +82,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-cendinf <- function(conc = NULL, time = NULL, dof = NULL){
+cendinf <- function(conc = NULL, time = NULL, dof = NULL, cmax = NULL){
   if(is.null(conc) && is.null(time) && is.null(dof)){
     stop("Error in cendinf: 'conc', 'time' and 'dof' vectors are NULL")
   } else if(is.null(conc) && is.null(time)){
@@ -124,6 +124,9 @@ cendinf <- function(conc = NULL, time = NULL, dof = NULL){
       c_endinf <- tmp[tmp$time == tmp_end_dof,]$conc[1]
     }
   } 
+  if(is.na(c_endinf) && !is.null(cmax)){
+    c_endinf <- suppressWarnings(as.numeric(cmax))
+  }
   
   return(c_endinf)
 }

@@ -36,6 +36,7 @@ updated Model Confuguration Template/MCT/map
 }
 
 \examples{
+No appropriate examples
 
 }
 \author{

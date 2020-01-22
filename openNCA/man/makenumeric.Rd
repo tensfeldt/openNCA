@@ -11,14 +11,14 @@ makenumeric(x)
 }
 \value{
 numeric vector
-
-#' @author
+}
+\description{
+makenumeric attempts to force a vector's values to all numeric values.
+}
+\author{
 \itemize{
  \item \strong{Thomas Tensfeldt, Pfizer}
  \item website: \url{www.pfizer.com}
  \item email: \url{thomas.g.tensfeldt@pfizer.com}
 }
-}
-\description{
-makenumeric attempts to force a vector's values to all numeric values.
 }

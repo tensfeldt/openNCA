@@ -23,6 +23,80 @@ Initial concentration resulting immediately after an IV bolus administration.
 }
 
 \examples{
+##########
+## Data ##
+#################################
+##  SID  ##  TIME  ##   CONC   ##
+#################################
+##   30  ##    0   ##   2.89   ##
+##   30  ##    1   ##   2.49   ##
+##   30  ##    2   ##   2.47   ##
+##   30  ##    3   ##   2.38   ##
+##   30  ##    4   ##   2.32   ##
+##   30  ##    5   ##   2.28   ##
+#################################
+
+data <- data.frame(
+    SID = ...,
+    TIME = ...,
+    RESULT = ...
+)
+#Same data as above, just represented as a dataframe
+
+c0()
+#Error in c0: 'conc' and 'time' vectors are NULL
+
+conc_vector <- data$CONC
+time_vector <- data$TIME
+
+c0(conc = conc_vector, time = time_vector)
+#2.89
+
+############
+## Data 2 ##
+#################################
+##  SID  ##  TIME  ##   CONC   ##
+#################################
+##   31  ##    0   ##      0   ##
+##   31  ##    1   ##      0   ##
+##   31  ##    2   ##      0   ##
+#################################
+
+data2 <- data.frame(
+    SID = ...,
+    TIME = ...,
+    RESULT = ...
+)
+#Same data as above, just represented as a dataframe
+
+conc_vector <- data2$CONC
+time_vector <- data2$TIME
+
+c0(conc = conc_vector, time = time_vector)
+#0
+
+############
+## Data 3 ##
+#################################
+##  SID  ##  TIME  ##   CONC   ##
+#################################
+##   32  ##    0   ##   1.19   ##
+##   32  ##    1   ##   1.23   ##
+##   32  ##    2   ##   1.34   ##
+#################################
+
+data3 <- data.frame(
+    SID = ...,
+    TIME = ...,
+    RESULT = ...
+)
+#Same data as above, just represented as a dataframe
+
+conc_vector <- data3$CONC
+time_vector <- data3$TIME
+
+c0(conc = conc_vector, time = time_vector)
+#1.19
 
 }
 \author{

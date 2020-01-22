@@ -4,7 +4,7 @@
 \alias{cendinf}
 \title{Observed concentration at the end of infusion}
 \usage{
-cendinf(conc = NULL, time = NULL, dof = NULL)
+cendinf(conc = NULL, time = NULL, dof = NULL, cmax = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

@@ -22,10 +22,6 @@ This function returns the regular expression associated to the specified paramet
 }
 }
 
-\examples{
-
-
-}
 \author{
 \itemize{
  \item \strong{Thomas Tensfeldt, Pfizer}

@@ -48,6 +48,33 @@ to CMAXC1, i.e. the first dosing interval of a concentration time profile.\cr
 }
 
 \examples{
+##########
+## Data ##
+###################################
+##  SDEID  ##  TIME  ##   CONC   ##
+###################################
+##   30    ##    0   ##   2.89   ##
+##   30    ##    1   ##   2.49   ##
+##   30    ##    2   ##   2.47   ##
+###################################
+
+#Data mentioned will be used for the following example
+
+cmax()
+#Error in cmax: 'conc' and 'time' vectors are NULL
+
+conc_vector <- c(2.89, 2.49, 2.47)
+time_vector <- c(0, 1, 2)
+
+kel(conc = conc_vector, time = time_vector)
+#       KEL      KELC0    KELTMLO    KELTMHI    KELNOPT      THALF     THALFF 
+#0.07851918 2.82291949 0.00000000 2.00000000 3.00000000 8.82774397         NA 
+
+cmax(conc = conc_vector, time = time_vector)
+#2.89
+
+cmaxc(kel = 0.07851918, cmax = 2.89, c0 = 2.89, tmax = 0)
+#0
 
 }
 \author{

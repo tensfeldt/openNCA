@@ -253,14 +253,15 @@ kel <- function(conc = NULL, time = NULL, exflag = NULL, spanratio = NULL){
     kelc0 <- (((conc_val * tmp_denom) - (time_val * tmp_numer))/(slope_denom))
     kelc0 <- exp(kelc0)
     #print(paste0("KelC0:", kelc0))
-
-    if(kel <= 0){
-      kel_val <- c(NA, NA, NA, NA, 0, NA, NA)
-      names(kel_val) <- c("KEL", "KELC0", "KELTMLO", "KELTMHI", "KELNOPT", "THALF", "THALFF")
-    } else {
-      kel_val <- c(kel, kelc0, kel_tmlo, kel_tmhi, kel_nopt, thalf, thalff)
-      names(kel_val) <- c("KEL", "KELC0", "KELTMLO", "KELTMHI", "KELNOPT", "THALF", "THALFF")
-    }
+    
+    #Removed the logic to return NA for negative KEL
+    #if(kel <= 0){
+    #  kel_val <- c(NA, NA, NA, NA, 0, NA, NA)
+    #  names(kel_val) <- c("KEL", "KELC0", "KELTMLO", "KELTMHI", "KELNOPT", "THALF", "THALFF")
+    #} else {
+    kel_val <- c(kel, kelc0, kel_tmlo, kel_tmhi, kel_nopt, thalf, thalff)
+    names(kel_val) <- c("KEL", "KELC0", "KELTMLO", "KELTMHI", "KELNOPT", "THALF", "THALFF")
+    #}
   }
 
   return(kel_val)

@@ -92,7 +92,7 @@ ptroughrend <- function(cmax = NULL, ctroughend = NULL){
   }
   
   p_troughrend <- cmax/ctroughend
-  p_troughrend <- replace(p_troughrend, is.infinite(p_troughrend), NA)
+  p_troughrend <- replace(p_troughrend, is.infinite(p_troughrend) || is.nan(p_troughrend), NA)
   p_troughrend <- replace(p_troughrend, p_troughrend == 0, NA)
   
   return(p_troughrend)

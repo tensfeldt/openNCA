@@ -39,6 +39,11 @@ the last non-zero concentration, divided by the weight.   \cr
 }
 
 \examples{
+clpw()
+#Error in clftauw: 'clftau' and 'normbs' vectors are NULL
+
+clpw(clp = 10.34535, normbs = 1.234)
+#8.38359
 
 }
 \author{

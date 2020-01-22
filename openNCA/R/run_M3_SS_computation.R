@@ -361,7 +361,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, rep(paste0("CENDINF",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("CENDINF",1:di_col)))
   }
-  if(disp_required[["CENDINFDN"]]){
+  if(disp_required[["CENDINFDNi"]]){
     col_names <- c(col_names, rep(paste0("CENDINFDN",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("CENDINFDN",1:di_col)))
   }
@@ -826,8 +826,8 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, rep(paste0("TAU",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("TAU",1:di_col)))
   }
-###  if("TOLD" %in% parameter_list) {
-  if(disp_required[["TOLD"]]) {
+###  if("TOLDi" %in% parameter_list) {
+  if(disp_required[["TOLDi"]]) {
     col_names <- c(col_names, rep(paste0("TOLD",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("TOLD",1:di_col)))
   }
@@ -1017,7 +1017,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(comp_required[["CENDINFi"]]){
         cend_inf <- list()
       }
-      if(comp_required[["CENDINFDN"]]){
+      if(comp_required[["CENDINFDNi"]]){
         cend_infdn <- list()
       }
       if(comp_required[["TENDINFi"]]){
@@ -1137,7 +1137,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(comp_required[["TAUi"]] || comp_required[["TAU"]]) {
         tau <- list()
       }
-###      if("TOLD" %in% parameter_list) {
+###      if("TOLDi" %in% parameter_list) {
       if(comp_required[["TOLDi"]] || comp_required[["TOLD"]]) {
         told <- list()
       }
@@ -1574,23 +1574,27 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
           dof[[d]] <- ifelse(paste0("DOF",d) %in% names(map_data), ifelse(map_data[c(paste0("DOF",d))] %in% names(data_data), unique(tmp_di_df[,as.character(map_data[c(paste0("DOF",d))])])[1], NA), NA)
-          if(comp_required[["CENDINFi"]]){
-            cend_inf[[d]] <- cendinf(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], dof = dof[[d]])
+###          if("CMAXi" %in% parameter_list) {
+          if(comp_required[["CMAXi"]]) {
+            c_maxi[[d]] <- cmax(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME])
           }
-          if(comp_required[["CENDINFDN"]]){
+###          if("TMAXi" %in% parameter_list) {
+          if(comp_required[["TMAXi"]]) {
+            t_maxi[[d]] <- tmax(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME])
+          }
+          if(comp_required[["CENDINFi"]]){
+            cend_inf[[d]] <- cendinf(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], dof = dof[[d]], cmax = c_maxi[[d]])
+          }
+          if(comp_required[["CENDINFDNi"]]){
             cend_infdn[[d]] <- cendinf_dn(cendinf = cend_inf[[d]], dose = tmp_dose)
           }
           if(comp_required[["TENDINFi"]]){
-            tend_inf[[d]] <- tendinf(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], dof = dof[[d]])
+            tend_inf[[d]] <- tendinf(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], dof = dof[[d]], tmax = t_maxi[[d]])
           }
 ###          if("TAUi" %in% parameter_list) {
           if(comp_required[["TAUi"]] || comp_required[["TAU"]]) {
             tau[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TAU",d))])][1]
             tau[[d]] <- as.numeric(tau[[d]])
-          }
-###          if("CMAXi" %in% parameter_list) {
-          if(comp_required[["CMAXi"]]) {
-            c_maxi[[d]] <- cmax(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME])
           }
 ###          if("CMINi" %in% parameter_list) {
           if(comp_required[["CMINi"]]) {
@@ -1606,10 +1610,6 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
           if(comp_required[["CMINDNi"]]){
             c_mindni[[d]] <- cmin_dn(cmin = c_mini[[d]], dose = tmp_dose)
-          }
-###          if("TMAXi" %in% parameter_list) {
-          if(comp_required[["TMAXi"]]) {
-            t_maxi[[d]] <- tmax(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME])
           }
 ###          if("TMINi" %in% parameter_list) {
           if(comp_required[["TMINi"]]) {
@@ -1715,8 +1715,8 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["AUMCXPTPi"]]){
             aumcxptpi[[d]] <- aumc_XpctP(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
           }
-###          if("TOLD" %in% parameter_list) {
-          if(comp_required[["TOLD"]]) {
+###          if("TOLDi" %in% parameter_list) {
+          if(comp_required[["TOLDi"]]) {
             told[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
             told[[d]] <- as.numeric(told[[d]])
           }
@@ -2120,7 +2120,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##          row_data <- c(row_data, unlist(cend_inf))
           computation_df[i, paste0("CENDINF",1:di_col)] <- unlist(cend_inf)
         }
-        if(disp_required[["CENDINFDN"]]){
+        if(disp_required[["CENDINFDNi"]]){
 ##          row_data <- c(row_data, unlist(cend_infdn))
           computation_df[i, paste0("CENDINFDN",1:di_col)] <- unlist(cend_infdn)
         }

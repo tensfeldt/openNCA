@@ -23,6 +23,7 @@ This function will generate a list of display parameters based on the specified 
 }
 
 \examples{
+No appropriate examples
 
 }
 \author{

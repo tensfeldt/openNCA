@@ -46,6 +46,38 @@ The inputs 'kelflag', 'tlast', 'spanratio' and 'kel' are optional.\cr
 }
 
 \examples{
+##########
+## Data ##
+#################################
+##  SID  ##  TIME  ##   CONC   ##
+#################################
+##   30  ##    0   ##   2.89   ##
+##   30  ##    1   ##   2.49   ##
+##   30  ##    2   ##   2.47   ##
+##   30  ##    3   ##   2.38   ##
+##   30  ##    4   ##   2.32   ##
+##   30  ##    5   ##   2.28   ##
+#################################
+
+data <- data.frame(
+    SID = ...,
+    TIME = ...,
+    RESULT = ...
+)
+#Same data as above, just represented as a dataframe
+
+cest()
+#Error in cest: 'conc' and 'time' vectors are NULL
+
+conc_vector <- data$CONC
+time_vector <- data$TIME
+
+kel(conc_vector, time_vector)
+#       KEL       KELC0     KELTMLO     KELTMHI     KELNOPT       THALF      THALFF 
+#0.04099056  2.72984039  0.00000000  5.00000000  6.00000000 16.90992299          NA
+
+cest(conc_vector, time_vector, t_last = 5, kel = 0.04099056, kelc0 = 2.72984039)
+#2.223962
 
 }
 \author{

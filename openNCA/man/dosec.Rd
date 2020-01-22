@@ -30,6 +30,7 @@ unit_conversion is used for DOSE unit scaling. \cr
 }
 
 \examples{
+No appropriate examples
 
 }
 \author{

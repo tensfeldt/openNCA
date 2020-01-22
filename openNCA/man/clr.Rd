@@ -34,6 +34,11 @@ Calculated for single dose studies.
 }
 
 \examples{
+clr()
+#Error in clr: 'aucinfp' and 'ae' vectors are NULL
+
+clr(aucinfp = 9.335, ae = 1.234)
+#0.1321907
 
 }
 \author{

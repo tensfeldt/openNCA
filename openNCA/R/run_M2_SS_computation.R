@@ -1143,8 +1143,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(comp_required[["TAUi"]]) {
         tau <- list()
       }
-###      if("TOLD" %in% parameter_list) {
-      if(comp_required[["TOLD"]]) {
+###      if("TOLDi" %in% parameter_list) {
+      if(comp_required[["TOLDi"]]) {
         told <- list()
       }
 ###      if("AUCTAUi" %in% parameter_list) {
@@ -1695,7 +1695,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             aucinfoi[[d]] <- auc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
           }
           if(comp_required[["AUCINFOCi"]]){
-            aucinfoi_c[[d]] <- auc_inf_oc(kel = kel_v[["KEL"]], aucinfo = aucinfoi[[d]], c0 = c_0)
+            aucinfoi_c[[d]] <- auc_inf_oc(kel = kel_v[["KEL"]], aucinfo = aucinfoi[[d]], c0 = obs_c_0)
           }
           if(comp_required[["AUCINFODNi"]]){
             aucinfoi_dn[[d]] <- auc_dn(auc = aucinfoi[[d]], dose = tmp_dose)
@@ -1710,7 +1710,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               aucinfpi[[d]] <- auc_inf_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, t_last = t_lasti[[d]])
           }
           if(comp_required[["AUCINFPCi"]]){
-            aucinfpi_c[[d]] <- auc_inf_pc(kel = kel_v[["KEL"]], aucinfp = aucinfpi[[d]], c0 = c_0)
+            aucinfpi_c[[d]] <- auc_inf_pc(kel = kel_v[["KEL"]], aucinfp = aucinfpi[[d]], c0 = obs_c_0)
           }
           if(comp_required[["AUCINFPDNi"]]){
             aucinfpi_dn[[d]] <- auc_dn(auc = aucinfpi[[d]], dose = tmp_dose)
@@ -1803,8 +1803,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("TAUi" %in% parameter_list) {
 ###              tau[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TAU",d))])][1]
 ###          }
-###          if("TOLD" %in% parameter_list) {
-          if(comp_required[["TOLD"]]) {
+###          if("TOLDi" %in% parameter_list) {
+          if(comp_required[["TOLDi"]]) {
             told[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
             told[[d]] <- as.numeric(told[[d]])
           }
@@ -2735,8 +2735,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##          row_data <- c(row_data, unlist(tau))
           computation_df[i, paste0("TAU",1:di_col)] <- unlist(tau)
         }
-###        if("TOLD" %in% parameter_list) {
-        if(disp_required[["TOLD"]]) {
+###        if("TOLDi" %in% parameter_list) {
+        if(disp_required[["TOLDi"]]) {
 ##          row_data <- c(row_data, unlist(told))
           computation_df[i, paste0("TOLD",1:di_col)] <- unlist(told)
         }

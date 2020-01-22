@@ -82,7 +82,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-tendinf <- function(conc = NULL, time = NULL, dof = NULL){
+tendinf <- function(conc = NULL, time = NULL, dof = NULL, tmax = NULL){
   if(is.null(conc) && is.null(time) && is.null(dof)){
     stop("Error in tendinf: 'conc', 'time' and 'dof' vectors are NULL")
   } else if(is.null(conc) && is.null(time)){
@@ -123,7 +123,10 @@ tendinf <- function(conc = NULL, time = NULL, dof = NULL){
     if(tmp_end_dof %in% tmp$time){
       t_endinf <- tmp[tmp$time == tmp_end_dof,]$time[1]
     }
-  } 
+  }
+  if(is.na(t_endinf) && !is.null(tmax)){
+    t_endinf <- suppressWarnings(as.numeric(tmax))
+  }
   
   return(t_endinf)
 }
