@@ -477,6 +477,9 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ####  }
 ###  if("AURCALL" %in% parameter_list) {
 ###  if(parameter_required("^AURCALL$", parameter_list) || parameter_required(dependent_parameters("^AURCALL$"), parameter_list)) {
+  if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
+    col_names <- c(col_names, "FLGACCEPTTAU")
+  }
   if(disp_required[["AURCALL"]]) {
     col_names <- c(col_names, "AURCALL")
     regular_int_type <- c(regular_int_type, "AURCALL")
@@ -1534,6 +1537,32 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ####        }
 ###        if("AURCALL" %in% parameter_list) {
 ###        if(parameter_required("^AURCALL$", parameter_list) || parameter_required(dependent_parameters("^AURCALL$"), parameter_list)) {
+        if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
+          if(!is.na(last_crit_factor)){
+            if(opt_list[2] %in% names(map_data)){
+              if(map_data[, opt_list[2]] %in% names(data_data)) {
+                tau_val <- unique(tmp_df[, map_data[, opt_list[2]]])[1]
+                if(!is.na(tau_val) && is.numeric(tau_val) && !is.na(last_crit_factor) && is.numeric(last_crit_factor)){
+                  lt_accept_crit <- tau_val * last_crit_factor
+                  ##                  row_data <- c(row_data, ifelse(last_time >= lt_accept_crit, 1, 0))
+                  computation_df[i, "FLGACCEPTTAU"] <- ifelse(last_time >= lt_accept_crit, 1, 0)
+                } else {
+                  ##                  row_data <- c(row_data, 0)
+                  computation_df[i, "FLGACCEPTTAU"] <- 0
+                }
+              } else {
+                ##                row_data <- c(row_data, 0)
+                computation_df[i, "FLGACCEPTTAU"] <- 0
+              }
+            } else {
+              ##              row_data <- c(row_data, 0)
+              computation_df[i, "FLGACCEPTTAU"] <- 0
+            }
+          } else {
+            ##            row_data <- c(row_data, 0)
+            computation_df[i, "FLGACCEPTTAU"] <- 0
+          }
+        }
         if(disp_required[["AURCALL"]]) {
 ##          row_data <- c(row_data, aurcall)
           computation_df[i, "AURCALL"] <- aurcall

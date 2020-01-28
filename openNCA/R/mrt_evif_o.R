@@ -58,7 +58,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-mrt_evif_o <- function(conc = NULL, time = NULL, method = 1, parameter = "SD", kelflag = NULL, aucflag = NULL, tau = NULL, orig_conc = NULL, orig_time = NULL){
+mrt_evif_o <- function(conc = NULL, time = NULL, method = 1, parameter = "SD", kelflag = NULL, aucflag = NULL, tau = NULL, orig_conc = NULL, orig_time = NULL, aucinfo = NULL, aumcinfo = NULL, auctau = NULL, aumctau = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in mrt_evif_o: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -91,29 +91,39 @@ mrt_evif_o <- function(conc = NULL, time = NULL, method = 1, parameter = "SD", k
   
   mrtevifo <- NA
   if(tolower(parameter) == "sd") {
-    auc_info <- auc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag)
-    aumc_info <- aumc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag)
-
-    if(auc_info <= 0 || aumc_info < 0 || is.na(auc_info) || is.na(aumc_info)){
+    if(is.null(aucinfo)){
+      aucinfo <- auc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag)
+    }
+    if(is.null(aumcinfo)){
+      aumcinfo <- aumc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag)
+    }
+    
+    if(aucinfo <= 0 || aumcinfo < 0 || is.na(aucinfo) || is.na(aumcinfo)){
       mrtevifo <- NA
     } else {
-      mrtevifo <- aumc_info/auc_info
+      mrtevifo <- aumcinfo/aucinfo
     }
   } else if(tolower(parameter) == "ss") {
-    auc_info <- auc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag)
+    if(is.null(aucinfo)){
+      aucinfo <- auc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag)
+    }
 ### 2019-09-04/TGT/ added orig_conc and orig_time to auc_tau call to permit interpolation
 ###    auctau <- auc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau)
-    auctau <- auc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+    if(is.null(auctau)){
+      auctau <- auc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+    }
 ### 2019-09-04/TGT/ added orig_conc and orig_time to aumc_tau call to permit interpolation
 ###    aumctau <- aumc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau)
-    aumctau <- aumc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+    if(is.null(aumctau)){
+      aumctau <- aumc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+    }
     
-    if(auc_info <= 0 || auctau < 0 || aumctau < 0 || is.na(auc_info) || is.na(auctau) || is.na(aumctau)){
+    if(aucinfo <= 0 || auctau < 0 || aumctau < 0 || is.na(aucinfo) || is.na(auctau) || is.na(aumctau)){
       mrtevifo <- NA
     } else {
 ### 2019-09-04/TGT/ auc_tau changed to auctau
 ###      mrtevifo <- ((aumctau + tau)*(auc_info - auctau))/auc_tau
-      mrtevifo <- ((aumctau + tau)*(auc_info - auctau))/auctau
+      mrtevifo <- ((aumctau + tau)*(aucinfo - auctau))/auctau
     }
   }
 

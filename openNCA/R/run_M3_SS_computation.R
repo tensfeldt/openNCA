@@ -819,7 +819,6 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###  if("DIi" %in% parameter_list) {
   if(disp_required[["DIi"]]) {
     col_names <- c(col_names, rep(paste0("DI",1:di_col)))
-    regular_int_type <- c(regular_int_type, rep(paste0("DI",1:di_col)))
   }
 ###  if("TAUi" %in% parameter_list) {
   if(disp_required[["TAUi"]]) {

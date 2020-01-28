@@ -465,6 +465,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###    regular_int_type <- c(regular_int_type, "AUCDN")
 ###  }
 ###  if("AURCALL" %in% parameter_list) {
+  if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
+    col_names <- c(col_names, "FLGACCEPTTAU")
+  }
   if(disp_required[["AURCALL"]]) {
     col_names <- c(col_names, "AURCALL")
     regular_int_type <- c(regular_int_type, "AURCALL")
@@ -527,15 +530,14 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###  if("DIi" %in% parameter_list) {
   if(disp_required[["DIi"]]) {
     col_names <- c(col_names, rep(paste0("DI",1:di_col)))
-    regular_int_type <- c(regular_int_type, rep(paste0("DI",1:di_col)))
   }
 ###  if("TAUi" %in% parameter_list) {
   if(disp_required[["TAUi"]]) {
     col_names <- c(col_names, rep(paste0("TAU",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("TAU",1:di_col)))
   }
-###  if("TOLD" %in% parameter_list) {
-  if(disp_required[["TOLD"]]) {
+###  if("TOLDi" %in% parameter_list) {
+  if(disp_required[["TOLDi"]]) {
     col_names <- c(col_names, rep(paste0("TOLD",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("TOLD",1:di_col)))
   }
@@ -724,8 +726,8 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(comp_required[["TAUi"]]) {
         tau <- list()
       }
-###      if("TOLD" %in% parameter_list) {
-      if(comp_required[["TOLD"]]) {
+###      if("TOLDi" %in% parameter_list) {
+      if(comp_required[["TOLDi"]]) {
         told <- list()
       }
 ###      if("DOSEi" %in% parameter_list) {
@@ -1031,8 +1033,8 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             tau[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TAU",d))])][1]
             tau[[d]] <- as.numeric(tau[[d]])
           }
-###          if("TOLD" %in% parameter_list) {
-          if(comp_required[["TOLD"]]) {
+###          if("TOLDi" %in% parameter_list) {
+          if(comp_required[["TOLDi"]]) {
             told[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
             told[[d]] <- as.numeric(told[[d]])
           }
@@ -1670,9 +1672,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##          row_data <- c(row_data, unlist(tau))
           computation_df[i, paste0("TAU",1:di_col)] <- unlist(tau)
         }
-###        if("TOLD" %in% parameter_list) {
+###        if("TOLDi" %in% parameter_list) {
 ### 2019-09-23/TGT/ Replace "TOLD" with "TOLDi"
-###        if(disp_required[["TOLD"]]) {
+###        if(disp_required[["TOLDi"]]) {
         if(disp_required[["TOLDi"]]) {
 ##          row_data <- c(row_data, unlist(told))
           computation_df[i, paste0("TOLD",1:di_col)] <- unlist(told)
@@ -1839,6 +1841,32 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###      display_parameters <- c(display_parameters, "AUCDN")
 ###    }
 ###    if("AURCALL" %in% display_list) {
+    if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
+      if(!is.na(last_crit_factor)){
+        if(paste0("TAU",di_col) %in% names(map_data)){
+          if(map_data[, paste0("TAU",di_col)] %in% names(data_data)) {
+            tau_val <- unique(tmp_df[, map_data[, paste0("TAU",di_col)]])[1]
+            if(!is.na(tau_val) && is.numeric(tau_val) && !is.na(last_crit_factor) && is.numeric(last_crit_factor)){
+              lt_accept_crit <- tau_val * last_crit_factor
+              ##                  row_data <- c(row_data, ifelse(last_time >= lt_accept_crit, 1, 0))
+              computation_df[i, "FLGACCEPTTAU"] <- ifelse(last_time >= lt_accept_crit, 1, 0)
+            } else {
+              ##                  row_data <- c(row_data, 0)
+              computation_df[i, "FLGACCEPTTAU"] <- 0
+            }
+          } else {
+            ##                row_data <- c(row_data, 0)
+            computation_df[i, "FLGACCEPTTAU"] <- 0
+          }
+        } else {
+          ##              row_data <- c(row_data, 0)
+          computation_df[i, "FLGACCEPTTAU"] <- 0
+        }
+      } else {
+        ##            row_data <- c(row_data, 0)
+        computation_df[i, "FLGACCEPTTAU"] <- 0
+      }
+    }
     if(disp_required[["AURCALL"]]) {
       display_parameters <- c(display_parameters, "AURCALL")
     }
@@ -1881,8 +1909,8 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     if(disp_required[["TAUi"]]) {
       display_parameters <- c(display_parameters, rep(paste0("TAU",1:di_col)))
     }
-###    if("TOLD" %in% display_list) {
-    if(disp_required[["TOLD"]]) {
+###    if("TOLDi" %in% display_list) {
+    if(disp_required[["TOLDi"]]) {
       display_parameters <- c(display_parameters, rep(paste0("TOLD",1:di_col)))
     }
 ###    if("DOSEi" %in% display_list) {

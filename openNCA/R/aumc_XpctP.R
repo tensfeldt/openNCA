@@ -109,7 +109,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-aumc_XpctP <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, aucflag = NULL, spanratio = NULL, kel = NULL){
+aumc_XpctP <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, aucflag = NULL, spanratio = NULL, kel = NULL, aumcinfp = NULL, aumclast = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in aumc_XpctP: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -139,14 +139,18 @@ aumc_XpctP <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, auc
     aumc_xpctp <- 0
     return(aumc_xpctp)
   } else {
-    aumc_infp <- aumc_inf_p(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
-    aumclast <- aumc_last(conc = conc, time = time, method = method, exflag = aucflag)
-
-    if(is.na(aumc_infp) || aumc_infp == 0 || is.na(aumclast)){
+    if(is.null(aumcinfp)){
+      aumcinfp <- aumc_inf_p(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
+    }
+    if(is.null(aumclast)){
+      aumclast <- aumc_last(conc = conc, time = time, method = method, exflag = aucflag)
+    }
+    
+    if(is.na(aumcinfp) || aumcinfp == 0 || is.na(aumclast)){
       aumc_xpctp <- NA
       return(aumc_xpctp)
     } else {
-      aumc_xpctp <- ((aumc_infp - aumclast)/aumc_infp)*100
+      aumc_xpctp <- ((aumcinfp - aumclast)/aumcinfp)*100
       return(aumc_xpctp)
     }
   }

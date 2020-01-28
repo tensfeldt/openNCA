@@ -879,7 +879,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###  if(parameter_required("^DIi$", parameter_list) || length(dependent_parameters("^DIi$"))>0){
   if(disp_required[["DIi"]]){
     col_names <- c(col_names, rep(paste0("DI",1:di_col)))
-    regular_int_type <- c(regular_int_type, rep(paste0("DI",1:di_col)))
   }
 ###  if("TAUi" %in% parameter_list) {
 ###  if(parameter_required("^TAUi$", parameter_list) || length(dependent_parameters("^TAUi$"))>0){
@@ -1786,7 +1785,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("CMAXDNi" %in% parameter_list && "CMAXi" %in% parameter_list) {
 ###          if(parameter_required("^CMAXDNi$", parameter_list) || length(dependent_parameters("^CMAXDNi$"))>0){
           if(comp_required[["CMAXDNi"]]){
-              c_maxdni[[d]] <- cmax_dn(cmax = c_maxi[[d]], dose = tmp_dose)
+            c_maxdni[[d]] <- cmax_dn(cmax = c_maxi[[d]], dose = tmp_dose)
 ###              cat('d: ', d, ' c_maxi[[',d,']]: ', c_maxi[[d]], ' dose: ', tmp_dose, ' c_maxdni[[',d,']]: ', c_maxdni[[d]], '\n') 
           }
           if(comp_required[["CMINDNi"]]){
@@ -1830,44 +1829,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          }
 ###          if("AUCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
 ###          if(parameter_required("^AUCINFOi$", parameter_list) || length(dependent_parameters("^AUCINFOi$"))>0){
-          if(comp_required[["AUCINFOi"]]){
-            aucinfoi[[d]] <- auc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
-          }
-          if(comp_required[["AUCINFOCi"]]){
-            aucinfoi_c[[d]] <- auc_inf_oc(kel = kel_v[["KEL"]], aucinfo = aucinfoi[[d]], c0 = c_0)
-          }
-          if(comp_required[["AUCINFODNi"]]){
-            aucinfoi_dn[[d]] <- auc_dn(auc = aucinfoi[[d]], dose = tmp_dose)
-          }
-###          if("AUCINFPi" %in% parameter_list && "CEST" %in% parameter_list && "AUCLASTi" %in% parameter_list && "TLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
-###          if(parameter_required("^AUCINFPi$", parameter_list) || length(dependent_parameters("^AUCINFPi$"))>0){
-          if(comp_required[["AUCINFPi"]]){
-            aucinfpi[[d]] <- auc_inf_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
-          }
-          if(comp_required[["AUCINFPCi"]]){
-            aucinfpi_c[[d]] <- auc_inf_pc(kel = kel_v[["KEL"]], aucinfp = aucinfpi[[d]], c0 = c_0)
-          }
-          if(comp_required[["AUCINFPDNi"]]){
-            aucinfpi_dn[[d]] <- auc_dn(auc = aucinfpi[[d]], dose = tmp_dose)
-          }
-###          if("AUMCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
-###          if(parameter_required("^AUMCINFOi$", parameter_list) || length(dependent_parameters("^AUMCINFOi$"))>0){
-          if(comp_required[["AUMCINFOi"]]){
-            aumcinfoi[[d]] <- aumc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
-          }
-###          if("AUMCINFPi" %in% parameter_list && "CEST" %in% parameter_list && "AUCLASTi" %in% parameter_list && "TLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
-###          if(parameter_required("^AUMCINFPi$", parameter_list) || length(dependent_parameters("^AUMCINFPi$"))>0){
-          if(comp_required[["AUMCINFPi"]]){
-            aumcinfpi[[d]] <- aumc_inf_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
-          }
-###          if("AUCDN" %in% parameter_list && "AUCALL" %in% parameter_list) {
-###          if(parameter_required("^AUCDN$", parameter_list) || length(dependent_parameters("^AUCDN$"))>0){
-### 2019-10-10/TGT/ replace AUCDN with AUCALLDN
-###          if(comp_required[["AUCDN"]]){
-###            aucdn[[d]] <- auc_dn(auc = aucall, dose = tmp_dose)
-          if(comp_required[["AUCALLDN"]]){
-            aucalldn[[d]] <- auc_dn(auc = aucall, dose = tmp_dose)
-          }
 ### 2019-08-18/TGT/ Add AUCLASTi computations
 ###          if(parameter_required(c("AUCLASTi", "TMAXi", "TLASTi"), parameter_list)) {
 ###            auclasti[[d]] <- auc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data[[map_data$TIME]]], method = method, exflag = auc_flag, t_last = t_lasti[[d]], t_max = t_maxi[[d]])
@@ -1876,12 +1837,12 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("AUCLASTi" %in% parameter_list && 'TMAXi' %in% parameter_list && 'TLASTi' %in% parameter_list) {
 ###          if(parameter_required("^AUCLASTi$", parameter_list) || length(dependent_parameters("^AUCLASTi$"))>0){
           if(comp_required[["AUCLASTi"]]){
-              auclasti[[d]] <- auc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag)
+            auclasti[[d]] <- auc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_lasti[[d]], t_max = t_maxi[[d]])
           }
 ###          if("AUCLASTCi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "TLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
 ###          if(parameter_required("^AUCLASTCi$", parameter_list) || length(dependent_parameters("^AUCLASTCi$"))>0){
           if(comp_required[["AUCLASTCi"]]){
-              auclasti_c[[d]] <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclasti[[d]], c0 = c_0, tlast = t_lasti[[d]])
+            auclasti_c[[d]] <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclasti[[d]], c0 = c_0, tlast = t_lasti[[d]])
           }
 ###          if("AUCLASTDNi" %in% parameter_list && "AUCLASTi" %in% parameter_list) {
 ###          if(parameter_required("^AUCLASTDNi$", parameter_list) || length(dependent_parameters("^AUCLASTDNi$"))>0){
@@ -1892,6 +1853,44 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if(parameter_required("^AUMCLASTi$", parameter_list) || length(dependent_parameters("^AUMCLASTi$"))>0){
           if(comp_required[["AUMCLASTi"]]){
             aumclasti[[d]] <- aumc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag)
+          }
+          if(comp_required[["AUCINFOi"]]){
+            aucinfoi[[d]] <- auc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, c_last = c_lasti[[d]], auclast = auclasti[[d]], kel = kel_v)
+          }
+          if(comp_required[["AUCINFOCi"]]){
+            aucinfoi_c[[d]] <- auc_inf_oc(kel = kel_v[["KEL"]], aucinfo = aucinfoi[[d]], c0 = c_0)
+          }
+          if(comp_required[["AUCINFODNi"]]){
+            aucinfoi_dn[[d]] <- auc_dn(auc = aucinfoi[[d]], dose = tmp_dose)
+          }
+###          if("AUCINFPi" %in% parameter_list && "CEST" %in% parameter_list && "AUCLASTi" %in% parameter_list && "TLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
+###          if(parameter_required("^AUCINFPi$", parameter_list) || length(dependent_parameters("^AUCINFPi$"))>0){
+          if(comp_required[["AUCINFPi"]]){
+            aucinfpi[[d]] <- auc_inf_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, t_last = t_lasti[[d]], auclast = auclasti[[d]], kel = kel_v)
+          }
+          if(comp_required[["AUCINFPCi"]]){
+            aucinfpi_c[[d]] <- auc_inf_pc(kel = kel_v[["KEL"]], aucinfp = aucinfpi[[d]], c0 = c_0)
+          }
+          if(comp_required[["AUCINFPDNi"]]){
+            aucinfpi_dn[[d]] <- auc_dn(auc = aucinfpi[[d]], dose = tmp_dose)
+          }
+###          if("AUMCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "CLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
+###          if(parameter_required("^AUMCINFOi$", parameter_list) || length(dependent_parameters("^AUMCINFOi$"))>0){
+          if(comp_required[["AUMCINFOi"]]){
+            aumcinfoi[[d]] <- aumc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumclast = aumclasti[[d]], c_last = c_lasti[[d]], t_last = t_lasti[[d]], kel = kel_v)
+          }
+###          if("AUMCINFPi" %in% parameter_list && "CEST" %in% parameter_list && "AUCLASTi" %in% parameter_list && "TLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
+###          if(parameter_required("^AUMCINFPi$", parameter_list) || length(dependent_parameters("^AUMCINFPi$"))>0){
+          if(comp_required[["AUMCINFPi"]]){
+            aumcinfpi[[d]] <- aumc_inf_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumclast = aumclasti[[d]], t_last = t_lasti[[d]], kel = kel_v)
+          }
+###          if("AUCDN" %in% parameter_list && "AUCALL" %in% parameter_list) {
+###          if(parameter_required("^AUCDN$", parameter_list) || length(dependent_parameters("^AUCDN$"))>0){
+### 2019-10-10/TGT/ replace AUCDN with AUCALLDN
+###          if(comp_required[["AUCDN"]]){
+###            aucdn[[d]] <- auc_dn(auc = aucall, dose = tmp_dose)
+          if(comp_required[["AUCALLDN"]]){
+            aucalldn[[d]] <- auc_dn(auc = aucall, dose = tmp_dose)
           }
 ###          if("AUCTAUi" %in% parameter_list) {
 ###          if(parameter_required("^AUCTAUi$", parameter_list) || length(dependent_parameters("^AUCTAUi$"))>0){
@@ -1906,6 +1905,12 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["AUCTAUDNi"]]){
             auctaudn[[d]] <- auc_dn(auc = auctau[[d]], dose = tmp_dose)
           }
+###          if("AUMCTAUi" %in% parameter_list && "TMAXi" %in% parameter_list) {
+###          if(parameter_required("^AUMCTAUi$", parameter_list) || length(dependent_parameters("^AUMCTAUi$"))>0){
+          if(comp_required[["AUMCTAUi"]]){
+###            aumctaui[[d]] <- aumc_tau(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = 1, exflag = auc_flag, tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = tmp_df[,map_data$CONC], orig_time = tmp_df[,map_data$TIME])
+            aumctaui[[d]] <- aumc_tau(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = 1, exflag = auc_flag, tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time)
+          }
 ###          if("MRTLASTi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "AUMCLASTi" %in% parameter_list) {
 ###          if(parameter_required("^MRTLASTi$", parameter_list) || length(dependent_parameters("^MRTLASTi$"))>0){
           if(comp_required[["MRTLASTi"]]){
@@ -1917,7 +1922,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-08-27/TGT/ call to mrt_evif_o is missing the tau argument
 ### 2019-09-04/TGT/ added tau = tau[[d]] argument to the mrt_evif_o call
 ### 2019-09-04/TGT/ added orig_conc and orig_time arguments to mrt_evif_o call
-              mrtevifoi[[d]] <- mrt_evif_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time)
+              mrtevifoi[[d]] <- mrt_evif_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfo = aucinfoi[[d]], aumcinfo = aumcinfoi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
           }
 ###          if("MRTEVIFPi" %in% parameter_list && "AUCINFPi" %in% parameter_list && "AUCTAUi" %in% parameter_list && "AUMCTAUi" %in% parameter_list){
 ###          if(parameter_required("^MRTEVIFPi$", parameter_list) || length(dependent_parameters("^MRTEVIFPi$"))>0){
@@ -1925,7 +1930,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-08-27/TGT/ call to mrt_evif_p is missing the tau argument
 ### 2019-09-04/TGT/ added tau = tau[[d]] argument to the mrt_evif_p call
 ### 2019-09-04/TGT/ added orig_conc and orig_time arguments to mrt_evif_p call
-              mrtevifpi[[d]] <- mrt_evif_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time)
+              mrtevifpi[[d]] <- mrt_evif_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfp = aucinfpi[[d]], aumcinfp = aumcinfpi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
           }
 ###          if("AUCXPCTOi" %in% parameter_list && "AUCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list){
 ###          if(parameter_required("^AUCXPCTOi$", parameter_list) || length(dependent_parameters("^AUCXPCTOi$"))>0){
@@ -1940,18 +1945,12 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("AUMCXPTOi" %in% parameter_list && "AUMCINFOi" %in% parameter_list && "AUMCLAST" %in% parameter_list){
 ###          if(parameter_required("^AUMCXPTOi$", parameter_list) || length(dependent_parameters("^AUMCXPTOi$"))>0){
           if(comp_required[["AUMCXPTOi"]]){
-            aumcxptoi[[d]] <- aumc_XpctO(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
+            aumcxptoi[[d]] <- aumc_XpctO(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumcinfo = aumcinfoi[[d]], aumclast = aumclasti[[d]])
           }
 ###          if("AUMCXPTPi" %in% parameter_list && "AUMCINFPi" %in% parameter_list && "AUMCLAST" %in% parameter_list){
 ###          if(parameter_required("^AUMCXPTPi$", parameter_list) || length(dependent_parameters("^AUMCXPTPi$"))>0){
           if(comp_required[["AUMCXPTPi"]]){
-            aumcxptpi[[d]] <- aumc_XpctP(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag)
-          }
-###          if("AUMCTAUi" %in% parameter_list && "TMAXi" %in% parameter_list) {
-###          if(parameter_required("^AUMCTAUi$", parameter_list) || length(dependent_parameters("^AUMCTAUi$"))>0){
-          if(comp_required[["AUMCTAUi"]]){
-###            aumctaui[[d]] <- aumc_tau(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = 1, exflag = auc_flag, tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = tmp_df[,map_data$CONC], orig_time = tmp_df[,map_data$TIME])
-            aumctaui[[d]] <- aumc_tau(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = 1, exflag = auc_flag, tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time)
+            aumcxptpi[[d]] <- aumc_XpctP(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumcinfp = aumcinfpi[[d]], aumclast = aumclasti[[d]])
           }
 ###          if("CAVi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
 ###          if(parameter_required("^CAVi$", parameter_list) || length(dependent_parameters("^CAVi$"))>0){

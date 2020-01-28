@@ -797,7 +797,6 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###  if("DIi" %in% parameter_list) {
   if(disp_required[["DIi"]]) {
     col_names <- c(col_names, rep(paste0("DI",1:di_col)))
-    regular_int_type <- c(regular_int_type, rep(paste0("DI",1:di_col)))
   }
 ### 2019-08-12/TGT/ Replace matching algorithm for TAUi to using regex to match
 ###

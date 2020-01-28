@@ -78,7 +78,7 @@ create_dependency_list <- function() {
     dependency_list[["AETPCT"]] <- list(callfun=c("aetpct"), regex="^AETPCT$", unit_class=c(uclass_percent), valid_models=c(m4), display_list_models=c(m4sd, m4ss), predecessors=c("AET"))
     dependency_list[["AETPCTi"]] <- list(callfun=c("aetpct"), regex="^AETPCT(i{1}?|[0-9]+?)$", unit_class=c(uclass_percent), valid_models=c(m4), display_list_models=c(m4sd, m4ss), predecessors=c("AET"))
     dependency_list[["AUCALL"]] <- list(callfun=c("auc_all"), regex="^AUCALL$", unit_class=c(uclass_auc), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c("TMAX"))
-    dependency_list[["AUCALLDN"]] <- list(callfun=c("auc_dn"), regex="^AUCALLDN$", unit_class=c(uclass_aucnorm), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c("AUCALL"))
+    dependency_list[["AUCALLDN"]] <- list(callfun=c("auc_dn"), regex="^AUCALLDN([0-9]*?)$", unit_class=c(uclass_aucnorm), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c("AUCALL"))
     dependency_list[["AUCDN"]] <- list(callfun=c("auc_dn"), regex="^AUCDN$", unit_class=c(uclass_aucnorm), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c("AUCALL"))
     dependency_list[["AUCINFO"]] <- list(callfun=c("auc_inf_o"), regex="^AUCINFO$", unit_class=c(uclass_auc), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c("CLAST", "AUCLAST", "KEL", "SPANRATIO"))
     dependency_list[["AUCINFOC"]] <- list(callfun=c("auc_inf_oc"), regex="^AUCINFOC$", unit_class=c(uclass_auc), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c("AUCINFO", "C0", "KEL"))
@@ -103,7 +103,7 @@ create_dependency_list <- function() {
     dependency_list[["AUCTAUDNi"]] <- list(callfun=c("auc_dn"), regex="^AUCTAUDN(i{1}?|[0-9]+?)$", unit_class=c(uclass_aucnorm), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("AUCTAUi", "TAUi", "TOLDi"))
     dependency_list[["AUCTAU"]] <- list(callfun=c("auc_all"), regex="^AUCTAU$", unit_class=c(uclass_auc), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(m1ss, m3ss), predecessors=c("TMAX", "TAUi", "TOLDi"))
     dependency_list[["AUCTAUi"]] <- list(callfun=c("auc_all"), regex="^AUCTAU(i{1}?|[0-9]+?)$", unit_class=c(uclass_auc), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(m1ss, m3ss), predecessors=c("TMAX", "TAUi", "TOLDi"))
-    dependency_list[["AUCTDN"]] <- list(callfun=c("auc_dn"), regex="^AUCTDN$", unit_class=c(uclass_aucnorm), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c("AUCT"))
+    dependency_list[["AUCTDN"]] <- list(callfun=c("auc_dn"), regex="^AUC(T|[0-9]+?)DN$", unit_class=c(uclass_aucnorm), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c("AUCT"))
     dependency_list[["AUCXPCTO"]] <- list(callfun=c(), regex="^AUCXPCTO$", unit_class=c(uclass_percent), valid_models=c(m1, m2, m3), display_list_models=c(), predecessors=c("AUCINFO", "AUCLAST"))
     dependency_list[["AUCXPCTOi"]] <- list(callfun=c(), regex="^AUCXPCTO(i{1}?|[0-9]+?)$", unit_class=c(uclass_percent), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("AUCINFOi", "AUCLASTi", "TAUi", "TOLDi"))
     dependency_list[["AUCXPCTP"]] <- list(callfun=c(), regex="^AUCXPCTP$", unit_class=c(uclass_percent), valid_models=c(m1, m2, m3), display_list_models=c(m1sd, m2sd, m3sd), predecessors=c("AUCINFP", "AUCLAST"))
@@ -171,7 +171,7 @@ create_dependency_list <- function() {
 ### 2019-09-01/TGT/ CTROUGHENDi not currently defined in computation engine codebase
     dependency_list[["CTROUGHENDi"]] <- list(callfun=c(), regex="^CTROUGHEND(i{1}?|[0-9]+?)$", unit_class=c(uclass_amtvol), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("TAUi", "TOLDi"))
     dependency_list[["DIi"]] <- list(callfun=c(), regex="^DI(i{1}?|[0-9]+?)$", unit_class=c(uclass_none), valid_models=c(m1ss, m2ss, m3ss), display_list_models=c(), predecessors=c("TAUi", "TOLDi"))
-    dependency_list[["DOFi"]] <- list(callfun=c(), regex="^DOF(i{1}?|[0-9]+?)$", unit_class=c(uclass_time), valid_models=c(m3), display_list_models=c(), predecessors=c())
+    dependency_list[["DOFi"]] <- list(callfun=c(), regex="^DOF(i{1}?|[0-9]*?)$", unit_class=c(uclass_time), valid_models=c(m3), display_list_models=c(), predecessors=c())
     dependency_list[["DOSE"]] <- list(callfun=c(), regex="^DOSE$", unit_class=c(uclass_dose), valid_models=c(m1, m2, m3, m4), display_list_models=c(), predecessors=c())
     dependency_list[["DOSEi"]] <- list(callfun=c(), regex="^DOSE(i{1}?|[0-9]+?)$", unit_class=c(uclass_dose), valid_models=c(m1, m2, m3, m4), display_list_models=c(), predecessors=c())
 ### 2019-09-01/TGT/ DOSEC not currently defined in computation engine codebase

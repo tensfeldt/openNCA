@@ -5,7 +5,8 @@
 \title{Percentage of AUMCINFO obtained by forward extrapolation}
 \usage{
 aumc_XpctO(conc = NULL, time = NULL, method = 1, kelflag = NULL,
-  aucflag = NULL, spanratio = NULL, kel = NULL)
+  aucflag = NULL, spanratio = NULL, kel = NULL, aumcinfo = NULL,
+  aumclast = NULL)
 }
 \arguments{
 \item{method}{The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr

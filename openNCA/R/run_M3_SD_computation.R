@@ -1341,7 +1341,6 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("MRTLAST" %in% parameter_list) {
         if(comp_required[["MRTLAST"]]) {
-          print(dof)
           mrtlast <- mrt_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M3", aucflag = auc_flag, dof = dof)
         }
 ###        if("MRTIVIFO" %in% parameter_list){

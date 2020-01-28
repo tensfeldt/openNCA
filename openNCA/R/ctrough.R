@@ -127,7 +127,7 @@ ctrough <- function(conc = NULL, time = NULL, tau = NULL, told = NULL){
   for(i in 1:length(tau)){
     start_time <- told[i]
     end_time <- start_time + tau[i]
-    tmp_df <- tmp[start_time <= tmp$time && tmp$time <= end_time,]
+    tmp_df <- tmp[start_time <= tmp$time & tmp$time <= end_time,]
     if(is.null(c_trough)){
       c_trough <- tmp_df$conc[1]
     } else {

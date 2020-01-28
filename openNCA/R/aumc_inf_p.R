@@ -131,7 +131,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-aumc_inf_p <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, aucflag = NULL, spanratio = NULL, kel = NULL){
+aumc_inf_p <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, aucflag = NULL, aumclast = NULL, t_last = NULL, spanratio = NULL, kel = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in aumc_inf_p: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -164,7 +164,9 @@ aumc_inf_p <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, auc
       kel <- kel(conc = conc, time = time, exflag = kelflag)
     }
   }
-  t_last <- tlast(conc = conc, time = time)
+  if(is.null(t_last)){
+    t_last <- tlast(conc = conc, time = time)
+  }
 
   if(sum(conc, na.rm = T) == 0){
     return(0)
@@ -179,8 +181,9 @@ aumc_inf_p <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, auc
   } else {
     c_est <- exp(-1*t_last*kel[['KEL']]) * kel[['KELC0']]
     aumc_extr <- (((t_last*c_est)/kel[['KEL']]) + (c_est/(kel[['KEL']] * kel[['KEL']])))
-
-    aumclast <- aumc_last(conc = conc, time = time, method = method, exflag = aucflag)
+    if(is.null(aumclast)){
+      aumclast <- aumc_last(conc = conc, time = time, method = method, exflag = aucflag)
+    }
     aumc_infp <- aumclast + aumc_extr
 
 ### 2019-09-13/TGT/ Test for NA values    

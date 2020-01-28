@@ -5,7 +5,8 @@
 \title{Area under the first moment cruve from time 0 to infinity (Observed)}
 \usage{
 aumc_inf_o(conc = NULL, time = NULL, method = 1, kelflag = NULL,
-  aucflag = NULL, spanratio = NULL, kel = NULL)
+  aucflag = NULL, aumclast = NULL, t_last = NULL, c_last = NULL,
+  spanratio = NULL, kel = NULL)
 }
 \arguments{
 \item{method}{The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr

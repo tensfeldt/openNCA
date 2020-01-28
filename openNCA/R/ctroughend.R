@@ -110,7 +110,7 @@ ctroughend <- function(conc = NULL, time = NULL, tau = NULL, told = NULL){
     tmp_start <- tmp[tmp$time <= tau[i],]
     start_time <- told[i]
     end_time <- start_time + tau[i]
-    tmp_df <- tmp[start_time <= tmp$time && tmp$time <= end_time,]
+    tmp_df <- tmp[start_time <= tmp$time & tmp$time <= end_time,]
     if(is.null(c_troughend)){
       c_troughend <- tmp_df[nrow(tmp_df),]$conc[1]
     } else {
