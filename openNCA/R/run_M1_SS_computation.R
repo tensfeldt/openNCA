@@ -1076,6 +1076,8 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
     tryCatch({
+      dof <- list()
+      
 ###      if("CMAXi" %in% parameter_list) {
 ###      if(parameter_required("^CMAXi$", parameter_list) || length(dependent_parameters("^CMAXi$"))>0){
       if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]){
@@ -1741,7 +1743,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               dose_ci[[d]] <- dose_c
             }
           }
-
+          dof[[d]] <- ifelse(paste0("DOF",d) %in% names(map_data), ifelse(map_data[c(paste0("DOF",d))] %in% names(data_data), unique(tmp_di_df[,as.character(map_data[c(paste0("DOF",d))])])[1], NA), NA)
 ###          cat('as.character(map_data[c(paste0("DOSE",d))]): ', as.character(map_data[c(paste0("DOSE",d))]),  '\n')
 ###          cat('dosevar: ', '\n')
 ###          print(dosevar)
@@ -1914,7 +1916,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("MRTLASTi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "AUMCLASTi" %in% parameter_list) {
 ###          if(parameter_required("^MRTLASTi$", parameter_list) || length(dependent_parameters("^MRTLASTi$"))>0){
           if(comp_required[["MRTLASTi"]]){
-            mrtlasti[[d]] <- mrt_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, model = "M1", aucflag = auc_flag, dof = dof, auclast = auclasti[[d]])
+            mrtlasti[[d]] <- mrt_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, model = "M1", aucflag = auc_flag, dof = dof[[d]], auclast = auclasti[[d]])
           }
 ###          if("MRTEVIFOi" %in% parameter_list && "AUCINFOi" %in% parameter_list && "AUCTAUi" %in% parameter_list && "AUMCTAUi" %in% parameter_list){
 ###          if(parameter_required("^MRTEVIFOi$", parameter_list) || length(dependent_parameters("^MRTEVIFOi$"))>0){
@@ -2211,7 +2213,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if("MRTLAST" %in% parameter_list && "AUCLAST" %in% parameter_list && "AUMCLAST" %in% parameter_list) {
 ###        if(parameter_required("^MRTLAST$", parameter_list) || length(dependent_parameters("^MRTLAST$"))>0){
         if(comp_required[["MRTLAST"]]){
-          mrtlast <- mrt_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M1", aucflag = auc_flag, dof = dof, auclast = auclast)
+          mrtlast <- mrt_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M1", aucflag = auc_flag, dof = dof[[d]], auclast = auclast)
         }
 ###        if("AUCXPCTO" %in% parameter_list && "AUCINFO" %in% parameter_list && "AUCLAST" %in% parameter_list){
 ###        if(parameter_required("^AUCXPCTO$", parameter_list) || length(dependent_parameters("^AUCXPCTO$"))>0){

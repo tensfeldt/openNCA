@@ -933,6 +933,9 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       } else {
         extrapolation <- FALSE
       }
+      
+      dof <- ifelse("DOF1" %in% names(map_data), ifelse(map_data$DOF1 %in% names(data_data), unique(tmp_df[,map_data$DOF1])[1], NA), ifelse("DOF" %in% names(map_data), ifelse(map_data$DOF %in% names(data_data), unique(tmp_df[,map_data$DOF])[1], NA), NA))
+      
       if(nrow(tmp_df) > 0){
         orig_time <- tmp_df[,map_data$TIME]
         orig_conc <- tmp_df[,map_data$CONC]

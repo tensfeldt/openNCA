@@ -5,7 +5,8 @@
 \title{Area under the concentration versus time cruve from time 0 until the dosing interval i}
 \usage{
 aumc_tau(conc = NULL, time = NULL, method = 1, exflag = NULL,
-  tau = NULL, t_max = NULL, orig_conc = NULL, orig_time = NULL)
+  tau = NULL, t_max = NULL, orig_conc = NULL, orig_time = NULL,
+  returnNA = TRUE)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

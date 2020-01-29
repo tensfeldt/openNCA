@@ -1013,6 +1013,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     sdeid <- unique(data_data[,map_data$SDEID])[i]
 ###        cat("i: ", i, " SDEID: ", unique(data_data[,map_data$SDEID])[i], "\n")
     tryCatch({
+      dof <- list()
+      
       if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]){
         dose_c_i <- list()
       }
@@ -1638,7 +1640,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               dose_c_i[[d]] <- dose_c
             }
           }
-
+          dof[[d]] <- ifelse(paste0("DOF",d) %in% names(map_data), ifelse(map_data[c(paste0("DOF",d))] %in% names(data_data), unique(tmp_di_df[,as.character(map_data[c(paste0("DOF",d))])])[1], NA), NA)
 ### 2019-08-27/TGT/ Added tau_di to identify tau variables from map_data (need to introduce in validate_timeconc_data.R eventually
           tau_di <- paste0("TAU", d)
 
@@ -1745,6 +1747,14 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["AUMCLASTi"]]) {
             aumclasti[[d]] <- aumc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag)
           }
+###          if("TAUi" %in% parameter_list) {
+          if(comp_required[["TAUi"]]) {
+### 2019-08-27/TGT/ change to tau_di
+###              tau[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TAU",d))])][1]
+            tau[[d]] <- tmp_di_df[, map_data[[tau_di]]][1] ### 2019-08-27/TGT/  obtain only the first value from the dataframe
+            tau[[d]] <- as.numeric(tau[[d]])         
+###              cat('tau_di: ', tau_di, ' map_data[[tau_di]]: ', map_data[[tau_di]], 'tau[[', d, ']]: ', tau[[d]], '\n')
+          }
 ###          if("AUCTAUi" %in% parameter_list) {
           if(comp_required[["AUCTAUi"]]) {
             auctau[[d]] <- auc_all(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag)
@@ -1753,17 +1763,14 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["AUCTAUDNi"]]) {
             auctaudn[[d]] <- auc_dn(auc = auctau[[d]], dose = tmp_dose)
           }
+###          if("AUMCTAUi" %in% parameter_list && "TMAXi" %in% parameter_list) {
+          if(comp_required[["AUMCTAUi"]]) {
+            aumctaui[[d]] <- aumc_tau(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = 1, exflag = auc_flag, tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = tmp_df[,map_data$CONC], orig_time = tmp_df[,map_data$TIME], returnNA = FALSE)
+            print(aumctaui[[d]])
+          }
 ###          if("MRTLASTi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "AUMCLASTi" %in% parameter_list) {
           if(comp_required[["MRTLASTi"]]) {
-            mrtlasti[[d]] <- mrt_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, model = "M2", aucflag = auc_flag, dof = dof, auclast = auclasti[[d]])
-          }
-###          if("TAUi" %in% parameter_list) {
-          if(comp_required[["TAUi"]]) {
-### 2019-08-27/TGT/ change to tau_di
-###              tau[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TAU",d))])][1]
-              tau[[d]] <- tmp_di_df[, map_data[[tau_di]]][1] ### 2019-08-27/TGT/  obtain only the first value from the dataframe
-              tau[[d]] <- as.numeric(tau[[d]])         
-###              cat('tau_di: ', tau_di, ' map_data[[tau_di]]: ', map_data[[tau_di]], 'tau[[', d, ']]: ', tau[[d]], '\n')
+            mrtlasti[[d]] <- mrt_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, model = "M2", aucflag = auc_flag, dof = dof[[d]], auclast = auclasti[[d]])
           }
 ###          if("MRTIVIFOi" %in% parameter_list && "AUCINFOi" %in% parameter_list && "AUCTAUi" %in% parameter_list && "AUMCTAUi" %in% parameter_list){
           if(comp_required[["MRTIVIFOi"]]){
@@ -1774,13 +1781,13 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###            mrtivifoi[[d]] <- mrt_ivif_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tausrc)
 ### 2019-09-28/TGT/ update call to mrt_ivif_o to include orig_conc and orig_time
 ### mrtivifoi[[d]] <- mrt_ivif_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]])
-              mrtivifoi[[d]] <- mrt_ivif_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time)
+              mrtivifoi[[d]] <- mrt_ivif_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfo = aucinfoi[[d]], aumcinfo = aumcinfoi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
           }
 ###          if("MRTIVIFPi" %in% parameter_list && "AUCINFPi" %in% parameter_list && "AUCTAUi" %in% parameter_list && "AUMCTAUi" %in% parameter_list){
           if(comp_required[["MRTIVIFPi"]]){
 ### 2019-08-27/TGT/ call to mrt_ivif_p is missing "tau", orig_time, orig_conc arguments
 ###              mrtivifpi[[d]] <- mrt_ivif_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag)
-              mrtivifpi[[d]] <- mrt_ivif_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time)
+              mrtivifpi[[d]] <- mrt_ivif_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfp = aucinfpi[[d]], aumcinfp = aumcinfpi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
           }
 ###          if("AUCXPCTOi" %in% parameter_list && "AUCINFOi" %in% parameter_list && "AUCLASTi" %in% parameter_list){
           if(comp_required[["AUCXPCTOi"]]){
@@ -1806,10 +1813,6 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["TOLDi"]]) {
             told[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
             told[[d]] <- as.numeric(told[[d]])
-          }
-###          if("AUMCTAUi" %in% parameter_list && "TMAXi" %in% parameter_list) {
-          if(comp_required[["AUMCTAUi"]]) {
-            aumctaui[[d]] <- aumc_tau(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = 1, exflag = auc_flag, tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = tmp_df[,map_data$CONC], orig_time = tmp_df[,map_data$TIME])
           }
 ###          if("CAVi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
           if(comp_required[["CAVi"]]) {
@@ -2069,7 +2072,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 ###        if("MRTLAST" %in% parameter_list && "AUCLAST" %in% parameter_list && "AUMCLAST" %in% parameter_list) {
         if(comp_required[["MRTLAST"]]) {
-          mrtlast <- mrt_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M2", aucflag = auc_flag, dof = dof, auclast = auclast)
+          mrtlast <- mrt_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M2", aucflag = auc_flag, dof = dof[[d]], auclast = auclast)
         }
 ###        if("AUCXPCTO" %in% parameter_list && "AUCINFO" %in% parameter_list && "AUCLAST" %in% parameter_list){
         if(comp_required[["AUCXPCTO"]]){

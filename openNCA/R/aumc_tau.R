@@ -135,7 +135,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = NULL, t_max = NULL, orig_conc = NULL, orig_time = NULL){
+aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = NULL, t_max = NULL, orig_conc = NULL, orig_time = NULL, returnNA = TRUE){
   if(is.null(conc) && is.null(time)){
     stop("Error in aumc_tau: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -239,7 +239,19 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = 
         return(aumc_lin_up_log_down(conc = new_conc, time = new_time, exflag = exflag))
       }
     } else {
-      return(NA)
+      if(!isTRUE(returnNA)){
+        if(method == 1){
+          return(aumc_lin_log(conc = conc, time = time, exflag = exflag, t_max = t_max))
+        } else if(method == 2){
+          return(aumc_lin(conc = conc, time = time, exflag = exflag))
+        } else if(method == 3){
+          return(aumc_log(conc = conc, time = time, exflag = exflag))
+        } else if(method == 4){
+          return(aumc_lin_up_log_down(conc = conc, time = time, exflag = exflag))
+        }
+      } else {
+        return(NA) 
+      }
     }
   }
 }

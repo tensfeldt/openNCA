@@ -69,7 +69,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-mrt_ivif_o <- function(conc = NULL, time = NULL, method = 1, model = "M2", parameter = "SD", kelflag = NULL, aucflag = NULL, tau = NULL, dof = NULL, spanratio = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL){
+mrt_ivif_o <- function(conc = NULL, time = NULL, method = 1, model = "M2", parameter = "SD", kelflag = NULL, aucflag = NULL, tau = NULL, dof = NULL, spanratio = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL, aucinfo = NULL, aumcinfo = NULL, auctau = NULL, aumctau = NULL){
 ###    cat("Entered mrt_ivif_o: \n")
 ###    cat("time: \n"); print(time)
 ###    cat("conc: \n"); print(conc)
@@ -113,19 +113,23 @@ mrt_ivif_o <- function(conc = NULL, time = NULL, method = 1, model = "M2", param
   }
 ###cat("mrt_ivif_o: check here1:\n")
   mrtivifo <- NA
-    if(model == "M2" || model == "m2") {
+  if(model == "M2" || model == "m2") {
 ###cat("mrt_ivif_o: check here1a:\n")
         
     if(tolower(parameter) == "sd") {
 ###cat('before auc_inf_o call...\n')
-        auc_info <- auc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
+      if(is.null(aucinfo)){
+        aucinfo <- auc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
+      }
 ###cat('auc_info: ', auc_info, '\n')
-      aumc_info <- aumc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
-
-      if(auc_info <= 0 || aumc_info < 0 || is.na(auc_info) || is.na(aumc_info)){
+      if(is.null(aumcinfo)){
+        aumcinfo <- aumc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
+      }
+      
+      if(aucinfo <= 0 || aumcinfo < 0 || is.na(aucinfo) || is.na(aumcinfo)){
         mrtivifo <- NA
       } else {
-        mrtivifo <- aumc_info/auc_info
+        mrtivifo <- aumcinfo/aucinfo
       }
     } else if(tolower(parameter) == "ss") {
 ###        cat("mrt_ivif_o: check here2:\n")
@@ -139,23 +143,27 @@ mrt_ivif_o <- function(conc = NULL, time = NULL, method = 1, model = "M2", param
 ###cat("kelflag:\n")
 ###print(kelflag)
 ###    cat('time:', time, ' conc: ', conc, ' method: ', method, ' kelflag: ', kelflag, ' aucflag: ', aucflag, ' spanratio: ', spanratio, ' kel: ', kel, '\n')
-        
-      auc_info <- auc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
+      if(is.null(aucinfo)){  
+        aucinfo <- auc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
+      }
 ###       cat("mrt_ivif_o: auc_info:", auc_info, "\n")
 ###        cat("mrt_ivif_o: orig_conc: ", orig_conc, " orig_time: ", orig_time, "\n")
-      auctau <- auc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+      if(is.null(auctau)){
+        auctau <- auc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+      }
 ###        cat('mrt_ivif_o: auctau: ', auctau, '\n')
-      aumctau <- aumc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+      if(is.null(aumctau)){
+        aumctau <- aumc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+      }
 ###        cat('mrt_ivif_o: aumctau: ', aumctau, '\n')
 
 ###cat("check here5:\n")
       
-      if(auc_info <= 0 || auctau < 0 || aumctau < 0 || is.na(auc_info) || is.na(auctau) || is.na(aumctau)){
+      if(aucinfo <= 0 || auctau < 0 || aumctau < 0 || is.na(aucinfo) || is.na(auctau) || is.na(aumctau)){
         mrtivifo <- NA
       } else {
 ###cat("mrt_ivif_o: check here6:\n")
-          
-          mrtivifo <- ((aumctau + tau)*(auc_info - auctau))/auctau
+        mrtivifo <- ((aumctau + tau)*(aucinfo - auctau))/auctau
 ###          cat('mrtivifo: ', mrtivifo, '\n')
       }
     }
@@ -167,13 +175,17 @@ mrt_ivif_o <- function(conc = NULL, time = NULL, method = 1, model = "M2", param
       stop("Error in mrt_ivif_o: dof is not a numeric value")
     }
     if(tolower(parameter) == "sd") {
-      auc_info <- auc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
-      aumc_info <- aumc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
-
-      if(auc_info <= 0 || aumc_info < 0 || is.na(auc_info) || is.na(aumc_info)){
+      if(is.null(aucinfo)){
+        aucinfo <- auc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
+      }
+      if(is.null(aumcinfo)){
+        aumcinfo <- aumc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
+      }
+      
+      if(aucinfo <= 0 || aumcinfo < 0 || is.na(aucinfo) || is.na(aumcinfo)){
         mrtivifo <- NA
       } else {
-        mrtivifo <- aumc_info/auc_info - dof/2
+        mrtivifo <- aumcinfo/aucinfo - dof/2
       }
     } else if(tolower(parameter) == "ss") {
       if(is.null(tau)){
@@ -181,18 +193,24 @@ mrt_ivif_o <- function(conc = NULL, time = NULL, method = 1, model = "M2", param
 ###        stop("Error in mrt_ivif_p: tau is NULL")
         stop("Error in mrt_ivif_o: tau is NULL")
       }
-      auc_info <- auc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
+      if(is.null(aucinfo)){
+        aucinfo <- auc_inf_o(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
+      }
 ###
 ###      cat('mrt_ivif_o: auc_info: ', auc_info, '\n')
-      auctau <- auc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+      if(is.null(auctau)){
+        auctau <- auc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+      }
 ###      cat('mrt_ivif_o: auctau: ', auctau, '\n')
-      aumctau <- aumc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+      if(is.null(aumctau)){
+        aumctau <- aumc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+      }
 ###      cat('mrt_ivif_o: aumc: ', aumctau, '\n')
       
-      if(auc_info <= 0 || auctau < 0 || aumctau < 0 || is.na(auc_info) || is.na(auctau) || is.na(aumctau)){
+      if(aucinfo <= 0 || auctau < 0 || aumctau < 0 || is.na(aucinfo) || is.na(auctau) || is.na(aumctau)){
         mrtivifo <- NA
       } else {
-        mrtivifo <- (((aumctau + tau)*(auc_info - auctau))/auctau) - dof/2
+        mrtivifo <- (((aumctau + tau)*(aucinfo - auctau))/auctau) - dof/2
       }
     }
   }

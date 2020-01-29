@@ -337,11 +337,15 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###  computation_df <- data.frame(matrix(ncol = col, nrow = 0))
 
   col_names <- c("SDEID")
+  if(disp_required[["AT"]]) {
+    col_names <- c(col_names, rep(paste0("AMT.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))))
+    regular_int_type <- c(regular_int_type, rep(paste0("AMT.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))))
+  }
 ###  if("AET" %in% parameter_list) {
   if(disp_required[["AET"]]) {
-    col_names <- c(col_names, rep(paste0("AMT.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))), rep(paste0("AE.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))))
+    col_names <- c(col_names, rep(paste0("AE.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))))
 ###    regular_int_type <- c(regular_int_type, rep(paste0("AMT.", sprintf("%.2f", unique(data_data[,map_data[[map_data$ENDTIME]]])[1:aet_len]))), rep(paste0("AE.", sprintf("%.2f", unique(data_data[,map_data[[map_data$ENDTIME]]])[1:aet_len]))))
-    regular_int_type <- c(regular_int_type, rep(paste0("AMT.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))), rep(paste0("AE.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))))
+    regular_int_type <- c(regular_int_type, rep(paste0("AE.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))))
   }
 ###  if("AETPCT" %in% parameter_list && "AET" %in% parameter_list) {
   if(disp_required[["AETPCTi"]]) {
@@ -1065,7 +1069,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             ae_pct_i[[d]] <- aepct(ae = ae_pct_ae, dose = ae_pct_dose)
           }
           if(comp_required[["AETAUi"]]){
-            aetau_i[[d]] <- aetau(aet = ae_t, time = na.omit(tmp_df[,map_data$TIME]), t = tau[[d]])
+            aetau_i[[d]] <- aetau(aet = amt, time = na.omit(tmp_df[,map_data$TIME]), t = tau[[d]])
           }
           if(comp_required[["AETAUPTi"]]) {
             tmp_map <- map_data
@@ -1472,12 +1476,14 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         #                        kelr_v[["KELRSQA"]], kel_v[["THALF"]])
 
 ##        row_data <- c(unique(data_data[,map_data$SDEID])[i])
-        computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]  
+        computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]
+        if(disp_required[["AT"]]) {
+          computation_df[i, paste0("AMT.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- amt
+        }
 ###        if("AET" %in% parameter_list) {
 ### 2019-09-23/TGT/ Note the following reports "AE" (amt) "AET" (ae_t) and "AETPCT" (aet_pct)
         if(disp_required[["AET"]]) {
 ##            row_data <- c(row_data, amt, ae_t)
-          computation_df[i, paste0("AMT.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- amt
           computation_df[i, paste0("AE.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- ae_t
         }
 ###        if("AETPCT" %in% parameter_list && "AET" %in% parameter_list) {

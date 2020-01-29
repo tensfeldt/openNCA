@@ -70,7 +70,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-mrt_ivif_p <- function(conc = NULL, time = NULL, method = 1, model = "M2", parameter = "SD", kelflag = NULL, aucflag = NULL, tau = NULL, dof = NULL, spanratio = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL){
+mrt_ivif_p <- function(conc = NULL, time = NULL, method = 1, model = "M2", parameter = "SD", kelflag = NULL, aucflag = NULL, tau = NULL, dof = NULL, spanratio = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL, aucinfp = NULL, aumcinfp = NULL, auctau = NULL, aumctau = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in mrt_ivif_p: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -105,26 +105,36 @@ mrt_ivif_p <- function(conc = NULL, time = NULL, method = 1, model = "M2", param
   mrtivifp <- NA
   if(model == "M2" || model == "m2"){
     if(tolower(parameter) == "sd") {
-      auc_infp <- auc_inf_p(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
-      aumc_infp <- aumc_inf_p(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
-
-      if(auc_infp <= 0 || aumc_infp < 0 || is.na(auc_infp) || is.na(aumc_infp)){
+      if(is.null(aucinfp)){  
+        aucinfp <- auc_inf_p(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
+      }
+      if(is.null(aumcinfp)){  
+        aumcinfp <- aumc_inf_p(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
+      }
+      
+      if(aucinfp <= 0 || aumcinfp < 0 || is.na(aucinfp) || is.na(aumcinfp)){
         mrtivifp <- NA
       } else {
-        mrtivifp <- aumc_infp/auc_infp
+        mrtivifp <- aumcinfp/aucinfp
       }
     } else if(tolower(parameter) == "ss") {
       if(is.null(tau)){
         stop("Error in mrt_ivif_p: tau is NULL")
       }
-      auc_infp <- auc_inf_p(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
-      auctau <- auc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
-      aumctau <- aumc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+      if(is.null(aucinfp)){  
+        aucinfp <- auc_inf_p(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
+      }
+      if(is.null(auctau)){  
+        auctau <- auc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+      }
+      if(is.null(aumctau)){  
+        aumctau <- aumc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+      }
       
-      if(auc_infp <= 0 || auctau < 0 || aumctau < 0 || is.na(auc_infp) || is.na(auctau) || is.na(aumctau)){
+      if(aucinfp <= 0 || auctau < 0 || aumctau < 0 || is.na(aucinfp) || is.na(auctau) || is.na(aumctau)){
         mrtivifp <- NA
       } else {
-        mrtivifp <- ((aumctau + tau)*(auc_infp - auctau))/auctau
+        mrtivifp <- ((aumctau + tau)*(aucinfp - auctau))/auctau
       }
     }
   } else if(model == "M3" || model == "m3") {
@@ -136,26 +146,36 @@ mrt_ivif_p <- function(conc = NULL, time = NULL, method = 1, model = "M2", param
     }
 
     if(tolower(parameter) == "sd") {
-      auc_infp <- auc_inf_p(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
-      aumc_infp <- aumc_inf_p(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
-
-      if(auc_infp <= 0 || aumc_infp < 0 || is.na(auc_infp) || is.na(aumc_infp)){
+      if(is.null(aucinfp)){  
+        aucinfp <- auc_inf_p(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
+      }
+      if(is.null(aumcinfp)){  
+        aumcinfp <- aumc_inf_p(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
+      }
+      
+      if(aucinfp <= 0 || aumcinfp < 0 || is.na(aucinfp) || is.na(aumcinfp)){
         mrtivifp <- NA
       } else {
-        mrtivifp <- aumc_infp/auc_infp - dof/2
+        mrtivifp <- aumcinfp/aucinfp - dof/2
       }
     } else if(tolower(parameter) == "ss") {
       if(is.null(tau)){
         stop("Error in mrt_ivif_p: tau is NULL")
       }
-      auc_infp <- auc_inf_p(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
-      auctau <- auc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
-      aumctau <- aumc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+      if(is.null(aucinfp)){  
+        aucinfp <- auc_inf_p(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag, spanratio = spanratio, kel = kel)
+      }
+      if(is.null(auctau)){  
+        auctau <- auc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+      }
+      if(is.null(aumctau)){  
+        aumctau <- aumc_tau(conc = conc, time = time, method = method, exflag = aucflag, tau = tau, orig_conc = orig_conc, orig_time = orig_time)
+      }
       
-      if(auc_infp <= 0 || auctau < 0 || aumctau < 0 || is.na(auc_infp) || is.na(auctau) || is.na(aumctau)){
+      if(aucinfp <= 0 || auctau < 0 || aumctau < 0 || is.na(aucinfp) || is.na(auctau) || is.na(aumctau)){
         mrtivifp <- NA
       } else {
-        mrtivifp <- (((aumctau + tau)*(auc_infp - auctau))/auctau) - dof/2
+        mrtivifp <- (((aumctau + tau)*(aucinfp - auctau))/auctau) - dof/2
       }
     }
   }

@@ -143,14 +143,13 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, all_time=NULL
           a_e <- ifelse(a_e == 0, NA, a_e)
         }
       } else {
-        tmp_rows <- as.logical(unlist(lapply(all_time, function(x){ all(x %in% orig_time) })))
+        tmp_rows <- unlist(sapply(all_time, function(x){ x %in% orig_time }))
         tmp_end_time <- all_time[tmp_rows,][,2]
         tmp_time <- end_time %in% tmp_end_time
         tmp_lim <- seq(1:length(tmp_time))[tmp_time]
         tmp_time[1:tmp_lim] <- TRUE
         if(any(tmp_time)) {
           tmp_amt <- amt[tmp_time]
-          
           if(is.logical(returnNA) && isTRUE(returnNA)){
             a_e <- sum(tmp_amt)
           } else {

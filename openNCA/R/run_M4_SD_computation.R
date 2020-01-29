@@ -349,13 +349,17 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "DOSEC")
     regular_int_type <- c(regular_int_type, "DOSEC")
   }
+  if(disp_required[["AT"]]) {
+    col_names <- c(col_names, rep(paste0("AMT.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))))
+    regular_int_type <- c(regular_int_type, rep(paste0("AMT.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))))
+  }
 ###  if("AET" %in% parameter_list) {
 ###  if(parameter_required("^AET$", parameter_list) || parameter_required(dependent_parameters("^AET$"), parameter_list)) {
   if(disp_required[["AET"]]) {
 ### 2019-08-29/TGT/ remap map_data[[map_data$ENDTIME]] to map_data$ENDTIME
-    col_names <- c(col_names, rep(paste0("AMT.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))), rep(paste0("AE.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))))
+    col_names <- c(col_names, rep(paste0("AE.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))))
 ### 2019-08-29/TGT/ remap map_data[[map_data$ENDTIME]] to map_data$ENDTIME
-    regular_int_type <- c(regular_int_type, rep(paste0("AMT.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))), rep(paste0("AE.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))))
+    regular_int_type <- c(regular_int_type, rep(paste0("AE.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])))))
 ###      print(regular_int_type)
   }
 ###  if("AETPCT" %in% parameter_list && "AET" %in% parameter_list) {
@@ -1408,11 +1412,13 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           ##          row_data <- c(row_data, dose_c)
           computation_df[i, "DOSEC"] <- dose_c
         }
+        if(disp_required[["AT"]]) {
+          computation_df[i, paste0("AMT.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- amt
+        }
 ###        if("AET" %in% parameter_list) {
 ###        if(parameter_required("^AET$", parameter_list) || parameter_required(dependent_parameters("^AET$"), parameter_list)) {
         if(disp_required[["AET"]]) {
 ##          row_data <- c(row_data, amt, ae_t)
-          computation_df[i, paste0("AMT.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- amt
           computation_df[i, paste0("AE.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- ae_t
         }
 ###        if("AETPCT" %in% parameter_list && "AET" %in% parameter_list) {
