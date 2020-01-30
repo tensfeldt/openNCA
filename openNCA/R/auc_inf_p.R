@@ -178,7 +178,7 @@ auc_inf_p <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, aucf
     t_last <- tlast(conc = conc, time = time)
   }
   if(sum(conc, na.rm = T) == 0){
-    return(0)
+    return(NA)
   }
 
   if(is.na(kel[['KEL']])){

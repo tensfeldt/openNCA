@@ -87,7 +87,7 @@ update_mct_data <- function(map, data, flag, verbose=FALSE) {
         for(i in 1:length(timeconcvalues$dose)) { map[,paste0("ORGDOSE",i)]  <- timeconcvalues$dose[i] }
         map$DOSELIST <- paste(timeconcvalues$dose, collapse=";")
     } else {
-      if(casefold(map$DOSINGTYPE) == "ss"){
+      if(isTRUE(casefold(map$DOSINGTYPE) == "ss")){
         map$ORGDOSE1  <- NA 
         map$DOSE1  <- NA 
         map$DOSELIST <- "DOSE1"
@@ -103,7 +103,7 @@ update_mct_data <- function(map, data, flag, verbose=FALSE) {
         for(i in 1:length(timeconcvalues$doseu)) { map[,paste0("ORGDOSE",i,"U")]  <- timeconcvalues$doseu[i] }
         map$DOSEULIST <- paste(timeconcvalues$doseu, collapse=";")
     } else { 
-      if(casefold(map$DOSINGTYPE) == "ss"){
+      if(isTRUE(casefold(map$DOSINGTYPE) == "ss")){
         map$ORGDOSE1U  <- NA 
         map$DOSE1U  <- NA 
         map$DOSEULIST <- "DOSE1U"
@@ -119,7 +119,7 @@ update_mct_data <- function(map, data, flag, verbose=FALSE) {
       for(i in 1:length(timeconcvalues$tau)) { map[,paste0("ORGTAU",i)]  <- timeconcvalues$tau[i] }
       map$TAULIST <- paste(timeconcvalues$tau, collapse=";")
     } else { 
-      if(casefold(map$DOSINGTYPE) == "ss"){
+      if(isTRUE(casefold(map$DOSINGTYPE) == "ss")){
         map$ORGTAU1  <- NA 
         map$TAU1  <- NA
         map$TAULIST <- "TAU1"
@@ -135,7 +135,7 @@ update_mct_data <- function(map, data, flag, verbose=FALSE) {
       for(i in 1:length(timeconcvalues$told)) { map[,paste0("ORGTOLD",i)]  <- timeconcvalues$told[i] }
       map$TOLDLIST <- paste(timeconcvalues$told, collapse=";")
     } else { 
-      if(casefold(map$DOSINGTYPE) == "ss"){
+      if(isTRUE(casefold(map$DOSINGTYPE) == "ss")){
         map$ORGTOLD1  <- NA 
         map$TOLD1  <- NA 
         map$TOLDLIST <- "TOLD1"

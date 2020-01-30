@@ -67,8 +67,20 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
 ### 2019-08-15/TGT/ Added following section to cover parameterset parameter/argument validation
   if(!is.null(parameterset)){
     if(grep("(PARAMETERLIST|PARAMETERDISPLAYLIST)", parameterset, ignore.case = TRUE, perl=TRUE)!=1) {
-      stop("Invalid value provided for PARAMETERSET argument. This needs to be either 'PARAMETERLIST' or 'PARAMETERDISPLAYLIST'")
+      stop("Invalid value provided for PARAMETERSET argument. This needs to be either 'PARAMETERLIST' or ''")
     }
+  }
+  
+  if("MODEL" %in% names(map_data)){
+    if(!(any(toupper(map_data$MODEL) %in% c("M1", "M2", "M3", "M4")))){
+      if(identical(toupper(map_data$MODEL), "")){
+        stop("'MODEL' value provided via 'map' is empty! Please provide a valid 'MODEL' parameter (M1, M2, M3, M4)!")
+      } else {
+        stop("'MODEL' value provided via 'map' is not valid! Please provide a valid 'MODEL' parameter (M1, M2, M3, M4)!")
+      }
+    }
+  } else {
+    stop("Dataset provided via 'map' does not contain the 'MODEL' column")
   }
 
 ### 2019-08-23/TGT/ 
@@ -120,8 +132,16 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
 ###  flgtime <- "FLGTIME"
 ###  if(length(parameter_indices("^FLGTIME$", flag_data))==1) { flgtime <- flag_data[,parameter_indices("^FLGTIME$", flag_data)] }
 
-  if(!(parameter_required("^SDEID$",names(data_data)))) {
+### RD/ This does not properly verify the SDEID mapping from MCT maps to the one provided via DATA
+###  if(!(parameter_required("^SDEID$",names(data_data)))) {
+###    stop("Value for 'SDEID' provided via 'map' is not present in the dataset provided via 'data'")
+###  }
+  if(!("SDEID" %in% names(map_data))){
+    stop("Dataset provided via 'map' does not contain the 'SDEID' column")
+  } else {
+    if(!(map_data$SDEID %in% names(data_data))){
       stop("Value for 'SDEID' provided via 'map' is not present in the dataset provided via 'data'")
+    }
   }
 
 ###  cat('map_data$TIME: ', map_data$TIME, ' map_data$TIMEU: ', map_data$TIMEU, '\n')
@@ -241,18 +261,6 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
 ### 2019-09-09/TGT/ determine TAU/TOLD from FLAGS
   k <- grep("^(TAU)|(TOLD)(i)*?([0-9]*?)$", names(merged_data), ignore.case=TRUE, perl=TRUE)
 ###  if(length(k)>0) { print(names(merged_data)[k]) }
-  
-  if("MODEL" %in% names(map_data)){
-    if(!(toupper(map_data$MODEL) %in% c("M1", "M2", "M3", "M4"))){
-      if(identical(toupper(map_data$MODEL), "")){
-        stop("'MODEL' value provided via 'map' is empty! Please provide a valid 'MODEL' parameter (M1, M2, M3, M4)!")
-      } else {
-        stop("'MODEL' value provided via 'map' is not valid! Please provide a valid 'MODEL' parameter (M1, M2, M3, M4)!")
-      }
-    }
-  } else {
-    stop("Dataset provided via 'map' does not contain the 'MODEL' column")
-  }
 
 ### 2019-08-17/TGT/ Note that DOSE, TAU, TOLD values can appear in either the concentration DATASET or the FLAGS dataset
 ### if appear in the FLAGS dataset, these override what appears in the original input concentration dataset
@@ -823,7 +831,7 @@ if(FALSE) {
   model_regex <- paste0("^", map_data$MODEL, "(", map_data$DOSINGTYPE, ")*?$")
 
   parameter_list <- list()
-  if(is.null(map_data$PARAMETERLIST)) { parameter_list <- model_parameters(model_regex) }
+  if(is.null(map_data$PARAMETERLIST) || is.na(map_data$PARAMETERLIST)) { parameter_list <- model_parameters(model_regex) }
   else { parameter_list <- unlist(strsplit(map_data$PARAMETERLIST, ";")) }
 
 #  xparameter_list <- model_parameters(model_regex)
@@ -2400,7 +2408,7 @@ if(FALSE) {
 ###  }
 
 ### If PARAMETERDISPLAYLIST is defined in map, use that otherwise use the full model_parameters list
-  if(is.null(map_data$PARAMETERDISPLAYLIST)) { display_list <- model_parameters(model_regex) }
+  if(is.null(map_data$PARAMETERDISPLAYLIST) || is.na(map_data$PARAMETERDISPLAYLIST)) { display_list <- model_parameters(model_regex) }
   else { display_list <- as.list(strsplit(map_data$PARAMETERDISPLAYLIST, ";")[[1]]) }
   
 ### 2019-08-15/TGT/ Use parameterset value to direct which set of parameters will be produced

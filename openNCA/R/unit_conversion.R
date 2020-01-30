@@ -1457,75 +1457,81 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
     if(length(CONCNORMUPARAM)>0 && parameter_required("^CONCU$", names(map_data)) && parameter_required("^DOSE(i{1}|[0-9]*?)U$", names(map))){
 ###      if(map_data$CONCU %in% names(data_data) && map_data$DOSE1U %in% names(data_data)){
       if(parameter_required(map_data$CONCU, names(data_data)) && parameter_required("^DOSE(i{1}|[0-9]*?)U$", names(map))){
-        conc_unit_tmp <- unlist(strsplit(as.character(unique(data_data[, map_data$CONCU])[[1]]), "/"))
-###        conc_unit_tmp2 <- as.character(unique(data_data[, map_data$DOSEU])[[1]])
-        conc_unit_tmp2 <- as.character(unique(data_data[,map_data[,unlist(strsplit(map_data$DOSEULIST, ";"))[1]]]))
-        inputUnit12 <- c(conc_unit_tmp[1], conc_unit_tmp[2], conc_unit_tmp2)
-###        outputUnit12 <- unlist(strsplit(unlist(strsplit(as.character(map_data$CONCNORMOUTPUTUNIT), "/")), "[.]"))
-
-        outputUnitLabel <- "CONCNORMOUTPUTUNIT"
-        testunit <- is.element(outputUnitLabel, names(map))
-        outputUnitFormat <- FALSE
-        if(testunit) {
-            outputUnit12 <- as.character(map_data[[outputUnitLabel]])
-            outputUnitFormat <- length(outputUnit12)>0 & !is.na(outputUnit12)
-            if(outputUnitFormat) {
-                if(length(grep("/", outputUnit12)) > 0) { outputUnit12 <- unlist(strsplit(outputUnit12, "[./]", perl=TRUE)) } else { outputUnitFormat <- FALSE }
-            }
-        }
-
-        testunit <- testunit && outputUnitFormat
-        if(testunit){
-            testunit <- testunit && length(outputUnit12) == 3 && length(conc_unit_tmp) == 2
-        }
-        
-### Added formattedinputUnit and formattedoutputUnit to simplify output
-        formattedinputUnit   <- paste(c(paste(inputUnit12[1:2], collapse="/"), inputUnit12[3]), collapse="/")
-        formattedoutputUnit  <- paste(c(paste(outputUnit12[1:2], collapse="/"), outputUnit12[3]), collapse="/")
-        
-        inputMatch12 <- numeric()
-        outputMatch12 <- numeric()
-        concdnUScaler <- numeric()
-
-        if(testunit){
-          for(i in 1:3) {
-            if(outputUnitFormat){
-              inputMatch12[i] <- match(inputUnit12[i], units, nomatch = 21)
-              outputMatch12[i] <- match(outputUnit12[i], units, nomatch = 21)
-
-              if(inputMatch12[i] != 21 && outputMatch12[i] != 21) {
-                inputMScale12 <- val[inputMatch12[i]]
-                outputMScale12 <- val[outputMatch12[i]]
-                if(class[inputMatch12[i]] == c("M", "V", "M")[i] && class[outputMatch12[i]] == c("M", "V", "M")[i]) {
-                  concdnUScaler[i] <- inputMScale12/outputMScale12
+        if(parameter_required(map_data[as.numeric(parameter_indices("^DOSE(i{1}|[0-9]*?)U$", names(map)))], names(data_data))){
+          conc_unit_tmp <- unlist(strsplit(as.character(unique(data_data[, map_data$CONCU])[[1]]), "/"))
+  ###        conc_unit_tmp2 <- as.character(unique(data_data[, map_data$DOSEU])[[1]])
+          conc_unit_tmp2 <- as.character(unique(data_data[,map_data[,unlist(strsplit(map_data$DOSEULIST, ";"))[1]]]))
+          inputUnit12 <- c(conc_unit_tmp[1], conc_unit_tmp[2], conc_unit_tmp2)
+  ###        outputUnit12 <- unlist(strsplit(unlist(strsplit(as.character(map_data$CONCNORMOUTPUTUNIT), "/")), "[.]"))
+  
+          outputUnitLabel <- "CONCNORMOUTPUTUNIT"
+          testunit <- is.element(outputUnitLabel, names(map))
+          outputUnitFormat <- FALSE
+          if(testunit) {
+              outputUnit12 <- as.character(map_data[[outputUnitLabel]])
+              outputUnitFormat <- length(outputUnit12)>0 & !is.na(outputUnit12)
+              if(outputUnitFormat) {
+                  if(length(grep("/", outputUnit12)) > 0) { outputUnit12 <- unlist(strsplit(outputUnit12, "[./]", perl=TRUE)) } else { outputUnitFormat <- FALSE }
+              }
+          }
+  
+          testunit <- testunit && outputUnitFormat
+          if(testunit){
+              testunit <- testunit && length(outputUnit12) == 3 && length(conc_unit_tmp) == 2
+          }
+          
+  ### Added formattedinputUnit and formattedoutputUnit to simplify output
+          formattedinputUnit   <- paste(c(paste(inputUnit12[1:2], collapse="/"), inputUnit12[3]), collapse="/")
+          formattedoutputUnit  <- paste(c(paste(outputUnit12[1:2], collapse="/"), outputUnit12[3]), collapse="/")
+          
+          inputMatch12 <- numeric()
+          outputMatch12 <- numeric()
+          concdnUScaler <- numeric()
+  
+          if(testunit){
+            for(i in 1:3) {
+              if(outputUnitFormat){
+                inputMatch12[i] <- match(inputUnit12[i], units, nomatch = 21)
+                outputMatch12[i] <- match(outputUnit12[i], units, nomatch = 21)
+  
+                if(inputMatch12[i] != 21 && outputMatch12[i] != 21) {
+                  inputMScale12 <- val[inputMatch12[i]]
+                  outputMScale12 <- val[outputMatch12[i]]
+                  if(class[inputMatch12[i]] == c("M", "V", "M")[i] && class[outputMatch12[i]] == c("M", "V", "M")[i]) {
+                    concdnUScaler[i] <- inputMScale12/outputMScale12
+                  } else {
+                    concdnUScaler[i] <- 1
+                    warning("'CONCU' and/or 'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
+                  }
                 } else {
                   concdnUScaler[i] <- 1
-                  warning("'CONCU' and/or 'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
+                  warning("'CONCU' and/or 'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion")
                 }
-              } else {
-                concdnUScaler[i] <- 1
-                warning("'CONCU' and/or 'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion")
               }
             }
           }
-        }
-        if(testunit){
-          concdnUFinalScaler <- concdnUScaler[1] * concdnUScaler[2] / concdnUScaler[3]
-          concdn_col <- names(result_data)[names(result_data) %in% CONCNORMUPARAM]
-          result_data[concdn_col] <- result_data[concdn_col] * concdnUFinalScaler
-###          result_data$CONCNORMU <- ifelse(concdnUFinalScaler == 1, as.character(paste0(conc_unit_tmp[1], "/", conc_unit_tmp[2], "/", conc_unit_tmp2)), as.character(map_data[[outputUnitLabel]]))
-          result_data$CONCNORMU <- ifelse(concdnUFinalScaler == 1, as.character(formattedinputUnit), as.character(formattedoutputUnit))
-          if(verbose) { cat(function_name, ': Unit Class 12: ([Amount/Volume]/Amount) concdn_col: ', concdn_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', concdnUFinalScaler, '\n') }
+          if(testunit){
+            concdnUFinalScaler <- concdnUScaler[1] * concdnUScaler[2] / concdnUScaler[3]
+            concdn_col <- names(result_data)[names(result_data) %in% CONCNORMUPARAM]
+            result_data[concdn_col] <- result_data[concdn_col] * concdnUFinalScaler
+  ###          result_data$CONCNORMU <- ifelse(concdnUFinalScaler == 1, as.character(paste0(conc_unit_tmp[1], "/", conc_unit_tmp[2], "/", conc_unit_tmp2)), as.character(map_data[[outputUnitLabel]]))
+            result_data$CONCNORMU <- ifelse(concdnUFinalScaler == 1, as.character(formattedinputUnit), as.character(formattedoutputUnit))
+            if(verbose) { cat(function_name, ': Unit Class 12: ([Amount/Volume]/Amount) concdn_col: ', concdn_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', concdnUFinalScaler, '\n') }
+          } else {
+  ### retain original input unit
+  ####          result_data$CONCNORMU <- as.character(paste0(conc_unit_tmp[1], "/", conc_unit_tmp[2], "/", conc_unit_tmp2))
+            result_data$CONCNORMU <- formattedinputUnit
+            if(length(conc_unit_tmp) != 2){
+              warning("Unit data provided via the 'CONCU' value provided via 'map' is not in the proper form! Please try again using 'Amount/Volume' format!")
+            }
+            if(outputUnitFormat){
+              warning("'", outputUnitLabel, "' is not present in the proper form! Please try again using '[Amount/Volume]/Amount' format!")
+            }
+          }
         } else {
-### retain original input unit
-####          result_data$CONCNORMU <- as.character(paste0(conc_unit_tmp[1], "/", conc_unit_tmp[2], "/", conc_unit_tmp2))
-          result_data$CONCNORMU <- formattedinputUnit
-          if(length(conc_unit_tmp) != 2){
-            warning("Unit data provided via the 'CONCU' value provided via 'map' is not in the proper form! Please try again using 'Amount/Volume' format!")
-          }
-          if(outputUnitFormat){
-            warning("'", outputUnitLabel, "' is not present in the proper form! Please try again using '[Amount/Volume]/Amount' format!")
-          }
+          result_data$CONCNORMU <- NA
+          doseUnitLabel <- map_data[as.numeric(parameter_indices("^DOSE(i{1}|[0-9]*?)U$", names(map)))]
+          warning(paste0("'", doseUnitLabel, "' value provided via 'map' is not present in the dataset provided via 'data'"))
         }
       } else {
         result_data$CONCNORMU <- NA

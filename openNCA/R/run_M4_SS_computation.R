@@ -469,9 +469,6 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###    regular_int_type <- c(regular_int_type, "AUCDN")
 ###  }
 ###  if("AURCALL" %in% parameter_list) {
-  if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
-    col_names <- c(col_names, "FLGACCEPTTAU")
-  }
   if(disp_required[["AURCALL"]]) {
     col_names <- c(col_names, "AURCALL")
     regular_int_type <- c(regular_int_type, "AURCALL")
@@ -602,31 +599,6 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   } else {
     warning("Flag 'FLGACCEPTKELCRIT' is not present in the dataset")
   }
-  if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)){
-    if(length(unlist(strsplit(as.character(map_data$LASTTIMEACCEPTCRIT), "[*]"))) == 2){
-      last_crit <- unlist(strsplit(as.character(map_data$LASTTIMEACCEPTCRIT), "[*]"))
-      if(as.character(gsub(" ", "", last_crit[2])) == "TAUi"){
-        last_crit_factor <- as.numeric(gsub(" ", "", last_crit[1]))
-      } else {
-        last_crit_factor <- NA
-        warning("Flag 'LASTTIMEACCEPTCRIT' does not have a valid column name")
-      }
-    } else {
-      last_crit_factor <- NA
-      warning("Flag 'LASTTIMEACCEPTCRIT' is not in a valid form! Please make sure it contains '*'")
-    }
-    if(paste0("TAU", di_col) %in% names(map_data)){
-      if(!map_data[, paste0("TAU", di_col)] %in% names(data_data)) {
-        warning("Flag 'FLGACCEPTTAU' cannot be computed if 'TAUi' is not provided")
-      }
-    } else {
-      warning("Flag 'FLGACCEPTTAU' cannot be computed if 'TAUi' is not provided")
-    }
-  } else {
-    if(disp_required[["FLGACCEPTTAU"]] && !("LASTTIMEACCEPTCRIT" %in% names(map_data))){
-      warning("Flag 'FLGACCEPTTAU' cannot be computed if 'LASTTIMEACCEPTCRIT' is not provided")
-    }
-  }
 
   if(!("FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data))){
     warning("Flag 'FLGEXKEL' is not present in the dataset")
@@ -649,9 +621,6 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     if(!(is.numeric(suppressWarnings(as.numeric(map_data$FLGACCEPTPREDOSECRIT)))) || (is.na(suppressWarnings(as.numeric(map_data$FLGACCEPTPREDOSECRIT))))){
       warning("Flag 'FLGACCEPTPREDOSECRIT' does not have valid form! Please try again with numeric value")
     }
-  }
-  if(disp_required[["FLGACCEPTTAU"]] && !("LASTTIMEACCEPTCRIT" %in% names(map_data))){
-    warning("Flag 'FLGACCEPTTAU' is not present in the dataset")
   }
   if(!("SPANRATIOCRIT" %in% names(map_data) && "THALFF" %in% parameter_list)){
     warning("Flag 'SPANRATIOCRIT' is not present in the dataset")
@@ -686,11 +655,15 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     comp_required[["AUCLASTi"]] <- TRUE
   }
   
-  if("INCLUDEINTERPOLATION" %in% names(map_data) && (map_data[, "INCLUDEINTERPOLATION"] != 0 && map_data[, "INCLUDEINTERPOLATION"] != 1)){
-    warning("Flag 'INCLUDEINTERPOLATION' does not have a valid value! Please try again with numeric value (either 0 or 1)")
+  if("INCLUDEINTERPOLATION" %in% names(map_data)){
+    if(isTRUE(map_data[, "INCLUDEINTERPOLATION"] != 0 && map_data[, "INCLUDEINTERPOLATION"] != 1)){
+      warning("Flag 'INCLUDEINTERPOLATION' does not have a valid value! Please try again with numeric value (either 0 or 1)")
+    }
   }
-  if("INCLUDEEXTRAPOLATION" %in% names(map_data) && (map_data[, "INCLUDEEXTRAPOLATION"] != 0 && map_data[, "INCLUDEEXTRAPOLATION"] != 1)){
-    warning("Flag 'INCLUDEEXTRAPOLATION' does not have a valid value! Please try again with numeric value (either 0 or 1)")
+  if("INCLUDEEXTRAPOLATION" %in% names(map_data)){
+    if(isTRUE(map_data[, "INCLUDEEXTRAPOLATION"] != 0 && map_data[, "INCLUDEEXTRAPOLATION"] != 1)){
+      warning("Flag 'INCLUDEEXTRAPOLATION' does not have a valid value! Please try again with numeric value (either 0 or 1)")
+    }
   }
   #if((!"LLOQPATTERNS" %in% names(map_data)) && generate_nominal_conc){
   #  warning("Flag 'LLOQPATTERNS' is not present in the map dataset")
@@ -773,39 +746,55 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
       
-      tmp_kel_flg <- as.numeric(tmp_df[,map_data$FLGEXKEL])
-      if("FLGEXSDE" %in% names(map_data) && map_data$FLGEXSDE %in% names(data_data)){
-        ex_flag <- as.numeric(tmp_df[,map_data$FLGEXSDE])
-        if(all(is.na(ex_flag))){
-          ex_flag[is.na(ex_flag)] <- 0
+      if("FLGEXSDE" %in% names(map_data)) {
+        if(map_data$FLGEXSDE %in% names(data_data)){
+          ex_flag <- as.numeric(tmp_df[,map_data$FLGEXSDE])
+          if(all(is.na(ex_flag))){
+            ex_flag[is.na(ex_flag)] <- 0
+          }
+          tmp_df <- tmp_df[!as.logical(ex_flag),]
+        } else {
+          ex_flag <- NULL
         }
-        tmp_df <- tmp_df[!as.logical(ex_flag),]
       } else {
         ex_flag <- NULL
       }
-      if("FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
-        kel_flag <- as.numeric(tmp_df[,map_data$FLGEXKEL])
-        if(all(is.na(kel_flag))){
-          kel_flag[is.na(kel_flag)] <- 0
-        }
-        if(isTRUE(optimize_kel)){
-          kel_flag <- rep(1, length(tmp_kel_flg))
+      if("FLGEXKEL" %in% names(map_data)) {
+        if(map_data$FLGEXKEL %in% names(data_data)){
+          tmp_kel_flg <- as.numeric(tmp_df[,map_data$FLGEXKEL])
+          kel_flag <- as.numeric(tmp_df[,map_data$FLGEXKEL])
+          if(all(is.na(kel_flag))){
+            kel_flag[is.na(kel_flag)] <- 0
+          }
+          if(isTRUE(optimize_kel)){
+            kel_flag <- rep(1, length(tmp_kel_flg))
+          }
+        } else {
+          kel_flag <- NULL
         }
       } else {
         kel_flag <- NULL
       }
-      if("FLGEXAUC" %in% names(map_data) && map_data$FLGEXAUC %in% names(data_data)){
-        auc_flag <- as.numeric(tmp_df[,map_data$FLGEXAUC])
-        if(all(is.na(auc_flag))){
-          auc_flag[is.na(auc_flag)] <- 0
+      if("FLGEXAUC" %in% names(map_data)) {
+        if(map_data$FLGEXAUC %in% names(data_data)){
+          auc_flag <- as.numeric(tmp_df[,map_data$FLGEXAUC])
+          if(all(is.na(auc_flag))){
+            auc_flag[is.na(auc_flag)] <- 0
+          }
+        } else {
+          auc_flag <- NULL
         }
       } else {
         auc_flag <- NULL
       }
-      if("FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
-        emesis_flag <- as.numeric(tmp_df[,map_data$FLGEMESIS])
-        if(all(is.na(emesis_flag))){
-          emesis_flag[is.na(emesis_flag)] <- 0
+      if("FLGEMESIS" %in% names(map_data)) {
+        if(map_data$FLGEMESIS %in% names(data_data)){
+          emesis_flag <- as.numeric(tmp_df[,map_data$FLGEMESIS])
+          if(all(is.na(emesis_flag))){
+            emesis_flag[is.na(emesis_flag)] <- 0
+          }
+        } else {
+          emesis_flag <- NULL
         }
       } else {
         emesis_flag <- NULL
@@ -930,7 +919,6 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           aet_pct <- NULL
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###            for(t in 1:length(unique(tmp_df[,map_data[[map_data$TIME]]]))){
-          
           for(t in 1:length(unique(data_data[,map_data$ENDTIME])[1:aet_len])){
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###              tmp <- aet(amt = amt, time = na.omit(tmp_df[,map_data[[map_data$TIME]]]), t = na.omit(tmp_df[,map_data[[map_data$TIME]]])[t])
@@ -943,7 +931,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             if(curr_end_time %in% tmp_df[,map_data$ENDTIME]){
               tmp_time_t <- tmp_df[,c(map_data$TIME, map_data$ENDTIME)]
               tmp_time_t <- tmp_time_t[tmp_time_t[,map_data$ENDTIME] == curr_end_time,]
-              tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$TIME])), t = as.numeric(tmp_time_t[map_data$TIME]), orig_time = tmp_time_t, all_time = tmp_data, end_time = tmp_end_data, returnNA = TRUE)
+              tmp <- aet(amt = amt, time = tmp_end_data, t = curr_end_time, orig_time = tmp_time_t, all_time = tmp_data, end_time = tmp_end_data, returnNA = TRUE)
             } else {
               tmp <- NA
             }
@@ -1739,11 +1727,6 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
     }
   }
-  if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
-    if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
-      computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
-    }
-  }
 
   for(n in 1:length(regular_int_type)){
     tmp_int_type <- computation_df[,names(computation_df) == as.character(regular_int_type[n])]
@@ -1847,32 +1830,6 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###      display_parameters <- c(display_parameters, "AUCDN")
 ###    }
 ###    if("AURCALL" %in% display_list) {
-    if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
-      if(!is.na(last_crit_factor)){
-        if(paste0("TAU",di_col) %in% names(map_data)){
-          if(map_data[, paste0("TAU",di_col)] %in% names(data_data)) {
-            tau_val <- unique(tmp_df[, map_data[, paste0("TAU",di_col)]])[1]
-            if(!is.na(tau_val) && is.numeric(tau_val) && !is.na(last_crit_factor) && is.numeric(last_crit_factor)){
-              lt_accept_crit <- tau_val * last_crit_factor
-              ##                  row_data <- c(row_data, ifelse(last_time >= lt_accept_crit, 1, 0))
-              computation_df[i, "FLGACCEPTTAU"] <- ifelse(last_time >= lt_accept_crit, 1, 0)
-            } else {
-              ##                  row_data <- c(row_data, 0)
-              computation_df[i, "FLGACCEPTTAU"] <- 0
-            }
-          } else {
-            ##                row_data <- c(row_data, 0)
-            computation_df[i, "FLGACCEPTTAU"] <- 0
-          }
-        } else {
-          ##              row_data <- c(row_data, 0)
-          computation_df[i, "FLGACCEPTTAU"] <- 0
-        }
-      } else {
-        ##            row_data <- c(row_data, 0)
-        computation_df[i, "FLGACCEPTTAU"] <- 0
-      }
-    }
     if(disp_required[["AURCALL"]]) {
       display_parameters <- c(display_parameters, "AURCALL")
     }

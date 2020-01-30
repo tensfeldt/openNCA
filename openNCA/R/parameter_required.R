@@ -76,8 +76,7 @@
 #' @export
 parameter_required <- function(parameter_names, parameter_list, simplify=TRUE) {
   k <- parameter_indices(parameter_names, parameter_list, simplify = simplify)
-  k <- lapply(k, FUN=function(x) { length(x)>0 } )
-
+  k <- lapply(k, FUN=function(x) { length(x)>0 & !is.na(x) } )
   if(length(k)==0) { return(FALSE) }
 
   if(simplify) { result <- all(unlist(k)) }

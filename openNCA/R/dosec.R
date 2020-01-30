@@ -73,7 +73,16 @@ dosec <- function(data = NULL, map = NULL, idose = NULL){
 ##  }
   
   ### Create a pseudo results (resulting parameters) dataset to drive unit_conversion
-  vlist <- c(map_data$CONCU, xdoseu, xdose)
+  vlist <- c()
+  if(!is.na(map_data$CONCU)){
+    vlist <- c(vlist, map_data$CONCU)
+  }
+  if(!is.na(xdoseu)){
+    vlist <- c(vlist, xdoseu)
+  }
+  if(!is.na(xdose)){
+    vlist <- c(vlist, xdose)
+  }
 ##  vlist <- c(map_tc12$SDEID, map_data$CONCU)
 ##  if(!is.null(xdoseu)){
 ##    vlist <- c(vlist, xdoseu)
@@ -82,16 +91,19 @@ dosec <- function(data = NULL, map = NULL, idose = NULL){
 ##    vlist <- c(vlist, xdose)
 ##  }
   vlist <- unlist(vlist)
-
-  data_data <- data_data[!duplicated(data_data[,xdose]), vlist]
+  if(!is.na(xdose) && xdose %in% names(data_data) && length(vlist) > 0){
+    data_data <- data_data[!duplicated(data_data[,xdose]), vlist]
 ##  if(!is.null(xdose) && all(xdose %in% names(data_data)) && all(vlist %in% names(data_data))){
 ##    data_data <- data_data[!duplicated(data_data[,xdose]), vlist] 
 ##  } else {
 ##    data_data <- data_data[, vlist]
 ##  }
   
-  df <- unit_conversion(data = data_data, map = map_data, result = data_data, unit_class = "DOSEU", verbose=FALSE)
-  dose_c <- df[,xdose]
+    df <- unit_conversion(data = data_data, map = map_data, result = data_data, unit_class = "DOSEU", verbose=FALSE)
+    dose_c <- df[,xdose]
+  } else {
+    dose_c <- NA
+  }
   
   return(dose_c)
 }

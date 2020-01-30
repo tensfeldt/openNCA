@@ -171,6 +171,9 @@ auc_last <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, t_last
   if(length(time) == 0 || length(conc) == 0 || all(is.na(time)) || all(is.na(conc))) { 
     return(NA)
   }
+  if(sum(conc, na.rm = T) == 0){
+    return(0)
+  }
 
   #Formatting data to subset data based on time values
   if(is.null(t_last)){
@@ -189,9 +192,6 @@ auc_last <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, t_last
 
   if(length(time) != length(conc)){
     stop("Error in auc_last: length of 'time' and 'conc' vectors are not equal")
-  }
-  if(sum(conc, na.rm = T) == 0){
-    return(0)
   }
 
   if(method == 1){

@@ -161,8 +161,8 @@ validate_timeconc_data <- function(map, data, flag, verbose=FALSE) {
     if(parameter_required("^CONC$",  names(map))) { vconc   <- map$CONC  }
     if(parameter_required("^CONCU$", names(map))) { vconcu  <- map$CONCU }
 
-    if (!(parameter_required(vconc, names(data)) && parameter_required(vconcu, names(data)))) {
-        stop("Concentration: '", vconc, "' or Concentration Unit: '", vconcu, "' aren't present in input dataset\n")
+    if(!(parameter_required(vconc, names(data)) && parameter_required(vconcu, names(data)))) {
+      stop("Concentration: '", vconc, "' or Concentration Unit: '", vconcu, "' aren't present in input dataset\n")
     }
 
     ### Check if DOSE is in map/mct
@@ -183,7 +183,7 @@ validate_timeconc_data <- function(map, data, flag, verbose=FALSE) {
             warning("assuming unit dose amounts for each dose")
         }
     } else {
-      if(casefold(map$DOSINGTYPE) == "ss"){
+      if(isTRUE(casefold(map$DOSINGTYPE) == "ss")){
         vdose <- "DOSE1"
         missing_dose_names <- "DOSE1"
       } else {
@@ -244,9 +244,8 @@ validate_timeconc_data <- function(map, data, flag, verbose=FALSE) {
       } else {
         
       }
-    }
-    else {
-      if(casefold(map$DOSINGTYPE) == "ss"){
+    } else {
+      if(isTRUE(casefold(map$DOSINGTYPE) == "ss")){
         vtau <- "TAU1"
         missing_tau_names <- "TAU1"
       } else {
@@ -279,9 +278,8 @@ validate_timeconc_data <- function(map, data, flag, verbose=FALSE) {
           cat(missing_told_names, " as defined in 'map', do not appear in input concentration dataset", "\n")
         }
       }
-    }
-    else {
-      if(casefold(map$DOSINGTYPE) == "ss"){
+    } else {
+      if(isTRUE(casefold(map$DOSINGTYPE) == "ss")){
         vtold <- "TOLD1"
         missing_told_names <- "TOLD1"
       } else {
