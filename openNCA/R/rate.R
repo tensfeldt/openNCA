@@ -53,7 +53,7 @@ rate <- function(start_time = NULL, end_time = NULL, conc = NULL, vol = NULL, vo
   if(length(start_time) != length(end_time) && length(end_time) != length(conc) && length(conc) != length(vol)){
     stop("Error in rate: length of 'start_time', 'end_time', 'conc' and 'vol' vectors are not equal")
   }
-  if(!is.character(type) || is.null(type)){
+  if(!is.character(type) && !is.null(type)){
     stop("Error in rate: 'type' is not a character value")
   }
   

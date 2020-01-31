@@ -139,7 +139,7 @@ auc_XpctP <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, aucf
   }
 
   if(sum(conc, na.rm=T) == 0){
-    auc_xpctp <- 0
+    auc_xpctp <- NA
     return(auc_xpctp)
   } else {
     if(is.null(auc_infp)){

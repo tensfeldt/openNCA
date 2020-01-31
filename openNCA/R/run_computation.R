@@ -200,12 +200,13 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
   }
   
   ### 2019-08-17/TGT/ add maximum, configurable # of dosing intervals to the Model Configuration Template (MCT) Definition
+  default_maxdosingintervals <- 5
   if(parameter_required("MAXDOSINGINTERVALS", names(map_data))) {
-    maxdosingintervals <- map_data[["MAXDOSINGINTERVALS"]]
+    maxdosingintervals <- ifelse(isTRUE(!is.null(map_data[["MAXDOSINGINTERVALS"]]) && !is.na(map_data[["MAXDOSINGINTERVALS"]])), map_data[["MAXDOSINGINTERVALS"]], default_maxdosingintervals)
   } else if(parameter_required("DOSELIST", names(map_data))) { # read # of doses from MCT/map DOSELIST value if present
-    maxdosingintervals <- length(unlist(strsplit(map_data$DOSELIST, ";")))
-  } else { maxdosingintervals <- 5 } # default to 5
-  
+    maxdosingintervals <- ifelse(isTRUE(!is.null(map_data$DOSELIST) && !is.na(map_data$DOSELIST)), length(unlist(strsplit(map_data$DOSELIST, ";"))), default_maxdosingintervals)
+  } else { maxdosingintervals <- default_maxdosingintervals } # default to 5
+
   merged_data <- merge(x = data_data, y = flag_data, by = map_data$FLGMERGE)
   valid_tau_told_check <- TRUE
   valid_tau_told_names <- c()

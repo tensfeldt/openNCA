@@ -136,7 +136,7 @@ aumc_XpctO <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, auc
   }
 
   if(sum(conc, na.rm=T) == 0){
-    aumc_xpcto <- 0
+    aumc_xpcto <- NA
     return(aumc_xpcto)
   } else {
     if(is.null(aumcinfo)){

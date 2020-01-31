@@ -148,6 +148,9 @@ aumc_inf_o <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, auc
     stop("Error in aumc_inf_o: the value provided for 'method' is not correct")
   }
 
+  if(sum(conc, na.rm = T) == 0){
+    return(0)
+  }
   if(is.null(kel)){
     if(!(is.null(spanratio))){
       kel <- kel(conc = conc, time = time, exflag = kelflag, spanratio = spanratio)
@@ -160,10 +163,6 @@ aumc_inf_o <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, auc
   }
   if(is.null(c_last)){
     c_last <- clast(conc = conc, time = time)
-  }
-
-  if(sum(conc, na.rm = T) == 0){
-    return(0)
   }
 
 ### 2019-09-13/TGT/ initialze value of aumc_info

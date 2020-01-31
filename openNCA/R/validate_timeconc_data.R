@@ -113,6 +113,18 @@ validate_timeconc_data <- function(map, data, flag, verbose=FALSE) {
             vendtimeu <- map$ENDTIMEU
          }
     }
+    else if (casefold(time.pointer)=='nominal' && !(parameter_required(nomtime, names(data)) && parameter_required(nomtimeu, names(data)))) {
+      stop("Nominal Time: '", nomtime, "' and Nominal Time Unit: '", nomtimeu, "' isn't present in input dataset\n")
+    }
+    else if (casefold(time.pointer)=='actual' && !(parameter_required(acttime, names(data)) && parameter_required(acttimeu, names(data)))) {
+      stop("Actual Time: '", acttime, "' and Actual Time Unit: '", acttimeu, "' isn't present in input dataset\n")
+    }
+    else if (flgm4 && casefold(time.pointer)=='nominal' && !(parameter_required(nomendtime, names(data)) && parameter_required(nomendtimeu, names(data)))) {
+      stop("Nominal End Time: '", nomendtime, "' and Nominal End Time Unit: '", nomendtimeu, "' isn't present in input dataset\n")
+    }
+    else if (flgm4 && casefold(time.pointer)=='actual' && !(parameter_required(actendtime, names(data)) && parameter_required(actendtimeu, names(data)))) {
+      stop("Actual End Time: '", actendtime, "' and Actual End Time Unit: '", actendtimeu, "' isn't present in input dataset\n")
+    }
     ### else use the columns pointed to by NOMTIME/NOMTIMEU if map$TIME is "nominal"
     else if (casefold(time.pointer)=='nominal' && parameter_required(nomtime, names(data)) && parameter_required(nomtimeu, names(data))) {
         vtime  <- nomtime
@@ -140,20 +152,6 @@ validate_timeconc_data <- function(map, data, flag, verbose=FALSE) {
         if(flgm4) {
             vendtime <- actendtime
             vendtimeu <- actendtimeu
-        }
-    }
-    else if (!(parameter_required(nomtime, names(data)) && parameter_required(nomtimeu, names(data)))) {
-        stop("Nominal Time: '", nomtime, "' and Nominal Time Unit: '", nomtimeu, "' isn't present in input dataset\n")
-    }
-    else if (!(parameter_required(acttime, names(data)) && parameter_required(acttimeu, names(data)))) {
-        stop("Actual Time: '", acttime, "' and Actual Time Unit: '", acttimeu, "' isn't present in input dataset\n")
-    }
-    else if (flgm4) {
-        if (!(parameter_required(nomendtime, names(data)) && parameter_required(nomendtimeu, names(data)))) {
-            stop("Nominal End Time: '", nomendtime, "' and Nominal End Time Unit: '", nomendtimeu, "' isn't present in input dataset\n")
-        }
-        else if (!(parameter_required(actendtime, names(data)) && parameter_required(actendtimeu, names(data)))) {
-            stop("Actual End Time: '", actendtime, "' and Actual End Time Unit: '", actendtimeu, "' isn't present in input dataset\n")
         }
     }
 

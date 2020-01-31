@@ -148,8 +148,6 @@ auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1
       return(NA)
   } else if(all(is.na(conc))) { # 2019-09-11/TGT/
       return(NA)
-  } else if(is.na(t_max) && method==1) { # 2019-09-11/TGT/ - update 2019-09-25/TGT/ updated to also consider method
-      return(NA)
   }
   
   if(!(is.numeric(conc) && is.vector(conc)) ){
@@ -162,6 +160,9 @@ auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1
     if(sum(conc, na.rm = T) == 0){
       return(0)
     }
+  }
+  if(is.na(t_max) && method==1) { # 2019-09-11/TGT/ - update 2019-09-25/TGT/ updated to also consider method
+    return(NA)
   }
   if(is.null(t1) || is.na(t1)){
     return(NA)

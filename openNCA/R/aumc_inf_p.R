@@ -157,6 +157,9 @@ aumc_inf_p <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, auc
     stop("Error in aumc_inf_p: the value provided for 'method' is not correct")
   }
 
+  if(sum(conc, na.rm = T) == 0){
+    return(NA)
+  }
   if(is.null(kel)){
     if(!(is.null(spanratio))){
       kel <- kel(conc = conc, time = time, exflag = kelflag, spanratio = spanratio)
@@ -166,10 +169,6 @@ aumc_inf_p <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, auc
   }
   if(is.null(t_last)){
     t_last <- tlast(conc = conc, time = time)
-  }
-
-  if(sum(conc, na.rm = T) == 0){
-    return(0)
   }
 
 ### 2019-09-13/TGT/ initialze value of aumc_infp

@@ -154,6 +154,14 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if(!(parameter_required("^SDEID$",names(data_data)))) {
     stop("Value for 'SDEID' provided via 'map' is not present in the dataset provided via 'data'")
   }
+  
+  if("AMOUNT" %in% names(map_data) && "AMOUNTU" %in% names(map_data)){
+    if(!(parameter_required(map_data$AMOUNT, names(data_data)) && parameter_required(map_data$AMOUNTU, names(data_data)))) {
+      stop("Amount: '", map_data$AMOUNT, "' and Amount Unit: '", map_data$AMOUNTU, "' isn't present in input dataset\n")
+    }
+  } else {
+    stop("Dataset provided via 'map' does not contain the 'AMOUNT' and/or 'AMOUNTU' column")
+  }
 
 ###  if(!("SDEID" %in% names(map_data) && "TIME" %in% names(map_data) && "CONC" %in% names(map_data))){
 ###    stop("Dataset provided via 'map' does not contain the required columns 'SDEID', 'TIME' and 'CONC'")
@@ -868,7 +876,12 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME, map_data[map_data$ENDTIME]] to map_data$ENDTIME
 ###      rt <- rate(start_time = tmp_df[,map_data[[map_data$TIME]]], end_time = tmp_df[,map_data[[map_data$ENDTIME]]], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]))
 ### 2019-10-03/TGT/ rt <- rate(start_time = tmp_df[,map_data$TIME], end_time = tmp_df[,map_data$ENDTIME], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]))
-      type <- ifelse("SAMPLETYPE" %in% names(map_data), ifelse(map_data$SAMPLETYPE %in% names(tmp_df), as.character(unique(tmp_df[,map_data$SAMPLETYPE])[1]), NULL), NULL)
+      type <- NULL
+      if("SAMPLETYPE" %in% names(map_data)){
+        if(map_data$SAMPLETYPE %in% names(tmp_df)){
+          type <- as.character(unique(tmp_df[,map_data$SAMPLETYPE])[1])
+        }
+      }
       rt <- rate(start_time = tmp_df[,map_data$TIME], end_time = tmp_df[,map_data$ENDTIME], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]), volu = tmp_df[,map_data$AMOUNTU], type = type, map = map_data)
 
       if(nrow(tmp_df) > 0){
@@ -1297,6 +1310,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##            } else {
 ##              stop("Error in optimize kel")
 ##            }
+            kel_val <- as.numeric(flag_df$CRIT[match("KEL", flag_df$VAR)])
             kelr_val <- as.numeric(flag_df$CRIT[match("KELRSQ", flag_df$VAR)])
             if("AUCXPCTO" %in% flag_df$VAR){
               aucxpct <- as.numeric(flag_df$CRIT[match("AUCXPCTO", flag_df$VAR)])
@@ -1311,6 +1325,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 sel_time <- ulist[[k]]
                 sel_conc <- tmp_conc[match(sel_time, tmp_time)]
                 
+                kel_tmp <- kel(conc = sel_conc, time = sel_time)[["KEL"]]
                 kelr_opt <- kel_r(conc = sel_conc, time = sel_time)[["KELRSQ"]]
                 if("AURCXPCTO" %in% flag_df$VAR){
                   span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
@@ -1325,9 +1340,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 }
                 
                 if(!is.na(kelr_opt) && !is.na(aucxpct_opt)){
-                  kel_opt <- ((kelr_opt - kelr_val)/(1 - kelr_val)) + (length(sel_time)/length(tmp_time)) + ((aucxpct - aucxpct_opt)/aucxpct)
+                  kel_opt <- ((kel_tmp - kel_val)/(1 - kel_val)) + ((kelr_opt - kelr_val)/(1 - kelr_val)) + (length(sel_time)/length(tmp_time)) + ((aucxpct - aucxpct_opt)/aucxpct)
                 } else {
-                  kel_opt <- 0
+                  kel_opt <- -1
                 }
                 
                 if(!is.na(kel_opt)){
