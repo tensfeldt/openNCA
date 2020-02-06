@@ -53,7 +53,9 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
       }
     }
   }
-  if(!is.null(flag)){
+  if(is.null(flag)){
+    stop("Please provide a valid path for the 'flag' parameter")
+  } else {
     if(is.data.frame(flag)){
       flag_data <- as.data.frame(lapply(flag, as.character), stringsAsFactors = FALSE)
     } else {
@@ -2498,6 +2500,9 @@ if(FALSE) {
       if(!is.null(data_out$optimized_kel_flag)){
         results_list$flag_data[,map_data$FLGEXKEL] <- data_out$optimized_kel_flag
       }
+      if(!all(unlist(lapply(data_out$est_data, length)) == 0)){
+        results_list$est_data <- data_out$est_data 
+      }
     }
   } else {
     if("KEL" %in% parameter_list){
@@ -2507,6 +2512,9 @@ if(FALSE) {
     } else {
       results_list$data_out <- data_out$data_out
       results_list$flag_data <- flag_data[1:nrow(merged_data),]
+      if(!all(unlist(lapply(data_out$est_data, length)) == 0)){
+        results_list$est_data <- data_out$est_data 
+      }
     }
   }
 ###  print(head(results_list$data_out))

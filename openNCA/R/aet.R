@@ -129,7 +129,7 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, all_time=NULL
     a_e <- NA
   } else {
     if(t %in% time) {
-      if(is.null(all_time) || is.null(end_time)){
+      if(is.null(all_time) && is.null(end_time)){
         tmp_time <- time[time <= t]
         if(length(tmp_time) > 0) {
           tmp_amt <- amt[1:length(tmp_time)]
@@ -143,7 +143,7 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, all_time=NULL
           a_e <- ifelse(a_e == 0, NA, a_e)
         }
       } else {
-        tmp_rows <- unlist(sapply(all_time, function(x){ all(x %in% orig_time) }))
+        tmp_rows <- apply(all_time, 1, function(x) { any(apply(orig_time, 1, function(y){ x %in% y })) })
         tmp_end_time <- all_time[tmp_rows,][,2]
         tmp_time <- end_time %in% tmp_end_time
         tmp_lim <- seq(1:length(tmp_time))[tmp_time]

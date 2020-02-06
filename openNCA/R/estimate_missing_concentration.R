@@ -85,10 +85,17 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
             }
           }
         } else if(time[1] >= orig_time[length(orig_time)]){
-          if(!is.na(kel[["KEL"]])){
-            if(isTRUE(extrapolate)){
-              conc[1] <- cest(conc = conc, time = time, t_last = time[1], kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
-              tmp$INT_EXT[1] <- "EXT"
+          if(!is.na(kel) && !is.null(kel)){
+            if(!is.na(kel[["KEL"]])){
+              if(isTRUE(extrapolate)){
+                conc[1] <- cest(conc = conc, time = time, t_last = time[1], kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
+                tmp$INT_EXT[1] <- "EXT"
+              }
+            } else {
+              if(isTRUE(extrapolate)){
+                conc[1] <- NA
+                tmp$INT_EXT[1] <- "EXT"
+              }
             }
           } else {
             if(isTRUE(extrapolate)){
@@ -116,10 +123,24 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
             }
           }
         } else {
-          if(!is.na(kel[["KEL"]])){
-            if(isTRUE(extrapolate)){
-              conc[nrow(tmp)] <- cest(conc = conc, time = time, t_last = time[length(time)], kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
-              tmp$INT_EXT[nrow(tmp)] <- "EXT"
+          if(!is.na(kel) && !is.null(kel)){
+            if(!is.na(kel[["KEL"]])){
+              if(isTRUE(extrapolate)){
+                conc[nrow(tmp)] <- cest(conc = conc, time = time, t_last = time[length(time)], kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
+                tmp$INT_EXT[nrow(tmp)] <- "EXT"
+              }
+            } else {
+              if(isTRUE(extrapolate)){
+                min_lim <- orig_time[length(orig_time)] - (orig_time[length(orig_time)] * 0.05)
+                max_lim <- (orig_time[length(orig_time)] * 0.05) + orig_time[length(orig_time)]
+                if(min_lim < time[nrow(tmp)] && time[nrow(tmp)] < max_lim){
+                  conc[nrow(tmp)] <- orig_conc[length(orig_conc)]
+                  tmp$INT_EXT[nrow(tmp)] <- "EXT"
+                } else {
+                  conc[nrow(tmp)] <- NA
+                  tmp$INT_EXT[nrow(tmp)] <- "EXT"
+                }
+              }
             }
           } else {
             if(isTRUE(extrapolate)){

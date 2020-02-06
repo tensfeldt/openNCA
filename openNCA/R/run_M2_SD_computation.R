@@ -964,10 +964,10 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         obs_c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
           
         if(comp_required[["DOSEC"]]) {
-            dose_c <- dosec(data = tmp_df, map = map_data)
+          dose_c <- dosec(data = tmp_df, map = map_data)
         }
         if(comp_required[["C0"]]) {
-            est_c_0 <- est_c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], npts=2, returnall=TRUE)
+          est_c_0 <- est_c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], npts=2, returnall=TRUE)
         }
         if(comp_required[["V0"]]) {
 ###          v_0 <- v0(c0 = est_c_0$est_c0, dose = unique(tmp_df[,map_data$DOSE1])[1])
@@ -1070,7 +1070,9 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##            } else {
 ##              stop("Error in optimize kel")
 ##            }
-            kel_val <- as.numeric(flag_df$CRIT[match("KEL", flag_df$VAR)])
+            if(isTRUE("KEL" %in% flag_df$VAR)){
+              kel_val <- as.numeric(flag_df$CRIT[match("KEL", flag_df$VAR)]) 
+            }
             kelr_val <- as.numeric(flag_df$CRIT[match("KELRSQ", flag_df$VAR)])
             if("AUCXPCTO" %in% flag_df$VAR){
               aucxpct <- as.numeric(flag_df$CRIT[match("AUCXPCTO", flag_df$VAR)])
@@ -1100,15 +1102,22 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 }
     
                 if(!is.na(kelr_opt) && !is.na(aucxpct_opt)){
-                  kel_opt <- ((kel_tmp - kel_val)/(1 - kel_val)) + ((kelr_opt - kelr_val)/(1 - kelr_val)) + (length(sel_time)/length(tmp_time)) + ((aucxpct - aucxpct_opt)/aucxpct)
+                  kel_opt <- ((kelr_opt - kelr_val)/(1 - kelr_val)) + (length(sel_time)/length(tmp_time)) + ((aucxpct - aucxpct_opt)/aucxpct)
                 } else {
                   kel_opt <- -1
                 }
                 
                 if(!is.na(kel_opt)){
                   if(kel_opt > saved_kel_opt){
-                    saved_kel_opt <- kel_opt
-                    selected_idx <- match(sel_time, orig_time)
+                    if(isTRUE("KEL" %in% flag_df$VAR)){
+                      if(kel_tmp > kel_val){
+                        saved_kel_opt <- kel_opt
+                        selected_idx <- match(sel_time, orig_time)
+                      }
+                    } else {
+                      saved_kel_opt <- kel_opt
+                      selected_idx <- match(sel_time, orig_time) 
+                    }
                   }
                 }
               }

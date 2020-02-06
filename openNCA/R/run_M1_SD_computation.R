@@ -1081,7 +1081,9 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##            } else {
 ##              stop("Error in optimize kel")
 ##            }
-            kel_val <- as.numeric(flag_df$CRIT[match("KEL", flag_df$VAR)])
+            if(isTRUE("KEL" %in% flag_df$VAR)){
+              kel_val <- as.numeric(flag_df$CRIT[match("KEL", flag_df$VAR)]) 
+            }
             kelr_val <- as.numeric(flag_df$CRIT[match("KELRSQ", flag_df$VAR)])
             if("AUCXPCTO" %in% flag_df$VAR){
               aucxpct <- as.numeric(flag_df$CRIT[match("AUCXPCTO", flag_df$VAR)])
@@ -1111,15 +1113,22 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 }
     
                 if(!is.na(kelr_opt) && !is.na(aucxpct_opt)){
-                  kel_opt <- ((kel_tmp - kel_val)/(1 - kel_val)) + ((kelr_opt - kelr_val)/(1 - kelr_val)) + (length(sel_time)/length(tmp_time)) + ((aucxpct - aucxpct_opt)/aucxpct)
+                  kel_opt <- ((kelr_opt - kelr_val)/(1 - kelr_val)) + (length(sel_time)/length(tmp_time)) + ((aucxpct - aucxpct_opt)/aucxpct)
                 } else {
                   kel_opt <- -1
                 }
-    
+                
                 if(!is.na(kel_opt)){
                   if(kel_opt > saved_kel_opt){
-                    saved_kel_opt <- kel_opt
-                    selected_idx <- match(sel_time, orig_time)
+                    if(isTRUE("KEL" %in% flag_df$VAR)){
+                      if(kel_tmp > kel_val){
+                        saved_kel_opt <- kel_opt
+                        selected_idx <- match(sel_time, orig_time)
+                      }
+                    } else {
+                      saved_kel_opt <- kel_opt
+                      selected_idx <- match(sel_time, orig_time) 
+                    }
                   }
                 }
               }
