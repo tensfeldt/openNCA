@@ -6,7 +6,7 @@
 \usage{
 run_M3_SS_computation(data = NULL, map = NULL, method = 1,
   model_regex = "^M3(SS)*?$", parameter_list = list(),
-  return_list = list())
+  return_list = list(), optimize_kel_debug = FALSE)
 }
 \arguments{
 \item{data}{The dataframe that contains the raw data}

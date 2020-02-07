@@ -6,7 +6,7 @@
 \usage{
 run_M1_SD_computation(data = NULL, map = NULL, method = 1,
   model_regex = "^M1(SD)*?$", parameter_list = list(),
-  return_list = list())
+  return_list = list(), optimize_kel_debug = FALSE)
 }
 \arguments{
 \item{data}{The dataframe that contains the raw data}

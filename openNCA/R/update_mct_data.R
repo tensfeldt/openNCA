@@ -85,6 +85,12 @@ update_mct_data <- function(map, data, flag, verbose=FALSE) {
     ### DOSE information
     if(parameter_required("^DOSE(i{1}|[0-9]*?)$", names(map)))  {
         for(i in 1:length(timeconcvalues$dose)) { map[,paste0("ORGDOSE",i)]  <- timeconcvalues$dose[i] }
+        for(i in 1:length(timeconcvalues$dose)) { 
+          if(paste0("TAU",i) %in% map$IMPUTETAUS || paste0("TOLD",i) %in% map$IMPUTETOLDS){
+            map[,paste0("DOSE",i)] <- NULL
+            timeconcvalues$dose <- timeconcvalues$dose[!timeconcvalues$dose %in% paste0("DOSE",i)]
+          }
+        }
         map$DOSELIST <- paste(timeconcvalues$dose, collapse=";")
     } else {
       if(isTRUE(casefold(map$DOSINGTYPE) == "ss")){
@@ -101,6 +107,12 @@ update_mct_data <- function(map, data, flag, verbose=FALSE) {
     ### DOSEU information
     if(parameter_required("^DOSE(i{1}|[0-9]*?)U$", names(map)))  {
         for(i in 1:length(timeconcvalues$doseu)) { map[,paste0("ORGDOSE",i,"U")]  <- timeconcvalues$doseu[i] }
+        for(i in 1:length(timeconcvalues$doseu)) { 
+          if(paste0("TAU",i) %in% map$IMPUTETAUS || paste0("TOLD",i) %in% map$IMPUTETOLDS){
+            map[,paste0("DOSE",i,"U")] <- NULL
+            timeconcvalues$doseu <- timeconcvalues$doseu[!timeconcvalues$doseu %in% paste0("DOSE",i,"U")]
+          }
+        }
         map$DOSEULIST <- paste(timeconcvalues$doseu, collapse=";")
     } else { 
       if(isTRUE(casefold(map$DOSINGTYPE) == "ss")){

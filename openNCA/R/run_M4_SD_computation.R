@@ -100,7 +100,7 @@
 #' @export
 ### 2019-10-10/TGT/ Remove display_list argument and incorporate model_regex argument
 ###run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, parameter_list = list(), display_list = list(), return_list = list()){
-run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_regex = "^M4(SD)*?$", parameter_list = list(), return_list = list()){
+run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_regex = "^M4(SD)*?$", parameter_list = list(), return_list = list(), optimize_kel_debug = FALSE){
 ###run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, parameter_list = list(), return_list = list()){
   function_name <- as.list(sys.call())[[1]]
 
@@ -709,6 +709,14 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     comp_required[["CMAX"]] <- TRUE
     comp_required[["CLAST"]] <- TRUE 
     comp_required[["AUCLAST"]] <- TRUE
+    if(isTRUE(optimize_kel_debug)){
+      debug_idx <- 1
+      if("AUCXPCTO" %in% flag_df$VAR){
+        kel_debug <- data.frame("SDEID" = numeric(), "TIME" = numeric(), "CONC" = numeric(), "KEL" = numeric(), "KELNOPT" = numeric(), "KELRSQ" = numeric(), "AUCXPCTO" = numeric(), "KELNOPT_W" = numeric(), "KELRSQ_W" = numeric(), "AUCXPCTO_W" = numeric(), "TOTAL_W" = numeric())
+      } else if("AUCXPCTP" %in% flag_df$VAR){
+        kel_debug <- data.frame("SDEID" = numeric(), "TIME" = numeric(), "CONC" = numeric(), "KEL" = numeric(), "KELNOPT" = numeric(), "KELRSQ" = numeric(), "AUCXPCTP" = numeric(), "KELNOPT_W" = numeric(), "KELRSQ_W" = numeric(), "AUCXPCTP_W" = numeric(), "TOTAL_W" = numeric())
+      }
+    }
   }
   
   if("INCLUDEINTERPOLATION" %in% names(map_data)){
@@ -1138,16 +1146,17 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 sel_time <- ulist[[k]]
                 sel_conc <- tmp_conc[match(sel_time, tmp_time)]
                 
-                kel_tmp <- kel(conc = sel_conc, time = sel_time)[["KEL"]]
+                all_kel <- kel(conc = sel_conc, time = sel_time)
+                kel_tmp <- all_kel[["KEL"]]
                 kelr_opt <- kel_r(conc = sel_conc, time = sel_time)[["KELRSQ"]]
                 if("AURCXPCTO" %in% flag_df$VAR){
                   span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
                   aucinfo_opt <- auc_inf_o(conc = rt, time = mid_pt, method = method, auclast = auclast, c_last = c_last, spanratio = span_ratio)
-                  aucxpct_opt <- auc_XpctO(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_info = aucinfo_opt, auclast = auclast)
+                  aucxpct_opt <- auc_XpctO(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_info = aucinfo_opt, auclast = auclast, kel = all_kel)
                 } else if("AURCXPCTP" %in% flag_df$VAR){
                   span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
                   aucinfp_opt <- auc_inf_p(conc = rt, time = mid_pt, method = method, auclast = auclast, t_last = t_last, spanratio = span_ratio)
-                  aucxpct_opt <- auc_XpctP(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_infp = aucinfp_opt, auclast = auclast)
+                  aucxpct_opt <- auc_XpctP(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_infp = aucinfp_opt, auclast = auclast, kel = all_kel)
                 } else {
                   stop("Error in optimize kel")
                 }
@@ -1156,6 +1165,10 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                   kel_opt <- ((kelr_opt - kelr_val)/(1 - kelr_val)) + (length(sel_time)/length(tmp_time)) + ((aucxpct - aucxpct_opt)/aucxpct)
                 } else {
                   kel_opt <- -1
+                }
+                if(isTRUE(optimize_kel_debug)){
+                  kel_debug[debug_idx,] <- c(unique(data_data[,map_data$SDEID])[i], as.character(paste0(sel_time, sep = ", ", collapse = "")), as.character(paste0(sel_conc, sep = ", ", collapse = "")), kel_tmp, length(sel_time), kelr_opt, aucxpct_opt, ((kelr_opt - kelr_val)/(1 - kelr_val)), (length(sel_time)/length(tmp_time)), ((aucxpct - aucxpct_opt)/aucxpct), kel_opt)
+                  debug_idx <- 1 + debug_idx
                 }
                 
                 if(!is.na(kel_opt)){
@@ -1766,6 +1779,28 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
        "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
       results_list$optimized_kel_flag <- kel_flag_optimized
     }
+    if(isTRUE(optimize_kel_debug)){
+      if(isTRUE(optimize_kel)){
+        kel_debug$KEL <- as.numeric(kel_debug$KEL)
+        kel_debug$KELNOPT <- as.numeric(kel_debug$KELNOPT)
+        kel_debug$KELRSQ <- as.numeric(kel_debug$KELRSQ)
+        kel_debug$KELNOPT_W <- as.numeric(kel_debug$KELNOPT_W)
+        kel_debug$KELRSQ_W <- as.numeric(kel_debug$KELRSQ_W)
+        kel_debug$TOTAL_W <- as.numeric(kel_debug$TOTAL_W)
+        if("AUCXPCTO" %in% flag_df$VAR){
+          kel_debug$AUCXPCTO <- as.numeric(kel_debug$AUCXPCTO)
+          kel_debug$AUCXPCTO_W <- as.numeric(kel_debug$AUCXPCTO_W)
+        } else if("AUCXPCTP" %in% flag_df$VAR){
+          kel_debug$AUCXPCTP <- as.numeric(kel_debug$AUCXPCTP)
+          kel_debug$AUCXPCTP_W <- as.numeric(kel_debug$AUCXPCTP_W)
+        }
+        
+        results_list$optimize_kel_data <- kel_debug
+      } else {
+        results_list$optimize_kel_data <- NULL
+      }
+    }
+    
     return(results_list)
     
 ### 2019-09-05/TGT/
