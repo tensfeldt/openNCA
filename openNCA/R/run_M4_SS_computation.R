@@ -940,7 +940,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           aet_pct <- NULL
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###            for(t in 1:length(unique(tmp_df[,map_data[[map_data$TIME]]]))){
-          for(t in 1:length(unique(data_data[,map_data$ENDTIME])[1:aet_len])){
+          for(t in 1:length(sort(unique(data_data[,map_data$ENDTIME]))[1:aet_len])){
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###              tmp <- aet(amt = amt, time = na.omit(tmp_df[,map_data[[map_data$TIME]]]), t = na.omit(tmp_df[,map_data[[map_data$TIME]]])[t])
             curr_end_time <- unique(data_data[,map_data$ENDTIME])[1:aet_len][t]
@@ -1083,11 +1083,11 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["AETAUPTi"]]) {
             tmp_map <- map_data
             tmp_dosevar <- dosevar[!duplicated(dosevar)]
-            tmp_res <- tmp_df[,c(map_data$SDEID, tmp_dosevar)]
             tmp_res$AETAU1 <- aetau_i[[d]]
-            aetau_pt_dose <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "DOSEU", verbose = FALSE)[,tmp_dosevar])[1]
+            test_dose <- dosec(data = tmp_df, map = map_data)
             aetau_pt_aetau <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "AMOUNTU", verbose = FALSE)[,"AETAU1"])[1]
-            aetau_pt_i[[d]] <- aepct(ae = aetau_pt_aetau, dose = aetau_pt_dose)
+            test_dose <- dosec(data = tmp_df, map = map_data)
+            aetau_pt_i[[d]] <- aepct(ae = aetau_pt_aetau, dose = test_dose)
           }
           if(comp_required[["AURCT"]] && (row_len) >= 2) {
             prev_na <- FALSE
@@ -1503,18 +1503,18 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##        row_data <- c(unique(data_data[,map_data$SDEID])[i])
         computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]
         if(disp_required[["AT"]]) {
-          computation_df[i, paste0("AMT.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- amt
+          computation_df[i, paste0("AMT.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME]))[1:aet_len]))] <- amt
         }
 ###        if("AET" %in% parameter_list) {
 ### 2019-09-23/TGT/ Note the following reports "AE" (amt) "AET" (ae_t) and "AETPCT" (aet_pct)
         if(disp_required[["AET"]]) {
 ##            row_data <- c(row_data, amt, ae_t)
-          computation_df[i, paste0("AE.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- ae_t
+          computation_df[i, paste0("AE.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME]))[1:aet_len]))] <- ae_t
         }
 ###        if("AETPCT" %in% parameter_list && "AET" %in% parameter_list) {
         if(disp_required[["AETPCTi"]]) {
 ##          row_data <- c(row_data, aet_pct)
-          computation_df[i, paste0("AEPCT.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- aet_pct
+          computation_df[i, paste0("AEPCT.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME]))[1:aet_len]))] <- aet_pct
         }
 ###        if("AE" %in% parameter_list) {
         if(disp_required[["AE"]]) {

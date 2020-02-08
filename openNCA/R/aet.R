@@ -147,7 +147,9 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, all_time=NULL
         tmp_end_time <- all_time[tmp_rows,][,2]
         tmp_time <- end_time %in% tmp_end_time
         tmp_lim <- seq(1:length(tmp_time))[tmp_time]
-        tmp_time[1:tmp_lim] <- TRUE
+        if(length(tmp_lim) > 0){
+          tmp_time[1:tmp_lim] <- TRUE
+        }
         if(any(tmp_time)) {
           tmp_amt <- amt[tmp_time]
           if(is.logical(returnNA) && isTRUE(returnNA)){

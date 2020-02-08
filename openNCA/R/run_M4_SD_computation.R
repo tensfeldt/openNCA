@@ -992,7 +992,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###          cat('unique(tmp_df[,map_data$TIME]): ', unique(tmp_df[,map_data$TIME]), '\n')
 ###          cat('length(unique(tmp_df[,map_data$TIME])): ', length(unique(tmp_df[,map_data$TIME])), '\n')
-          for(t in 1:length(unique(data_data[,c(map_data$TIME, map_data$ENDTIME)])[,map_data$TIME])){
+          for(t in 1:length(sort(unique(data_data[,c(map_data$TIME, map_data$ENDTIME)])[,map_data$TIME]))){
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
             tmp_data <- unique(data_data[,c(map_data$TIME, map_data$ENDTIME)]) 
             tmp_time_t <- tmp_data[order(tmp_data[,map_data$TIME], tmp_data[,map_data$ENDTIME]),]
@@ -1439,19 +1439,19 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           computation_df[i, "DOSEC"] <- dose_c
         }
         if(disp_required[["AT"]]) {
-          computation_df[i, paste0("AMT.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- amt
+          computation_df[i, paste0("AMT.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME]))[1:aet_len]))] <- amt
         }
 ###        if("AET" %in% parameter_list) {
 ###        if(parameter_required("^AET$", parameter_list) || parameter_required(dependent_parameters("^AET$"), parameter_list)) {
         if(disp_required[["AET"]]) {
 ##          row_data <- c(row_data, amt, ae_t)
-          computation_df[i, paste0("AE.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- ae_t
+          computation_df[i, paste0("AE.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME]))[1:aet_len]))] <- ae_t
         }
 ###        if("AETPCT" %in% parameter_list && "AET" %in% parameter_list) {
 ###        if(parameter_required("^AETPCT$", parameter_list) || parameter_required(dependent_parameters("^AETPCT$"), parameter_list)) {
         if(disp_required[["AETPCT"]]) {
 ##          row_data <- c(row_data, aet_pct)
-          computation_df[i, paste0("AEPCT.", sprintf("%.2f", unique(data_data[,map_data$ENDTIME])[1:aet_len]))] <- aet_pct
+          computation_df[i, paste0("AEPCT.", sprintf("%.2f", sort(unique(data_data[,map_data$ENDTIME]))[1:aet_len]))] <- aet_pct
         }
 ###        if("AE" %in% parameter_list) {
 ###        if(parameter_required("^AE$", parameter_list) || parameter_required(dependent_parameters("^AE$"), parameter_list)) {

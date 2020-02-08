@@ -1730,6 +1730,10 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["AUCTAUDNi"]]) {
             auctaudn[[d]] <- auc_dn(auc = auctau[[d]], dose = tmp_dose)
           }
+###          if("AUMCTAUi" %in% parameter_list && "TMAXi" %in% parameter_list) {
+          if(comp_required[["AUMCTAUi"]]) {
+            aumctaui[[d]] <- aumc_tau(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = 1, exflag = auc_flag, tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = tmp_df[,map_data$CONC], orig_time = tmp_df[,map_data$TIME])
+          }
 ###          if("MRTLASTi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "AUMCLASTi" %in% parameter_list) {
           if(comp_required[["MRTLASTi"]]) {
             mrtlasti[[d]] <- mrt_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, model = "M2", aucflag = auc_flag, dof = dof[[d]], auclast = auclasti[[d]])
@@ -1762,10 +1766,6 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["TOLDi"]]) {
             told[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
             told[[d]] <- as.numeric(told[[d]])
-          }
-###          if("AUMCTAUi" %in% parameter_list && "TMAXi" %in% parameter_list) {
-          if(comp_required[["AUMCTAUi"]]) {
-            aumctaui[[d]] <- aumc_tau(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = 1, exflag = auc_flag, tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = tmp_df[,map_data$CONC], orig_time = tmp_df[,map_data$TIME])
           }
 ###          if("CAVi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
           if(comp_required[["CAVi"]]) {
@@ -2256,7 +2256,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ##          row_data <- c(row_data, unlist(t_maxi))
           computation_df[i, paste0("TMAX",1:di_col)] <- unlist(t_maxi)
         }
-        if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
+        if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data)){
 ##          row_data <- c(row_data, 1)
           computation_df[i, "FLGACCEPTTMAX"] <- 1
         }

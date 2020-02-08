@@ -2357,7 +2357,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           computation_df[i, paste0("TMAX",1:di_col)] <- unlist(t_maxi)
         }
 ###        if("FLGEMESIS" %in% names(map_data) && ("TMAXi" %in% parameter_list)){
-        if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
+        if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data)){
 ##          row_data <- c(row_data, 1)
           computation_df[i, "FLGACCEPTTMAX"] <- 1
         }
