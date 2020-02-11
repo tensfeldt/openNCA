@@ -114,7 +114,19 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, all_time=NULL
   } else if(all(is.na(amt))) { # 2019-11-24/RD/
     return(NA)
   }
-
+  #print("amt")
+  #print(amt)
+  #print("time")
+  #print(time)
+  #print("t")
+  #print(t)
+  #print("orig_time")
+  #print(orig_time)
+  #print("all_time")
+  #print(all_time)
+  #print("end_time")
+  #print(end_time)
+  
   if(!(is.numeric(amt) && is.vector(amt))){
     stop("Error in aet: 'amt' is not a numeric vector")
   }
@@ -129,7 +141,7 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, all_time=NULL
     a_e <- NA
   } else {
     if(t %in% time) {
-      if(is.null(all_time) && is.null(end_time)){
+      if(is.null(all_time) || is.null(end_time)){
         tmp_time <- time[time <= t]
         if(length(tmp_time) > 0) {
           tmp_amt <- amt[1:length(tmp_time)]
@@ -144,7 +156,11 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, all_time=NULL
         }
       } else {
         tmp_rows <- apply(all_time, 1, function(x) { all(apply(orig_time, 1, function(y){ x %in% y })) })
+        #print("tmp_rows")
+        #print(tmp_rows)
         tmp_end_time <- all_time[tmp_rows,][,2]
+        #print("tmp_end_time")
+        #print(tmp_end_time)
         tmp_time <- end_time %in% tmp_end_time
         tmp_lim <- seq(1:length(tmp_time))[tmp_time]
         if(length(tmp_lim) > 0){

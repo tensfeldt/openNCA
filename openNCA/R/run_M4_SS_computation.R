@@ -1081,13 +1081,25 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             aetau_i[[d]] <- aetau(aet = amt, time = na.omit(tmp_df[,map_data$TIME]), t = tau[[d]])
           }
           if(comp_required[["AETAUPTi"]]) {
+            check_amt_output_unit <- ifelse("AMOUNTOUTPUTUNIT" %in% names(map_data), ifelse(!is.na(map_data$AMOUNTOUTPUTUNIT), TRUE, FALSE), FALSE)
             tmp_map <- map_data
-            tmp_dosevar <- dosevar[!duplicated(dosevar)]
             tmp_res$AETAU1 <- aetau_i[[d]]
-            test_dose <- dosec(data = tmp_df, map = map_data)
             aetau_pt_aetau <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "AMOUNTU", verbose = FALSE)[,"AETAU1"])[1]
-            test_dose <- dosec(data = tmp_df, map = map_data)
-            aetau_pt_i[[d]] <- aepct(ae = aetau_pt_aetau, dose = test_dose)
+            if(isTRUE(check_amt_output_unit)) {
+              check_dose_output_unit <- ifelse("DOSEOUTPUTUNIT" %in% names(map_data), ifelse(!is.na(map_data$DOSEOUTPUTUNIT), TRUE, FALSE), FALSE)
+              if(isTRUE(check_dose_output_unit)) {
+                if(!tmp_map$AMOUNTOUTPUTUNIT == tmp_map$DOSEOUTPUTUNIT){
+                  tmp_map$DOSEOUTPUTUNIT <- tmp_map$AMOUNTOUTPUTUNIT
+                }
+              }
+              tmp_dosevar <- dosevar[!duplicated(dosevar)]
+              tmp_res <- tmp_df[,c(map_data$SDEID, tmp_dosevar)]
+              aetau_pt_dose <- unique(unit_conversion(tmp_df, tmp_map, tmp_res, unit_class = "DOSEU", verbose = FALSE)[,tmp_dosevar])[1]
+              aetau_pt_i[[d]] <- aepct(ae = aetau_pt_aetau, dose = aetau_pt_dose)
+            } else {
+              test_dose <- dosec(data = tmp_df, map = map_data)
+              aetau_pt_i[[d]] <- aepct(ae = aetau_pt_aetau, dose = test_dose)
+            }
           }
           if(comp_required[["AURCT"]] && (row_len) >= 2) {
             prev_na <- FALSE

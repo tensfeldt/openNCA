@@ -408,7 +408,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
 ###          if(parameter_required(map_data$DOSEU, names(data_data))){
           if(parameter_required(map_data[,doseuvar], names(data_data))){
 ###            inputUnit3 <- unique(data_data[, map_data$DOSEU])[1]
-            inputUnit3 <- as.character(unique(data_data[, map_data[,doseuvar]])[1])
+            inputUnit3 <- as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])
 ###            outputUnit3 <- as.character(map_data$DOSEOUTPUTUNIT)
   
             outputUnitLabel <- "DOSEOUTPUTUNIT"

@@ -85,10 +85,25 @@ update_mct_data <- function(map, data, flag, verbose=FALSE) {
     ### DOSE information
     if(parameter_required("^DOSE(i{1}|[0-9]*?)$", names(map)))  {
         for(i in 1:length(timeconcvalues$dose)) { map[,paste0("ORGDOSE",i)]  <- timeconcvalues$dose[i] }
-        for(i in 1:length(timeconcvalues$dose)) { 
-          if(paste0("TAU",i) %in% map$IMPUTETAUS || paste0("TOLD",i) %in% map$IMPUTETOLDS){
+        for(i in 1:length(timeconcvalues$dose)) {
+          if(paste0("TAU",i) %in% timeconcvalues$tau[timeconcvalues$taudata] && paste0("TOLD",i) %in% timeconcvalues$told[timeconcvalues$tolddata]){
+            if(i != 1){
+              map[,paste0("DOSE",i)] <- NULL
+              timeconcvalues$dose <- timeconcvalues$dose[!timeconcvalues$dose %in% paste0("DOSE",i)]
+            }
+          } else if(paste0("TAU",i) %in% unlist(strsplit(map$IMPUTETAUS, ";")) || paste0("TOLD",i) %in% unlist(strsplit(map$IMPUTETOLDS, ";"))){
+            map[,paste0("TAU",i)] <- NULL
+            timeconcvalues$tau <- timeconcvalues$tau[!timeconcvalues$tau %in% paste0("TAU",i)]
+            timeconcvalues$taudata <- timeconcvalues$taudata[!timeconcvalues$tau %in% paste0("TAU",i)]
+            map$IMPUTETAUS <- paste(timeconcvalues$imputetaus[!timeconcvalues$imputetaus %in% paste0("TAU",i)], collapse=";") 
+            map[,paste0("TOLD",i)] <- NULL
+            timeconcvalues$told <- timeconcvalues$told[!timeconcvalues$told %in% paste0("TOLD",i)]
+            timeconcvalues$tolddata <- timeconcvalues$tolddata[!timeconcvalues$told %in% paste0("TOLD",i)]
+            map$IMPUTETOLDS <- paste(timeconcvalues$imputetolds[!timeconcvalues$imputetolds %in% paste0("TOLD",i)], collapse=";") 
             map[,paste0("DOSE",i)] <- NULL
             timeconcvalues$dose <- timeconcvalues$dose[!timeconcvalues$dose %in% paste0("DOSE",i)]
+            timeconcvalues$dosedata <- timeconcvalues$dosedata[!timeconcvalues$dose %in% paste0("DOSE",i)]
+            map$IMPUTEDOSES <- paste(timeconcvalues$imputedoses[!timeconcvalues$imputedoses %in% paste0("DOSE",i)], collapse=";")
           }
         }
         map$DOSELIST <- paste(timeconcvalues$dose, collapse=";")
@@ -103,14 +118,19 @@ update_mct_data <- function(map, data, flag, verbose=FALSE) {
         map$DOSELIST <- "DOSE"
       }
     }
-
     ### DOSEU information
     if(parameter_required("^DOSE(i{1}|[0-9]*?)U$", names(map)))  {
         for(i in 1:length(timeconcvalues$doseu)) { map[,paste0("ORGDOSE",i,"U")]  <- timeconcvalues$doseu[i] }
         for(i in 1:length(timeconcvalues$doseu)) { 
-          if(paste0("TAU",i) %in% map$IMPUTETAUS || paste0("TOLD",i) %in% map$IMPUTETOLDS){
+          if(paste0("TAU",i) %in% timeconcvalues$tau[timeconcvalues$taudata] && paste0("TOLD",i) %in% timeconcvalues$told[timeconcvalues$tolddata]){
+            if(i != 1){
+              map[,paste0("DOSE",i,"U")] <- NULL
+              timeconcvalues$doseu <- timeconcvalues$doseu[!timeconcvalues$doseu %in% paste0("DOSE",i,"U")]
+            }
+          } else if(paste0("TAU",i) %in% unlist(strsplit(map$IMPUTETAUS, ";")) || paste0("TOLD",i) %in% unlist(strsplit(map$IMPUTETOLDS, ";"))){
             map[,paste0("DOSE",i,"U")] <- NULL
             timeconcvalues$doseu <- timeconcvalues$doseu[!timeconcvalues$doseu %in% paste0("DOSE",i,"U")]
+            timeconcvalues$doseudata <- timeconcvalues$doseudata[!timeconcvalues$doseu %in% paste0("DOSE",i,"U")]
           }
         }
         map$DOSEULIST <- paste(timeconcvalues$doseu, collapse=";")
