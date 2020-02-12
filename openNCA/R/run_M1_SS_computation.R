@@ -1943,7 +1943,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["AUCTAUi"]]){
 ### 2019-09-16/TGT/ Shouldn't this be calling auc_tau????
 ###            auctau[[d]] <- auc_all(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag)
-            auctau[[d]] <- auc_tau(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time)
+            auctau[[d]] <- auc_tau(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, last_crit_factor = last_crit_factor, kel = kel_v, auclast = auclasti[[d]])
 ###          cat('d: ', d, ' auctau[[',d,']]: ', auctau[[d]], '\n')
           }
 ###          if("AUCTAUDNi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {

@@ -5,7 +5,8 @@
 \title{Run Computation}
 \usage{
 run_computation(data = NULL, map = NULL, flag = NULL,
-  parameterset = NULL, optimize_kel_debug = FALSE)
+  parameterset = NULL, return_merged_data = FALSE,
+  optimize_kel_debug = FALSE)
 }
 \arguments{
 \item{data}{The dataframe that contains the raw data}

@@ -1801,7 +1801,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
 ###          if("AUCTAUi" %in% parameter_list) {
           if(comp_required[["AUCTAUi"]]) {
-            auctau[[d]] <- auc_all(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag)
+            auctau[[d]] <- auc_tau(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, last_crit_factor = last_crit_factor, kel = kel_v, auclast = auclasti[[d]])
           }
 ###          if("AUCTAUDNi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
           if(comp_required[["AUCTAUDNi"]]) {

@@ -943,19 +943,21 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           for(t in 1:length(sort(unique(data_data[,map_data$ENDTIME]))[1:aet_len])){
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###              tmp <- aet(amt = amt, time = na.omit(tmp_df[,map_data[[map_data$TIME]]]), t = na.omit(tmp_df[,map_data[[map_data$TIME]]])[t])
-            curr_end_time <- unique(data_data[,map_data$ENDTIME])[1:aet_len][t]
+            # print(sort(unique(data_data[,map_data$ENDTIME]))[t])
+            # print(tmp_df[,map_data$ENDTIME])
+            tmp_curr_data <- unique(tmp_df[,c(map_data$TIME, map_data$ENDTIME)]) 
+            tmp_curr_time_t <- tmp_curr_data[order(tmp_curr_data[,map_data$TIME], tmp_curr_data[,map_data$ENDTIME]),]
+            tmp_orig_time <- tmp_curr_time_t[tmp_curr_time_t[,map_data$ENDTIME] %in% sort(unique(data_data[,map_data$ENDTIME]))[t],]
             tmp_data <- unique(data_data[,c(map_data$TIME, map_data$ENDTIME)]) 
-            tmp_data <- tmp_data[order(tmp_data[,map_data$TIME], tmp_data[,map_data$ENDTIME]),]
-            tmp_end_data <- unique(data_data[,map_data$ENDTIME])
-            tmp_end_data <- tmp_end_data[order(tmp_end_data)]
+            tmp_time_t <- tmp_data[order(tmp_data[,map_data$TIME], tmp_data[,map_data$ENDTIME]),]
             
-            if(curr_end_time %in% tmp_df[,map_data$ENDTIME]){
-              tmp_time_t <- tmp_df[,c(map_data$TIME, map_data$ENDTIME)]
-              tmp_time_t <- tmp_time_t[tmp_time_t[,map_data$ENDTIME] == curr_end_time,]
-              tmp <- aet(amt = amt, time = tmp_end_data, t = curr_end_time, orig_time = tmp_time_t, all_time = tmp_data, end_time = tmp_end_data, returnNA = TRUE)
+            if(sort(unique(data_data[,map_data$ENDTIME]))[t] %in% tmp_df[,map_data$ENDTIME]){
+              tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$ENDTIME])), t = sort(unique(data_data[,map_data$ENDTIME]))[t], orig_time = tmp_orig_time, curr_time = tmp_curr_time_t, all_time = tmp_time_t, end_time = tmp_end_data <- sort(unique(data_data[,map_data$ENDTIME])))
             } else {
               tmp <- NA
             }
+            # print(tmp)
+            # print("---")
             tmp_map <- map_data
             tmp_dosevar <- dosevar[!duplicated(dosevar)]
             tmp_res <- tmp_df[,c(map_data$SDEID, tmp_dosevar)]

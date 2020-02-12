@@ -24,7 +24,7 @@
 #'  \item email: \url{Thomas.G.Tensfeldt@pfizer.com}
 #' }
 #' @export
-run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset = NULL, optimize_kel_debug = FALSE){
+run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset = NULL, return_merged_data = FALSE, optimize_kel_debug = FALSE){
   function_name <- as.list(sys.call())[[1]]
 
   if(is.null(data)){
@@ -2520,6 +2520,9 @@ if(FALSE) {
   }
   if(isTRUE(optimize_kel_debug)){
     results_list$optimize_kel_data <- data_out$optimize_kel_data
+  }
+  if(isTRUE(return_merged_data)){
+    results_list$merged_data_in <- merged_data
   }
 ###  print(head(results_list$data_out))
 

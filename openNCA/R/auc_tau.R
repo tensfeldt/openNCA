@@ -139,7 +139,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = NULL, t_max = NULL, orig_conc = NULL, orig_time = NULL){
+auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = NULL, t_max = NULL, orig_conc = NULL, orig_time = NULL, last_crit_factor = NULL, kel = NULL, auclast = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in auc_tau: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -254,6 +254,37 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = N
       } else if(method == 4){
         return(auc_lin_up_log_down(conc = new_conc, time = new_time, exflag = exflag))
       }
+    } else {
+      time_min_range <- ifelse(!is.null(last_crit_factor), as.numeric(last_crit_factor) * tau, NA)
+      auctau <- NA
+      if(!is.na(time_min_range)){
+        if(!is.null(kel) && "KEL" %in% kel && "KELC0" %in% kel){
+          if(!is.na(kel[["KEL"]])){
+            tau_conc <- NA
+            tau_conc <- cest(conc = conc, time = time, t_last = time[1], kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
+            new_time <- c(time, tau)
+            new_conc <- c(conc, tau_conc)
+            
+            if(method == 1){
+              auctau <- auc_lin_log(conc = new_conc, time = new_time, exflag = exflag, t_max = t_max)
+            } else if(method == 2){
+              auctau <- auc_lin(conc = new_conc, time = new_time, exflag = exflag)
+            } else if(method == 3){
+              auctau <- auc_log(conc = new_conc, time = new_time, exflag = exflag)
+            } else if(method == 4){
+              auctau <- auc_lin_up_log_down(conc = new_conc, time = new_time, exflag = exflag)
+            }
+          } else if(!is.null(auclast)){
+            auctau <- auclast
+          }
+        }
+        if(time_min_range <= orig_time[length(orig_time)]){
+          return(auctau)
+        } else {
+          auctau <- ifelse(!is.null(auclast), ifelse((auctau <= (as.numeric(auclast) * 1.20)), auctau, NA), NA)
+        }
+      }
+      return(auctau)
     }
   }
 }

@@ -1003,11 +1003,15 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###          cat('unique(tmp_df[,map_data$TIME]): ', unique(tmp_df[,map_data$TIME]), '\n')
 ###          cat('length(unique(tmp_df[,map_data$TIME])): ', length(unique(tmp_df[,map_data$TIME])), '\n')
-          for(t in 1:length(sort(unique(data_data[,c(map_data$TIME, map_data$ENDTIME)])[,map_data$TIME]))){
+          for(t in 1:length(sort(unique(data_data[,map_data$ENDTIME]))[1:aet_len])){
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
+            tmp_curr_data <- unique(tmp_df[,c(map_data$TIME, map_data$ENDTIME)]) 
+            tmp_curr_time_t <- tmp_curr_data[order(tmp_curr_data[,map_data$TIME], tmp_curr_data[,map_data$ENDTIME]),]
+            tmp_orig_time <- tmp_curr_time_t[tmp_curr_time_t[,map_data$ENDTIME] %in% sort(unique(data_data[,map_data$ENDTIME]))[t],]
             tmp_data <- unique(data_data[,c(map_data$TIME, map_data$ENDTIME)]) 
             tmp_time_t <- tmp_data[order(tmp_data[,map_data$TIME], tmp_data[,map_data$ENDTIME]),]
-            tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$TIME])), t = tmp_time_t[t,map_data$TIME], orig_time = tmp_time_t[t,], all_time = tmp_time_t, returnNA = TRUE)
+            tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$ENDTIME])), t = sort(unique(data_data[,map_data$ENDTIME]))[t], orig_time = tmp_orig_time, curr_time = tmp_curr_time_t, all_time = tmp_time_t, end_time = tmp_end_data <- sort(unique(data_data[,map_data$ENDTIME])))
+
 ###            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data$DOSE1])[1])
 #            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data$DOSE])[1])
 ###            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data[,dosevar]])[1])
