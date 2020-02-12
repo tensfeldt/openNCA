@@ -1010,7 +1010,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             tmp_orig_time <- tmp_curr_time_t[tmp_curr_time_t[,map_data$ENDTIME] %in% sort(unique(data_data[,map_data$ENDTIME]))[t],]
             tmp_data <- unique(data_data[,c(map_data$TIME, map_data$ENDTIME)]) 
             tmp_time_t <- tmp_data[order(tmp_data[,map_data$TIME], tmp_data[,map_data$ENDTIME]),]
-            tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$ENDTIME])), t = sort(unique(data_data[,map_data$ENDTIME]))[t], orig_time = tmp_orig_time, curr_time = tmp_curr_time_t, all_time = tmp_time_t, end_time = tmp_end_data <- sort(unique(data_data[,map_data$ENDTIME])))
+            tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$ENDTIME])), t = sort(unique(data_data[,map_data$ENDTIME]))[t], orig_time = tmp_orig_time, curr_time = tmp_curr_time_t, all_time = tmp_time_t, end_time = sort(unique(data_data[,map_data$ENDTIME])))
 
 ###            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data$DOSE1])[1])
 #            tmp_pct <-  aetpct(aet = tmp, dose = unique(tmp_df[,map_data$DOSE])[1])

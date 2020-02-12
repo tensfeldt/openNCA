@@ -952,7 +952,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             tmp_time_t <- tmp_data[order(tmp_data[,map_data$TIME], tmp_data[,map_data$ENDTIME]),]
             
             if(sort(unique(data_data[,map_data$ENDTIME]))[t] %in% tmp_df[,map_data$ENDTIME]){
-              tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$ENDTIME])), t = sort(unique(data_data[,map_data$ENDTIME]))[t], orig_time = tmp_orig_time, curr_time = tmp_curr_time_t, all_time = tmp_time_t, end_time = tmp_end_data <- sort(unique(data_data[,map_data$ENDTIME])))
+              tmp <- aet(amt = amt, time = na.omit(sort(tmp_df[,map_data$ENDTIME])), t = sort(unique(data_data[,map_data$ENDTIME]))[t], orig_time = tmp_orig_time, curr_time = tmp_curr_time_t, all_time = tmp_time_t, end_time = sort(unique(data_data[,map_data$ENDTIME])))
             } else {
               tmp <- NA
             }
@@ -1080,7 +1080,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             ae_pct_i[[d]] <- aepct(ae = ae_pct_ae, dose = ae_pct_dose)
           }
           if(comp_required[["AETAUi"]]){
-            aetau_i[[d]] <- aetau(aet = amt, time = na.omit(tmp_df[,map_data$TIME]), t = tau[[d]])
+            aetau_i[[d]] <- aetau(aet = amt, time = na.omit(tmp_df[,map_data$ENDTIME]), t = tau[[d]])
           }
           if(comp_required[["AETAUPTi"]]) {
             check_amt_output_unit <- ifelse("AMOUNTOUTPUTUNIT" %in% names(map_data), ifelse(!is.na(map_data$AMOUNTOUTPUTUNIT), TRUE, FALSE), FALSE)
