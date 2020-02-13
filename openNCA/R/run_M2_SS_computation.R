@@ -1,6 +1,6 @@
 #' Run M2 SS Computation
 #'
-#' This function will compute all the relevant parameters for a M2 model Stedy State (SS).\cr
+#' This function will compute all the relevant parameters for a M2 model Steady State (SS).\cr
 #'
 #' @details
 #' \strong{Methods:} You can use the following methods to calculate AUC: \cr
@@ -1751,8 +1751,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("AUCINFPi" %in% parameter_list && "CEST" %in% parameter_list && "AUCLASTi" %in% parameter_list && "TLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
 ###          if("AUCINFPi" %in% parameter_list && "AUCLASTi" %in% parameter_list && "KEL" %in% parameter_list) {
           if(comp_required[["AUCINFPi"]]) {
-              if(!exists('t_lasti[[d]])')) { t_lasti[[d]] <- tlast(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME]) }
-              aucinfpi[[d]] <- auc_inf_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, t_last = t_lasti[[d]])
+            if(!exists('t_lasti[[d]])')) { t_lasti[[d]] <- tlast(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME]) }
+            aucinfpi[[d]] <- auc_inf_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, t_last = t_lasti[[d]])
           }
           if(comp_required[["AUCINFPCi"]]){
             aucinfpi_c[[d]] <- auc_inf_pc(kel = kel_v[["KEL"]], aucinfp = aucinfpi[[d]], c0 = obs_c_0)
@@ -1799,9 +1799,14 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             tau[[d]] <- as.numeric(tau[[d]])         
 ###              cat('tau_di: ', tau_di, ' map_data[[tau_di]]: ', map_data[[tau_di]], 'tau[[', d, ']]: ', tau[[d]], '\n')
           }
+###          if("TOLDi" %in% parameter_list) {
+          if(comp_required[["TOLDi"]]) {
+            told[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
+            told[[d]] <- as.numeric(told[[d]])
+          }
 ###          if("AUCTAUi" %in% parameter_list) {
           if(comp_required[["AUCTAUi"]]) {
-            auctau[[d]] <- auc_tau(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, last_crit_factor = last_crit_factor, kel = kel_v, auclast = auclasti[[d]])
+            auctau[[d]] <- auc_tau(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, tau = told[[d]]+tau[[d]], orig_conc = orig_conc, orig_time = orig_time, last_crit_factor = last_crit_factor, kel = kel_v, auclast = auclasti[[d]])
           }
 ###          if("AUCTAUDNi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
           if(comp_required[["AUCTAUDNi"]]) {
@@ -1852,11 +1857,6 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          if("TAUi" %in% parameter_list) {
 ###              tau[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TAU",d))])][1]
 ###          }
-###          if("TOLDi" %in% parameter_list) {
-          if(comp_required[["TOLDi"]]) {
-            told[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
-            told[[d]] <- as.numeric(told[[d]])
-          }
 ###          if("CAVi" %in% parameter_list && "AUCTAUi" %in% parameter_list) {
           if(comp_required[["CAVi"]]) {
             ca_v[[d]] <- cav(auctau = auctau[[d]], tau = tau[[d]])

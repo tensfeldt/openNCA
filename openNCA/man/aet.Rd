@@ -6,7 +6,8 @@
 where t can have a numerical value.}
 \usage{
 aet(amt = NULL, time = NULL, t = NULL, orig_time = NULL,
-  all_time = NULL, end_time = NULL, returnNA = FALSE)
+  curr_time = NULL, all_time = NULL, end_time = NULL,
+  returnNA = FALSE)
 }
 \arguments{
 \item{amt}{The amount data (given in a vector form) either represents the volume or weight}

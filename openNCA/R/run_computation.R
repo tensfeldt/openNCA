@@ -24,7 +24,7 @@
 #'  \item email: \url{Thomas.G.Tensfeldt@pfizer.com}
 #' }
 #' @export
-run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset = NULL, return_merged_data = FALSE, optimize_kel_debug = FALSE){
+run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset = NULL, return_merged_data_in = FALSE, merged_data_in_debug = FALSE, optimize_kel_debug = FALSE){
   function_name <- as.list(sys.call())[[1]]
 
   if(is.null(data)){
@@ -636,7 +636,8 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
                       }
                     }
                   } else {
-                    #print(time)
+                    #print("tmp_time")
+                    #print(tmp_time)
 ### 2019-09-14/TGT/ need to match NOMINAL time for SS TOLD, TAU
 ###                      cat('i: ', i, ' told: ', told, ' tau: ', tau, ' tau+told: ', tau+told, ' nomtime: ', map_data$NOMTIME, ' acttime: ', map_data$ACTTIME, ' time: \n')
 ###                      print(time)
@@ -649,23 +650,18 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
                     #print(tau_i)
                     if(is.na(told_i) || is.na(tau_i)){
                       if(is.na(told_i)){
-                        if(casefold(map_data$ORGTIME)=='actual'){
-                          told <- tmp_time[told < tmp_time][1]
-                          told_i <- match(told, tmp_time)
-                          tau_i <- match((tau+told), tmp_time)
-                        } else {
-                          stop("10 Unable to generate dosing interval for Steady State data! TOLD value not found in the provided TIME data") 
-                        }
+                        told <- tmp_time[told < tmp_time][1]
+                        told_i <- match(told, tmp_time)
+                        tau_i <- match((tau+told), tmp_time)
+###                        cat('update 1: ', i, ' told: ', told, ' told_i: ', told_i, ' tau: ', tau, ' tau_i: ', tau_i, '\n')
                       }
                       if(is.na(tau_i)){
                         if(length(tmp_time[tmp_time < (tau+told)]) > 0){
                           tau <- tmp_time[tmp_time < (tau+told)][length(tmp_time[tmp_time < (tau+told)])]
-                          tau_i <- match((tau+told), tmp_time)
-                          #print('updated TAU')
-                          #print(tau)
-                          #print(tau_i)
+                          tau_i <- match(tau, tmp_time)
+###                          cat('update 2: ', i, ' told: ', told, ' told_i: ', told_i, ' tau: ', tau, ' tau_i: ', tau_i, '\n')
                         } else {
-                          stop("11 Unable to generate dosing interval for Steady State data! TAU value not found in the provided TIME data")
+                          stop("10 Unable to generate dosing interval for Steady State data! TAU value not found in the provided TIME data")
                         }
                       }
                     }
@@ -2402,7 +2398,11 @@ if(FALSE) {
 
   data_out <- NULL
   merged_data <- merged_data[order(merged_data[,map_data[[map_data$SDEID]]]),]
-
+  
+  if(isTRUE(return_merged_data_in)){
+    cat("No computation performed! Returning merged input data (based on 'data' and 'flag') as specified!", "\n")
+    return(merged_data)
+  }
 ### 2019-08-27/TGT/ following no longer needed with validate_timeconc_data being used  
 ###  if(map_data$TIME == 'NOMTIME'){
 ###    map_data$TIME <- "Nominal"
@@ -2521,7 +2521,7 @@ if(FALSE) {
   if(isTRUE(optimize_kel_debug)){
     results_list$optimize_kel_data <- data_out$optimize_kel_data
   }
-  if(isTRUE(return_merged_data)){
+  if(isTRUE(merged_data_in_debug)){
     results_list$merged_data_in <- merged_data
   }
 ###  print(head(results_list$data_out))

@@ -1,6 +1,6 @@
 #' Run M4 SS Computation
 #'
-#' This function will compute all the relevant parameters for a M4 model Stedy State (SS).\cr
+#' This function will compute all the relevant parameters for a M4 model Steady State (SS).\cr
 #'
 #' @details
 #' \strong{Linear Method} \cr
@@ -196,7 +196,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if(any(ss_dose %in% names(data_data))){
     di_col <- sum(ss_dose %in% names(data_data))
   } else {
-    stop("Unable to find dosing interval for Stedy State data! Please provide a valid 'data' parameter")
+    stop("Unable to find dosing interval for Steady State data! Please provide a valid 'data' parameter")
   }
 
   auc_list <- c("AURCT1_T2")
@@ -868,7 +868,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       mid_pt <- midpt(start_time = tmp_df[,map_data$TIME], end_time = tmp_df[,map_data$ENDTIME])
 ### 2019-09-03/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ###      amt <- at(conc = tmp_df[,map_data$CONC], amt = as.numeric(tmp_df[,map_data$AMOUNT]), time = tmp_df[,map_data[[map_data$TIME]]], amt_units = tmp_df[,map_data$AMOUNTU])
-      amt <- at(conc = tmp_df[,map_data$CONC], amt = as.numeric(tmp_df[,map_data$AMOUNT]), time = tmp_df[,map_data$TIME], amt_units = tmp_df[,map_data$AMOUNTU])
+      amt <- at(conc = tmp_df[,map_data$CONC], amt = as.numeric(tmp_df[,map_data$AMOUNT]), time = tmp_df[,map_data$ENDTIME], amt_units = tmp_df[,map_data$AMOUNTU])
 
       if(casefold(map_data$ORGTIME) == "nominal"){
         if(length(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])) > length(amt)){

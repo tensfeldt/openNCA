@@ -1,6 +1,6 @@
 #' Run M3 SS Computation
 #'
-#' This function will compute all the relevant parameters for a M3 model Stedy State (SS).\cr
+#' This function will compute all the relevant parameters for a M3 model Steady State (SS).\cr
 #'
 #' @details
 #' \strong{Methods:} You can use the following methods to calculate AUC: \cr
@@ -193,7 +193,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if(any(ss_dose %in% names(data_data))){
     di_col <- sum(ss_dose %in% names(data_data))
   } else {
-    stop("Unable to find dosing interval for Stedy State data! Please provide a valid 'data' parameter")
+    stop("Unable to find dosing interval for Steady State data! Please provide a valid 'data' parameter")
   }
 
   auc_list <- c("AUCT", "AUCTDN")

@@ -170,7 +170,7 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = N
     return(0)
   }
 ###
-###cat('auc_tau.R: tau: ', tau, ' time: ', time, ' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
+###cat('auc_tau.R: tau: ', tau, ' time: ', time, ' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' tau: ', tau, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
   
   if(tau %in% time && time[length(time)] == tau){
     if(method == 1){

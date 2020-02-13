@@ -872,7 +872,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
 ### 2019-08-29/TGT/ remap map_data[[map_data$ENDTIME]] to map_data$ENDTIME
       mid_pt <- midpt(start_time = tmp_df[,map_data$TIME], end_time = tmp_df[,map_data$ENDTIME])
-      amt <- at(conc = tmp_df[,map_data$CONC], amt = as.numeric(tmp_df[,map_data$AMOUNT]), time = tmp_df[,map_data$TIME], amt_units = tmp_df[,map_data$AMOUNTU])
+      amt <- at(conc = tmp_df[,map_data$CONC], amt = as.numeric(tmp_df[,map_data$AMOUNT]), time = tmp_df[,map_data$ENDTIME], amt_units = tmp_df[,map_data$AMOUNTU])
       #if(length(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])) > length(tmp_df[,map_data$TIME])){
       #  tmp_amt <- data.frame(amt = amt, time = tmp_df[,map_data$TIME])
       #  amt <- as.numeric(unlist(lapply(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len]), function(x){
@@ -894,7 +894,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       } else if(casefold(map_data$ORGTIME) == "actual"){
         if(length(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])) > length(amt)){
           tmp_amt <- data.frame(amt = amt, time = tmp_df[,map_data$ENDTIME])
-          amt <- as.numeric(unlist(lapply(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len]), function(x){ return(ifelse(!(x %in% tmp_df[,map_data$ENDTIME]), NA, tmp_amt[tmp_amt$time == x,"amt"])) })))
+          amt <- as.numeric(unlist(lapply(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len]), function(x){ print(x);print(!(x %in% tmp_df[,map_data$ENDTIME]));return(ifelse(!(x %in% tmp_df[,map_data$ENDTIME]), NA, tmp_amt[tmp_amt$time == x,"amt"])) })))
         }
       }
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME

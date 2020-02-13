@@ -118,19 +118,47 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, curr_time=NUL
   if(!(is.numeric(amt) && is.vector(amt))){
     stop("Error in aet: 'amt' is not a numeric vector")
   }
+  # print("amt")
+  # print(amt)
+  # print("time")
+  # print(time)
+  # print("t")
+  # print(t)
+  # print("orig_time")
+  # print(orig_time)
+  # print("curr_time")
+  # print(curr_time)
+  # print("all_time")
+  # print(all_time)
+  # print("end_time")
+  # print(end_time)
   
   amt_check <- FALSE
   if(!is.null(all_time) && !is.null(orig_time)){
     tmp_all_rows <- as.logical(apply(all_time, 1, function(x) { any(apply(orig_time, 1, function(y){ x %in% y })) }))
+    # print("tmp_all_rows")
+    # print(tmp_all_rows)
     tmp_end_time <- all_time[tmp_all_rows,][,2]
+    # print("tmp_end_time")
+    # print(tmp_end_time)
     tmp_rows <- end_time %in% tmp_end_time
-    tmp_time <- tmp_rows
+    # print("tmp_rows")
+    # print(tmp_rows)
+    tmp_time <- end_time[tmp_rows] %in% t
+    # print("tmp_time")
+    # print(tmp_time)
     tmp_lim <- seq(1:length(tmp_time))[tmp_time]
+    # print("tmp_lim")
+    # print(tmp_lim)
     if(length(tmp_lim) > 0){
-      tmp_lin <- max(tmp_lim)
+      tmp_lim <- max(tmp_lim)
       tmp_time[1:tmp_lim] <- TRUE
     }
+    # print("tmp_lim final")
+    # print(tmp_lim)
     amt_check <- ifelse(any(tmp_rows), ifelse(all(is.na(amt[tmp_rows])), TRUE, FALSE), TRUE)
+    # print("amt_check")
+    # print(amt_check)
   }
     
   if(isTRUE(amt_check)) {
@@ -153,6 +181,8 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, curr_time=NUL
       } else {
         if(any(tmp_time)) {
           tmp_amt <- amt[tmp_time]
+          # print("tmp_amt")
+          # print(tmp_amt)
           if(is.logical(returnNA) && isTRUE(returnNA)){
             a_e <- sum(tmp_amt)
           } else {
