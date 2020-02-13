@@ -118,54 +118,44 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, curr_time=NUL
   if(!(is.numeric(amt) && is.vector(amt))){
     stop("Error in aet: 'amt' is not a numeric vector")
   }
-  # print("amt")
-  # print(amt)
-  # print("time")
-  # print(time)
-  # print("t")
-  # print(t)
-  # print("orig_time")
-  # print(orig_time)
-  # print("curr_time")
-  # print(curr_time)
-  # print("all_time")
-  # print(all_time)
-  # print("end_time")
-  # print(end_time)
   
   amt_check <- FALSE
-  if(!is.null(all_time) && !is.null(orig_time)){
-    tmp_all_rows <- as.logical(apply(all_time, 1, function(x) { any(apply(orig_time, 1, function(y){ x %in% y })) }))
-    # print("tmp_all_rows")
-    # print(tmp_all_rows)
+  if(!is.null(all_time) && !is.null(curr_time)){
+    tmp_all_rows_tmp <- apply(all_time, 1, function(x) { 
+      tmp <- NA
+      apply(curr_time, 1, function(y) {
+        test_match <- TRUE
+        for(i in 1:length(all_time)){
+          if(x[i] != y[i]){
+            test_match <- FALSE
+            return(test_match)
+          }
+        }
+        if(isTRUE(test_match)){
+          return(test_match)
+        }
+      })
+    })
+    tmp_all_rows <- c()
+    for(j in 1:ncol(tmp_all_rows_tmp)){
+      tmp_all_rows <- c(tmp_all_rows, any(tmp_all_rows_tmp[,j]))
+    }
     tmp_end_time <- all_time[tmp_all_rows,][,2]
-    # print("tmp_end_time")
-    # print(tmp_end_time)
     tmp_rows <- end_time %in% tmp_end_time
-    # print("tmp_rows")
-    # print(tmp_rows)
     tmp_time <- end_time[tmp_rows] %in% t
-    # print("tmp_time")
-    # print(tmp_time)
-    tmp_lim <- seq(1:length(tmp_time))[tmp_time]
-    # print("tmp_lim")
-    # print(tmp_lim)
+    tmp_lim <- seq(1:length(end_time[tmp_rows]))[tmp_time]
     if(length(tmp_lim) > 0){
       tmp_lim <- max(tmp_lim)
       tmp_time[1:tmp_lim] <- TRUE
     }
-    # print("tmp_lim final")
-    # print(tmp_lim)
     amt_check <- ifelse(any(tmp_rows), ifelse(all(is.na(amt[tmp_rows])), TRUE, FALSE), TRUE)
-    # print("amt_check")
-    # print(amt_check)
   }
     
   if(isTRUE(amt_check)) {
     a_e <- NA
   } else {
     if(t %in% time) {
-      if(is.null(all_time) || is.null(orig_time)){
+      if(is.null(all_time) || is.null(curr_time)){
         tmp_time <- time[time <= t]
         if(length(tmp_time) > 0) {
           tmp_amt <- amt[1:length(tmp_time)]
@@ -180,29 +170,19 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, curr_time=NUL
         }
       } else {
         if(any(tmp_time)) {
-          tmp_amt <- amt[tmp_time]
-          # print("tmp_amt")
-          # print(tmp_amt)
+          tmp_amt <- amt[tmp_rows][tmp_time]
           if(is.logical(returnNA) && isTRUE(returnNA)){
             a_e <- sum(tmp_amt)
           } else {
             a_e <- sum(tmp_amt, na.rm = TRUE)
-            a_e <- ifelse(a_e == 0, NA, a_e)
+            #a_e <- ifelse(a_e == 0, NA, a_e)
           }
         } else {
-          if(is.logical(returnNA) && isTRUE(returnNA)){
-            a_e <- NA
-          } else {
-            stop("Error in aet: value 't' cannot be used to subset 'time' vector") 
-          }
+          a_e <- NA
         }
       }
     } else {
-      if(is.logical(returnNA) && !isTRUE(returnNA)){
-        stop("Error in aet: value 't' is not present in 'time' vector") 
-      } else {
-        a_e <- NA
-      }
+      a_e <- NA
     }
   }
   return(a_e)

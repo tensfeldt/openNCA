@@ -1320,9 +1320,9 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
       
       tmp_df <- data_data[data_data[,map_data$SDEID] == unique(data_data[,map_data$SDEID])[i],]
-      tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
+      tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
 ###
 ###      cat('map_data$TIME: ', map_data$TIME, ' map_data$NOMTIME: ', map_data$NOMTIME, ' map_data$ACTTIME: ', map_data$ACTTIME, ' map_data$CONC: ', map_data$CONC, '\n')
 ###      vlist <- c("PKDATAROWID", "SDEID", "SUBJID", map_data$TIME, map_data$NOMTIME, map_data$ACTTIME, map_data$CONC, map_data$TOLD1, map_data$TAU1, map_data$TOLD2, map_data$TAU2, "DI1F", "DI2F")

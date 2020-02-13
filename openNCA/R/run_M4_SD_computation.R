@@ -755,12 +755,10 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
     tryCatch({
       tmp_df <- data_data[data_data[,map_data$SDEID] == unique(data_data[,map_data$SDEID])[i],]
-      tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
-      if("ENDTIME" %in% map_data){
-        tmp_df[,map_data$ENDTIME] <- as.numeric(tmp_df[,map_data$ENDTIME])
-      }
+      tmp_df[,map_data$ENDTIME] <- as.numeric(tmp_df[,map_data$ENDTIME])
+      tmp_df <- tmp_df[order(tmp_df[,map_data$ENDTIME]),]
 
       if("FLGEXSDE" %in% names(map_data)) {
         if(map_data$FLGEXSDE %in% names(data_data)){
@@ -815,7 +813,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       } else {
         emesis_flag <- NULL
       }
-      test_df <- tmp_df[,c(map_data$CONC, map_data$TIME)]
+      test_df <- tmp_df[,c(map_data$CONC, map_data$TIME, map_data$ENDTIME)]
       if(any(duplicated(test_df))){
         tmp_df <- tmp_df[!duplicated(test_df),]
         if(!is.null(ex_flag)){
@@ -832,7 +830,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         warning(paste0("Removing duplicate CONC and TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
       }
-      test_df_2 <- tmp_df[,c(map_data$TIME)]
+      test_df_2 <- tmp_df[,c(map_data$TIME, map_data$ENDTIME)]
       if(any(duplicated(test_df_2))){
         tmp_df <- tmp_df[!duplicated(test_df_2),]
         if(!is.null(ex_flag)){
@@ -956,7 +954,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###        if(parameter_required("^AE$", parameter_list) || parameter_required(dependent_parameters("^AE$"), parameter_list)) {
         if(comp_required[["AE"]]) {
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
-          a_e <- ae(amt = amt, time = tmp_df[,map_data$TIME], orig_time = sort(unique(data_data[,map_data$TIME])))
+          a_e <- ae(amt = amt, time = tmp_df[,map_data$ENDTIME], orig_time = sort(unique(data_data[,map_data$ENDTIME])))
 ###          cat("a_e: ", a_e, "\n")
         }
 ###        if("AEPCT" %in% parameter_list && "AE" %in% parameter_list) {
@@ -1008,7 +1006,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 ###          cat('length(unique(tmp_df[,map_data$TIME])): ', length(unique(tmp_df[,map_data$TIME])), '\n')
           for(t in 1:length(sort(unique(data_data[,map_data$ENDTIME]))[1:aet_len])){
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME
-            tmp_curr_data <- unique(tmp_df[,c(map_data$TIME, map_data$ENDTIME)]) 
+            tmp_curr_data <- unique(tmp_df[,c(map_data$TIME, map_data$ENDTIME)])
             tmp_curr_time_t <- tmp_curr_data[order(tmp_curr_data[,map_data$TIME], tmp_curr_data[,map_data$ENDTIME]),]
             tmp_orig_time <- tmp_curr_time_t[tmp_curr_time_t[,map_data$ENDTIME] %in% sort(unique(data_data[,map_data$ENDTIME]))[t],]
             tmp_data <- unique(data_data[,c(map_data$TIME, map_data$ENDTIME)]) 

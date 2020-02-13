@@ -1241,9 +1241,9 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
       ### 2019-08-28/TGT/ Reposition orig_time, orig_conc assignment here rather than within optimize_kel evaluation
       tmp_df <- data_data[data_data[,map_data$SDEID] == unique(data_data[,map_data$SDEID])[i],]
-      tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
+      tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       
       if("FLGEXSDE" %in% names(map_data)) {
         if(map_data$FLGEXSDE %in% names(data_data)){
