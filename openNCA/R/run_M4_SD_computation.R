@@ -891,8 +891,8 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       #}
       if(casefold(map_data$ORGTIME) == "nominal"){
         if(length(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])) > length(amt)){
-          tmp_amt <- data.frame(amt = amt, time = tmp_df[,map_data$TIME])
-          amt <- as.numeric(unlist(lapply(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len]), function(x){ return(ifelse(!(x %in% tmp_df[,map_data$TIME]), NA, tmp_amt[tmp_amt$time == x,"amt"])) })))
+          tmp_amt <- data.frame(amt = amt, time = tmp_df[,map_data$ENDTIME])
+          amt <- as.numeric(unlist(lapply(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len]), function(x){ return(ifelse(!(x %in% tmp_df[,map_data$ENDTIME]), NA, tmp_amt[tmp_amt$time == x,"amt"])) })))
         }
       } else if(casefold(map_data$ORGTIME) == "actual"){
         if(length(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])) > length(amt)){
