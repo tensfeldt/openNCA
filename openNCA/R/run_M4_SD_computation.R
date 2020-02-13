@@ -758,7 +758,10 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
-    
+      if("ENDTIME" %in% map_data){
+        tmp_df[,map_data$ENDTIME] <- as.numeric(tmp_df[,map_data$ENDTIME])
+      }
+
       if("FLGEXSDE" %in% names(map_data)) {
         if(map_data$FLGEXSDE %in% names(data_data)){
           ex_flag <- as.numeric(tmp_df[,map_data$FLGEXSDE])
@@ -894,7 +897,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       } else if(casefold(map_data$ORGTIME) == "actual"){
         if(length(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len])) > length(amt)){
           tmp_amt <- data.frame(amt = amt, time = tmp_df[,map_data$ENDTIME])
-          amt <- as.numeric(unlist(lapply(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len]), function(x){ print(x);print(!(x %in% tmp_df[,map_data$ENDTIME]));return(ifelse(!(x %in% tmp_df[,map_data$ENDTIME]), NA, tmp_amt[tmp_amt$time == x,"amt"])) })))
+          amt <- as.numeric(unlist(lapply(sort(unique(data_data[,map_data$ENDTIME])[1:aet_len]), function(x){ return(ifelse(!(x %in% tmp_df[,map_data$ENDTIME]), NA, tmp_amt[tmp_amt$time == x,"amt"])) })))
         }
       }
 ### 2019-08-29/TGT/ remap map_data[[map_data$TIME]] to map_data$TIME

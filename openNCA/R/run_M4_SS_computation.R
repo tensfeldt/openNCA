@@ -761,6 +761,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
+      if("ENDTIME" %in% map_data){
+        tmp_df[,map_data$ENDTIME] <- as.numeric(tmp_df[,map_data$ENDTIME])
+      }
       
       if("FLGEXSDE" %in% names(map_data)) {
         if(map_data$FLGEXSDE %in% names(data_data)){
