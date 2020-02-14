@@ -137,8 +137,12 @@ aet <- function(amt = NULL, time = NULL, t = NULL, orig_time=NULL, curr_time=NUL
       })
     })
     tmp_all_rows <- c()
-    for(j in 1:ncol(tmp_all_rows_tmp)){
-      tmp_all_rows <- c(tmp_all_rows, any(tmp_all_rows_tmp[,j]))
+    if(is.matrix(tmp_all_rows_tmp)){
+      for(j in 1:ncol(tmp_all_rows_tmp)){
+        tmp_all_rows <- c(tmp_all_rows, any(tmp_all_rows_tmp[,j]))
+      }
+    } else {
+      tmp_all_rows <- tmp_all_rows_tmp
     }
     tmp_end_time <- all_time[tmp_all_rows,][,2]
     tmp_rows <- end_time %in% tmp_end_time
