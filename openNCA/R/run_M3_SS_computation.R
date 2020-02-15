@@ -911,6 +911,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       warning("Flag 'FLGACCEPTTAU' cannot be computed if 'TAUi' is not provided")
     }
   } else {
+    last_crit_factor <- NA
     if(disp_required[["FLGACCEPTTAU"]] && !("LASTTIMEACCEPTCRIT" %in% names(map_data))){
       warning("Flag 'FLGACCEPTTAU' cannot be computed if 'LASTTIMEACCEPTCRIT' is not provided")
     }
