@@ -121,7 +121,7 @@ mrt_evif_p <- function(conc = NULL, time = NULL, method = 1, parameter = "SD", k
     } else {
 ### 2019-09-04/TGT/ change auc_tau to auctau, replace mrtevifo with mrtevifp
 ###      mrtevifo <- ((aumctau + tau)*(auc_infp - auctau))/auc_tau
-      mrtevifp <- ((aumctau + tau)*(aucinfp - auctau))/auctau
+      mrtevifp <- (aumctau + tau *(aucinfp - auctau))/auctau
     }
   }
 

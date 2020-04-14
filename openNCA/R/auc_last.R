@@ -182,10 +182,6 @@ auc_last <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, t_last
 
 ### 2019-09-11/TGT/ return NA if t_last is NA
   if(is.na(t_last)) { return(NA) }
-  
-  if(!(t_last %in% time)){
-    stop("Error in auc_last: 't_last' value is not in the 'time' data")
-  }
 
   conc <- conc[time <= t_last]
   time <- time[time <= t_last]

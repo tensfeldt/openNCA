@@ -6,7 +6,8 @@
 \usage{
 run_M1_SD_computation(data = NULL, map = NULL, method = 1,
   model_regex = "^M1(SD)*?$", parameter_list = list(),
-  return_list = list(), optimize_kel_debug = FALSE)
+  return_list = list(), raw_results_debug = FALSE,
+  optimize_kel_debug = FALSE)
 }
 \arguments{
 \item{data}{The dataframe that contains the raw data}
@@ -89,7 +90,7 @@ The following are the functions that this function uses to generate parameters: 
 }
 \section{Note}{
 
-By default all the return list options are selected and calculated if 'parameter_list' is not specified. Please refer to \code{\link{mct_template}}
+By default all the return list options are selected and calculated if 'parameter_list' is not specified. Please refer to MCT
 to get more calrification on how to specify which parameters to calculate to this function if you wish to subset the default caculated parameters. \cr
 By default 'display_list' argument is empty, which means that this function will return all caculated parameters specifed by the 'parameter_list' argument.
 Only specfiy a list of parameters to the 'display_list' if you want to subset the calculated parameters returned as a result of this function. \cr

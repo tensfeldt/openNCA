@@ -134,7 +134,7 @@ mrt_ivif_p <- function(conc = NULL, time = NULL, method = 1, model = "M2", param
       if(aucinfp <= 0 || auctau < 0 || aumctau < 0 || is.na(aucinfp) || is.na(auctau) || is.na(aumctau)){
         mrtivifp <- NA
       } else {
-        mrtivifp <- ((aumctau + tau)*(aucinfp - auctau))/auctau
+        mrtivifp <- (aumctau + tau * (aucinfp - auctau))/auctau
       }
     }
   } else if(model == "M3" || model == "m3") {
@@ -175,7 +175,7 @@ mrt_ivif_p <- function(conc = NULL, time = NULL, method = 1, model = "M2", param
       if(aucinfp <= 0 || auctau < 0 || aumctau < 0 || is.na(aucinfp) || is.na(auctau) || is.na(aumctau)){
         mrtivifp <- NA
       } else {
-        mrtivifp <- (((aumctau + tau)*(aucinfp - auctau))/auctau) - dof/2
+        mrtivifp <- ((aumctau + tau * (aucinfp - auctau))/auctau) - (dof/2)
       }
     }
   }

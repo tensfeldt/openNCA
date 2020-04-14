@@ -55,14 +55,18 @@ aumc_lin_log <- function(conc = NULL, time = NULL, exflag = NULL, t_max = NULL){
 
     if(!is.na(t_max)){
       for(i in 1:(nrow(tmp)-1)){
-        if(tmp$time[i+1] <= t_max || tmp$conc[i] == 0 || tmp$conc[i+1] == 0 || tmp$conc[i] == tmp$conc[i+1]){
-          aumc_df[i] <- (((tmp$conc[i]*tmp$time[i]) + (tmp$conc[i+1]*tmp$time[i+1]))/2)*(tmp$time[i+1]-tmp$time[i])
+        if(!is.na(tmp$time[i]) && !is.na(tmp$time[i+1]) && !is.na(tmp$conc[i]) && !is.na(tmp$conc[i+1])){
+          if(tmp$time[i+1] <= t_max || tmp$conc[i] == 0 || tmp$conc[i+1] == 0 || tmp$conc[i] == tmp$conc[i+1]){
+            aumc_df[i] <- (((tmp$conc[i]*tmp$time[i]) + (tmp$conc[i+1]*tmp$time[i+1]))/2)*(tmp$time[i+1]-tmp$time[i])
+          } else {
+            tmp_ln <- tmp$conc[i+1]/tmp$conc[i]
+            #print(paste0("tmp_ln:", tmp_ln))
+            aumc_df_p1 <- (((tmp$conc[i+1]*tmp$time[i+1]) - (tmp$conc[i]*tmp$time[i]))/log(tmp_ln))*(tmp$time[i+1]-tmp$time[i])
+            aumc_df_p2 <- ((tmp$time[i+1]-tmp$time[i])*(tmp$time[i+1]-tmp$time[i]))*((tmp$conc[i+1] - tmp$conc[i])/((log(tmp_ln)*log(tmp_ln))))
+            aumc_df[i] <- aumc_df_p1 - aumc_df_p2
+          }
         } else {
-          tmp_ln <- tmp$conc[i+1]/tmp$conc[i]
-          #print(paste0("tmp_ln:", tmp_ln))
-          aumc_df_p1 <- (((tmp$conc[i+1]*tmp$time[i+1]) - (tmp$conc[i]*tmp$time[i]))/log(tmp_ln))*(tmp$time[i+1]-tmp$time[i])
-          aumc_df_p2 <- ((tmp$time[i+1]-tmp$time[i])*(tmp$time[i+1]-tmp$time[i]))*((tmp$conc[i+1] - tmp$conc[i])/((log(tmp_ln)*log(tmp_ln))))
-          aumc_df[i] <- aumc_df_p1 - aumc_df_p2
+          aumc_df[i] <- NA
         }
       }
       aumc_df <- as.numeric(aumc_df)

@@ -5,7 +5,7 @@
 \title{Cumulative amount of drug recovered unchanged in the urine during a dosing interval i post dose.
 i refers to the value of NDOSEI.}
 \usage{
-aetau(aet = NULL, time = NULL, t = NULL)
+aetau(aet = NULL, time = NULL, t = NULL, returnNA = TRUE)
 }
 \arguments{
 \item{aet}{Cumulative (running sum) amount of drug}

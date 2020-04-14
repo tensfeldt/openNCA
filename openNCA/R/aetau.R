@@ -105,7 +105,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-aetau <- function(aet = NULL, time = NULL, t = NULL){
+aetau <- function(aet = NULL, time = NULL, t = NULL, returnNA = TRUE){
   if(is.null(aet) && is.null(time) && is.null(t)) {
     stop("Error in aetau: 'aet' and 'time' vectors and value 't' are NULL")
   } else if(is.null(aet) && is.null(time)) {
@@ -130,7 +130,7 @@ aetau <- function(aet = NULL, time = NULL, t = NULL){
     stop("Error in aetau: 'amt' is not a numeric vector")
   }
 
-  if(any(is.na(aet))) {
+  if(isTRUE(returnNA) & any(is.na(aet))) {
     ae_tau <- NA
   } else {
     tmp_time <- time[time <= t]

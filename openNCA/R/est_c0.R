@@ -98,10 +98,14 @@ est_c0 <- function(conc = NULL, time = NULL, npts=2, verbose=FALSE, returnall=TR
     if(!all(is.na(x)) && !all(is.na(y))){
       m <- lm(log(y)~x)
       slope <- coef(m)["x"]
-      intercept <- coef(m)["(Intercept)"]
-      x <- range(x)
-      y <- exp(intercept + slope*x)
-      est_c0 <- exp(intercept)
+      if(slope < 0){
+        intercept <- coef(m)["(Intercept)"]
+        x <- range(x)
+        y <- exp(intercept + slope*x)
+        est_c0 <- exp(intercept)
+      } else {
+        est_c0 <- y[1]
+      }
     } else {
       est_c0 <- NA
     }

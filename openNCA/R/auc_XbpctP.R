@@ -91,7 +91,7 @@
 #'  \item email: \url{thomas.g.tensfeldt@pfizer.com}
 #' }
 #' @export
-auc_XbpctP <- function(conc = NULL, time = NULL, method = 2, kelflag = NULL, aucflag = NULL){
+auc_XbpctP <- function(conc = NULL, time = NULL, method = 2, kelflag = NULL, aucflag = NULL, auc_infp = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in auc_XpctP: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -126,10 +126,10 @@ auc_XbpctP <- function(conc = NULL, time = NULL, method = 2, kelflag = NULL, auc
     xdf <- xdf[order(xdf$time),]
     k <- (xdf$conc>0 | xdf$time==0)
     xdf <- xdf[k,][1:2,]
-    auct0_t1 <- auc_t1_t2(conc = xdf$conc, time=xdf$time, t1=xdf$time[1], t2=xdf$time[2], method=2)
+    auct0_t1 <- auc_t1_t2(conc = xdf$conc, time=xdf$time, t1=xdf$time[1], t2=xdf$time[2], method=method)
   }
-  if(!is.na(auct0_t1)) {
-      auc_infp <- auc_inf_p(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag)
+  if(is.null(auc_infp)) {
+    auc_infp <- auc_inf_p(conc = conc, time = time, method = method, kelflag = kelflag, aucflag = aucflag)
   }
   if(!is.na(auct0_t1) && !is.na(auc_infp) && auc_infp!=0) {
     auc_xbpctp <- 100*(auct0_t1)/auc_infp

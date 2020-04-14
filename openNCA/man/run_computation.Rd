@@ -6,7 +6,9 @@
 \usage{
 run_computation(data = NULL, map = NULL, flag = NULL,
   parameterset = NULL, return_merged_data_in = FALSE,
-  merged_data_in_debug = FALSE, optimize_kel_debug = FALSE)
+  return_partitioned_data_in = FALSE, merged_data_in_debug = FALSE,
+  partitioned_data_in_debug = FALSE, raw_results_debug = FALSE,
+  optimize_kel_debug = FALSE)
 }
 \arguments{
 \item{data}{The dataframe that contains the raw data}

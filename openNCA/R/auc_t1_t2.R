@@ -161,7 +161,7 @@ auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1
       return(0)
     }
   }
-  if(is.na(t_max) && method==1) { # 2019-09-11/TGT/ - update 2019-09-25/TGT/ updated to also consider method
+  if((!is.null(t_max) && is.na(t_max)) && method==1) { # 2019-09-11/TGT/ - update 2019-09-25/TGT/ updated to also consider method
     return(NA)
   }
   if(is.null(t1) || is.na(t1)){
@@ -170,9 +170,7 @@ auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1
   if(is.null(t2) || is.na(t2)){
     return(NA)
   }
-  if(!is.null(t_max) && !(t_max %in% time)){
-    stop("Error in auc_t1_t2: 't_max' value is not in the 'time' data")
-  }
+
   if(as.numeric(t1) >= as.numeric(t2)){
     stop("Error in auc_t1_t2: 't1' value is greater than 't2' value")
   }
@@ -217,7 +215,7 @@ auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1
   if(length(time) != length(conc)){
     stop("Error in auc_t1_t2: length of 'time' and 'conc' vectors are not equal")
   }
-  
+
   if(method == 1){
     return(auc_lin_log(conc = conc, time = time, exflag = exflag, t_max = t_max, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time, includeNA = includeNA))
   } else if(method == 2){

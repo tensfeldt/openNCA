@@ -19,15 +19,18 @@
 #' 
 #! @export
 auc_lin_up_log_down <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL, extrapolate = NULL, model = NULL, dosing_type = NULL, told = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL, includeNA = FALSE){
+  interpolate_check <- ifelse(is.null(interpolate), FALSE, isTRUE(interpolate))
+  extrapolate_check <- ifelse(is.null(extrapolate), FALSE, isTRUE(extrapolate))
+  
   if(is.null(conc) && is.null(time)){
     stop("Error in auc_lin_up_log_down: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
     stop("Error in auc_lin_up_log_down: 'conc' vector is NULL")
   } else if(is.null(time)) {
     stop("Error in auc_lin_up_log_down: 'time' vectors is NULL")
-  } else if(all(is.na(time))) { # 2019-09-25/TGT/
+  } else if(all(is.na(time)) && !isTRUE(interpolate_check) && !isTRUE(extrapolate_check)) { # 2019-09-25/TGT/
       return(NA)
-  } else if(all(is.na(conc))) { # 2019-09-25/TGT/
+  } else if(all(is.na(conc)) && !isTRUE(interpolate_check) && !isTRUE(extrapolate_check)) { # 2019-09-25/TGT/
       return(NA)
   }
 
@@ -94,8 +97,6 @@ auc_lin_up_log_down <- function(conc = NULL, time = NULL, exflag = NULL, interpo
     conc <- conc[exflag]
   }
   
-  interpolate_check <- ifelse(is.null(interpolate), FALSE, isTRUE(interpolate))
-  extrapolate_check <- ifelse(is.null(extrapolate), FALSE, isTRUE(extrapolate))
   if((!isTRUE(interpolate_check) && !isTRUE(extrapolate_check)) && !isTRUE(includeNA)){
     time <- time[!is.na(conc)]
     conc <- conc[!is.na(conc)]  
@@ -107,7 +108,7 @@ auc_lin_up_log_down <- function(conc = NULL, time = NULL, exflag = NULL, interpo
 ##  conc <- conc[!is.na(conc)]
 
   tmp <- data.frame(time, conc)
-  if(nrow(tmp) < 2){
+  if(nrow(tmp) < 2 && !isTRUE(interpolate_check) && !isTRUE(extrapolate_check)){
     auc <- NA
     return(auc)
   } else {

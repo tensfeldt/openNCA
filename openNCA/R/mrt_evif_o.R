@@ -123,7 +123,7 @@ mrt_evif_o <- function(conc = NULL, time = NULL, method = 1, parameter = "SD", k
     } else {
 ### 2019-09-04/TGT/ auc_tau changed to auctau
 ###      mrtevifo <- ((aumctau + tau)*(auc_info - auctau))/auc_tau
-      mrtevifo <- ((aumctau + tau)*(aucinfo - auctau))/auctau
+      mrtevifo <- (aumctau + tau *(aucinfo - auctau))/auctau
     }
   }
 

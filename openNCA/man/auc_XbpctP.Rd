@@ -5,7 +5,7 @@
 \title{Percentage of AUCINFP obtained by back extrapolation from the first non-zero concentration time point}
 \usage{
 auc_XbpctP(conc = NULL, time = NULL, method = 2, kelflag = NULL,
-  aucflag = NULL)
+  aucflag = NULL, auc_infp = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

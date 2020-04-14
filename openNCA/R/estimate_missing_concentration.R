@@ -26,15 +26,14 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
     orig_conc <- orig_conc[-sel_idx]
     orig_time <- orig_time[-sel_idx] 
   }
-  
   tmp <- data.frame("CONC" = conc, "TIME" = time, "INT_EXT" = NA)
-  
+
   for(i in 1:(nrow(tmp)-1)){
 ##    2019-11-08/RD Added for Interpolation for AUC Start time has no data
 ##        
     if(is.na(conc[1]) && i == 1){
       if(length(orig_time) > 0 && length(orig_conc) > 0){
-        if(time[1] <= orig_time[1]){
+        if(isTRUE(time[1] <= orig_time[1])){
           if(model == "M2"){
             k <- (log(na.omit(tmp)[["conc"]][2])-log(na.omit(tmp)[["conc"]][2]))/(na.omit(tmp)[["time"]][2]-na.omit(tmp)[["time"]][1])
             if(k >= 0){
@@ -43,17 +42,13 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
               conc_s_tmp <- exp(-1*k*na.omit(tmp)[["time"]][1]) * na.omit(tmp)[["conc"]][1] 
             }
           } else {
-            if(model != "M4"){
-              if(dosing_type == "SD"){
-                conc_s_tmp <- 0
-              } else if(dosing_type == "SS"){
-                conc_s_tmp <- cmin(conc = conc, time = time)
-              } 
-            } else {
-              conc_s_tmp <- NULL
+            if(dosing_type == "SD"){
+              conc_s_tmp <- 0
+            } else if(dosing_type == "SS"){
+              conc_s_tmp <- cmin(conc = conc, time = time)
             }
           }
-          if(time[1] == told){
+          if(isTRUE(time[1] == told)){
             if(isTRUE(extrapolate) && !is.null(conc_s_tmp)){
               conc[1] <- conc_s_tmp
               tmp$INT_EXT[1] <- "EXT" 
@@ -71,7 +66,7 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
               }
             }
           }
-        } else if((orig_time[1] < time[1]) && (time[1] < orig_time[length(orig_time)])){
+        } else if(isTRUE((orig_time[1] < time[1]) && (time[1] < orig_time[length(orig_time)]))){
           if(isTRUE(interpolate)){
             idx <- which(orig_time < time[1])
             idx <- idx[length(idx)]
@@ -84,7 +79,7 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
               tmp$INT_EXT[1] <- "INT"
             }
           }
-        } else if(time[1] >= orig_time[length(orig_time)]){
+        } else if(isTRUE(time[1] >= orig_time[length(orig_time)])){
           if(!is.na(kel) && !is.null(kel)){
             if(!is.na(kel[["KEL"]])){
               if(isTRUE(extrapolate)){
@@ -105,11 +100,29 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
           }
         }
       }
+      if(isTRUE(is.na(conc[nrow(tmp)]) && (i+1) == nrow(tmp))){
+        if(length(orig_time) > 0 && length(orig_conc) > 0){
+          if(isTRUE((orig_time[1] < time[nrow(tmp)]) && (time[nrow(tmp)] < orig_time[length(orig_time)]))){
+            if(isTRUE(interpolate)){
+              idx <- which(orig_time < time[nrow(tmp)])
+              idx <- idx[length(idx)]
+              if(length(idx) > 0){
+                if(auc_method == "LIN"){
+                  conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                } else if(auc_method == "LOG"){
+                  conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                }
+                tmp$INT_EXT[nrow(tmp)] <- "INT"
+              }
+            }
+          }
+        }
+      }
 ##    2019-11-08/RD Added for Interpolation for AUC End time has no data
 ##  
-    } else if(is.na(conc[nrow(tmp)]) && (i+1) == nrow(tmp)){
+    } else if(isTRUE(is.na(conc[nrow(tmp)]) && (i+1) == nrow(tmp))){
       if(length(orig_time) > 0 && length(orig_conc) > 0){
-        if((orig_time[1] < time[nrow(tmp)]) && (time[nrow(tmp)] < orig_time[length(orig_time)])){
+        if(isTRUE((orig_time[1] < time[nrow(tmp)]) && (time[nrow(tmp)] < orig_time[length(orig_time)]))){
           if(isTRUE(interpolate)){
             idx <- which(orig_time < time[nrow(tmp)])
             idx <- idx[length(idx)]
@@ -133,7 +146,7 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
               if(isTRUE(extrapolate)){
                 min_lim <- orig_time[length(orig_time)] - (orig_time[length(orig_time)] * 0.05)
                 max_lim <- (orig_time[length(orig_time)] * 0.05) + orig_time[length(orig_time)]
-                if(min_lim < time[nrow(tmp)] && time[nrow(tmp)] < max_lim){
+                if(isTRUE(min_lim < time[nrow(tmp)] && time[nrow(tmp)] < max_lim)){
                   conc[nrow(tmp)] <- orig_conc[length(orig_conc)]
                   tmp$INT_EXT[nrow(tmp)] <- "EXT"
                 } else {
@@ -146,7 +159,7 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
             if(isTRUE(extrapolate)){
               min_lim <- orig_time[length(orig_time)] - (orig_time[length(orig_time)] * 0.05)
               max_lim <- (orig_time[length(orig_time)] * 0.05) + orig_time[length(orig_time)]
-              if(min_lim < time[nrow(tmp)] && time[nrow(tmp)] < max_lim){
+              if(isTRUE(min_lim < time[nrow(tmp)] && time[nrow(tmp)] < max_lim)){
                 conc[nrow(tmp)] <- orig_conc[length(orig_conc)]
                 tmp$INT_EXT[nrow(tmp)] <- "EXT"
               } else {

@@ -258,7 +258,7 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = N
       time_min_range <- ifelse(!is.null(last_crit_factor), as.numeric(last_crit_factor) * tau, NA)
       auctau <- NA
       if(!is.na(time_min_range)){
-        if(!is.null(kel) && "KEL" %in% kel && "KELC0" %in% kel){
+        if(!is.null(kel) && "KEL" %in% names(kel) && "KELC0" %in% names(kel)){
           if(!is.na(kel[["KEL"]])){
             tau_conc <- NA
             tau_conc <- cest(conc = conc, time = time, t_last = time[1], kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])

@@ -119,7 +119,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-aumc_last <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, t_max = NULL){
+aumc_last <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, t_last = NULL, t_max = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in aumc_last: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -132,9 +132,6 @@ aumc_last <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, t_max
       return(NA)
   }
 
-  if(!is.null(t_max) && !(t_max %in% time)){
-    stop("Error in auc_t1_t2: 't_max' value is not in the 'time' data")
-  }
   if(!(is.numeric(conc) && is.vector(conc)) ){
     stop("Error in aumc_last: 'conc' is not a numeric vector")
   }
@@ -144,17 +141,26 @@ aumc_last <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, t_max
   if(method != 1 && method != 2 && method != 3 && method != 4){
     stop("Error in aumc_last: the value provided for 'method' is not correct")
   }
+  
+  if(length(time) == 0 || length(conc) == 0 || all(is.na(time)) || all(is.na(conc))) { 
+    return(NA)
+  }
+  if(sum(conc, na.rm = T) == 0){
+    return(0)
+  }
 
   #Formatting data to subset data based on time values
-  t_last <- tlast(conc = conc, time = time)
+  if(is.null(t_last)){
+    t_last <- tlast(conc = conc, time = time)
+  }
+  
+  if(is.na(t_last)) { return(NA) }
+  
   conc <- conc[time <= t_last]
   time <- time[time <= t_last]
 
   if(length(time) != length(conc)){
     stop("Error in aumc_last: length of 'time' and 'conc' vectors are not equal")
-  }
-  if(sum(conc, na.rm = T) == 0){
-    return(0)
   }
 
   if(method == 1){

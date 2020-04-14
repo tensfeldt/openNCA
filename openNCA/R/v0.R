@@ -51,7 +51,7 @@ v0 <- function(c0 = NULL, dose = NULL){
   if(is.na(dose) || (0 %in% dose) || is.na(c0)) {
     v_0 <- NA
   } else {
-    v_0 <- c0/dose
+    v_0 <- dose/c0
     v_0 <- replace(v_0, is.infinite(v_0), NA)
   }
 

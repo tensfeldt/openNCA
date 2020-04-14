@@ -163,7 +163,7 @@ mrt_ivif_o <- function(conc = NULL, time = NULL, method = 1, model = "M2", param
         mrtivifo <- NA
       } else {
 ###cat("mrt_ivif_o: check here6:\n")
-        mrtivifo <- ((aumctau + tau)*(aucinfo - auctau))/auctau
+        mrtivifo <- (aumctau + tau * (aucinfo - auctau))/auctau
 ###          cat('mrtivifo: ', mrtivifo, '\n')
       }
     }
@@ -210,7 +210,7 @@ mrt_ivif_o <- function(conc = NULL, time = NULL, method = 1, model = "M2", param
       if(aucinfo <= 0 || auctau < 0 || aumctau < 0 || is.na(aucinfo) || is.na(auctau) || is.na(aumctau)){
         mrtivifo <- NA
       } else {
-        mrtivifo <- (((aumctau + tau)*(aucinfo - auctau))/auctau) - dof/2
+        mrtivifo <- ((aumctau + tau *(aucinfo - auctau))/auctau) - (dof/2)
       }
     }
   }
