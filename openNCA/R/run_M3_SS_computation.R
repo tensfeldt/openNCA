@@ -1083,7 +1083,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         extrapolation <- FALSE
       }
       
-      if(nrow(tmp_df) > 0){
+      if(nrow(tmp_df) > 0 & all(tmp_df[,map_data$TIME] >= 0)){
         orig_time <- tmp_df[,map_data$TIME]
         orig_conc <- tmp_df[,map_data$CONC]
         
@@ -2093,6 +2093,9 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           kel_flag_optimized <- c(kel_flag_optimized, kel_flag)
         }
         computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]
+        if(any(tmp_df[,map_data$TIME] < 0)){
+          warning(paste0("No parameters generated due to negative TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
+        }
       }
     }, error = function(e) {
       stop(paste0(e, "For SDEID ", unique(data_data[,map_data$SDEID])[i]))

@@ -95,8 +95,8 @@ validate_timeconc_data <- function(map, data, flag, verbose=FALSE) {
         if(parameter_required("^ACTENDTIME$",  names(map))) { actendtime   <- map$ACTENDTIME  }
         if(parameter_required("^ACTENDTIMEU$", names(map))) { actendtimeu  <- map$ACTENDTIMEU }
     }
-    if(parameter_required("^SAMPLEVOLUME$",  names(map))) { results[["samplevolume"]]  <- samplevolume  <- map$SAMPLEVOLUME }
-    if(parameter_required("^SAMPLEVOLUMEU$", names(map))) { results[["samplevolumeu"]] <- samplevolumeu <- map$SAMPLEVOLUMEU }
+    if(parameter_required("^AMOUNT$",  names(map))) { results[["samplevolume"]]  <- samplevolume  <- map$AMOUNT }
+    if(parameter_required("^AMOUNTU$", names(map))) { results[["samplevolumeu"]] <- samplevolumeu <- map$AMOUNTU }
 
     if(verbose) {
         cat('nomtime: ', nomtime, ' nomtimeu: ', nomtimeu, ' acttime: ', acttime, ' acttimeu: ', acttimeu, '\n')

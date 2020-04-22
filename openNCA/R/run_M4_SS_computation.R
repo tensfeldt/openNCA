@@ -719,7 +719,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
       rt <- rate(start_time = tmp_df[,map_data$TIME], end_time = tmp_df[,map_data$ENDTIME], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]), volu = tmp_df[,map_data$AMOUNTU], type = type, map = map_data)
       
-      if(nrow(tmp_df) > 0){
+      if(nrow(tmp_df) > 0 & all(tmp_df[,map_data$TIME] >= 0) & all(tmp_df[,map_data$ENDTIME] >= 0)){
         orig_time <- rt
         orig_conc <- mid_pt
         if(!0 %in% mid_pt){
@@ -1139,7 +1139,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           aurcxpctp <- auc_XpctP(conc = auc_rt, time = auc_mid_pt, method = method, kelflag = kel_flag, aucflag = auc_flag, auc_infp = aurcinf_p, auclast = aurclast)
         }
         if(comp_required[["VOLSUM"]]) {
-          volsum <- vol_sum(vol = tmp_df[,map_data$SAMPLEVOLUME], volu = tmp_df[,map_data$SAMPLEVOLUMEU])
+          volsum <- vol_sum(vol = tmp_df[,map_data$AMOUNT], volu = tmp_df[,map_data$AMOUNTU])
         }
         if(comp_required[["KEL"]]){
           exflag <- !as.logical(kel_flag)
@@ -1353,6 +1353,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           kel_flag_optimized <- c(kel_flag_optimized, kel_flag)
         }
         computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]
+        if(any(tmp_df[,map_data$TIME] < 0) || any(tmp_df[,map_data$ENDTIME] < 0)){
+          warning(paste0("No parameters generated due to negative TIME and/or ENDTIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
+        }
       }
     }, error = function(e) {
       stop(paste0(e, "For SDEID ", unique(data_data[,map_data$SDEID])[i]))

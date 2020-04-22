@@ -633,7 +633,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
       rt <- rate(start_time = tmp_df[,map_data$TIME], end_time = tmp_df[,map_data$ENDTIME], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]), volu = tmp_df[,map_data$AMOUNTU], type = type, map=map_data)
 
-      if(nrow(tmp_df)){
+      if(nrow(tmp_df) & all(tmp_df[,map_data$TIME] >= 0) & all(tmp_df[,map_data$ENDTIME] >= 0)){
         orig_conc <- rt
         orig_time <- mid_pt
         if(!0 %in% mid_pt){
@@ -1131,6 +1131,9 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           kel_flag_optimized <- c(kel_flag_optimized, kel_flag)
         }
         computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]
+        if(any(tmp_df[,map_data$TIME] < 0) || any(tmp_df[,map_data$ENDTIME] < 0)){
+          warning(paste0("No parameters generated due to negative TIME and/or ENDTIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
+        }
       }
     }, error = function(e) {
       stop(paste0(e, "For SDEID ", unique(data_data[,map_data$SDEID])[i]))
