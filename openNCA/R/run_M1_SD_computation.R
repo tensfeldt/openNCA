@@ -810,23 +810,31 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
                   s_time <- match(t_max, orig_time)+1
                   e_time <- match(t_last, orig_time)
-                  tmp_time <- orig_time[s_time:e_time]
+                  if(s_time <= e_time && e_time <= length(orig_time)){
+                    tmp_time <- orig_time[s_time:e_time]
+                  }
                 }
                 if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
                   s_conc <- match(c_max, orig_conc)+1
                   e_conc <- match(c_last, orig_conc)
-                  tmp_conc <- orig_conc[s_conc:e_conc]
+                  if(s_conc <= e_conc && e_conc <= length(orig_conc)){
+                    tmp_conc <- orig_conc[s_conc:e_conc]
+                  }
                 }
               } else {
                 if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
                   s_time <- match(t_max, orig_time)
                   e_time <- match(t_last, orig_time)
-                  tmp_time <- orig_time[s_time:e_time]
+                  if(s_time <= e_time && e_time <= length(orig_time)){
+                    tmp_time <- orig_time[s_time:e_time]
+                  }
                 }
                 if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
                   s_conc <- match(c_max, orig_conc)
                   e_conc <- match(c_last, orig_conc)
-                  tmp_conc <- orig_conc[s_conc:e_conc]
+                  if(s_conc <= e_conc && e_conc <= length(orig_conc)){
+                    tmp_conc <- orig_conc[s_conc:e_conc]
+                  }
                 }
               }
             }
@@ -834,12 +842,16 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
               s_time <- match(t_max, orig_time)+1
               e_time <- match(t_last, orig_time)
-              tmp_time <- orig_time[s_time:e_time]
+              if(s_time <= e_time && e_time <= length(orig_time)){
+                tmp_time <- orig_time[s_time:e_time]
+              }
             }
             if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
               s_conc <- match(c_max, orig_conc)+1
               e_conc <- match(c_last, orig_conc)
-              tmp_conc <- orig_conc[s_conc:e_conc]
+              if(s_conc <= e_conc && e_conc <= length(orig_conc)){
+                tmp_conc <- orig_conc[s_conc:e_conc]
+              }
             }
             if(!isTRUE(flg_no_cmax_check)){
               warning("Flag 'FLGNOCMAX' value provided via 'map' does not have a proper format! Please make sure the value is either '1' or '0'!")             

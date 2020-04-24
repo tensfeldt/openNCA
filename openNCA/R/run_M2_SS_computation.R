@@ -270,8 +270,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     regular_int_type <- c(regular_int_type, "C0")
   }
   if(disp_required[["V0"]]) {
-    col_names <- c(col_names, rep(paste0("V0",1:di_col)))
-    regular_int_type <- c(regular_int_type, rep(paste0("V0",1:di_col)))
+    col_names <- c(col_names, "V0")
+    regular_int_type <- c(regular_int_type, "V0")
   }
   if(disp_required[["CMAX"]]) {
     col_names <- c(col_names, "CMAX")
@@ -831,9 +831,6 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]){
         dose_c_i <- list()
       }
-      if(comp_required[["V0"]]) {
-        v_0 <- list()
-      }
       if(comp_required[["CMAXi"]]) {
         c_maxi <- list()
       }
@@ -1130,6 +1127,10 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
         }
+        if(comp_required[["V0"]]) {
+          tmp_dose <- tmp_df[, as.character(map_data[c("DOSE1")])][1]
+          v_0 <- v0(c0 = obs_c_0, dose = tmp_dose)
+        }
         if(comp_required[["CMAX"]]) {
           c_max <- cmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
         }
@@ -1351,7 +1352,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
 
           if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]) {
             if(!is.na(tmp_dose)) { 
-                dose_c_i[[d]] <- dosec(data = tmp_di_df, map = map_data, idose=d)
+              dose_c_i[[d]] <- dosec(data = tmp_di_df, map = map_data, idose=d)
             } else {
               dose_c_i[[d]] <- dose_c
             }
@@ -1359,9 +1360,6 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           dof[[d]] <- ifelse(paste0("DOF",d) %in% names(map_data), ifelse(map_data[c(paste0("DOF",d))] %in% names(data_data), unique(tmp_di_df[,as.character(map_data[c(paste0("DOF",d))])])[1], NA), NA)
           tau_di <- paste0("TAU", d)
 
-          if(comp_required[["V0"]]) {
-            v_0[[d]] <- v0(c0 = obs_c_0, dose = dose_c_i[[d]])
-          }
           if(comp_required[["CMAXi"]]) {
             c_maxi[[d]] <- cmax(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME])
           }
@@ -1822,7 +1820,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           est_data <- rbind(est_data, tmp_est_data)
         }
         if(disp_required[["V0"]]) {
-          computation_df[i, "V0"] <- unlist(v_0)
+          computation_df[i, "V0"] <- v_0
         }
         if(disp_required[["CMAX"]]) {
           computation_df[i, "CMAX"] <- c_max
