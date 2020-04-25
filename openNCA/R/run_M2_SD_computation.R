@@ -879,23 +879,39 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
                   s_time <- match(t_max, orig_time)+1
                   e_time <- match(t_last, orig_time)
-                  tmp_time <- orig_time[s_time:e_time]
+                  if(s_time <= e_time && e_time <= length(orig_time)){
+                    tmp_time <- orig_time[s_time:e_time]
+                  } else {
+                    tmp_time <- c()
+                  }
                 }
                 if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
                   s_conc <- match(c_max, orig_conc)+1
                   e_conc <- match(c_last, orig_conc)
-                  tmp_conc <- orig_conc[s_conc:e_conc]
+                  if(s_conc <= e_conc && e_conc <= length(orig_conc)){
+                    tmp_conc <- orig_conc[s_conc:e_conc]
+                  } else {
+                    tmp_conc <- c()
+                  }
                 }
               } else {
                 if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
                   s_time <- match(t_max, orig_time)
                   e_time <- match(t_last, orig_time)
-                  tmp_time <- orig_time[s_time:e_time]
+                  if(s_time <= e_time && e_time <= length(orig_time)){
+                    tmp_time <- orig_time[s_time:e_time]
+                  } else {
+                    tmp_time <- c()
+                  }
                 }
                 if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
                   s_conc <- match(c_max, orig_conc)
                   e_conc <- match(c_last, orig_conc)
-                  tmp_conc <- orig_conc[s_conc:e_conc]
+                  if(s_conc <= e_conc && e_conc <= length(orig_conc)){
+                    tmp_conc <- orig_conc[s_conc:e_conc]
+                  } else {
+                    tmp_conc <- c()
+                  }
                 }
               }
             }
@@ -903,12 +919,20 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             if(!is.null(t_max) && !is.na(t_max) && !is.null(t_last) && !is.na(t_last)){
               s_time <- match(t_max, orig_time)+1
               e_time <- match(t_last, orig_time)
-              tmp_time <- orig_time[s_time:e_time]
+              if(s_time <= e_time && e_time <= length(orig_time)){
+                tmp_time <- orig_time[s_time:e_time]
+              } else {
+                tmp_time <- c()
+              }
             }
             if(!is.null(c_max) && !is.na(c_max) && !is.null(c_last) && !is.na(c_last)){
               s_conc <- match(c_max, orig_conc)+1
               e_conc <- match(c_last, orig_conc)
-              tmp_conc <- orig_conc[s_conc:e_conc]
+              if(s_conc <= e_conc && e_conc <= length(orig_conc)){
+                tmp_conc <- orig_conc[s_conc:e_conc]
+              } else {
+                tmp_conc <- c()
+              }
             }
             if(!isTRUE(flg_no_cmax_check)){
               warning("Flag 'FLGNOCMAX' value provided via 'map' does not have a proper format! Please make sure the value is either '1' or '0'!")             
@@ -946,6 +970,7 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   
             selected_idx <- NA
             saved_kel_opt <- -1
+            first_kel_saved <- FALSE
             if(length(ulist) >= 1){
               for(k in 1:length(ulist)){
                 sel_time <- ulist[[k]]
@@ -977,7 +1002,10 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 }
                 
                 if(!is.na(kel_opt)){
-                  if(kel_opt > saved_kel_opt){
+                  if(kel_opt > saved_kel_opt || (!isTRUE(first_kel_saved) && kel_opt >= saved_kel_opt)){
+                    if(!isTRUE(first_kel_saved) && kel_opt >= saved_kel_opt){
+                      first_kel_saved <- TRUE
+                    }
                     if(isTRUE("KEL" %in% flag_df$VAR)){
                       if(kel_tmp > kel_val){
                         saved_kel_opt <- kel_opt
@@ -989,6 +1017,11 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                     }
                   }
                 }
+              }
+            } else {
+              if(isTRUE(optimize_kel_debug)){
+                kel_debug[debug_idx,] <- c(unique(data_data[,map_data$SDEID])[i], as.character(paste0(c(), sep = ", ", collapse = "")), as.character(paste0(c(), sep = ", ", collapse = "")), NA, 0, NA, NA, NA, NA, NA, NA)
+                debug_idx <- 1 + debug_idx
               }
             }
             tmp_kel_flag <- rep(1, length(kel_flag))

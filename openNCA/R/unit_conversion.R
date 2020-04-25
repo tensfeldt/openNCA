@@ -470,7 +470,11 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                 inputMScale5 <- val[inputMatch5[i]]
                 outputMScale5 <- val[outputMatch5[i]]
                 if(class[inputMatch5[i]] == c("M", "V")[i] && class[outputMatch5[i]] == c("M", "V")[i]) {
-                  concUScaler[i] <- ifelse(isTRUE(inputUnit5[i] == "DPM" || outputUnit5[i] == "DPM"), 1, inputMScale5/outputMScale5)
+                  if(class[inputMatch5[i]] == "M" && class[outputMatch5[i]] == "M"){
+                    concUScaler[i] <- ifelse(isTRUE(inputUnit5[i] == "DPM" || outputUnit5[i] == "DPM"), 1, inputMScale5/outputMScale5)
+                  } else {
+                    concUScaler[i] <- inputMScale5/outputMScale5
+                  }
                 } else {
                   concUScaler[i] <- 1
                   warning("'CONCU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
@@ -745,7 +749,11 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                 inputMScale8 <- val[inputMatch8[i]]
                 outputMScale8 <- val[outputMatch8[i]]
                 if(class[inputMatch8[i]] == c("M", "T", "V")[i] && class[outputMatch8[i]] == c("M", "T", "V")[i]) {
-                  aucUScaler[i] <- ifelse(isTRUE(inputUnit8[i] == "DPM" || outputUnit8[i] == "DPM"), 1, inputMScale8/outputMScale8)
+                  if(class[inputMatch8[i]] == "M" && class[outputMatch8[i]] == "M") {
+                    aucUScaler[i] <- ifelse(isTRUE(inputUnit8[i] == "DPM" || outputUnit8[i] == "DPM"), 1, inputMScale8/outputMScale8)
+                  } else {
+                    aucUScaler[i] <- inputMScale8/outputMScale8
+                  }
                 } else {
                   aucUScaler[i] <- 1
                   warning(paste0("'", map_data$TIMEU, "' and/or 'CONCU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion"))
@@ -851,7 +859,11 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                 inputMScale9 <- val[inputMatch9[i]]
                 outputMScale9 <- val[outputMatch9[i]]
                 if(class[inputMatch9[i]] == c("M", "T", "T", "V")[i] && class[outputMatch9[i]] == c("M", "T", "T", "V")[i]) {
-                  aumcUScaler[i] <- ifelse(isTRUE(inputUnit9[i] == "DPM" || outputUnit9[i] == "DPM"), 1, inputMScale9/outputMScale9)
+                  if(class[inputMatch9[i]] == "M" && class[outputMatch9[i]] == "M") {
+                    aumcUScaler[i] <- ifelse(isTRUE(inputUnit9[i] == "DPM" || outputUnit9[i] == "DPM"), 1, inputMScale9/outputMScale9)
+                  } else {
+                    aumcUScaler[i] <- inputMScale9/outputMScale9
+                  }
                 } else {
                   aumcUScaler[i] <- 1
                   warning(paste0("'", map_data$TIMEU, "' and/or 'CONCU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion"))
@@ -959,7 +971,11 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                 inputMScale10 <- val[inputMatch10[i]]
                 outputMScale10 <- val[outputMatch10[i]]
                 if(class[inputMatch10[i]] == c("M", "T", "V", "M")[i] && class[outputMatch10[i]] == c("M", "T", "V", "M")[i]) {
-                  aucdnUScaler[i] <- ifelse(isTRUE(inputUnit10[i] == "DPM" || outputUnit10[i] == "DPM"), 1, inputMScale10/outputMScale10)
+                  if(class[inputMatch10[i]] == "M" && class[outputMatch10[i]] == "M") {
+                    aucdnUScaler[i] <- ifelse(isTRUE(inputUnit10[i] == "DPM" || outputUnit10[i] == "DPM"), 1, inputMScale10/outputMScale10)
+                  } else {
+                    aucdnUScaler[i] <- inputMScale10/outputMScale10
+                  }
                 } else {
                   aucdnUScaler[i] <- 1
                   warning(paste0("'", map_data$TIMEU, "' and/or 'CONCU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion"))
@@ -1079,7 +1095,11 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                 inputMScale11 <- val[inputMatch11[i]]
                 outputMScale11 <- val[outputMatch11[i]]
                 if(class[inputMatch11[i]] == c("V", "M", "V")[i] && class[outputMatch11[i]] == c("V", "M", "V")[i]) {
-                  aurcUScaler[i] <- ifelse(isTRUE(inputUnit11[i] == "DPM" || outputUnit11[i] == "DPM"), 1, inputMScale11/outputMScale11)
+                  if(class[inputMatch11[i]] == "M" && class[outputMatch11[i]] == "M") {
+                    aurcUScaler[i] <- ifelse(isTRUE(inputUnit11[i] == "DPM" || outputUnit11[i] == "DPM"), 1, inputMScale11/outputMScale11)
+                  } else {
+                    aurcUScaler[i] <- inputMScale11/outputMScale11
+                  }
                 } else {
                   aurcUScaler[i] <- 1
                   warning(paste0("'CONCU'  and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion"))
@@ -1183,7 +1203,11 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                   inputMScale12 <- val[inputMatch12[i]]
                   outputMScale12 <- val[outputMatch12[i]]
                   if(class[inputMatch12[i]] == c("M", "V", "M")[i] && class[outputMatch12[i]] == c("M", "V", "M")[i]) {
-                    concdnUScaler[i] <- ifelse(isTRUE(inputUnit12[i] == "DPM" || outputUnit12[i] == "DPM"), 1, inputMScale12/outputMScale12)
+                    if(class[inputMatch12[i]] == "M" && class[outputMatch12[i]] == "M") {
+                      concdnUScaler[i] <- ifelse(isTRUE(inputUnit12[i] == "DPM" || outputUnit12[i] == "DPM"), 1, inputMScale12/outputMScale12)
+                    } else {
+                      concdnUScaler[i] <- inputMScale12/outputMScale12
+                    }
                   } else {
                     concdnUScaler[i] <- 1
                     warning("'CONCU' and/or 'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
@@ -1277,7 +1301,11 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                 inputMScale13 <- val[inputMatch13[i]]
                 outputMScale13 <- val[outputMatch13[i]]
                 if(class[inputMatch13[i]] == c("M", "T")[i] && class[outputMatch13[i]] == c("M", "T")[i]) {
-                  rateUScaler[i] <- ifelse(isTRUE(inputUnit13[i] == "DPM" || outputUnit13[i] == "DPM"), 1, inputMScale13/outputMScale13)
+                  if(class[inputMatch13[i]] == "M" && class[outputMatch13[i]] == "M") {
+                    rateUScaler[i] <- ifelse(isTRUE(inputUnit13[i] == "DPM" || outputUnit13[i] == "DPM"), 1, inputMScale13/outputMScale13)
+                  } else {
+                    rateUScaler[i] <- inputMScale13/outputMScale13
+                  }
                 } else {
                   rateUScaler[i] <- 1
                   warning(paste0("'", map_data$TIMEU, "' and/or 'CONCU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion"))
@@ -1362,7 +1390,11 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                 inputMScale14 <- val[inputMatch14[i]]
                 outputMScale14 <- val[outputMatch14[i]]
                 if(class[inputMatch14[i]] == c("V", "M")[i] && class[outputMatch14[i]] == c("V", "M")[i]) {
-                  volumewUScaler[i] <- ifelse(isTRUE(inputUnit14[i] == "DPM" || outputUnit14[i] == "DPM"), 1, inputMScale14/outputMScale14)
+                  if(class[inputMatch14[i]] == "M" && class[outputMatch14[i]] == "M") {
+                    volumewUScaler[i] <- ifelse(isTRUE(inputUnit14[i] == "DPM" || outputUnit14[i] == "DPM"), 1, inputMScale14/outputMScale14)
+                  } else {
+                    volumewUScaler[i] <- inputMScale14/outputMScale14
+                  }
                 } else {
                   volumewUScaler[i] <- 1
                   warning("'CONCU' and/or 'NORMBSU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
@@ -1464,7 +1496,11 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                 inputMScale15 <- val[inputMatch15[i]]
                 outputMScale15 <- val[outputMatch15[i]]
                 if(class[inputMatch15[i]] == c("V", "T", "M")[i] && class[outputMatch15[i]] == c("V", "T", "M")[i]) {
-                  clwUScaler[i] <- ifelse(isTRUE(inputUnit15[i] == "DPM" || outputUnit15[i] == "DPM"), 1, inputMScale15/outputMScale15)
+                  if(class[inputMatch15[i]] == "M" && class[outputMatch15[i]] == "M") {
+                    clwUScaler[i] <- ifelse(isTRUE(inputUnit15[i] == "DPM" || outputUnit15[i] == "DPM"), 1, inputMScale15/outputMScale15)
+                  } else {
+                    clwUScaler[i] <- inputMScale15/outputMScale15
+                  }
                 } else {
                   clwUScaler[i] <- 1
                   warning(paste0("'CONCU' and/or '", map_data$TIMEU, " and/or 'NORMBSU' and/or '", outputUnitFormat, "' value provided via 'map' is not accounted for unit conversion"))
