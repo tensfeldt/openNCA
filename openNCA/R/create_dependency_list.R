@@ -269,7 +269,7 @@ create_dependency_list <- function() {
     dependency_list[["VSSP"]] <- list(callfun=c("vssp"), regex="^VSSP$", unit_class=c(uclass_volume), valid_models=c(m2sd, m3sd), display_list_models=c(m3sd), predecessors=c("CLP", "MRTIVIFP"))
 ### 2019-09-01/TGT/ VSSPi not currently defined in computation engine codebase
     dependency_list[["VSSPi"]] <- list(callfun=c("vssp"), regex="^VSSP(i{1}?|[0-9]+?)$", unit_class=c(uclass_volume), valid_models=c(m2ss, m3ss), display_list_models=c(m3ss), predecessors=c("CLTAUi", "MRTIVIFPi", "TAUi", "TOLDi"))
-    dependency_list[["VSSPW"]] <- list(callfun=c("vsspw"), regex="^VSSPW$", unit_class=c(uclass_volume), valid_models=c(m2sd, m3sd), display_list_models=c(m3sd), predecessors=c("VSSP"))
+    dependency_list[["VSSPW"]] <- list(callfun=c("vsspw"), regex="^VSSPW$", unit_class=c(uclass_volwnorm), valid_models=c(m2sd, m3sd), display_list_models=c(m3sd), predecessors=c("VSSP"))
     dependency_list[["VSSPWi"]] <- list(callfun=c("vsspw"), regex="^VSSPW(i{1}?|[0-9]+?)$", unit_class=c(uclass_volwnorm), valid_models=c(m2ss, m3ss), display_list_models=c(m3ss), predecessors=c("VSSPi"))
 ### 2019-09-01/TGT/ VSSO not currently defined in computation engine codebase
     dependency_list[["VSSO"]] <- list(callfun=c("vsso"), regex="^VSSO$", unit_class=c(uclass_volume), valid_models=c(m2sd, m3sd), display_list_models=c(), predecessors=c("CLO", "MRTIVIFO"))

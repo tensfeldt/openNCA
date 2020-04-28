@@ -539,6 +539,18 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, rep(paste0("AUMCTAU",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("AUMCTAU",1:di_col)))
   }
+  if(disp_required[["AUMCLAST"]]){
+    col_names <- c(col_names, "AUMCLAST")
+    regular_int_type <- c(regular_int_type, "AUMCLAST")
+  }
+  if(disp_required[["AUMCINFO"]]){
+    col_names <- c(col_names, "AUMCINFO")
+    regular_int_type <- c(regular_int_type, "AUMCINFO")
+  }
+  if(disp_required[["AUMCINFP"]]){
+    col_names <- c(col_names, "AUMCINFP")
+    regular_int_type <- c(regular_int_type, "AUMCINFP")
+  }
   if(disp_required[["MRTLAST"]]){
     col_names <- c(col_names, "MRTLAST")
     regular_int_type <- c(regular_int_type, "MRTLAST")
@@ -835,6 +847,15 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(comp_required[["PTROUGHRENDi"]]){
         p_troughrendi <- list()
       }
+      if(comp_required[["AUCLAST"]]){
+        tmp_auclast <- list()
+      }
+      if(comp_required[["AUCALL"]]){
+        tmp_aucall <- list()
+      }
+      if(comp_required[["AUMCLAST"]]){
+        tmp_aumclast <- list()
+      }
       if(comp_required[["AUCINFOi"]]){
         aucinfoi <- list()
       }
@@ -1067,9 +1088,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         } else {
           t_last <- NULL
         }
-        if(comp_required[["AUCLAST"]]){
-          auclast <- auc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_last, t_max = t_max)
-        }
         if(isTRUE(optimize_kel) && comp_required[["TMAXi"]] && comp_required[["TLASTi"]] && comp_required[["CMAXi"]] && comp_required[["CLASTi"]] && comp_required[["AUCLASTi"]] &&
            "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
           tmp_time <- orig_time
@@ -1185,12 +1203,14 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 kelr_opt <- kel_r(conc = sel_conc, time = sel_time)[["KELRSQ"]]
                 if("AUCXPCTO" %in% flag_df$VAR){
                   span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
-                  aucinfo_opt <- auc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, auclast = auclast, c_last = c_last, spanratio = span_ratio, kel = all_kel)
-                  aucxpct_opt <- auc_XpctO(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_info = aucinfo_opt, auclast = auclast)
+                  auclast_opt <- auc_last(conc = sel_conc, time = sel_time, method = method, exflag = auc_flag, t_last = t_last, t_max = t_max)
+                  aucinfo_opt <- auc_inf_o(conc = sel_conc, time = sel_time, method = method, auclast = auclast_opt, c_last = c_last, spanratio = span_ratio, kel = all_kel)
+                  aucxpct_opt <- auc_XpctO(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_info = aucinfo_opt, auclast = auclast_opt)
                 } else if("AUCXPCTP" %in% flag_df$VAR){
                   span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
-                  aucinfp_opt <- auc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, auclast = auclast, t_last = t_last, spanratio = span_ratio, kel = all_kel)
-                  aucxpct_opt <- auc_XpctP(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_infp = aucinfp_opt, auclast = auclast)
+                  auclast_opt <- auc_last(conc = sel_conc, time = sel_time, method = method, exflag = auc_flag, t_last = t_last, t_max = t_max)
+                  aucinfp_opt <- auc_inf_p(conc = sel_conc, time = sel_time, method = method, auclast = auclast_opt, t_last = t_last, spanratio = span_ratio, kel = all_kel)
+                  aucxpct_opt <- auc_XpctP(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_infp = aucinfp_opt, auclast = auclast_opt)
                 } else {
                   stop("Error in optimize kel")
                 }
@@ -1267,18 +1287,9 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(comp_required[["LASTTIME"]]){
           last_time <- lasttime(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
         }
-        if(comp_required[["AUCALL"]]){
-          aucall <- auc_all(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
-        }
-        if(comp_required[["AUCINFO"]]){
-          aucinf_o <- auc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, c_last = c_last, kel = kel_v)
-        }
         if(comp_required[["CEST"]] || parameter_required("KEL", names(kel_v)) || parameter_required("KELC0", names(kel_v))) {
           span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
           c_est <- cest(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], kelflag = kel_flag, t_last = t_last, spanratio = span_ratio, kel = kel_v[["KEL"]])
-        }
-        if(comp_required[["AUCINFP"]]){
-          aucinf_p <- auc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, t_last = t_last, kel = kel_v)
         }
         if(comp_required[["AUCT"]] && auc_len > 1){
           auct <- list()
@@ -1364,6 +1375,24 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["PTROUGHRENDi"]]){
             p_troughrendi[[d]] <- ptroughrend(cmax = c_maxi[[d]], ctrough = c_troughendi[[d]])
           }
+          if(comp_required[["AUCLAST"]]){
+            tmp_auclast[[d]] <- auc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_lasti[[d]], t_max = t_maxi[[d]])
+            if(d == di_col){
+              auclast <- sum(unlist(tmp_auclast))
+            }
+          }
+          if(comp_required[["AUCALL"]]){
+            tmp_aucall[[d]] <- auc_all(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
+            if(d == di_col){
+              aucall <- sum(unlist(tmp_aucall))
+            }
+          }
+          if(comp_required[["AUMCLAST"]]) {
+            tmp_aumclast[[d]] <- aumc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
+            if(d == di_col){
+              aumclast <- sum(unlist(tmp_aumclast))
+            }
+          }
           if(comp_required[["AUCLASTi"]]){
             auclasti[[d]] <- auc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_lasti[[d]], t_max = t_maxi[[d]])
           }
@@ -1400,9 +1429,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["AUMCINFPi"]]){
             aumcinfpi[[d]] <- aumc_inf_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumclast = aumclasti[[d]], t_last = t_lasti[[d]], kel = kel_v)
           }
-          if(comp_required[["AUCALLDN"]]){
-            aucalldn[[d]] <- auc_dn(auc = aucall, dose = dose_ci[[d]])
-          }
           if(comp_required[["AUCTAUi"]]){
             auctau[[d]] <- auc_tau(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, tau = told[[d]]+tau[[d]], t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time, last_crit_factor = last_crit_factor, kel = kel_v, auclast = auclasti[[d]])
           }
@@ -1416,10 +1442,10 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             mrtlasti[[d]] <- mrt_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, model = "M1", aucflag = auc_flag, dof = dof[[d]], auclast = auclasti[[d]], aumclast = aumclasti[[d]])
           }
           if(comp_required[["MRTEVIFOi"]]){
-              mrtevifoi[[d]] <- mrt_evif_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfo = aucinfoi[[d]], aumcinfo = aumcinfoi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
+            mrtevifoi[[d]] <- mrt_evif_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfo = aucinfoi[[d]], aumcinfo = aumcinfoi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
           }
           if(comp_required[["MRTEVIFPi"]]){
-              mrtevifpi[[d]] <- mrt_evif_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfp = aucinfpi[[d]], aumcinfp = aumcinfpi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
+            mrtevifpi[[d]] <- mrt_evif_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfp = aucinfpi[[d]], aumcinfp = aumcinfpi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
           }
           if(comp_required[["AUCXPCTOi"]]){
             aucxpctoi[[d]] <- auc_XpctO(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_info = aucinfoi[[d]], auclast = auclasti[[d]])
@@ -1447,7 +1473,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             dose[[d]] <- tmp_dose
           }
           if(comp_required[["CLFTAUi"]]){
-            clf_tau[[d]] <- clftau(auctau = auctau[[d]], dose = dose_ci[[d]])
+            clf_tau[[d]] <- clftau(auctau = auctau[[d]], dose = tmp_dose)
           }
           if(comp_required[["CLFTAUWi"]]){
             clf_tauw[[d]] <- clftauw(clftau = clf_tau[[d]], normbs = norm_bs)
@@ -1459,7 +1485,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             pt_r[[d]] <- ptr(cmax = c_maxi[[d]], cmin = c_mini[[d]])
           }
           if(comp_required[["VZFTAUi"]]){
-            vzf_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose = dose_ci[[d]])
+            vzf_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose = tmp_dose)
           }
           if(comp_required[["VZFTAUWi"]]){
             vzf_tauw[[d]] <- vzftauw(vzftau = vzf_tau[[d]], normbs = norm_bs)
@@ -1614,11 +1640,37 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
         }
+        for(d in 1:di_col){
+          tmp_di_df  <- tmp_df[tmp_df[c(paste0("DI", d, "F"))] == 1,]
+          tmp_di_df <- tmp_di_df[order(tmp_di_df[,map_data$TIME]),]
+          
+          if(comp_required[["AUCALLDN"]]){
+            aucalldn[[d]] <- auc_dn(auc = aucall, dose = dose_ci[[d]])
+          }
+          if(comp_required[["AUCINFO"]]){
+            tmp_aucinf_o <- auc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, c_last = c_lasti[[d]], kel = kel_v)
+            if(d == di_col){
+              aucinf_o <- sum(unlist(tmp_aucinf_o))
+            }
+          }
+          if(comp_required[["AUCINFP"]]){
+            tmp_aucinf_p <- auc_inf_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, t_last = t_lasti[[d]], kel = kel_v)
+            if(d == di_col){
+              aucinf_p <- sum(unlist(tmp_aucinf_p))
+            }
+          }
+        }
         if(comp_required[["AUCLASTC"]]){
           auclastc <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclast, c0 = c_0, tlast = t_last)
         }
         if(comp_required[["AUCLASTDN"]]){
           auclastdn <- auc_dn(auc = auclast, dose = dose_c)
+        }
+        if(comp_required[["AUCXPCTO"]]){
+          aucxpcto <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_info = aucinf_o, auclast = auclast)
+        }
+        if(comp_required[["AUCXPCTP"]]){
+          aucxpctp <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_infp = aucinf_p, auclast = auclast)
         }
         if(comp_required[["AUCINFOC"]]){
           aucinf_oc <- auc_inf_oc(kel = kel_v[["KEL"]], aucinfo = aucinf_o, c0 = c_0)
@@ -1632,9 +1684,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(comp_required[["AUCINFPDN"]]){
           aucinf_pdn <- auc_dn(auc = aucinf_p, dose = dose_c)
         }
-        if(comp_required[["AUMCLAST"]]) {
-          aumclast <- aumc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
-        }
         if(comp_required[["AUMCINFO"]]) {
           aumcinf_o <- aumc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumclast = aumclast, c_last = c_last, t_last = t_last, kel = kel_v)
         }
@@ -1643,12 +1692,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         if(comp_required[["MRTLAST"]]){
           mrtlast <- mrt_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M1", aucflag = auc_flag, dof = dof[[d]], auclast = auclast, aumclast = aumclast)
-        }
-        if(comp_required[["AUCXPCTO"]]){
-          aucxpcto <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_info = aucinf_o, auclast = auclast)
-        }
-        if(comp_required[["AUCXPCTP"]]){
-          aucxpctp <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_infp = aucinf_p, auclast = auclast)
         }
         if(comp_required[["AUMCXPTO"]]){
           aumcxpto <- aumc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumcinfo = aumcinf_o, aumclast = aumclast)
@@ -1977,6 +2020,15 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         if(disp_required[["AUMCTAUi"]]){
           computation_df[i, paste0("AUMCTAU",1:di_col)] <- unlist(aumctaui)
+        }
+        if(comp_required[["AUMCLAST"]]) {
+          computation_df[i, "AUMCLAST"] <- aumclast
+        }
+        if(comp_required[["AUMCINFO"]]) {
+          computation_df[i, "AUMCINFO"] <- aumcinf_o
+        }
+        if(comp_required[["AUMCINFP"]]) {
+          computation_df[i, "AUMCINFP"] <- aumcinf_p
         }
         if(disp_required[["MRTLAST"]]){
           computation_df[i, "MRTLAST"] <- mrtlast
