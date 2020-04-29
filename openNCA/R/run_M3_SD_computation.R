@@ -814,7 +814,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           cend_inf <- cendinf(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], dof = dof, cmax = c_max)
         }
         if(comp_required[["CENDINFDN"]]){
-          cend_infdn <- cendinf_dn(cendinf = cend_inf, dose = dose_c)
+          cend_infdn <- cendinf_dn(cendinf = cend_inf, dose = tmp_dose)
         }
         if(comp_required[["TENDINF"]]){
           tend_inf <- tendinf(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], dof = dof, tmax = t_max)
@@ -1006,7 +1006,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           c_min <- cmin(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
         }
         if(comp_required[["CMAXDN"]]) {
-          cmaxdn <- cmax_dn(cmax = c_max, dose = dose_c)
+          cmaxdn <- cmax_dn(cmax = c_max, dose = tmp_dose)
         }
         if(comp_required[["TMIN"]]) {
           t_min <- tmin(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
@@ -1030,13 +1030,13 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           aucall <- auc_all(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
         }
         if(comp_required[["AUCALLDN"]]) {
-          aucalldn <- auc_dn(auc = aucall, dose = dose_c)
+          aucalldn <- auc_dn(auc = aucall, dose = tmp_dose)
         }
         if(comp_required[["AUCLASTC"]]) {
           auclast_c <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclast, c0 = c_0, tlast = t_last)
         }
         if(comp_required[["AUCLASTDN"]]) {
-          auclastdn <- auc_dn(auc = auclast, dose = dose_c)
+          auclastdn <- auc_dn(auc = auclast, dose = tmp_dose)
         }
         if(comp_required[["AUMCLAST"]]) {
           aumclast <- aumc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
@@ -1047,7 +1047,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           auc_int <- NULL
           for(t in 2:(auc_len+1)){
             tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], t1 = tmp_df[,map_data$TIME][1], t2 = tmp_df[,map_data$TIME][t], method = method, exflag = auc_flag, t_max = t_max)
-            tmp_dn <- auc_dn(auc = tmp, dose = dose_c)
+            tmp_dn <- auc_dn(auc = tmp, dose = tmp_dose)
             if(!is.na(unique(tmp_df[,map_data$TIME])[1]) && !is.na(unique(tmp_df[,map_data$TIME])[t])){
               tmp_int <- paste0(unique(tmp_df[,map_data$TIME])[1], "_", unique(tmp_df[,map_data$TIME])[t])
             } else {
@@ -1137,7 +1137,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           aucinf_oc <- auc_inf_oc(kel = kel_v[["KEL"]], aucinfo = aucinf_o, c0 = c_0)
         }
         if(comp_required[["AUCINFODN"]]) {
-          aucinfo_dn <- auc_dn(auc = aucinf_o, dose = dose_c)
+          aucinfo_dn <- auc_dn(auc = aucinf_o, dose = tmp_dose)
         }
         if(comp_required[["AUCINFP"]]) {
           aucinf_p <- auc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, t_last = t_last, kel = kel_v)
@@ -1146,7 +1146,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           aucinf_pc <- auc_inf_pc(kel = kel_v[["KEL"]], aucinfp = aucinf_p, c0 = c_0)
         }
         if(comp_required[["AUCINFPDN"]]) {
-          aucinfp_dn <- auc_dn(auc = aucinf_p, dose = dose_c)
+          aucinfp_dn <- auc_dn(auc = aucinf_p, dose = tmp_dose)
         }
         if(comp_required[["AUMCINFO"]]) {
           aumcinf_o <- aumc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumclast = aumclast, c_last = c_last, t_last = t_last, kel = kel_v)
@@ -1170,10 +1170,10 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           aucxpctp <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_infp = aucinf_p, auclast = auclast)
         }
         if(comp_required[["AUMCXPTO"]]){
-          aucxpcto <- aumc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumcinfo = aumcinf_o, aumclast = aumclast)
+          aumcxpto <- aumc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumcinfo = aumcinf_o, aumclast = aumclast)
         }
         if(comp_required[["AUMCXPTP"]]){
-          aucxpctp <- aumc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumcinfp = aumcinf_p, aumclast = aumclast)
+          aumcxptp <- aumc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumcinfp = aumcinf_p, aumclast = aumclast)
         }
         if(comp_required[["CLO"]]) {
           cl_o <- clo(aucinfo = aucinf_o, dose = dose_c)
@@ -1473,10 +1473,10 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           computation_df[i, "AUCXPCTP"] <- aucxpctp
         }
         if(disp_required[["AUMCXPTO"]]){
-          computation_df[i, "AUMCXPTO"] <- aucxpcto
+          computation_df[i, "AUMCXPTO"] <- aumcxpto
         }
         if(disp_required[["AUMCXPTP"]]){
-          computation_df[i, "AUMCXPTP"] <- aucxpctp
+          computation_df[i, "AUMCXPTP"] <- aumcxptp
         }
         if(disp_required[["CLO"]]) {
           computation_df[i, "CLO"] <- cl_o
