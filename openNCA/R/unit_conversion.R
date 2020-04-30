@@ -27,9 +27,9 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
   function_name <- as.list(sys.call())[[1]]
 
   u_class  <- c("TIMEU", "AMOUNTU", "DOSEU", "VOLUMEU", "CONCU", "KELU", "CLU", "AUCU", "AUMCU", "AUCNORMU", "AURCU", "CONCNORMU", "RATEU", "VOLUMEWU", "CLWU", "ALL")
-  units    <- c("HR", "MIN", "KG", "GM", "DPM", "ngeq",  "DG", "CG", "MG", "UG", "MCG", "NG",  "PG",  "FG", "KL", "L", "DL", "CL", "ML", "UL", "NL",  "PL",  "FL",        "")
-  val      <- c(  60,     1,  1e3,    1,     1,      1,  1e-1, 1e-2, 1e-3, 1e-6,  1e-6, 1e-9, 1e-12, 1e-15,  1e3,   1, 1e-1, 1e-2, 1e-3, 1e-6, 1e-9, 1e-12, 1e-15,        NA)
-  class    <- c( "T",   "T",  "M",  "M",   "M",    "M",   "M",  "M",  "M",  "M",   "M",  "M",   "M",   "M",  "V", "V",  "V",  "V",  "V",  "V",  "V",   "V",   "V", "MISSING")
+  units    <- c("HR", "MIN", "LB", "KG", "GM", "DPM", "ngeq",  "DG", "CG", "MG", "UG", "MCG", "NG",  "PG",  "FG", "KL", "L", "DL", "CL", "ML", "UL", "NL",  "PL",  "FL",        "")
+  val      <- c(  60,     1,  453.592, 1e3,    1,     1,      1,  1e-1, 1e-2, 1e-3, 1e-6,  1e-6, 1e-9, 1e-12, 1e-15,  1e3,   1, 1e-1, 1e-2, 1e-3, 1e-6, 1e-9, 1e-12, 1e-15,        NA)
+  class    <- c( "T",   "T",  "M", "M",  "M",   "M",    "M",   "M",  "M",  "M",  "M",   "M",  "M",   "M",   "M",  "V", "V",  "V",  "V",  "V",  "V",  "V",   "V",   "V", "MISSING")
 
   if(is.null(data)){
     stop("Please provide a valid path for the 'data' parameter")

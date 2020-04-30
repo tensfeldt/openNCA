@@ -1057,7 +1057,7 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           last_time <- lasttime(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
         }
         if(comp_required[["CMAXC"]]) {
-          c_max_c <- cmaxc(kel = kel_v[["KEL"]], cmax = c_max, c0 = est_c_0$est_c0, tmax = t_max)
+          c_max_c <- cmaxc(kel = kel_v[["KEL"]], cmax = c_max, c0 = obs_c_0, tmax = t_max)
         }
         if(comp_required[["CEST"]] || parameter_required("KEL", names(kel_v)) || parameter_required("KELC0", names(kel_v))) {
           c_est <- cest(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], kelflag=kel_flag, t_last=t_last, spanratio=span_ratio, kel=kel_v[["KEL"]], kelc0=kel_v[["KELC0"]])

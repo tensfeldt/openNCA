@@ -1367,7 +1367,12 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           tmp_di_df <- tmp_di_df[order(tmp_di_df[,map_data$TIME]),]
           norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_di_df), tmp_di_df[,map_data$NORMBS][1], NA), NA)
           tmp_dose <- tmp_di_df[, as.character(map_data[c(paste0("DOSE",d))])][1]
-
+          if(d == 1){ 
+            aumc_time <- tmp_di_df[,map_data$TIME]
+          } else {
+            aumc_time <- tmp_di_df[,map_data$TIME] - as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",(d-1)))])][1])
+          }
+          
           if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]) {
             if(!is.na(tmp_dose)) { 
               dose_c_i[[d]] <- dosec(data = tmp_di_df, map = map_data, idose=d)
@@ -1418,7 +1423,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             auclasti_dn[[d]] <- auc_dn(auc = auclasti[[d]], dose = tmp_dose)
           }
           if(comp_required[["AUMCLASTi"]]) {
-            aumclasti[[d]] <- aumc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
+            aumclasti[[d]] <- aumc_last(conc = tmp_di_df[,map_data$CONC], time = aumc_time, method = method, exflag = auc_flag, t_max = t_maxi[[d]])
           }
           if(comp_required[["AUCINFOi"]]) {
             aucinfoi[[d]] <- auc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclasti[[d]], c_last = c_lasti[[d]], kel = kel_v)
@@ -1439,10 +1444,10 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             aucinfpi_dn[[d]] <- auc_dn(auc = aucinfpi[[d]], dose = tmp_dose)
           }
           if(comp_required[["AUMCINFOi"]]) {
-            aumcinfoi[[d]] <- aumc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumclast = aumclasti[[d]], t_last = t_lasti[[d]], c_last = c_lasti[[d]], kel = kel_v)
+            aumcinfoi[[d]] <- aumc_inf_o(conc = tmp_di_df[,map_data$CONC], time = aumc_time, method = method, kelflag = kel_flag, aucflag = auc_flag, aumclast = aumclasti[[d]], t_last = t_lasti[[d]], c_last = c_lasti[[d]], kel = kel_v)
           }
           if(comp_required[["AUMCINFPi"]]) {
-            aumcinfpi[[d]] <- aumc_inf_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumclast = aumclasti[[d]], t_last = t_lasti[[d]], kel = kel_v)
+            aumcinfpi[[d]] <- aumc_inf_p(conc = tmp_di_df[,map_data$CONC], time = aumc_time, method = method, kelflag = kel_flag, aucflag = auc_flag, aumclast = aumclasti[[d]], t_last = t_lasti[[d]], kel = kel_v)
           }
           if(comp_required[["TAUi"]]) {
             tau[[d]] <- tmp_di_df[, map_data[[tau_di]]][1]
@@ -1459,7 +1464,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             auctaudn[[d]] <- auc_dn(auc = auctau[[d]], dose = tmp_dose)
           }
           if(comp_required[["AUMCTAUi"]]) {
-            aumctaui[[d]] <- aumc_tau(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = 1, exflag = auc_flag, tau = told[[d]]+tau[[d]], t_max = t_maxi[[d]], orig_conc = tmp_df[,map_data$CONC], orig_time = tmp_df[,map_data$TIME], returnNA = FALSE)
+            aumctaui[[d]] <- aumc_tau(conc = tmp_di_df[,map_data$CONC], time = aumc_time, method = 1, exflag = auc_flag, tau = told[[d]]+tau[[d]], t_max = t_maxi[[d]], orig_conc = tmp_df[,map_data$CONC], orig_time = tmp_df[,map_data$TIME], returnNA = FALSE)
           }
           if(comp_required[["MRTLASTi"]]) {
             mrtlasti[[d]] <- mrt_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, model = "M2", aucflag = auc_flag, dof = dof[[d]], auclast = auclasti[[d]], aumclast = aumclasti[[d]])
@@ -1477,10 +1482,10 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             aucxpctpi[[d]] <- auc_XpctP(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_infp = aucinfpi[[d]], auclast = auclasti[[d]])
           }
           if(comp_required[["AUMCXPTOi"]]){
-            aumcxptoi[[d]] <- aumc_XpctO(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumcinfo = aumcinfoi[[d]], aumclast = aumclasti[[d]])
+            aumcxptoi[[d]] <- aumc_XpctO(conc = tmp_di_df[,map_data$CONC], time = aumc_time, method = method, kelflag = kel_flag, aucflag = auc_flag, aumcinfo = aumcinfoi[[d]], aumclast = aumclasti[[d]])
           }
           if(comp_required[["AUMCXPTPi"]]){
-            aumcxptpi[[d]] <- aumc_XpctP(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumcinfp = aumcinfpi[[d]], aumclast = aumclasti[[d]])
+            aumcxptpi[[d]] <- aumc_XpctP(conc = tmp_di_df[,map_data$CONC], time = aumc_time, method = method, kelflag = kel_flag, aucflag = auc_flag, aumcinfp = aumcinfpi[[d]], aumclast = aumclasti[[d]])
           }
           if(comp_required[["CAVi"]]) {
             ca_v[[d]] <- cav(auctau = auctau[[d]], tau = tau[[d]])

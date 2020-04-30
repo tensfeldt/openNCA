@@ -800,7 +800,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         orig_time <- tmp_df[,map_data$TIME]
         orig_conc <- tmp_df[,map_data$CONC]
         
-        c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        obs_c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
         if(comp_required[["DOSEC"]]) {
           dose_c <- dosec(data = tmp_df, map = map_data)
         }
@@ -1033,7 +1033,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           aucalldn <- auc_dn(auc = aucall, dose = tmp_dose)
         }
         if(comp_required[["AUCLASTC"]]) {
-          auclast_c <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclast, c0 = c_0, tlast = t_last)
+          auclast_c <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclast, c0 = obs_c_0, tlast = t_last)
         }
         if(comp_required[["AUCLASTDN"]]) {
           auclastdn <- auc_dn(auc = auclast, dose = tmp_dose)
@@ -1134,7 +1134,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           aucinf_o <- auc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, c_last = c_last, kel = kel_v)
         }
         if(comp_required[["AUCINFOC"]]) {
-          aucinf_oc <- auc_inf_oc(kel = kel_v[["KEL"]], aucinfo = aucinf_o, c0 = c_0)
+          aucinf_oc <- auc_inf_oc(kel = kel_v[["KEL"]], aucinfo = aucinf_o, c0 = obs_c_0)
         }
         if(comp_required[["AUCINFODN"]]) {
           aucinfo_dn <- auc_dn(auc = aucinf_o, dose = tmp_dose)
@@ -1143,7 +1143,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           aucinf_p <- auc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, t_last = t_last, kel = kel_v)
         }
         if(comp_required[["AUCINFPC"]]) {
-          aucinf_pc <- auc_inf_pc(kel = kel_v[["KEL"]], aucinfp = aucinf_p, c0 = c_0)
+          aucinf_pc <- auc_inf_pc(kel = kel_v[["KEL"]], aucinfp = aucinf_p, c0 = obs_c_0)
         }
         if(comp_required[["AUCINFPDN"]]) {
           aucinfp_dn <- auc_dn(auc = aucinf_p, dose = tmp_dose)

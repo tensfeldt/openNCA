@@ -649,7 +649,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           orig_auc_time <- auc_mid_pt
         }
         
-        c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        obs_c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
         if(comp_required[["DOSEC"]]) {
           dose_c <- dosec(data = tmp_df, map = map_data)
         }
