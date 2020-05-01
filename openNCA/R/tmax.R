@@ -84,7 +84,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-tmax <- function(conc = NULL, time = NULL){
+tmax <- function(conc = NULL, time = NULL, told = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in tmax: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -119,5 +119,8 @@ tmax <- function(conc = NULL, time = NULL){
   c_max <- max(tmp$conc, na.rm = TRUE)
   # Find the time of the max concentration
   t_max <- min(tmp[tmp$conc == c_max,]$time, na.rm = TRUE)
+  if(!is.null(told) && is.numeric(told)){
+    t_max <- ifelse(isTRUE(t_max < told), told, t_max)
+  }
   return(t_max)
 }

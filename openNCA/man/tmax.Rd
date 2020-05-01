@@ -4,7 +4,7 @@
 \alias{tmax}
 \title{First Time at Maximum Observed Concentration}
 \usage{
-tmax(conc = NULL, time = NULL)
+tmax(conc = NULL, time = NULL, told = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

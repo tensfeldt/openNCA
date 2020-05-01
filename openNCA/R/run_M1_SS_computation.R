@@ -1335,10 +1335,18 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             c_mindni[[d]] <- cmin_dn(cmin = c_mini[[d]], dose = tmp_dose)
           }
           if(comp_required[["TMAXi"]]){
-            t_maxi[[d]] <- tmax(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME])
+            if(toupper(map_data$TIME) == "ACTUAL"){
+              t_maxi[[d]] <- tmax(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], told = told[[d]])
+            } else {
+              t_maxi[[d]] <- tmax(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME])
+            }
           }
           if(comp_required[["TMINi"]]){
-            t_mini[[d]] <- tmin(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME])
+            if(toupper(map_data$TIME) == "ACTUAL"){
+              t_mini[[d]] <- tmin(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], told = told[[d]]) 
+            } else {
+              t_mini[[d]] <- tmin(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME])
+            }
           }
           if(comp_required[["TLASTi"]]){
             t_lasti[[d]] <- tlast(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME])

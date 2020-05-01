@@ -4,7 +4,7 @@
 \alias{tmin}
 \title{Time at Minimum Observed Concentration}
 \usage{
-tmin(conc = NULL, time = NULL)
+tmin(conc = NULL, time = NULL, told = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}
