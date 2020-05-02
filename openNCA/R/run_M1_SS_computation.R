@@ -941,6 +941,9 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
       
       tmp_df <- data_data[data_data[,map_data$SDEID] == unique(data_data[,map_data$SDEID])[i],]
+      default_df <- tmp_df
+      default_df[,map_data$TIME] <- as.numeric(default_df[,map_data$TIME])
+      default_df <- default_df[order(default_df[,map_data$TIME]),]
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
       tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
@@ -1266,7 +1269,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           kelr_v <- kel_r(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], exflag = kel_flag)
         }
         if(comp_required[["LASTTIME"]]){
-          last_time <- lasttime(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+          last_time <- lasttime(conc = default_df[,map_data$CONC], time = default_df[,map_data$TIME])
         }
         if(comp_required[["CEST"]] || parameter_required("KEL", names(kel_v)) || parameter_required("KELC0", names(kel_v))) {
           span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
@@ -1292,6 +1295,8 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
 
         for(d in 1:di_col){
+          default_di_df <- default_df[default_df[c(paste0("DI", d, "F"))] == 1,]
+          default_di_df <- default_di_df[order(default_di_df[,map_data$TIME]),]
           tmp_di_df  <- tmp_df[tmp_df[c(paste0("DI", d, "F"))] == 1,]
           tmp_di_df <- tmp_di_df[order(tmp_di_df[,map_data$TIME]),]
           norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_di_df), tmp_di_df[,map_data$NORMBS][1], NA), NA)
@@ -1352,7 +1357,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             t_lasti[[d]] <- tlast(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME])
           }
           if(comp_required[["LASTTIMEi"]]){
-            last_timei[[d]] <- lasttime(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME])
+            last_timei[[d]] <- lasttime(conc = default_di_df[,map_data$CONC], time = default_di_df[,map_data$TIME])
           }
           if(comp_required[["CMAXCi"]]) {
             c_maxci[[d]] <- cmaxc(kel = kel_v[["KEL"]], cmax = c_maxi[[d]], c0 = obs_c_0, tmax = t_maxi[[d]])

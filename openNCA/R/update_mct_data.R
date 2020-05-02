@@ -115,6 +115,13 @@ update_mct_data <- function(map, data, flag, verbose=FALSE) {
         map$DOSELIST <- "DOSE"
       }
     }
+    
+    for(i in 1:length(timeconcvalues$doseu)) { 
+      tmp_doseu  <- timeconcvalues$doseu[i]
+      if(!tmp_doseu %in% names(map)){
+        map[,tmp_doseu] <- NA 
+      }
+    }
     ### DOSEU information
     if(parameter_required("^DOSE(i{1}|[0-9]*?)U$", names(map)))  {
         for(i in 1:length(timeconcvalues$doseu)) { map[,paste0("ORGDOSE",i,"U")]  <- timeconcvalues$doseu[i] }

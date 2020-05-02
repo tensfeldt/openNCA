@@ -204,6 +204,13 @@ validate_timeconc_data <- function(map, data, flag, verbose=FALSE) {
         k <- parameter_indices(paste0("^",map[,vdoseu],"$"), names(data), simplify=FALSE)
         ### vdoseudata is a boolean indicating whether the values of vdoseu appear in the input concentration dataset or not        
         vdoseudata <- is.element(map[,vdoseu], names(k))
+        if(length(vdose) > length(vdoseu)){
+          for(i in (length(vdoseu)+1):length(vdose)){
+            tmp_vdoseu <- paste0(vdose[i],"U")
+            vdoseu <- c(vdoseu, tmp_vdoseu)
+            vdoseudata <- c(vdoseudata, FALSE)
+          }
+        }
         missing_doseu_names <- vdoseu[!vdoseudata]
         if(length(missing_doseu_names)>0) {
             cat(missing_doseu_names, " as defined in 'map', do not appear in input concentration dataset", "\n")

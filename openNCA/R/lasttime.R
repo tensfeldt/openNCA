@@ -97,9 +97,6 @@ lasttime <- function(conc = NULL, time = NULL){
       return(NA)
   }
 
-  if(!(is.numeric(conc) && is.vector(conc)) ){
-    stop("Error in lasttime: 'conc' is not a numeric vector")
-  }
   if(!(is.numeric(time) && is.vector(time)) ){
     stop("Error in lasttime: 'time' is not a numeric vector")
   }
