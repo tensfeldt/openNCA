@@ -35,7 +35,7 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
       if(length(orig_time) > 0 && length(orig_conc) > 0){
         if(isTRUE(time[1] <= orig_time[1])){
           if(model == "M2"){
-            k <- (log(na.omit(tmp)[["conc"]][2])-log(na.omit(tmp)[["conc"]][2]))/(na.omit(tmp)[["time"]][2]-na.omit(tmp)[["time"]][1])
+            k <- (log(na.omit(tmp)[["conc"]][2])-log(na.omit(tmp)[["conc"]][1]))/(na.omit(tmp)[["time"]][2]-na.omit(tmp)[["time"]][1])
             if(k >= 0){
               conc_s_tmp <- conc[1]
             } else {
