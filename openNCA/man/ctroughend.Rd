@@ -4,7 +4,8 @@
 \alias{ctroughend}
 \title{Concentrations at the end of the ith dose interval}
 \usage{
-ctroughend(conc = NULL, time = NULL, tau = NULL, told = NULL)
+ctroughend(conc = NULL, time = NULL, tau = NULL, told = NULL,
+  ctold = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

@@ -139,6 +139,14 @@ create_dosing_intervals <- function(data, map, flag, maxdosingintervals) {
             if(i > 1){
               for(k in 1:(i-1)){
                 if(told < prev_tau[[j]][k]){
+                  if(i == 2){
+                    interval_text <- paste0(i,"nd")
+                  } else if(i == 3){
+                    interval_text <- paste0(i,"rd")
+                  } else {
+                    interval_text <- paste0(i,"th")
+                  }
+                  warning(paste0("Unable to generate ", interval_text," dosing interval for Steady State data because it overlaps previous intervals!"))
                   told <- NA
                   tau <- NA
                 }

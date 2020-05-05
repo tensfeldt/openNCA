@@ -66,7 +66,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-ctroughend <- function(conc = NULL, time = NULL, tau = NULL, told = NULL){
+ctroughend <- function(conc = NULL, time = NULL, tau = NULL, told = NULL, ctold = NULL){
   if(is.null(conc) && is.null(time) && is.null(tau)){
     stop("Error in ctroughend: 'conc', 'time' and 'tau' vectors are NULL")
   } else if(is.null(conc) && is.null(time)){
@@ -106,16 +106,30 @@ ctroughend <- function(conc = NULL, time = NULL, tau = NULL, told = NULL){
   c_troughend <- NULL
   
   # Find the concentration at the end of the ith dosing interval
-  for(i in 1:length(tau)){
-    tmp_start <- tmp[tmp$time <= tau[i],]
-    start_time <- told[i]
-    end_time <- start_time + tau[i]
-    tmp_df <- tmp[start_time <= tmp$time & tmp$time <= end_time,]
-    if(is.null(c_troughend)){
-      c_troughend <- tmp_df[nrow(tmp_df),]$conc[1]
-    } else {
-      c_troughend <- c(c_troughend, tmp_df[nrow(tmp_df),]$conc[1])
+  if(is.null(ctold) || is.na(ctold)){
+    for(i in 1:length(tau)){
+      tmp_start <- tmp[tmp$time <= tau[i],]
+      start_time <- told[i]
+      end_time <- start_time + tau[i]
+      tmp_df <- tmp[start_time <= tmp$time & tmp$time <= end_time,]
+      
+      tmp_conc_tau <- tmp[tmp$time == tau[i],]$conc
+      if(isTRUE(is.na(as.numeric(tmp_conc_tau))) || length(tmp_conc_tau) == 0){
+        if(is.null(c_troughend)){
+          c_troughend <- NA
+        } else {
+          c_troughend <- c(c_troughend, NA)
+        }
+      } else {
+        if(is.null(c_troughend)){
+          c_troughend <- tmp_df[nrow(tmp_df),]$conc[1]
+        } else {
+          c_troughend <- c(c_troughend, tmp_df[nrow(tmp_df),]$conc[1])
+        }
+      }
     }
+  } else {
+    c_troughend <- ctold
   }
   return(c_troughend)
 }

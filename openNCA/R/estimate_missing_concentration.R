@@ -34,38 +34,9 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
     if(is.na(conc[1]) && i == 1){
       if(length(orig_time) > 0 && length(orig_conc) > 0){
         if(isTRUE(time[1] <= orig_time[1])){
-          if(model == "M2"){
-            k <- (log(na.omit(tmp)[["conc"]][2])-log(na.omit(tmp)[["conc"]][1]))/(na.omit(tmp)[["time"]][2]-na.omit(tmp)[["time"]][1])
-            if(k >= 0){
-              conc_s_tmp <- conc[1]
-            } else {
-              conc_s_tmp <- exp(-1*k*na.omit(tmp)[["time"]][1]) * na.omit(tmp)[["conc"]][1] 
-            }
-          } else {
-            if(dosing_type == "SD"){
-              conc_s_tmp <- 0
-            } else if(dosing_type == "SS"){
-              conc_s_tmp <- cmin(conc = conc, time = time)
-            }
-          }
-          if(isTRUE(time[1] == told)){
-            if(isTRUE(extrapolate) && !is.null(conc_s_tmp)){
-              conc[1] <- conc_s_tmp
-              tmp$INT_EXT[1] <- "EXT" 
-            }
-          } else {
-            if(isTRUE(interpolate)){
-              cold <- ifelse(!is.na(orig_conc[which(told == orig_time)]), orig_conc[which(told == orig_time)], NA)
-              if(!is.na(cold) && length(cold) > 0){
-                if(auc_method == "LIN"){
-                  conc[1] <- interpolate_lin(conc1 = cold, time1 = told, conc2 = orig_conc[1], time2 = orig_time[1], est_time = time[1])
-                } else if(auc_method == "LOG"){
-                  conc[1] <- interpolate_log(conc1 = cold, time1 = told, conc2 = orig_conc[1], time2 = orig_time[1], est_time = time[1])
-                }
-                tmp$INT_EXT[1] <- "INT"
-              }
-            }
-          }
+          est_tmp <- estimate_told_concentration(conc = conc, time = time, interpolate = interpolate, extrapolate = extrapolate, auc_method = "LIN", model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time, tmp = tmp)
+          conc <- est_tmp[[1]]
+          tmp <- est_tmp[[2]]
         } else if(isTRUE((orig_time[1] < time[1]) && (time[1] < orig_time[length(orig_time)]))){
           if(isTRUE(interpolate)){
             idx <- which(orig_time < time[1])
