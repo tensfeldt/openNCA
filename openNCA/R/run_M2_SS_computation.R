@@ -1549,7 +1549,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             dose[[d]] <- tmp_dose
           }
           if(comp_required[["CTROUGHi"]]){
-            c_troughi[[d]] <- ctrough(conc = tmp_conc_di, time = tmp_time_di, tau = tau[[d]], told = told[[d]], ctold = ctold_est[[d]])
+            c_troughi[[d]] <- ctrough(conc = tmp_conc_di, time = tmp_time_di, tau = tau[[d]], told = told[[d]])
           }
           if(comp_required[["PTROUGHRi"]]){
             p_troughri[[d]] <- ptroughr(cmax = c_maxi[[d]], ctrough = c_troughi[[d]])
