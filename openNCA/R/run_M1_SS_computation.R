@@ -1444,7 +1444,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
           if(comp_required[["AUCLASTi"]]){
-            auclasti[[d]] <- auc_last(conc = tmp_conc_di, time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_lasti[[d]], t_max = t_maxi[[d]])
+            auclasti[[d]] <- auc_last(conc = tmp_conc_di, time = tmp_time_di, method = method, exflag = auc_flag, t_last = t_lasti[[d]], t_max = t_maxi[[d]])
           }
           if(comp_required[["AUCLASTDNi"]]){
             auclasti_dn[[d]] <- auc_dn(auc = auclasti[[d]], dose = tmp_dose)
