@@ -1557,23 +1557,41 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["AUCLAST"]]){
             tmp_auclast[[d]] <- auc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_lasti[[d]], t_max = t_maxi[[d]])
             if(d == di_col){
-              auclast <- sum(unlist(tmp_auclast))
+              overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
+              tmp_last_time <- tmp_di_df[nrow(tmp_di_df),map_data$TIME]
+              if(overall_last_time > tmp_last_time){
+                auclast <- auc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_last, t_max = t_max)
+              } else {
+                auclast <- sum(unlist(tmp_auclast)) 
+              }
             }
           }
           if(comp_required[["AUCALL"]]){
             tmp_aucall[[d]] <- auc_all(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
             if(d == di_col){
-              aucall <- sum(unlist(tmp_aucall))
+              overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
+              tmp_last_time <- tmp_di_df[nrow(tmp_di_df),map_data$TIME]
+              if(overall_last_time > tmp_last_time){
+                aucall <- auc_all(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
+              } else {
+                aucall <- sum(unlist(tmp_aucall))
+              }
             }
           }
           if(comp_required[["AUMCLAST"]]) {
             tmp_aumclast[[d]] <- aumc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
             if(d == di_col){
-              aumclast <- sum(unlist(tmp_aumclast))
+              overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
+              tmp_last_time <- tmp_di_df[nrow(tmp_di_df),map_data$TIME]
+              if(overall_last_time > tmp_last_time){
+                aumclast <- aumc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
+              } else {
+                aumclast <- sum(unlist(tmp_aumclast))
+              }
             }
           }
           if(comp_required[["CLTAUi"]]) {
-            cl_tau[[d]] <- cltau(auctau = auctau[[d]], dose = tmp_dose)
+            cl_tau[[d]] <- cltau(auctau = auctau[[d]], dose =  dose_c_i[[d]])
           }
           if(comp_required[["CLTAUWi"]]) {
             cl_tauw[[d]] <- cltauw(cltau = cl_tau[[d]], normbs = norm_bs)
@@ -1597,7 +1615,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             vsspw[[d]] <- vsspw(vssp = vssp[[d]], normbs = norm_bs)
           }
           if(comp_required[["VZTAUi"]]) {
-            vz_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose = tmp_dose)
+            vz_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose =  dose_c_i[[d]])
           }
           if(comp_required[["VZTAUWi"]]) {
             vz_tauw[[d]] <- vzftauw(vzftau = vz_tau[[d]], normbs = norm_bs)
@@ -1758,9 +1776,10 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         for(d in 1:di_col){
           tmp_di_df  <- tmp_df[tmp_df[c(paste0("DI", d, "F"))] == 1,]
           tmp_di_df <- tmp_di_df[order(tmp_di_df[,map_data$TIME]),]
+          tmp_dose <- tmp_di_df[, as.character(map_data[c(paste0("DOSE",d))])][1]
           
           if(comp_required[["AUCALLDN"]]){
-            aucalldn[[d]] <- auc_dn(auc = aucall, dose = dose_ci[[d]])
+            aucalldn[[d]] <- auc_dn(auc = aucall, dose = tmp_dose)
           }
           if(comp_required[["AUCINFO"]]){
             tmp_aucinf_o <- auc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, c_last = c_lasti[[d]], kel = kel_v)

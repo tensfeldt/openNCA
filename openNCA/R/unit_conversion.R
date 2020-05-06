@@ -918,12 +918,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
     AUCNORMUPARAM <- parameters_by_class("AUCNORMU", names(result_data))
     
     if(length(AUCNORMUPARAM)>0 && parameter_required("^TIMEU$", names(map_data)) && parameter_required("^CONCU$", names(map_data)) && parameter_required("^DOSE[0-9]*?U$", names(map))){
-      if(parameter_required(map_data$TIMEU, names(data_data)) && parameter_required(map_data$CONCU, names(data_data)) && parameter_required(map_data$DOSEU, names(data_data))){
+      if(parameter_required(map_data$TIMEU, names(data_data)) && parameter_required(map_data$CONCU, names(data_data)) && parameter_required("^DOSE(i{1}|[0-9]*?)U$", names(map))){
         inputconcunit <- as.character(unique(data_data[, map_data$CONCU])[[1]])
         inputtimeunit <- as.character(unique(data_data[, map_data$TIMEU])[[1]])
-        xdoseu <- ifelse(!is.null(map_data$DOSEULIST), unlist(strsplit(map_data$DOSEULIST, ";"))[1], NA)
-        inputdoseunit <- as.character(unique(data_data[, map_data[,xdoseu]])[[1]])
-
+        
         if(!is.null(map_data$CONCU)){
           if(!is.null(unique(data_data[, map_data$CONCU])[1])){
             aucdn_unit_tmp <- as.character(unlist(strsplit(as.character(unique(data_data[, map_data$CONCU])[1]), "/"))) 
@@ -934,7 +932,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           aucdn_unit_tmp <- NA
         }
         aucdn_unit_tmp2 <- as.character(unique(data_data[, map_data$TIMEU])[[1]])
-        aucdn_unit_tmp3 <- as.character(unique(data_data[, map_data[,xdoseu]])[[1]])
+        aucdn_unit_tmp3 <- as.character(unique(data_data[, map_data[,unlist(strsplit(map_data$DOSEULIST, ";"))[1]]]))
         inputUnit10 <- c(as.character(aucdn_unit_tmp[1]), aucdn_unit_tmp2, as.character(aucdn_unit_tmp[2]), aucdn_unit_tmp3)
 
         outputUnitLabel <- "AUCNORMOUTPUTUNIT"
