@@ -98,9 +98,8 @@ dosec <- function(data = NULL, map = NULL, idose = NULL){
 ##  } else {
 ##    data_data <- data_data[, vlist]
 ##  }
-  
     df <- unit_conversion(data = data_data, map = map_data, result = data_data, unit_class = "DOSEU", verbose=FALSE)
-    dose_c <- df[,xdose]
+    dose_c <- unique(df[,xdose])[1]
   } else {
     dose_c <- NA
   }

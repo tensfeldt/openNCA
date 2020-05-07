@@ -1094,7 +1094,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         extrapolation <- FALSE
       }      
       
-      if(nrow(tmp_df) > 0 & all(tmp_df[,map_data$TIME] >= 0)){
+      if(isTRUE(nrow(tmp_df) > 0 & all(tmp_df[,map_data$TIME] >= 0))){
         orig_time <- tmp_df[,map_data$TIME]
         orig_conc <- tmp_df[,map_data$CONC]
         auc_time <- tmp_df[,map_data$TIME]
@@ -1469,9 +1469,6 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["CMAXCi"]]) {
             c_maxci[[d]] <- cmaxc(kel = kel_v[["KEL"]], cmax = c_maxi[[d]], c0 = obs_c_0, tmax = t_maxi[[d]])
           }
-          if(comp_required[["AUCALLDN"]]) {
-            aucalldn[[d]] <- auc_dn(auc = aucall, dose = tmp_dose)
-          }
           if(comp_required[["AUCLASTi"]]) {
             auclasti[[d]] <- auc_last(conc = tmp_conc_di, time = tmp_time_di, method = method, exflag = auc_flag, t_last = t_lasti[[d]], t_max = t_maxi[[d]])
           }
@@ -1559,8 +1556,12 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             if(d == di_col){
               overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
               tmp_last_time <- tmp_di_df[nrow(tmp_di_df),map_data$TIME]
-              if(overall_last_time > tmp_last_time){
-                auclast <- auc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_last, t_max = t_max)
+              if((is.numeric(overall_last_time) && length(overall_last_time) > 0) && (is.numeric(tmp_last_time) && length(tmp_last_time) > 0)){
+                if(isTRUE(overall_last_time > tmp_last_time)){
+                  auclast <- auc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_last, t_max = t_max)
+                } else {
+                  auclast <- sum(unlist(tmp_auclast)) 
+                }
               } else {
                 auclast <- sum(unlist(tmp_auclast)) 
               }
@@ -1571,8 +1572,12 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             if(d == di_col){
               overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
               tmp_last_time <- tmp_di_df[nrow(tmp_di_df),map_data$TIME]
-              if(overall_last_time > tmp_last_time){
-                aucall <- auc_all(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
+              if((is.numeric(overall_last_time) && length(overall_last_time) > 0) && (is.numeric(tmp_last_time) && length(tmp_last_time) > 0)){
+                if(isTRUE(overall_last_time > tmp_last_time)){
+                  aucall <- auc_all(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
+                } else {
+                  aucall <- sum(unlist(tmp_aucall))
+                }
               } else {
                 aucall <- sum(unlist(tmp_aucall))
               }
@@ -1583,8 +1588,12 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             if(d == di_col){
               overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
               tmp_last_time <- tmp_di_df[nrow(tmp_di_df),map_data$TIME]
-              if(overall_last_time > tmp_last_time){
-                aumclast <- aumc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
+              if((is.numeric(overall_last_time) && length(overall_last_time) > 0) && (is.numeric(tmp_last_time) && length(tmp_last_time) > 0)){
+                if(isTRUE(overall_last_time > tmp_last_time)){
+                  aumclast <- aumc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
+                } else {
+                  aumclast <- sum(unlist(tmp_aumclast))
+                }
               } else {
                 aumclast <- sum(unlist(tmp_aumclast))
               }
@@ -2331,8 +2340,10 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     }
   }
   if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
-    if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
-      computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
+    if("FLGACCEPTKEL" %in% names(computation_df)){
+      if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
+        computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
+      }
     }
   }
   if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
