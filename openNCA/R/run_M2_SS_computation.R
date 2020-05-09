@@ -1384,6 +1384,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
           tmp_tau <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TAU",d))])][1])
+          tmp_tau <- tmp_tau + tmp_told
           ctau_exists <- FALSE 
           if(tmp_tau %in% tmp_di_df[,map_data$TIME]){
             idx <- which(tmp_di_df[,map_data$TIME] == tmp_tau)
@@ -1392,7 +1393,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               ctau_exists <- TRUE
             }
           }
-          if((isTRUE(ctold_exists) || isTRUE(ctau_exists)) && di_col > 1){
+          if((!isTRUE(ctold_exists) || !isTRUE(ctau_exists)) && di_col > 1){
             warning(paste0("Missing concentration at TAU and/or TOLD for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
           }
           
@@ -1411,6 +1412,12 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             aumc_time <- tmp_time_di
           } else {
             aumc_time <- tmp_time_di - as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",(d-1)))])][1])
+          }
+          tmp_nomtime_di <- tmp_time_di
+          if(isTRUE("NOMTIME" %in% names(map_data))){
+            if(isTRUE(map_data$NOMTIME %in% names(tmp_di_df))){
+              tmp_nomtime_di <- tmp_di_df[,map_data$NOMTIME]
+            }
           }
           
           if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]) {
@@ -1546,7 +1553,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             dose[[d]] <- tmp_dose
           }
           if(comp_required[["CTROUGHi"]]){
-            c_troughi[[d]] <- ctrough(conc = tmp_conc_di, time = tmp_time_di, tau = tau[[d]], told = told[[d]])
+            c_troughi[[d]] <- ctrough(conc = tmp_conc_di, time = tmp_nomtime_di, tau = tau[[d]], told = told[[d]])
           }
           if(comp_required[["PTROUGHRi"]]){
             p_troughri[[d]] <- ptroughr(cmax = c_maxi[[d]], ctrough = c_troughi[[d]])
@@ -1787,20 +1794,42 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           tmp_di_df <- tmp_di_df[order(tmp_di_df[,map_data$TIME]),]
           tmp_dose <- tmp_di_df[, as.character(map_data[c(paste0("DOSE",d))])][1]
           
+          ctold_exists <- FALSE 
+          if(tmp_told %in% tmp_di_df[,map_data$TIME]){
+            idx <- which(tmp_di_df[,map_data$TIME] == tmp_told)
+            tmp_ctold <- tmp_di_df[,map_data$CONC][length(idx)]
+            if(!is.na(tmp_ctold)){
+              ctold_exists <- TRUE
+            }
+          }
+          tmp_tau <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TAU",d))])][1])
+          tmp_tau <- tmp_tau + tmp_told
+          ctau_exists <- FALSE 
+          if(tmp_tau %in% tmp_di_df[,map_data$TIME]){
+            idx <- which(tmp_di_df[,map_data$TIME] == tmp_tau)
+            tmp_ctau <- tmp_di_df[,map_data$CONC][length(idx)]
+            if(!is.na(tmp_ctau)){
+              ctau_exists <- TRUE
+            }
+          }
+          if(!isTRUE(ctold_exists)){
+            tmp_conc_di <- c(NA, tmp_di_df[,map_data$CONC])
+            tmp_time_di <- c(tmp_told, tmp_di_df[,map_data$TIME])
+            est_tmp <- estimate_told_concentration(conc = tmp_conc_di, time = tmp_time_di, interpolate = TRUE, extrapolate = TRUE, auc_method = "LIN", model = "M1", dosing_type = "SS", told = tmp_told, orig_conc = orig_conc, orig_time = orig_time)
+            tmp_conc_di <- est_tmp[[1]]
+          } else {
+            tmp_conc_di <- tmp_di_df[,map_data$CONC]
+            tmp_time_di <- tmp_di_df[,map_data$TIME]
+          }
+          tmp_nomtime_di <- tmp_time_di
+          if(isTRUE("NOMTIME" %in% names(map_data))){
+            if(isTRUE(map_data$NOMTIME %in% names(tmp_di_df))){
+              tmp_nomtime_di <- tmp_di_df[,map_data$NOMTIME]
+            }
+          }
+          
           if(comp_required[["AUCALLDN"]]){
             aucalldn[[d]] <- auc_dn(auc = aucall, dose = tmp_dose)
-          }
-          if(comp_required[["AUCINFO"]]){
-            tmp_aucinf_o <- auc_inf_o(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, c_last = c_lasti[[d]], kel = kel_v)
-            if(d == di_col){
-              aucinf_o <- sum(unlist(tmp_aucinf_o))
-            }
-          }
-          if(comp_required[["AUCINFP"]]){
-            tmp_aucinf_p <- auc_inf_p(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, t_last = t_lasti[[d]], kel = kel_v)
-            if(d == di_col){
-              aucinf_p <- sum(unlist(tmp_aucinf_p))
-            }
           }
           if((d+1) <= di_col){
             next_tmp_di_df  <- tmp_df[tmp_df[c(paste0("DI", d+1, "F"))] == 1,]
@@ -1822,14 +1851,14 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               next_ctold_est <- next_tmp_conc_di[1]
               
               if(comp_required[["CTROUGHENDi"]]){
-                c_troughendi[[d]] <- ctroughend(conc = tmp_conc_di, time = tmp_time_di, tau = tau[[d]], told = told[[d]], ctold = next_ctold_est)
+                c_troughendi[[d]] <- ctroughend(conc = tmp_conc_di, time = tmp_nomtime_di, tau = tau[[d]], told = told[[d]], ctold = next_ctold_est)
               }
               if(comp_required[["PTROUGHRENDi"]]){
                 p_troughrendi[[d]] <- ptroughrend(cmax = c_maxi[[d]], ctrough = c_troughendi[[d]])
               }
             } else {
               if(comp_required[["CTROUGHENDi"]]){
-                c_troughendi[[d]] <- ctroughend(conc = tmp_conc_di, time = tmp_time_di, tau = tau[[d]], told = told[[d]])
+                c_troughendi[[d]] <- ctroughend(conc = tmp_conc_di, time = tmp_nomtime_di, tau = tau[[d]], told = told[[d]])
               }
               if(comp_required[["PTROUGHRENDi"]]){
                 p_troughrendi[[d]] <- ptroughrend(cmax = c_maxi[[d]], ctrough = c_troughendi[[d]])
@@ -1837,12 +1866,18 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           } else {
             if(comp_required[["CTROUGHENDi"]]){
-              c_troughendi[[d]] <- ctroughend(conc = tmp_conc_di, time = tmp_time_di, tau = tau[[d]], told = told[[d]])
+              c_troughendi[[d]] <- ctroughend(conc = tmp_conc_di, time = tmp_nomtime_di, tau = tau[[d]], told = told[[d]])
             }
             if(comp_required[["PTROUGHRENDi"]]){
               p_troughrendi[[d]] <- ptroughrend(cmax = c_maxi[[d]], ctrough = c_troughendi[[d]])
             }
           }
+        }
+        if(comp_required[["AUCINFO"]]){
+          aucinf_o <- auc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, c_last = c_last, kel = kel_v)
+        }
+        if(comp_required[["AUCINFP"]]){
+          aucinf_p <- auc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, t_last = t_last, kel = kel_v)
         }
         if(comp_required[["AUCLASTDN"]]) {
           auclastdn <- auc_dn(auc = auclast, dose = main_dose)
@@ -2307,7 +2342,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           kel_flag_optimized <- c(kel_flag_optimized, kel_flag)
         }
         computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]
-        if(any(tmp_df[,map_data$TIME] < 0)){
+        if(isTRUE(any(tmp_df[,map_data$TIME] < 0))){
           warning(paste0("No parameters generated due to negative TIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
         }
       }

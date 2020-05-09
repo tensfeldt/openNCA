@@ -30,11 +30,17 @@ estimate_told_concentration <- function(conc = NULL, time = NULL, interpolate = 
   }
 
   if(model == "M2"){
-    k <- (log(na.omit(tmp)[["conc"]][2])-log(na.omit(tmp)[["conc"]][1]))/(na.omit(tmp)[["time"]][2]-na.omit(tmp)[["time"]][1])
-    if(k >= 0){
+    if(nrow(tmp) >= 2){
+      k <- (log(na.omit(tmp)[["conc"]][2])-log(na.omit(tmp)[["conc"]][1]))/(na.omit(tmp)[["time"]][2]-na.omit(tmp)[["time"]][1])
+      if(k >= 0){
+        conc_s_tmp <- conc[1]
+      } else {
+        conc_s_tmp <- exp(-1*k*na.omit(tmp)[["time"]][1]) * na.omit(tmp)[["conc"]][1] 
+      }
+    } else if(nrow(tmp) == 1){
       conc_s_tmp <- conc[1]
     } else {
-      conc_s_tmp <- exp(-1*k*na.omit(tmp)[["time"]][1]) * na.omit(tmp)[["conc"]][1] 
+      conc_s_tmp <- NA
     }
   } else {
     if(dosing_type == "SD"){

@@ -203,12 +203,14 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = N
 
 ### 2019-08-28/TGT/ There doesn't appear to be any implement extrapolation method for auc_tau.R if tau>max(time)
     if(tau < orig_time[length(orig_time)]){
-      time_1 <- time[length(time)]
-      conc_1 <- conc[length(conc)]
-      time_2 <- orig_time[!orig_time < tau][1]
-      conc_2 <- orig_conc[orig_time %in% time_2]
-
+      idx <- which(orig_time < tau)
+      idx <- idx[length(idx)]
+      time_1 <- orig_time[idx]
+      conc_1 <- orig_conc[idx]
+      time_2 <- orig_time[idx+1]
+      conc_2 <- orig_conc[idx+1]
 ###
+###      cat('auc_tau.R: time_1: ', time_1,' conc_1: ', conc_1, ' time_2: ', time_2,' conc_2: ', conc_2, '\n')
 ###      cat('auc_tau.R: t_max: ', t_max,' class(tau): ', class(tau), ' tau: ', tau, '\n')
 
       tau_conc <- NA
@@ -234,16 +236,15 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = N
       }
       new_time <- c(time, tau)
       new_time <- sort(new_time)
-      index <- sum(new_time <= tau)
-      if(index > length(conc)){
-        new_conc <- c(conc[1:(index-1)], tau_conc)
-      } else {
-        new_conc <- c(conc[1:(index-1)], tau_conc, conc[index:length(conc)])
-      }
+      index <- which(new_time < tau)
+      new_time <- c(new_time[index], tau)
+      new_conc <- c(conc[index], tau_conc)
+      
       if(sum(new_conc, na.rm = T) == 0){
         return(0)
       }
 ###      cat('new_conc: ', new_conc, '\n')
+###      cat('new_time: ', new_time, '\n')
       
       if(method == 1){
         return(auc_lin_log(conc = new_conc, time = new_time, exflag = exflag, t_max = t_max))

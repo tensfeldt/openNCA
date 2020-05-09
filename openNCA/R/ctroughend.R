@@ -106,30 +106,34 @@ ctroughend <- function(conc = NULL, time = NULL, tau = NULL, told = NULL, ctold 
   c_troughend <- NULL
   
   # Find the concentration at the end of the ith dosing interval
-  if(is.null(ctold) || is.na(ctold)){
-    for(i in 1:length(tau)){
-      tmp_start <- tmp[tmp$time <= tau[i],]
-      start_time <- told[i]
-      end_time <- start_time + tau[i]
-      tmp_df <- tmp[start_time <= tmp$time & tmp$time <= end_time,]
-      
-      tmp_conc_tau <- tmp[tmp$time == tau[i],]$conc
-      if(isTRUE(is.na(as.numeric(tmp_conc_tau))) || length(tmp_conc_tau) == 0){
-        if(is.null(c_troughend)){
+  for(i in 1:length(tau)){
+    tmp_start <- tmp[tmp$time <= tau[i],]
+    start_time <- told[i]
+    end_time <- start_time + tau[i]
+    tmp_df <- tmp[start_time <= tmp$time & tmp$time <= end_time,]
+    
+    tmp_conc_tau <- tmp[tmp$time == tau[i],]$conc
+    if(isTRUE(is.na(as.numeric(tmp_conc_tau))) || length(tmp_conc_tau) == 0){
+      if(is.null(c_troughend)){
+        if(is.null(ctold) || is.na(ctold) || !is.numeric(ctold)){
           c_troughend <- NA
         } else {
-          c_troughend <- c(c_troughend, NA)
+          c_troughend <- ctold
         }
       } else {
-        if(is.null(c_troughend)){
-          c_troughend <- tmp_df[nrow(tmp_df),]$conc[1]
+        if(is.null(ctold) || is.na(ctold) || !is.numeric(ctold)){
+          c_troughend <- c(c_troughend, NA)
         } else {
-          c_troughend <- c(c_troughend, tmp_df[nrow(tmp_df),]$conc[1])
+          c_troughend <- c(c_troughend, ctold)
         }
       }
+    } else {
+      if(is.null(c_troughend)){
+        c_troughend <- tmp_df[nrow(tmp_df),]$conc[1]
+      } else {
+        c_troughend <- c(c_troughend, tmp_df[nrow(tmp_df),]$conc[1])
+      }
     }
-  } else {
-    c_troughend <- ctold
   }
   return(c_troughend)
 }

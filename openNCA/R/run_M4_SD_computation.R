@@ -1164,7 +1164,7 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           kel_flag_optimized <- c(kel_flag_optimized, kel_flag)
         }
         computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]
-        if(any(tmp_df[,map_data$TIME] < 0) || any(tmp_df[,map_data$ENDTIME] < 0)){
+        if(isTRUE(any(tmp_df[,map_data$TIME] < 0) || any(tmp_df[,map_data$ENDTIME] < 0))){
           warning(paste0("No parameters generated due to negative TIME and/or ENDTIME values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
         }
       }
