@@ -6,8 +6,8 @@
 \usage{
 estimate_missing_concentration(conc = NULL, time = NULL,
   interpolate = NULL, extrapolate = NULL, auc_method = NULL,
-  model = NULL, dosing_type = NULL, told = NULL, kel = NULL,
-  orig_conc = NULL, orig_time = NULL)
+  model = NULL, dosing_type = NULL, t_max = NULL, told = NULL,
+  kel = NULL, orig_conc = NULL, orig_time = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

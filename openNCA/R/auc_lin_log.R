@@ -123,7 +123,7 @@ auc_lin_log <- function(conc = NULL, time = NULL, exflag = NULL, t_max = NULL, i
       if(isTRUE(interpolate) || isTRUE(extrapolate)){
 ##        2019-11-08/RD Added helper function for Interpolation
 ##
-        est_tmp <- estimate_missing_concentration(conc = conc, time = time, interpolate = interpolate, extrapolate = extrapolate, auc_method = "LINLOG", model = model, dosing_type = dosing_type, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time)
+        est_tmp <- estimate_missing_concentration(conc = conc, time = time, interpolate = interpolate, extrapolate = extrapolate, auc_method = "LINLOG", model = model, dosing_type = dosing_type, t_max = t_max, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time)
         conc <- est_tmp[[1]]
         tmp <- data.frame(time, conc)
       }
