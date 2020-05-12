@@ -1359,6 +1359,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         if(comp_required[["AUCT1_T2"]] && auc_pair_check) {
           auct1_t2 <- list()
+          auct1_t2_check <- as.list(rep(NA, auc_par_len))
           auct1_t2_names <- c(rep(paste0("AUC.", 1:auc_par_len, ".T1")), rep(paste0("AUC.", 1:auc_par_len, ".T2")))
 
           if(!all(auct1_t2_names %in% names(map_data))){
@@ -1397,7 +1398,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             warning(paste0("Missing concentration at TAU and/or TOLD for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
           }
           
-          if(!isTRUE(ctold_exists)){
+          if(!isTRUE(ctold_exists) && !is.na(tmp_told)){
             tmp_conc_di <- c(NA, tmp_di_df[,map_data$CONC])
             tmp_time_di <- c(tmp_told, tmp_di_df[,map_data$TIME])
             est_tmp <- estimate_told_concentration(conc = tmp_conc_di, time = tmp_time_di, interpolate = TRUE, extrapolate = TRUE, auc_method = "LIN", model = "M2", dosing_type = "SS", told = tmp_told, orig_conc = orig_conc, orig_time = orig_time)
@@ -1416,7 +1417,11 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           tmp_nomtime_di <- tmp_time_di
           if(isTRUE("NOMTIME" %in% names(map_data))){
             if(isTRUE(map_data$NOMTIME %in% names(tmp_di_df))){
-              tmp_nomtime_di <- tmp_di_df[,map_data$NOMTIME]
+              if(!isTRUE(ctold_exists) && !is.na(tmp_told)){
+                tmp_nomtime_di <- c(tmp_told, tmp_di_df[,map_data$NOMTIME])
+              } else {
+                tmp_nomtime_di <- tmp_di_df[,map_data$NOMTIME] 
+              }
             }
           }
           
@@ -1761,24 +1766,49 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               if(!(is.numeric(as.numeric(map_data[, paste0("AUC.", t, ".T1")])) && is.numeric(as.numeric(map_data[, paste0("AUC.", t, ".T2")])))){
                 stop(paste0("'AUC.", t, ".T1' and/or 'AUC.", t, ".T2' value provided via 'map' is not a numeric value"))
               }
-              auc_t1 <- as.numeric(map_data[, paste0("AUC.", t, ".T1")])
-              auc_t2 <- as.numeric(map_data[, paste0("AUC.", t, ".T2")])
-
-              if((isTRUE(interpolation) || isTRUE(extrapolation))){
-                tmp <- auc_t1_t2(conc = auc_conc, time = auc_time, t1 = auc_t1, t2 = auc_t2, method = method, exflag = a_auc_flag, t_max = t_max, interpolate = interpolation, extrapolate = extrapolation, model = "M2", dosing_type = "SS", told = tmp_told, kel = kel_v, orig_conc = auc_conc, orig_time = auc_time, includeNA = TRUE)
-                if(is.list(tmp)){
-                  tmp_auc <- tmp[[1]]
-                  if(t == 1){
-                    cest_tmp <- tmp[[2]]
-                  } else {
-                    cest_tmp <- rbind(cest_tmp, tmp[[2]])
+              orig_auc_t1 <- as.numeric(map_data[, paste0("AUC.", t, ".T1")])
+              orig_auc_t2 <- as.numeric(map_data[, paste0("AUC.", t, ".T2")])
+              auc_t1 <- orig_auc_t1
+              auc_t2 <- orig_auc_t2
+              tmp_start_time <- time_di[1]
+              tmp_end_time <- time_di[length(time_di)]
+              
+              if((tmp_start_time <= orig_auc_t1 && orig_auc_t1 < tmp_end_time) || (tmp_start_time < orig_auc_t2 && orig_auc_t2 <= tmp_end_time) || isTRUE(auct1_t2_check[[t]])){
+                if(!isTRUE(auct1_t2_check[[t]]) && tmp_start_time <= orig_auc_t1 && orig_auc_t1 < tmp_end_time){
+                  auct1_t2_check[[t]] <- TRUE
+                }
+                if(isTRUE(auct1_t2_check[[t]])){
+                  if(d > 1 && orig_auc_t1 < tmp_start_time){
+                    auc_t1 <- tmp_start_time
                   }
-                  cest_tmp <- unique(na.omit(cest_tmp))
+                  if(d < di_col && orig_auc_t2 > tmp_end_time){
+                    auc_t2 <- tmp_end_time
+                  }
+                  
+                  if((isTRUE(interpolation) || isTRUE(extrapolation))){
+                    tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_maxi[[d]], interpolate = interpolation, extrapolate = extrapolation, model = "M2", dosing_type = "SS", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time, includeNA = TRUE)
+                    if(is.list(tmp)){  
+                      tmp_auc <- tmp[[1]]
+                      if(t == 1){
+                        cest_tmp <- tmp[[2]]
+                      } else {
+                        cest_tmp <- rbind(cest_tmp, tmp[[2]])
+                      }
+                      cest_tmp <- unique(na.omit(cest_tmp))
+                    } else {
+                      tmp_auc <- tmp
+                    }
+                  } else {
+                    tmp_auc <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], t1 = auc_t1, t2 = auc_t2, method = method, exflag = auc_flag, t_max = t_maxi[[d]], model = "M2", dosing_type = "SS", includeNA = TRUE)
+                  }
                 } else {
-                  tmp_auc <- tmp
+                  tmp_auc <- 0
+                }
+                if(tmp_start_time < orig_auc_t2 && orig_auc_t2 <= tmp_end_time){
+                  auct1_t2_check[[t]] <- FALSE
                 }
               } else {
-                tmp_auc <- auc_t1_t2(conc = auc_conc, time = auc_time, t1 = auc_t1, t2 = auc_t2, method = method, exflag = a_auc_flag, t_max = t_max, includeNA = TRUE)
+                tmp_auc <- 0
               }
               
               if(d == 1){
@@ -1794,6 +1824,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           tmp_di_df <- tmp_di_df[order(tmp_di_df[,map_data$TIME]),]
           tmp_dose <- tmp_di_df[, as.character(map_data[c(paste0("DOSE",d))])][1]
           
+          tmp_told <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1])
           ctold_exists <- FALSE 
           if(tmp_told %in% tmp_di_df[,map_data$TIME]){
             idx <- which(tmp_di_df[,map_data$TIME] == tmp_told)
@@ -1812,7 +1843,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               ctau_exists <- TRUE
             }
           }
-          if(!isTRUE(ctold_exists)){
+          if(!isTRUE(ctold_exists) && !is.na(tmp_told)){
             tmp_conc_di <- c(NA, tmp_di_df[,map_data$CONC])
             tmp_time_di <- c(tmp_told, tmp_di_df[,map_data$TIME])
             est_tmp <- estimate_told_concentration(conc = tmp_conc_di, time = tmp_time_di, interpolate = TRUE, extrapolate = TRUE, auc_method = "LIN", model = "M1", dosing_type = "SS", told = tmp_told, orig_conc = orig_conc, orig_time = orig_time)
@@ -1824,7 +1855,11 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           tmp_nomtime_di <- tmp_time_di
           if(isTRUE("NOMTIME" %in% names(map_data))){
             if(isTRUE(map_data$NOMTIME %in% names(tmp_di_df))){
-              tmp_nomtime_di <- tmp_di_df[,map_data$NOMTIME]
+              if(!isTRUE(ctold_exists) && !is.na(tmp_told)){
+                tmp_nomtime_di <- c(tmp_told, tmp_di_df[,map_data$NOMTIME])
+              } else {
+                tmp_nomtime_di <- tmp_di_df[,map_data$NOMTIME] 
+              }
             }
           }
           

@@ -140,7 +140,7 @@ auc_log <- function(conc = NULL, time = NULL, exflag = NULL, interpolate = NULL,
         auc <- NA
       }
     } else {
-      stop("Error in auc_log: 'tmax' is NA")
+      auc <- NA
     }
     if(!is.na(tmp$conc[1]) && !is.na(tmp$conc[length(tmp$conc)])){
       auc_df <- as.numeric(auc_df)

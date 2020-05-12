@@ -809,6 +809,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         if(comp_required[["AURCT1_T2"]] && auc_pair_check) {
           aurct1_t2 <- list()
+          aurct1_t2_check <- as.list(rep(NA, aurc_par_len))
           aurct1_t2_names <- c(rep(paste0("AUC.", 1:aurc_par_len, ".T1")), rep(paste0("AUC.", 1:aurc_par_len, ".T2")))
           if(!all(aurct1_t2_names %in% names(map_data))){
             par_col <- rep(paste0("'", aurct1_t2_names[!aurct1_t2_names %in% names(map_data)], "'"))
@@ -936,6 +937,9 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
           if(comp_required[["AURCT1_T2"]] && auc_pair_check) {
+            time <- sort(auc_mid_pt)
+            time_di <- sort(tmp_mid_pt)
+            
             if((isTRUE(interpolation) || isTRUE(extrapolation)) && !(c(paste0("TOLD",d)) %in% names(map_data))){
               stop(paste0("Dataset provided via 'map' does not contain the required columns for interpolating partial areas ", paste0("TOLD",d)))
             } else if((isTRUE(interpolation) || isTRUE(extrapolation)) && (c(paste0("TOLD",d)) %in% names(map_data))) {
@@ -949,29 +953,53 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             } else {
               tmp_told <- NA
             }
-            
             for(t in 1:(aurc_par_len)){
               if(!(is.numeric(as.numeric(map_data[, paste0("AUC.", t, ".T1")])) && is.numeric(as.numeric(map_data[, paste0("AUC.", t, ".T2")])))){
                 stop(paste0("'AUC.", t, ".T1' and/or 'AUC.", t, ".T2' value provided via 'map' is not a numeric value"))
               }
-              aurc_t1 <- as.numeric(map_data[, paste0("AUC.", t, ".T1")])
-              aurc_t2 <- as.numeric(map_data[, paste0("AUC.", t, ".T2")])
+              orig_aurc_t1 <- as.numeric(map_data[, paste0("AUC.", t, ".T1")])
+              orig_aurc_t2 <- as.numeric(map_data[, paste0("AUC.", t, ".T2")])
+              aurc_t1 <- orig_aurc_t1
+              aurc_t2 <- orig_aurc_t2
+              tmp_start_time <- time_di[1]
+              tmp_end_time <- time_di[length(time_di)]
               
-              if((isTRUE(interpolation) || isTRUE(extrapolation))){
-                tmp <- auc_t1_t2(conc = auc_rt, time = auc_mid_pt, t1 = aurc_t1, t2 = aurc_t2, method = method, exflag = auc_flag, t_max = tmax_rate, interpolate = interpolation, extrapolate = extrapolation, model = "M4", dosing_type = "SS", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time, includeNA = TRUE)
-                if(is.list(tmp)){
-                  tmp_auc <- tmp[[1]]
-                  if(t == 1){
-                    cest_tmp <- tmp[[2]]
-                  } else {
-                    cest_tmp <- rbind(cest_tmp, tmp[[2]])
+              if((tmp_start_time <= orig_aurc_t1 && orig_aurc_t1 < tmp_end_time) || (tmp_start_time < orig_aurc_t2 && orig_aurc_t2 <= tmp_end_time) || isTRUE(aurct1_t2_check[[t]])){
+                if(!isTRUE(aurct1_t2_check[[t]]) && tmp_start_time <= orig_aurc_t1 && orig_aurc_t1 < tmp_end_time){
+                  aurct1_t2_check[[t]] <- TRUE
+                }
+                if(isTRUE(aurct1_t2_check[[t]])){
+                  if(d > 1 && orig_aurc_t1 < tmp_start_time){
+                    aurc_t1 <- tmp_start_time
                   }
-                  cest_tmp <- unique(na.omit(cest_tmp))
+                  if(d < di_col && orig_aurc_t2 > tmp_end_time){
+                    aurc_t2 <- tmp_end_time
+                  }
+                  
+                  if((isTRUE(interpolation) || isTRUE(extrapolation))){
+                    tmp <- auc_t1_t2(conc = auc_rt, time = auc_mid_pt, t1 = aurc_t1, t2 = aurc_t2, method = method, exflag = auc_flag, t_max = tmax_rate_i[[d]], interpolate = interpolation, extrapolate = extrapolation, model = "M4", dosing_type = "SS", told = tmp_told, kel = kel_v, orig_conc = orig_conc, orig_time = orig_time, includeNA = TRUE)
+                    if(is.list(tmp)){  
+                      tmp_auc <- tmp[[1]]
+                      if(t == 1){
+                        cest_tmp <- tmp[[2]]
+                      } else {
+                        cest_tmp <- rbind(cest_tmp, tmp[[2]])
+                      }
+                      cest_tmp <- unique(na.omit(cest_tmp))
+                    } else {
+                      tmp_auc <- tmp
+                    }
+                  } else {
+                    tmp_auc <- auc_t1_t2(conc = auc_rt, time = auc_mid_pt, t1 = aurc_t1, t2 = aurc_t2, method = method, exflag = auc_flag, t_max = tmax_rate_i[[d]], model = "M4", dosing_type = "SS", includeNA = TRUE)
+                  }
                 } else {
-                  tmp_auc <- tmp
+                  tmp_auc <- 0
+                }
+                if(tmp_start_time < orig_auc_t2 && orig_auc_t2 <= tmp_end_time){
+                  aurct1_t2_check[[t]] <- FALSE
                 }
               } else {
-                tmp_auc <- auc_t1_t2(conc = auc_rt, time = auc_mid_pt, t1 = aurc_t1, t2 = aurc_t2, method = method, exflag = auc_flag, t_max = tmax_rate, includeNA = TRUE)
+                tmp_auc <- 0
               }
               
               if(d == 1){

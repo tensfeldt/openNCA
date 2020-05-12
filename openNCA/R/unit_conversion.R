@@ -1218,7 +1218,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
             }
           }
           if(testunit){
-            concdnUFinalScaler <- concdnUScaler[1] * concdnUScaler[2] / concdnUScaler[3]
+            concdnUFinalScaler <- concdnUScaler[1] / concdnUScaler[2] / concdnUScaler[3]
             concdn_col <- names(result_data)[names(result_data) %in% CONCNORMUPARAM]
             result_data[concdn_col] <- result_data[concdn_col] * concdnUFinalScaler
             result_data$CONCNORMU <- ifelse(concdnUFinalScaler == 1 & as.character(formattedinputUnit) == as.character(formattedoutputUnit), as.character(formattedinputUnit), as.character(formattedoutputUnit))
