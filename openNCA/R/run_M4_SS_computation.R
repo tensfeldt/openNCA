@@ -964,15 +964,15 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               tmp_start_time <- time_di[1]
               tmp_end_time <- time_di[length(time_di)]
               
-              if((tmp_start_time <= orig_aurc_t1 && orig_aurc_t1 < tmp_end_time) || (tmp_start_time < orig_aurc_t2 && orig_aurc_t2 <= tmp_end_time) || isTRUE(aurct1_t2_check[[t]])){
-                if(!isTRUE(aurct1_t2_check[[t]]) && tmp_start_time <= orig_aurc_t1 && orig_aurc_t1 < tmp_end_time){
+              if(isTRUE(tmp_start_time <= orig_aurc_t1 && orig_aurc_t1 < tmp_end_time) || isTRUE(tmp_start_time < orig_aurc_t2 && orig_aurc_t2 <= tmp_end_time) || isTRUE(aurct1_t2_check[[t]])){
+                if(!isTRUE(aurct1_t2_check[[t]]) && isTRUE(tmp_start_time <= orig_aurc_t1) && isTRUE(orig_aurc_t1 < tmp_end_time)){
                   aurct1_t2_check[[t]] <- TRUE
                 }
                 if(isTRUE(aurct1_t2_check[[t]])){
-                  if(d > 1 && orig_aurc_t1 < tmp_start_time){
+                  if(isTRUE(d > 1 && orig_aurc_t1 < tmp_start_time)){
                     aurc_t1 <- tmp_start_time
                   }
-                  if(d < di_col && orig_aurc_t2 > tmp_end_time){
+                  if(isTRUE(d < di_col && orig_aurc_t2 > tmp_end_time)){
                     aurc_t2 <- tmp_end_time
                   }
                   
@@ -995,7 +995,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 } else {
                   tmp_auc <- 0
                 }
-                if(tmp_start_time < orig_auc_t2 && orig_auc_t2 <= tmp_end_time){
+                if(isTRUE(tmp_start_time < orig_aurc_t2) && isTRUE(orig_aurc_t2 <= tmp_end_time)){
                   aurct1_t2_check[[t]] <- FALSE
                 }
               } else {
