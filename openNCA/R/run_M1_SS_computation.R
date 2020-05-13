@@ -1310,8 +1310,8 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           
           tmp_told <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1])
           ctold_exists <- FALSE 
-          if(tmp_told %in% tmp_di_df[,map_data$TIME]){
-            idx <- which(tmp_di_df[,map_data$TIME] == tmp_told)
+          if(tmp_told %in% tmp_di_df[,map_data$NOMTIME]){
+            idx <- which(tmp_di_df[,map_data$NOMTIME] == tmp_told)
             tmp_ctold <- tmp_di_df[,map_data$CONC][length(idx)]
             if(!is.na(tmp_ctold)){
               ctold_exists <- TRUE
@@ -1320,8 +1320,8 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           tmp_tau <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TAU",d))])][1])
           tmp_tau <- tmp_tau + tmp_told
           ctau_exists <- FALSE 
-          if(tmp_tau %in% tmp_di_df[,map_data$TIME]){
-            idx <- which(tmp_di_df[,map_data$TIME] == tmp_tau)
+          if(tmp_tau %in% tmp_di_df[,map_data$NOMTIME]){
+            idx <- which(tmp_di_df[,map_data$NOMTIME] == tmp_tau)
             tmp_ctau <- tmp_di_df[,map_data$CONC][length(idx)]
             if(!is.na(tmp_ctau)){
               ctau_exists <- TRUE
@@ -1428,10 +1428,10 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 if(isTRUE(overall_last_time > tmp_last_time)){
                   auclast <- auc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_last, t_max = t_max)
                 } else {
-                  auclast <- sum(unlist(tmp_auclast))
+                  auclast <- ifelse(isTRUE(all(is.na(tmp_auclast))), NA, sum(unlist(tmp_auclast), na.rm = TRUE))
                 }
               } else {
-                auclast <- sum(unlist(tmp_auclast))
+                auclast <- ifelse(isTRUE(all(is.na(tmp_auclast))), NA, sum(unlist(tmp_auclast), na.rm = TRUE))
               }
             }
           }
@@ -1444,10 +1444,10 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 if(isTRUE(overall_last_time > tmp_last_time)){
                   aucall <- auc_all(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
                 } else {
-                  aucall <- sum(unlist(tmp_aucall))
+                  aucall <- ifelse(isTRUE(all(is.na(tmp_aucall))), NA, sum(unlist(tmp_aucall), na.rm = TRUE))
                 }
               } else {
-                aucall <- sum(unlist(tmp_aucall))
+                aucall <- ifelse(isTRUE(all(is.na(tmp_aucall))), NA, sum(unlist(tmp_aucall), na.rm = TRUE))
               }
             }
           }
@@ -1460,10 +1460,10 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 if(isTRUE(overall_last_time > tmp_last_time)){
                   aumclast <- aumc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
                 } else {
-                  aumclast <- sum(unlist(tmp_aumclast))
+                  aumclast <- ifelse(isTRUE(all(is.na(tmp_aumclast))), NA, sum(unlist(tmp_aumclast), na.rm = TRUE))
                 }
               } else {
-                aumclast <- sum(unlist(tmp_aumclast))
+                aumclast <- ifelse(isTRUE(all(is.na(tmp_aumclast))), NA, sum(unlist(tmp_aumclast), na.rm = TRUE))
               }
             }
           }
@@ -1788,8 +1788,8 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             next_tmp_di_df <- next_tmp_di_df[order(next_tmp_di_df[,map_data$TIME]),]
             next_tmp_told <- as.numeric(next_tmp_di_df[, as.character(map_data[c(paste0("TOLD",d+1))])][1])
             next_ctold_exists <- FALSE 
-            if(next_tmp_told %in% next_tmp_di_df[,map_data$TIME]){
-              idx <- which(next_tmp_di_df[,map_data$TIME] == next_tmp_told)
+            if(next_tmp_told %in% next_tmp_di_df[,map_data$NOMTIME]){
+              idx <- which(next_tmp_di_df[,map_data$NOMTIME] == next_tmp_told)
               next_tmp_ctold <- next_tmp_di_df[,map_data$CONC][length(idx)]
               if(!is.na(next_tmp_ctold)){
                 next_ctold_exists <- TRUE

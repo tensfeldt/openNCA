@@ -224,10 +224,11 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = 
           tau_conc <- interpolate_log(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = tau)
         }
       }
-      tmp_data <- data.frame(time = time, conc = conc)
-      tmp_data[nrow(tmp_data)+1,] <- c(tau, tau_conc)
-      new_time <- tmp_data[order(tmp_data$time),]$time
-      new_conc <- tmp_data[order(tmp_data$time),]$conc
+      new_time <- c(time, tau)
+      new_time <- sort(new_time)
+      index <- which(new_time < tau)
+      new_time <- c(new_time[index], tau)
+      new_conc <- c(conc[index], tau_conc)
 
       if(method == 1){
         return(aumc_lin_log(conc = new_conc, time = new_time, exflag = exflag, t_max = t_max))
