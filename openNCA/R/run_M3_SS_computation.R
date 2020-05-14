@@ -1350,8 +1350,10 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               ctau_exists <- TRUE
             }
           }
-          if((!isTRUE(ctold_exists) || !isTRUE(ctau_exists)) && di_col > 1){
-            warning(paste0("Missing concentration at TAU and/or TOLD for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
+          if(!is.na(tmp_told) && !is.na(tmp_tau)){
+            if((!isTRUE(ctold_exists) || !isTRUE(ctau_exists)) && di_col > 1){
+              warning(paste0("Missing concentration at TAU and/or TOLD for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
+            }
           }
           
           if(!isTRUE(ctold_exists) && !is.na(tmp_told)){
@@ -1711,6 +1713,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(comp_required[["AUCT1_T2"]] && auc_pair_check) {
             time <- sort(unique(data_data[,map_data$TIME]))
             time_di <- sort(tmp_di_df[,map_data$TIME])
+            nomtime_di <- sort(tmp_di_df[,map_data$NOMTIME])
 
             if((isTRUE(interpolation) || isTRUE(extrapolation)) && !(c(paste0("TOLD",d)) %in% names(map_data))){
               stop(paste0("Dataset provided via 'map' does not contain the required columns for interpolating partial areas ", paste0("TOLD",d)))
@@ -1733,8 +1736,8 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               orig_auc_t2 <- as.numeric(map_data[, paste0("AUC.", t, ".T2")])
               auc_t1 <- orig_auc_t1
               auc_t2 <- orig_auc_t2
-              tmp_start_time <- time_di[1]
-              tmp_end_time <- time_di[length(time_di)]
+              tmp_start_time <- nomtime_di[1]
+              tmp_end_time <- nomtime_di[length(time_di)]
               
               if(isTRUE(tmp_start_time <= orig_auc_t1 && orig_auc_t1 < tmp_end_time) || isTRUE(tmp_start_time < orig_auc_t2 && orig_auc_t2 <= tmp_end_time) || isTRUE(auct1_t2_check[[t]])){
                 if(!isTRUE(auct1_t2_check[[t]]) && isTRUE(tmp_start_time <= orig_auc_t1) && isTRUE(orig_auc_t1 < tmp_end_time)){
