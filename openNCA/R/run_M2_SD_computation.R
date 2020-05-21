@@ -819,7 +819,7 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       
       dof <- ifelse("DOF1" %in% names(map_data), ifelse(map_data$DOF1 %in% names(data_data), unique(tmp_df[,map_data$DOF1])[1], NA), ifelse("DOF" %in% names(map_data), ifelse(map_data$DOF %in% names(data_data), unique(tmp_df[,map_data$DOF])[1], NA), NA))
       
-      if(isTRUE(nrow(tmp_df) > 0 & all(tmp_df[,map_data$TIME] >= 0))){
+      if(isTRUE(nrow(tmp_df) > 0 & all(tmp_df[,map_data$TIME][!is.na(tmp_df[,map_data$TIME])] >= 0))){
         orig_time <- tmp_df[,map_data$TIME]
         orig_conc <- tmp_df[,map_data$CONC]
         auc_time <- tmp_df[,map_data$TIME]
@@ -834,16 +834,22 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         if(comp_required[["C0"]]) {
           est_c_0 <- est_c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], npts=2, returnall=TRUE)
-          auc_conc <- auc_conc[auc_time != 0]
-          auc_time <- auc_time[auc_time != 0]
-          a_kel_flag <- a_kel_flag[auc_time != 0]
-          a_auc_flag <- a_auc_flag[auc_time != 0]
-          auc_conc <- c(as.numeric(est_c_0$est_c0), auc_conc)
-          auc_time <- c(0, auc_time)
-          if(!any(auc_time == 0)){
-            remove_extra_AUC <- FALSE
-            a_kel_flag <- c(0, a_kel_flag)
-            a_auc_flag <- c(0, a_auc_flag)
+          if(!is.na(est_c_0) && !is.null(est_c_0)){
+            auc_conc <- auc_conc[auc_time != 0]
+            auc_time <- auc_time[auc_time != 0]
+            a_kel_flag <- a_kel_flag[auc_time != 0]
+            a_auc_flag <- a_auc_flag[auc_time != 0]
+            auc_conc <- c(as.numeric(est_c_0$est_c0), auc_conc)
+            auc_time <- c(0, auc_time)
+            if(!any(auc_time == 0)){
+              remove_extra_AUC <- FALSE
+              a_kel_flag <- c(0, a_kel_flag)
+              a_auc_flag <- c(0, a_auc_flag)
+            }
+          } else {
+            if(!any(auc_time == 0)){
+              remove_extra_AUC <- FALSE
+            }
           }
         }
         if(comp_required[["V0"]]) {

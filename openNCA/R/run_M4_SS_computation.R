@@ -718,8 +718,11 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
       }
       rt <- rate(start_time = tmp_df[,map_data$TIME], end_time = tmp_df[,map_data$ENDTIME], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]), volu = tmp_df[,map_data$AMOUNTU], type = type, map = map_data)
+      if(is.na(rt) && length(rt) == 1){
+        rt <- rep(NA, length(tmp_df[,map_data$CONC]))
+      }
       
-      if(isTRUE(nrow(tmp_df) > 0 & all(tmp_df[,map_data$TIME] >= 0) & all(tmp_df[,map_data$ENDTIME] >= 0))){
+      if(isTRUE(nrow(tmp_df) > 0 & all(tmp_df[,map_data$TIME][!is.na(tmp_df[,map_data$TIME])] >= 0) & all(tmp_df[,map_data$ENDTIME][!is.na(tmp_df[,map_data$ENDTIME])] >= 0))){
         orig_time <- rt
         orig_conc <- mid_pt
         if(!0 %in% mid_pt){

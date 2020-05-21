@@ -632,10 +632,14 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
       }
       rt <- rate(start_time = tmp_df[,map_data$TIME], end_time = tmp_df[,map_data$ENDTIME], conc = tmp_df[,map_data$CONC], vol = as.numeric(tmp_df[,map_data$AMOUNT]), volu = tmp_df[,map_data$AMOUNTU], type = type, map=map_data)
-
-      if(isTRUE(nrow(tmp_df) > 0 & all(tmp_df[,map_data$TIME] >= 0) & all(tmp_df[,map_data$ENDTIME] >= 0))){
+      if(is.na(rt) && length(rt) == 1){
+        rt <- rep(NA, length(tmp_df[,map_data$CONC]))
+      }
+     
+      if(isTRUE(nrow(tmp_df) > 0 & all(tmp_df[,map_data$TIME][!is.na(tmp_df[,map_data$TIME])] >= 0) & all(tmp_df[,map_data$ENDTIME][!is.na(tmp_df[,map_data$ENDTIME])] >= 0))){
         orig_conc <- rt
         orig_time <- mid_pt
+        
         if(!0 %in% mid_pt){
           auc_rt <- c(0, rt)
           auc_mid_pt <- c(0, mid_pt)

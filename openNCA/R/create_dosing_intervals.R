@@ -147,11 +147,23 @@ create_dosing_intervals <- function(data, map, flag, maxdosingintervals) {
                     } else {
                       interval_text <- paste0(i,"th")
                     }
-                    warning(paste0("Unable to generate ", interval_text," dosing interval for Steady State data because it overlaps previous intervals!"))
+                    warning(paste0("Unable to generate ", interval_text," dosing interval for Steady State data because it overlaps previous intervals for SDEID: '", unique(data[,map$SDEID])[j],"'!"))
                     told <- NA
                     tau <- NA
                   }
                 }
+              }
+              if(!is.na(tau) && isTRUE(tau == 0)){
+                if(i == 2){
+                  interval_text <- paste0(i,"nd")
+                } else if(i == 3){
+                  interval_text <- paste0(i,"rd")
+                } else {
+                  interval_text <- paste0(i,"th")
+                }
+                warning(paste0("Unable to generate ", interval_text," dosing interval for Steady State data because TAU is zero for SDEID: '", unique(data[,map$SDEID])[j],"'!"))
+                told <- NA
+                tau <- NA
               }
             }
             if(i > 1){

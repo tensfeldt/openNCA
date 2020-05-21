@@ -753,11 +753,13 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
   if(isTRUE(optimize_kel)){
     comp_required[["KEL"]] <- TRUE
+    comp_required[["TMAX"]] <- TRUE
     comp_required[["TMAXi"]] <- TRUE
+    comp_required[["TLAST"]] <- TRUE
     comp_required[["TLASTi"]] <- TRUE
-    comp_required[["CMAXi"]] <- TRUE
-    comp_required[["CLASTi"]] <- TRUE 
-    comp_required[["AUCLASTi"]] <- TRUE
+    comp_required[["CMAX"]] <- TRUE
+    comp_required[["CLAST"]] <- TRUE
+    comp_required[["AUCLAST"]] <- TRUE
     if(isTRUE(optimize_kel_debug)){
       debug_idx <- 1
       if("AUCXPCTO" %in% flag_df$VAR){
@@ -777,12 +779,12 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       warning("Flag 'INCLUDEEXTRAPOLATION' does not have a valid value! Please try again with numeric value (either 0 or 1)")
     }
   }
-  if(isTRUE(optimize_kel) && (!comp_required[["TMAXi"]] || !comp_required[["TLASTi"]] || !comp_required[["CMAXi"]] || !comp_required[["CLASTi"]] || !comp_required[["AUCLASTi"]] ||
+  if(isTRUE(optimize_kel) && (!comp_required[["TMAX"]] || !comp_required[["TLAST"]] || !comp_required[["CMAX"]] || !comp_required[["CLAST"]] || !comp_required[["AUCLAST"]] ||
      !"FLGACCEPTKELCRIT" %in% names(map_data) || !"FLGEXKEL" %in% names(map_data) || !map_data$FLGEXKEL %in% names(data_data))){
     warning("Kel optimization cannot be performed because 'TMAXi', 'TLASTi', 'CMAXi', 'CLASTi', 'AUCLASTi' are not part of the calculated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGEXKEL' are not present in the dataset")
   }
   
-  if(isTRUE(optimize_kel) && comp_required[["TMAXi"]] && comp_required[["TLASTi"]] && comp_required[["CMAXi"]] && comp_required[["CLASTi"]] && comp_required[["AUCLASTi"]] &&
+  if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
      "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
     kel_flag_optimized <- integer()
     kel_opt_warning <- FALSE
@@ -1081,7 +1083,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         extrapolation <- FALSE
       }
       
-      if(isTRUE(nrow(tmp_df) > 0 & all(tmp_df[,map_data$TIME] >= 0))){
+      if(isTRUE(nrow(tmp_df) > 0 & all(tmp_df[,map_data$TIME][!is.na(tmp_df[,map_data$TIME])] >= 0))){
         orig_time <- tmp_df[,map_data$TIME]
         orig_conc <- tmp_df[,map_data$CONC]
         
@@ -1103,7 +1105,134 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         } else {
           t_last <- NULL
         }
-        if(isTRUE(optimize_kel) && comp_required[["TMAXi"]] && comp_required[["TLASTi"]] && comp_required[["CMAXi"]] && comp_required[["CLASTi"]] && comp_required[["AUCLASTi"]] &&
+        for(d in 1:di_col){
+          default_di_df <- default_df[default_df[c(paste0("DI", d, "F"))] == 1,]
+          default_di_df <- default_di_df[order(default_di_df[,map_data$TIME]),]
+          tmp_di_df <- tmp_df[tmp_df[c(paste0("DI", d, "F"))] == 1,]
+          tmp_di_df <- tmp_di_df[order(tmp_di_df[,map_data$TIME]),]
+          norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_di_df), tmp_di_df[,map_data$NORMBS][1], NA), NA)
+          tmp_dose <- tmp_di_df[, as.character(map_data[c(paste0("DOSE",d))])][1]
+          
+          tmp_told <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1])
+          ctold_exists <- FALSE 
+          if(tmp_told %in% tmp_di_df[,map_data$NOMTIME]){
+            idx <- which(tmp_di_df[,map_data$NOMTIME] == tmp_told)
+            tmp_ctold <- tmp_di_df[,map_data$CONC][length(idx)]
+            if(!is.na(tmp_ctold)){
+              ctold_exists <- TRUE
+            }
+          }
+          tmp_tau <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TAU",d))])][1])
+          tmp_tau <- tmp_tau + tmp_told
+          ctau_exists <- FALSE 
+          if(tmp_tau %in% tmp_di_df[,map_data$NOMTIME]){
+            idx <- which(tmp_di_df[,map_data$NOMTIME] == tmp_tau)
+            tmp_ctau <- tmp_di_df[,map_data$CONC][length(idx)]
+            if(!is.na(tmp_ctau)){
+              ctau_exists <- TRUE
+            }
+          }
+          if(!isTRUE(ctold_exists) && !is.na(tmp_told)){
+            tmp_conc_di <- c(NA, tmp_di_df[,map_data$CONC])
+            tmp_time_di <- c(tmp_told, tmp_di_df[,map_data$TIME])
+            est_tmp <- estimate_told_concentration(conc = tmp_conc_di, time = tmp_time_di, interpolate = TRUE, extrapolate = TRUE, auc_method = "LIN", model = "M3", dosing_type = "SS", told = tmp_told, orig_conc = orig_conc, orig_time = orig_time)
+            tmp_conc_di <- est_tmp[[1]]
+            ctold_est[[d]] <- tmp_conc_di[1]
+          } else {
+            tmp_conc_di <- tmp_di_df[,map_data$CONC]
+            tmp_time_di <- tmp_di_df[,map_data$TIME]
+            ctold_est[[d]] <- NA
+          }
+          if(d == 1){ 
+            aumc_time <- tmp_time_di
+          } else {
+            aumc_told <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",(d-1)))])][1])
+            aumc_tau <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TAU",(d-1)))])][1])
+            if(is.numeric(aumc_told) && !is.na(aumc_told) && is.numeric(aumc_tau) && !is.na(aumc_tau)){
+              aumc_time <- tmp_time_di - (aumc_told + aumc_tau) 
+            } else {
+              aumc_time <- tmp_time_di
+            }
+          }
+          tmp_nomtime_di <- tmp_time_di
+          if(isTRUE("NOMTIME" %in% names(map_data))){
+            if(isTRUE(map_data$NOMTIME %in% names(tmp_di_df))){
+              if(!isTRUE(ctold_exists) && !is.na(tmp_told)){
+                tmp_nomtime_di <- c(tmp_told, tmp_di_df[,map_data$NOMTIME])
+              } else {
+                tmp_nomtime_di <- tmp_di_df[,map_data$NOMTIME] 
+              }
+            }
+          }
+          
+          if(comp_required[["TAUi"]]) {
+            tau[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TAU",d))])][1]
+            tau[[d]] <- as.numeric(tau[[d]])
+          }
+          if(comp_required[["TOLDi"]]) {
+            told[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
+            told[[d]] <- as.numeric(told[[d]])
+          }
+          if(comp_required[["TMAXi"]]){
+            if(toupper(map_data$TIME) == "ACTUAL"){
+              t_maxi[[d]] <- tmax(conc = tmp_conc_di, time = tmp_time_di, told = told[[d]])
+            } else {
+              t_maxi[[d]] <- tmax(conc = tmp_conc_di, time = tmp_time_di)
+            }
+          }
+          if(comp_required[["TLASTi"]]) {
+            t_lasti[[d]] <- tlast(conc = tmp_conc_di, time = tmp_time_di)
+          }
+          if(comp_required[["AUCLAST"]]){
+            tmp_auclast[[d]] <- auc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_lasti[[d]], t_max = t_maxi[[d]])
+            if(d == di_col){
+              overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
+              tmp_last_time <- tmp_di_df[nrow(tmp_di_df),map_data$TIME]
+              if((is.numeric(overall_last_time) && length(overall_last_time) > 0) && (is.numeric(tmp_last_time) && length(tmp_last_time) > 0)){
+                if(isTRUE(overall_last_time > tmp_last_time)){
+                  auclast <- auc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_last, t_max = t_max)
+                } else {
+                  auclast <- ifelse(isTRUE(all(is.na(tmp_auclast))), NA, sum(unlist(tmp_auclast), na.rm = TRUE))
+                }
+              } else {
+                auclast <- ifelse(isTRUE(all(is.na(tmp_auclast))), NA, sum(unlist(tmp_auclast), na.rm = TRUE))
+              }
+            }
+          }
+          if(comp_required[["AUCALL"]]){
+            tmp_aucall[[d]] <- auc_all(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
+            if(d == di_col){
+              overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
+              tmp_last_time <- tmp_di_df[nrow(tmp_di_df),map_data$TIME]
+              if((is.numeric(overall_last_time) && length(overall_last_time) > 0) && (is.numeric(tmp_last_time) && length(tmp_last_time) > 0)){
+                if(isTRUE(overall_last_time > tmp_last_time)){
+                  aucall <- auc_all(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
+                } else {
+                  aucall <- ifelse(isTRUE(all(is.na(tmp_aucall))), NA, sum(unlist(tmp_aucall), na.rm = TRUE))
+                }
+              } else {
+                aucall <- ifelse(isTRUE(all(is.na(tmp_aucall))), NA, sum(unlist(tmp_aucall), na.rm = TRUE))
+              }
+            }
+          }
+          if(comp_required[["AUMCLAST"]]) {
+            tmp_aumclast[[d]] <- aumc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
+            if(d == di_col){
+              overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
+              tmp_last_time <- tmp_di_df[nrow(tmp_di_df),map_data$TIME]
+              if((is.numeric(overall_last_time) && length(overall_last_time) > 0) && (is.numeric(tmp_last_time) && length(tmp_last_time) > 0)){
+                if(isTRUE(overall_last_time > tmp_last_time)){
+                  aumclast <- aumc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
+                } else {
+                  aumclast <- ifelse(isTRUE(all(is.na(tmp_aumclast))), NA, sum(unlist(tmp_aumclast), na.rm = TRUE))
+                }
+              } else {
+                aumclast <- ifelse(isTRUE(all(is.na(tmp_aumclast))), NA, sum(unlist(tmp_aumclast), na.rm = TRUE))
+              }
+            }
+          }
+        }
+        if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
            "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
           orig_time <- tmp_df[,map_data$TIME]
           orig_conc <- tmp_df[,map_data$CONC]
@@ -1370,7 +1499,13 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(d == 1){ 
             aumc_time <- tmp_time_di
           } else {
-            aumc_time <- tmp_time_di - as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",(d-1)))])][1])
+            aumc_told <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",(d-1)))])][1])
+            aumc_tau <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TAU",(d-1)))])][1])
+            if(is.numeric(aumc_told) && !is.na(aumc_told) && is.numeric(aumc_tau) && !is.na(aumc_tau)){
+              aumc_time <- tmp_time_di - (aumc_told + aumc_tau) 
+            } else {
+              aumc_time <- tmp_time_di
+            }
           }
           tmp_nomtime_di <- tmp_time_di
           if(isTRUE("NOMTIME" %in% names(map_data))){
@@ -1392,23 +1527,8 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
           dof[[d]] <- ifelse(paste0("DOF",d) %in% names(map_data), ifelse(map_data[c(paste0("DOF",d))] %in% names(data_data), unique(tmp_di_df[,as.character(map_data[c(paste0("DOF",d))])])[1], NA), NA)
           
-          if(comp_required[["TAUi"]]) {
-            tau[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TAU",d))])][1]
-            tau[[d]] <- as.numeric(tau[[d]])
-          }
-          if(comp_required[["TOLDi"]]) {
-            told[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
-            told[[d]] <- as.numeric(told[[d]])
-          }
           if(comp_required[["CMAXi"]]) {
             c_maxi[[d]] <- cmax(conc = tmp_conc_di, time = tmp_time_di)
-          }
-          if(comp_required[["TMAXi"]]){
-            if(toupper(map_data$TIME) == "ACTUAL"){
-              t_maxi[[d]] <- tmax(conc = tmp_conc_di, time = tmp_time_di, told = told[[d]])
-            } else {
-              t_maxi[[d]] <- tmax(conc = tmp_conc_di, time = tmp_time_di)
-            }
           }
           if(comp_required[["CENDINFi"]]){
             cend_inf[[d]] <- cendinf(conc = tmp_conc_di, time = tmp_time_di, dof = dof[[d]], cmax = c_maxi[[d]])
@@ -1441,9 +1561,6 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             } else {
               t_mini[[d]] <- tmin(conc = tmp_conc_di, time = tmp_time_di)
             }
-          }
-          if(comp_required[["TLASTi"]]) {
-            t_lasti[[d]] <- tlast(conc = tmp_conc_di, time = tmp_time_di)
           }
           if(comp_required[["LASTTIMEi"]]) {
             last_timei[[d]] <- lasttime(conc = default_di_df[,map_data$CONC], time = default_di_df[,map_data$TIME])
@@ -1488,7 +1605,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             auctaudn[[d]] <- auc_dn(auc = auctau[[d]], dose = tmp_dose)
           }
           if(comp_required[["AUMCTAUi"]]) {
-            aumctaui[[d]] <- aumc_tau(conc = tmp_conc_di, time = aumc_time, method = method, exflag = auc_flag, tau = told[[d]]+tau[[d]], t_max = t_maxi[[d]], orig_conc = tmp_df[,map_data$CONC], orig_time = tmp_df[,map_data$TIME])
+            aumctaui[[d]] <- aumc_tau(conc = tmp_conc_di, time = aumc_time, method = method, exflag = auc_flag, tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = tmp_df[,map_data$CONC], orig_time = tmp_df[,map_data$TIME])
           }
           if(comp_required[["MRTLASTi"]]) {
             mrtlasti[[d]] <- mrt_last(conc = tmp_conc_di, time = aumc_time, method = method, model = "M2", aucflag = auc_flag, dof = dof[[d]], auclast = auclasti[[d]], aumclast = aumclasti[[d]])
@@ -1529,54 +1646,6 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
           if(comp_required[["PTROUGHRi"]]){
             p_troughri[[d]] <- ptroughr(cmax = c_maxi[[d]], ctrough = c_troughi[[d]])
-          }
-          if(comp_required[["AUCLAST"]]){
-            tmp_auclast[[d]] <- auc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_lasti[[d]], t_max = t_maxi[[d]])
-            if(d == di_col){
-              overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
-              tmp_last_time <- tmp_di_df[nrow(tmp_di_df),map_data$TIME]
-              if((is.numeric(overall_last_time) && length(overall_last_time) > 0) && (is.numeric(tmp_last_time) && length(tmp_last_time) > 0)){
-                if(isTRUE(overall_last_time > tmp_last_time)){
-                  auclast <- auc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_last, t_max = t_max)
-                } else {
-                  auclast <- ifelse(isTRUE(all(is.na(tmp_auclast))), NA, sum(unlist(tmp_auclast), na.rm = TRUE))
-                }
-              } else {
-                auclast <- ifelse(isTRUE(all(is.na(tmp_auclast))), NA, sum(unlist(tmp_auclast), na.rm = TRUE))
-              }
-            }
-          }
-          if(comp_required[["AUCALL"]]){
-            tmp_aucall[[d]] <- auc_all(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
-            if(d == di_col){
-              overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
-              tmp_last_time <- tmp_di_df[nrow(tmp_di_df),map_data$TIME]
-              if((is.numeric(overall_last_time) && length(overall_last_time) > 0) && (is.numeric(tmp_last_time) && length(tmp_last_time) > 0)){
-                if(isTRUE(overall_last_time > tmp_last_time)){
-                  aucall <- auc_all(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
-                } else {
-                  aucall <- ifelse(isTRUE(all(is.na(tmp_aucall))), NA, sum(unlist(tmp_aucall), na.rm = TRUE))
-                }
-              } else {
-                aucall <- ifelse(isTRUE(all(is.na(tmp_aucall))), NA, sum(unlist(tmp_aucall), na.rm = TRUE))
-              }
-            }
-          }
-          if(comp_required[["AUMCLAST"]]) {
-            tmp_aumclast[[d]] <- aumc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
-            if(d == di_col){
-              overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
-              tmp_last_time <- tmp_di_df[nrow(tmp_di_df),map_data$TIME]
-              if((is.numeric(overall_last_time) && length(overall_last_time) > 0) && (is.numeric(tmp_last_time) && length(tmp_last_time) > 0)){
-                if(isTRUE(overall_last_time > tmp_last_time)){
-                  aumclast <- aumc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
-                } else {
-                  aumclast <- ifelse(isTRUE(all(is.na(tmp_aumclast))), NA, sum(unlist(tmp_aumclast), na.rm = TRUE))
-                }
-              } else {
-                aumclast <- ifelse(isTRUE(all(is.na(tmp_aumclast))), NA, sum(unlist(tmp_aumclast), na.rm = TRUE))
-              }
-            }
           }
           if(comp_required[["CLTAUi"]]) {
             cl_tau[[d]] <- cltau(auctau = auctau[[d]], dose = dose_c_i[[d]])
@@ -2409,7 +2478,7 @@ run_M3_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   results_list$data_out <- computation_df
   results_list$est_data <- est_data
   
-  if(isTRUE(optimize_kel) && comp_required[["TMAXi"]] && comp_required[["TLASTi"]] && comp_required[["CMAXi"]] && comp_required[["CLASTi"]] && comp_required[["AUCLASTi"]] &&
+  if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
      "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
     results_list$optimized_kel_flag <- kel_flag_optimized
   }

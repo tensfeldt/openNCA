@@ -34,7 +34,7 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
       data_data <- data
     } else {
       if(file.exists(data)){
-        data_data <- read.csv(file = data)
+        data_data <- read.csv(file = data, stringsAsFactors = FALSE)
       } else {
         stop("Invalid path provided for 'data'! Please provide a valid path for the 'data' parameter")
       }

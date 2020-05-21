@@ -149,7 +149,7 @@ aumc_inf_o <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, auc
   }
 
   if(sum(conc, na.rm = T) == 0){
-    return(0)
+    return(NA)
   }
   if(is.null(kel)){
     if(!(is.null(spanratio))){
