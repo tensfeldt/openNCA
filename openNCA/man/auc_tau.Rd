@@ -6,7 +6,8 @@
 \usage{
 auc_tau(conc = NULL, time = NULL, method = 1, exflag = NULL,
   tau = NULL, t_max = NULL, orig_conc = NULL, orig_time = NULL,
-  last_crit_factor = NULL, kel = NULL, auclast = NULL)
+  last_crit_factor = NULL, kel = NULL, auclast = NULL,
+  lasttime = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

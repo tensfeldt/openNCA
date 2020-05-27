@@ -78,6 +78,9 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
       stop("Invalid value provided for 'unit_class'! Please provide a valid value for the 'unit_class' parameter")
     }
   }
+  
+  #This should reprsent the 'NA' value in array 'val'
+  missing_idx <- length(val)
 
   #----------------------------------------------------------------------------  
   #Unit Class 1: Time
@@ -102,10 +105,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         formattedoutputUnit  <- outputUnit1
           
         if(testunit){
-          inputMatch1 <- match(inputUnit1, units, nomatch = 21)
-          outputMatch1 <- match(outputUnit1, units, nomatch = 21)
+          inputMatch1 <- match(inputUnit1, units, nomatch = missing_idx)
+          outputMatch1 <- match(outputUnit1, units, nomatch = missing_idx)
 
-          if(inputMatch1 != 21 && outputMatch1 != 21) {
+          if(inputMatch1 != missing_idx && outputMatch1 != missing_idx) {
             inputMScale1 <- val[inputMatch1]
             outputMScale1 <- val[outputMatch1]
             if(class[inputMatch1] == "T" && class[outputMatch1] == "T") {
@@ -176,10 +179,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         formattedoutputUnit  <- outputUnit2
 
         if(testunit){
-          inputMatch2 <- match(inputUnit2, units, nomatch = 21)
-          outputMatch2 <- match(outputUnit2, units, nomatch = 21)
+          inputMatch2 <- match(inputUnit2, units, nomatch = missing_idx)
+          outputMatch2 <- match(outputUnit2, units, nomatch = missing_idx)
 
-          if(inputMatch2 != 21 && outputMatch2 != 21) {
+          if(inputMatch2 != missing_idx && outputMatch2 != missing_idx) {
             inputMScale2 <- val[inputMatch2]
             outputMScale2 <- val[outputMatch2]
             if(class[inputMatch2] == "M" && class[outputMatch2] == "M") {
@@ -246,10 +249,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
               formattedoutputUnit  <- outputUnit3
             
               if(testunit){
-                inputMatch3 <- match(inputUnit3, units, nomatch = 21)
-                outputMatch3 <- match(outputUnit3, units, nomatch = 21)
+                inputMatch3 <- match(inputUnit3, units, nomatch = missing_idx)
+                outputMatch3 <- match(outputUnit3, units, nomatch = missing_idx)
   
-                if(inputMatch3 != 21 && outputMatch3 != 21) {
+                if(inputMatch3 != missing_idx && outputMatch3 != missing_idx) {
                   inputMScale3 <- val[inputMatch3]
                   outputMScale3 <- val[outputMatch3]
                   if(class[inputMatch3] == "M" && class[outpt2utMatch3] == "M") {
@@ -304,9 +307,9 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
             formattedoutputUnit  <- outputUnit3
             
             if(testunit){
-              inputMatch3 <- match(inputUnit3, units, nomatch = 21)
-              outputMatch3 <- match(outputUnit3, units, nomatch = 21)
-              if(inputMatch3 != 21 && outputMatch3 != 21) {
+              inputMatch3 <- match(inputUnit3, units, nomatch = missing_idx)
+              outputMatch3 <- match(outputUnit3, units, nomatch = missing_idx)
+              if(inputMatch3 != missing_idx && outputMatch3 != missing_idx) {
                 inputMScale3 <- val[inputMatch3]
                 outputMScale3 <- val[outputMatch3]
                 if(class[inputMatch3] == "M" && class[outputMatch3] == "M") {
@@ -375,10 +378,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         formattedoutputUnit  <- outputUnit4
 
         if(testunit && (length(volume_unit_tmp) == 2)){
-          inputMatch4 <- match(inputUnit4, units, nomatch = 21)
-          outputMatch4 <- match(outputUnit4, units, nomatch = 21)
+          inputMatch4 <- match(inputUnit4, units, nomatch = missing_idx)
+          outputMatch4 <- match(outputUnit4, units, nomatch = missing_idx)
 
-          if(inputMatch4 != 21 && outputMatch4 != 21) {
+          if(inputMatch4 != missing_idx && outputMatch4 != missing_idx) {
             inputMScale4 <- val[inputMatch4]
             outputMScale4 <- val[outputMatch4]
             if(class[inputMatch4] == "V" && class[outputMatch4] == "V") {
@@ -464,9 +467,9 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         if(testunit){
           for(i in 1:2) {
             if(!all(is.na(outputUnit5))){
-              inputMatch5[i] <- match(inputUnit5[i], units, nomatch = 21)
-              outputMatch5[i] <- match(outputUnit5[i], units, nomatch = 21)
-              if(inputMatch5[i] != 21 && outputMatch5[i] != 21) {
+              inputMatch5[i] <- match(inputUnit5[i], units, nomatch = missing_idx)
+              outputMatch5[i] <- match(outputUnit5[i], units, nomatch = missing_idx)
+              if(inputMatch5[i] != missing_idx && outputMatch5[i] != missing_idx) {
                 inputMScale5 <- val[inputMatch5[i]]
                 outputMScale5 <- val[outputMatch5[i]]
                 if(class[inputMatch5[i]] == c("M", "V")[i] && class[outputMatch5[i]] == c("M", "V")[i]) {
@@ -553,10 +556,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         testunit <- testunit && outputUnitFormat
             
         if(testunit){
-          inputMatch6 <- match(inputUnit6, units, nomatch = 21)
-          outputMatch6 <- match(outputUnit6, units, nomatch = 21)
+          inputMatch6 <- match(inputUnit6, units, nomatch = missing_idx)
+          outputMatch6 <- match(outputUnit6, units, nomatch = missing_idx)
 
-          if(inputMatch6 != 21 && outputMatch6 != 21) {
+          if(inputMatch6 != missing_idx && outputMatch6 != missing_idx) {
             inputMScale6 <- val[inputMatch6]
             outputMScale6 <- val[outputMatch6]
             if(class[inputMatch6] == "T" && class[outputMatch6] == "T") {
@@ -636,10 +639,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         if(testunit){
           for(i in 1:2) {
             if(outputUnitFormat){
-              inputMatch7[i] <- match(inputUnit7[i], units, nomatch = 21)
-              outputMatch7[i] <- match(outputUnit7[i], units, nomatch = 21)
+              inputMatch7[i] <- match(inputUnit7[i], units, nomatch = missing_idx)
+              outputMatch7[i] <- match(outputUnit7[i], units, nomatch = missing_idx)
 
-              if(inputMatch7[i] != 21 && outputMatch7[i] != 21) {
+              if(inputMatch7[i] != missing_idx && outputMatch7[i] != missing_idx) {
                 inputMScale7 <- val[inputMatch7[i]]
                 outputMScale7 <- val[outputMatch7[i]]
                 if(class[inputMatch7[i]] == c("V", "T")[i] && class[outputMatch7[i]] == c("V", "T")[i]) {
@@ -742,10 +745,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         if(testunit){
           for(i in 1:3) {
             if(outputUnitFormat){
-              inputMatch8[i] <- match(inputUnit8[i], units, nomatch = 21)
-              outputMatch8[i] <- match(outputUnit8[i], units, nomatch = 21)
+              inputMatch8[i] <- match(inputUnit8[i], units, nomatch = missing_idx)
+              outputMatch8[i] <- match(outputUnit8[i], units, nomatch = missing_idx)
 
-              if(inputMatch8[i] != 21 && outputMatch8[i] != 21) {
+              if(inputMatch8[i] != missing_idx && outputMatch8[i] != missing_idx) {
                 inputMScale8 <- val[inputMatch8[i]]
                 outputMScale8 <- val[outputMatch8[i]]
                 if(class[inputMatch8[i]] == c("M", "T", "V")[i] && class[outputMatch8[i]] == c("M", "T", "V")[i]) {
@@ -852,10 +855,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         if(testunit){
           for(i in 1:4) {
             if(outputUnitFormat){
-              inputMatch9[i] <- match(inputUnit9[i], units, nomatch = 21)
-              outputMatch9[i] <- match(outputUnit9[i], units, nomatch = 21)
+              inputMatch9[i] <- match(inputUnit9[i], units, nomatch = missing_idx)
+              outputMatch9[i] <- match(outputUnit9[i], units, nomatch = missing_idx)
 
-              if(inputMatch9[i] != 21 && outputMatch9[i] != 21) {
+              if(inputMatch9[i] != missing_idx && outputMatch9[i] != missing_idx) {
                 inputMScale9 <- val[inputMatch9[i]]
                 outputMScale9 <- val[outputMatch9[i]]
                 if(class[inputMatch9[i]] == c("M", "T", "T", "V")[i] && class[outputMatch9[i]] == c("M", "T", "T", "V")[i]) {
@@ -962,10 +965,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         if(testunit){
           for(i in 1:4) {
             if(outputUnitFormat){
-              inputMatch10[i] <- match(inputUnit10[i], units, nomatch = 21)
-              outputMatch10[i] <- match(outputUnit10[i], units, nomatch = 21)
+              inputMatch10[i] <- match(inputUnit10[i], units, nomatch = missing_idx)
+              outputMatch10[i] <- match(outputUnit10[i], units, nomatch = missing_idx)
 
-              if(inputMatch10[i] != 21 && outputMatch10[i] != 21) {
+              if(inputMatch10[i] != missing_idx && outputMatch10[i] != missing_idx) {
                 inputMScale10 <- val[inputMatch10[i]]
                 outputMScale10 <- val[outputMatch10[i]]
                 if(class[inputMatch10[i]] == c("M", "T", "V", "M")[i] && class[outputMatch10[i]] == c("M", "T", "V", "M")[i]) {
@@ -1086,10 +1089,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         if(testunit){
           for(i in 1:3) {
             if(outputUnitFormat){
-              inputMatch11[i] <- match(inputUnit11[i], units, nomatch = 21)
-              outputMatch11[i] <- match(outputUnit11[i], units, nomatch = 21)
+              inputMatch11[i] <- match(inputUnit11[i], units, nomatch = missing_idx)
+              outputMatch11[i] <- match(outputUnit11[i], units, nomatch = missing_idx)
 
-              if(inputMatch11[i] != 21 && outputMatch11[i] != 21) {
+              if(inputMatch11[i] != missing_idx && outputMatch11[i] != missing_idx) {
                 inputMScale11 <- val[inputMatch11[i]]
                 outputMScale11 <- val[outputMatch11[i]]
                 if(class[inputMatch11[i]] == c("V", "M", "V")[i] && class[outputMatch11[i]] == c("V", "M", "V")[i]) {
@@ -1194,10 +1197,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           if(testunit){
             for(i in 1:3) {
               if(outputUnitFormat){
-                inputMatch12[i] <- match(inputUnit12[i], units, nomatch = 21)
-                outputMatch12[i] <- match(outputUnit12[i], units, nomatch = 21)
+                inputMatch12[i] <- match(inputUnit12[i], units, nomatch = missing_idx)
+                outputMatch12[i] <- match(outputUnit12[i], units, nomatch = missing_idx)
   
-                if(inputMatch12[i] != 21 && outputMatch12[i] != 21) {
+                if(inputMatch12[i] != missing_idx && outputMatch12[i] != missing_idx) {
                   inputMScale12 <- val[inputMatch12[i]]
                   outputMScale12 <- val[outputMatch12[i]]
                   if(class[inputMatch12[i]] == c("M", "V", "M")[i] && class[outputMatch12[i]] == c("M", "V", "M")[i]) {
@@ -1292,10 +1295,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         if(testunit){
           for(i in 1:2) {
             if(outputUnitFormat){
-              inputMatch13[i] <- match(inputUnit13[i], units, nomatch = 21)
-              outputMatch13[i] <- match(outputUnit13[i], units, nomatch = 21)
+              inputMatch13[i] <- match(inputUnit13[i], units, nomatch = missing_idx)
+              outputMatch13[i] <- match(outputUnit13[i], units, nomatch = missing_idx)
 
-              if(inputMatch13[i] != 21 && outputMatch13[i] != 21) {
+              if(inputMatch13[i] != missing_idx && outputMatch13[i] != missing_idx) {
                 inputMScale13 <- val[inputMatch13[i]]
                 outputMScale13 <- val[outputMatch13[i]]
                 if(class[inputMatch13[i]] == c("M", "T")[i] && class[outputMatch13[i]] == c("M", "T")[i]) {
@@ -1381,10 +1384,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         if(testunit){
           for(i in 1:2) {
             if(outputUnitFormat){
-              inputMatch14[i] <- match(inputUnit14[i], units, nomatch = 21)
-              outputMatch14[i] <- match(outputUnit14[i], units, nomatch = 21)
+              inputMatch14[i] <- match(inputUnit14[i], units, nomatch = missing_idx)
+              outputMatch14[i] <- match(outputUnit14[i], units, nomatch = missing_idx)
 
-              if(inputMatch14[i] != 21 && outputMatch14[i] != 21) {
+              if(inputMatch14[i] != missing_idx && outputMatch14[i] != missing_idx) {
                 inputMScale14 <- val[inputMatch14[i]]
                 outputMScale14 <- val[outputMatch14[i]]
                 if(class[inputMatch14[i]] == c("V", "M")[i] && class[outputMatch14[i]] == c("V", "M")[i]) {
@@ -1487,10 +1490,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         if(testunit){
           for(i in 1:3) {
             if(outputUnitFormat){
-              inputMatch15[i] <- match(inputUnit15[i], units, nomatch = 21)
-              outputMatch15[i] <- match(outputUnit15[i], units, nomatch = 21)
+              inputMatch15[i] <- match(inputUnit15[i], units, nomatch = missing_idx)
+              outputMatch15[i] <- match(outputUnit15[i], units, nomatch = missing_idx)
 
-              if(inputMatch15[i] != 21 && outputMatch15[i] != 21) {
+              if(inputMatch15[i] != missing_idx && outputMatch15[i] != missing_idx) {
                 inputMScale15 <- val[inputMatch15[i]]
                 outputMScale15 <- val[outputMatch15[i]]
                 if(class[inputMatch15[i]] == c("V", "T", "M")[i] && class[outputMatch15[i]] == c("V", "T", "M")[i]) {

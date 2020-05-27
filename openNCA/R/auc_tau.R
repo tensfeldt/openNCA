@@ -139,7 +139,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = NULL, t_max = NULL, orig_conc = NULL, orig_time = NULL, last_crit_factor = NULL, kel = NULL, auclast = NULL){
+auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = NULL, t_max = NULL, orig_conc = NULL, orig_time = NULL, last_crit_factor = NULL, kel = NULL, auclast = NULL, lasttime = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in auc_tau: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -172,7 +172,7 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = N
 ###
 ###cat('auc_tau.R: tau: ', tau, ' time: ', time, ' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' tau: ', tau, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
   
-  if(tau %in% time && time[length(time)] == tau){
+  if(isTRUE(tau %in% time && time[length(time)] == tau)){
     if(method == 1){
       return(auc_lin_log(conc = conc, time = time, exflag = exflag, t_max = t_max))
     } else if(method == 2){
@@ -202,7 +202,7 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = N
     }
 
 ### 2019-08-28/TGT/ There doesn't appear to be any implement extrapolation method for auc_tau.R if tau>max(time)
-    if(tau < orig_time[length(orig_time)]){
+    if(isTRUE(tau < orig_time[length(orig_time)])){
       idx <- which(orig_time < tau)
       idx <- idx[length(idx)]
       time_1 <- orig_time[idx]
@@ -279,10 +279,10 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = N
             auctau <- auclast
           }
         }
-        if(time_min_range <= orig_time[length(orig_time)]){
+        if(isTRUE(time_min_range <= lastttime)){
           return(auctau)
         } else {
-          auctau <- ifelse(!is.null(auclast), ifelse((auctau <= (as.numeric(auclast) * 1.20)), auctau, NA), NA)
+          auctau <- ifelse(!is.null(auclast), ifelse(isTRUE(auctau <= (as.numeric(auclast) * 1.20)), auctau, NA), NA)
         }
       }
       return(auctau)

@@ -504,6 +504,8 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
     tryCatch({
       tmp_df <- data_data[data_data[,map_data$SDEID] == unique(data_data[,map_data$SDEID])[i],]
+      default_df <- tmp_df
+      suppressWarnings(default_df <- default_df[order(as.numeric(default_df[,map_data$TIME])),])
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
       tmp_df[,map_data$ENDTIME] <- as.numeric(tmp_df[,map_data$ENDTIME])
@@ -635,8 +637,24 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if(is.na(rt) && length(rt) == 1){
         rt <- rep(NA, length(tmp_df[,map_data$CONC]))
       }
+      
+      conc_check <- TRUE
+      time_check <- TRUE
+      suppressWarnings(blq_lloq_check <- default_df[,map_data$CONC][is.na(default_df[,map_data$CONC])])
+      if(isTRUE(length(blq_lloq_check) > 0)){
+        if(!isTRUE(all(toupper(blq_lloq_check) %in% c("BLQ", "LLOQ", NA)))){
+          warning(paste0("Parameters not generated due to invalid concentration values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
+          conc_check <- FALSE
+        }
+      }
+      suppressWarnings(na_stime_check <- default_df[,map_data$TIME][is.na(default_df[,map_data$TIME])])
+      suppressWarnings(na_etime_check <- default_df[,map_data$ENDTIME][is.na(default_df[,map_data$ENDTIME])])
+      if(isTRUE(length(na_stime_check) > 0) || isTRUE(length(na_etime_check) > 0)){
+        warning(paste0("Parameters not generated due to invalid time values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
+        time_check <- FALSE
+      }
      
-      if(isTRUE(nrow(tmp_df) > 0 & all(tmp_df[,map_data$TIME][!is.na(tmp_df[,map_data$TIME])] >= 0) & all(tmp_df[,map_data$ENDTIME][!is.na(tmp_df[,map_data$ENDTIME])] >= 0))){
+      if(isTRUE(nrow(tmp_df) > 0 & all(tmp_df[,map_data$TIME][!is.na(tmp_df[,map_data$TIME])] >= 0) & all(tmp_df[,map_data$ENDTIME][!is.na(tmp_df[,map_data$ENDTIME])] >= 0)) & isTRUE(time_check) & isTRUE(conc_check)){
         orig_conc <- rt
         orig_time <- mid_pt
         
@@ -652,8 +670,6 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           orig_auc_conc <- auc_rt
           orig_auc_time <- auc_mid_pt
         }
-        
-        obs_c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
         if(comp_required[["DOSEC"]]) {
           dose_c <- dosec(data = tmp_df, map = map_data)
         }

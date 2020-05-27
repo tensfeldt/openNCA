@@ -707,8 +707,7 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     tryCatch({
       tmp_df <- data_data[data_data[,map_data$SDEID] == unique(data_data[,map_data$SDEID])[i],]
       default_df <- tmp_df
-      default_df[,map_data$TIME] <- as.numeric(default_df[,map_data$TIME])
-      default_df <- default_df[order(default_df[,map_data$TIME]),]
+      suppressWarnings(default_df <- default_df[order(as.numeric(default_df[,map_data$TIME])),])
       tmp_df[,map_data$CONC] <- as.numeric(tmp_df[,map_data$CONC])
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
       tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
@@ -818,8 +817,22 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
       
       dof <- ifelse("DOF1" %in% names(map_data), ifelse(map_data$DOF1 %in% names(data_data), unique(tmp_df[,map_data$DOF1])[1], NA), ifelse("DOF" %in% names(map_data), ifelse(map_data$DOF %in% names(data_data), unique(tmp_df[,map_data$DOF])[1], NA), NA))
+      conc_check <- TRUE
+      time_check <- TRUE
+      suppressWarnings(blq_lloq_check <- default_df[,map_data$CONC][is.na(default_df[,map_data$CONC])])
+      if(isTRUE(length(blq_lloq_check) > 0)){
+        if(!isTRUE(all(toupper(blq_lloq_check) %in% c("BLQ", "LLOQ", NA)))){
+          warning(paste0("Parameters not generated due to invalid concentration values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
+          conc_check <- FALSE
+        }
+      }
+      suppressWarnings(na_time_check <- default_df[,map_data$TIME][is.na(default_df[,map_data$TIME])])
+      if(isTRUE(length(na_time_check) > 0)){
+        warning(paste0("Parameters not generated due to invalid time values for SDEID: '", unique(data_data[,map_data$SDEID])[i], "'"))
+        time_check <- FALSE
+      }
       
-      if(isTRUE(nrow(tmp_df) > 0 & all(tmp_df[,map_data$TIME][!is.na(tmp_df[,map_data$TIME])] >= 0))){
+      if(isTRUE(nrow(tmp_df) > 0 & all(tmp_df[,map_data$TIME][!is.na(tmp_df[,map_data$TIME])] >= 0)) & isTRUE(time_check) & isTRUE(conc_check)){
         orig_time <- tmp_df[,map_data$TIME]
         orig_conc <- tmp_df[,map_data$CONC]
         auc_time <- tmp_df[,map_data$TIME]
@@ -841,13 +854,13 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             a_auc_flag <- a_auc_flag[auc_time != 0]
             auc_conc <- c(as.numeric(est_c_0$est_c0), auc_conc)
             auc_time <- c(0, auc_time)
-            if(!any(auc_time == 0)){
+            if(!isTRUE(any(auc_time == 0))){
               remove_extra_AUC <- FALSE
               a_kel_flag <- c(0, a_kel_flag)
               a_auc_flag <- c(0, a_auc_flag)
             }
           } else {
-            if(!any(auc_time == 0)){
+            if(!isTRUE(any(auc_time == 0))){
               remove_extra_AUC <- FALSE
             }
           }

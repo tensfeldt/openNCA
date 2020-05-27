@@ -218,8 +218,8 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
           for(i in 1:length(unique(merged_data[,map_data$SDEID]))){
             tmp_logic <- merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[i]
             tmp_df <- merged_data[tmp_logic,]
-            tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
             tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
+            tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
             tmptold <- tmp_df[1,map_data$TIME]
             tmptau <- tmp_df[nrow(tmp_df),map_data$TIME]
             tmptau <- tmptau - tmptold
@@ -242,8 +242,8 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
           for(i in 1:length(unique(merged_data[,map_data$SDEID]))){
             tmp_logic <- merged_data[,map_data$SDEID] == unique(merged_data[,map_data$SDEID])[i]
             tmp_df <- merged_data[tmp_logic,]
-            tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
             tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
+            tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
             tmptold <- tmp_df[1,map_data$TIME]
             #print(tmptold)
             map_data[,"TOLD1"] <- "TOLD1"

@@ -166,7 +166,7 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = 
     return(NA)
   }
 
-  if(tau %in% time && time[length(time)] == tau){
+  if(isTRUE(tau %in% time && time[length(time)] == tau)){
     if(method == 1){
       return(aumc_lin_log(conc = conc, time = time, exflag = exflag, t_max = t_max))
     } else if(method == 2){
@@ -195,7 +195,7 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = 
       stop("Error in aumc_tau: length of 'orig_time' and 'orig_conc' vectors are not equal")
     }
 
-    if(orig_time[1] < tau && tau < orig_time[length(orig_time)]){
+    if(isTRUE(orig_time[1] < tau && tau < orig_time[length(orig_time)])){
       idx <- which(orig_time < tau)
       idx <- idx[length(idx)]
       time_1 <- orig_time[idx]
