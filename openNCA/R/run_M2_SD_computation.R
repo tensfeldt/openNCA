@@ -1453,7 +1453,7 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         ###  vz_o <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinf_o, dose = dose_c)
         ###}
         if(isTRUE(dose_by_mass)){
-          vz_o
+          vz_o <- NA
         } else {
           vz_o <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinf_o, dose = dose_c)
         } 
