@@ -111,9 +111,19 @@
 #'  \item email: \url{thomas.g.tensfeldt@pfizer.com}
 #' }
 #' @export
-run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_regex = "^M2(SS)*?$", parameter_list = list(), return_list = list(), raw_results_debug = FALSE, optimize_kel_debug = FALSE){
+run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_regex = "^M2(SS)*?$", parameter_list = list(), return_list = list(), raw_results_debug = FALSE, optimize_kel_debug = FALSE, ...){
   function_name <- as.list(sys.call())[[1]]
-
+  additional_inputs <- list(...)
+  
+  if(isTRUE("print_version" %in% names(additional_inputs))){
+    if(isTRUE(additional_inputs$print_version)){
+      opennca_version()
+      cat(paste0("Computation Run Date/Time: ", Sys.time(), "\n"))
+    }
+  } else {
+    opennca_version()
+    cat(paste0("Computation Run Date/Time: ", Sys.time(), "\n"))
+  }
   if(is.null(data)){
     stop("Please provide a valid path for the 'data' parameter")
   } else {
@@ -195,16 +205,20 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     dosenames <- dosenames[!duplicated(as.character(unlist(dosevar)))]
   }
 
-  comp_required <- list()
-  disp_required <- list()
-  plist <- parameter_list
-  for(i in model_parameters()) {
-    rg <- parameter_regex(i)
-    pr <- parameter_required(rg, parameter_list=plist)
-    dp <- parameter_required(dependent_parameters(rg), plist)
-    comp_required[[i]] <- pr || dp
-    disp_required[[i]] <- pr
-  }
+  ###comp_required <- list()
+  ###disp_required <- list()
+  ###plist <- parameter_list
+  ###for(i in model_parameters()) {
+  ###  rg <- parameter_regex(i)
+  ###  pr <- parameter_required(rg, parameter_list=plist)
+  ###  dp <- parameter_required(dependent_parameters(rg), plist)
+  ###  comp_required[[i]] <- pr || dp
+  ###  disp_required[[i]] <- pr
+  ###}
+  all_parameters <- model_parameters("m2ss")
+  disp_required <- rep(FALSE, length(all_parameters))
+  names(disp_required) <- all_parameters
+  disp_required[names(disp_required) %in% parameter_list] <- TRUE
     
   if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
     if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
@@ -250,9 +264,79 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   elist <- c("PKDATAROWID", "SDEID","TIME","CEST_KEL","CEST_INT","CEST_EXT","CEST_C0","CEST_TLAST")
   est_data <- data.frame(matrix(ncol = length(elist), nrow = 0))
   names(est_data) <- elist
+  
+  if("DOSEU" %in% names(map_data)){
+    if(map_data$DOSEU %in% names(data_data)){
+      if(length(grep("/", as.character(unique(data_data[, as.character(map_data$DOSEU)])[1])) > 0)){
+        dose_by_mass <- TRUE
+      } else {
+        dose_by_mass <- FALSE
+      }
+    } else {
+      dose_by_mass <- FALSE
+    }
+  } else {
+    dose_by_mass <- FALSE
+  }
+  
+  if("MRSDEID" %in% names(map_data)){
+    if(map_data$MRSDEID %in% names(data_data)){
+      secondary <- TRUE
+    } else {
+      secondary <- FALSE
+    }
+  } else {
+    secondary <- FALSE
+  }
+  if(isTRUE(secondary)){
+    secondary_prereqs <- c('PKTERMPARENT', 'PKTERM', 'MW', 'METABOLITEPARAMETEREXCLUSIONLIST')
+    secondary_mappings <- c('PKTERM', 'MW')
+    if(!(all(secondary_prereqs %in% names(map_data)))){
+      missing_prereqs <- secondary_prereqs[!(secondary_prereqs %in% names(map_data))]
+      if(length(missing_prereqs) > 1){
+        warning(paste0("'", missing_prereqs, "' is not present in the dataset provided via 'map'! Cannot compute secondary parameters!"))
+      } else {
+        missing_msg <- ""
+        for(m in 1:length(missing_prereqs)){ 
+          if(m == 1){
+            missing_msg <- paste0(missing_msg, "'", missing_prereqs[i], "'")
+          } else if(m == length(missing_prereqs)){
+            missing_msg <- paste0(missing_msg, " and '", missing_prereqs[i], "'")
+          } else {
+            missing_msg <- paste0(missing_msg, ", '", missing_prereqs[i], "'")
+          }
+        }
+        warning(paste0(missing_msg, " are not present in the dataset provided via 'map'! Cannot compute secondary parameters!"))
+      }
+      secondary <- FALSE
+    } 
+    secondary_values <- as.character(map_data[,secondary_mappings])
+    if(!(all(secondary_values %in% names(data_data)))){
+      missing_values <- secondary_values[!(secondary_values %in% names(data_data))]
+      if(length(missing_values) > 1){
+        warning(paste0("'", missing_values, "' is not present in the dataset provided via 'data'! Cannot compute secondary parameters!"))
+      } else {
+        missing_msg <- ""
+        for(m in 1:length(missing_values)){ 
+          if(m == 1){
+            missing_msg <- paste0(missing_msg, "'", missing_values[i], "'")
+          } else if(m == length(missing_values)){
+            missing_msg <- paste0(missing_msg, " and '", missing_values[i], "'")
+          } else {
+            missing_msg <- paste0(missing_msg, ", '", missing_values[i], "'")
+          }
+        }
+        warning(paste0(missing_msg, " are not present in the dataset provided via 'data'! Cannot compute secondary parameters!"))
+      }
+      secondary <- FALSE
+    } 
+  }
+  if(isTRUE(secondary)){
+    exclusion_list <- unlist(strsplit(map_data$METABOLITEPARAMETEREXCLUSIONLIST, ";"))
+    disp_required[names(disp_required) %in% exclusion_list] <- FALSE
+  }
  
   col_names <- c("SDEID")
-
   if(disp_required[["DOSEi"]]) {
     col_names <- c(col_names, unlist(dosenames))
     regular_int_type <- c(regular_int_type, unlist(dosenames))
@@ -450,7 +534,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, rep(paste0("AUMCLAST",1:di_col)))
     regular_int_type <-  c(regular_int_type, rep(paste0("AUMCLAST",1:di_col)))
   }
-  if((disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) && comp_required[["C0"]]) {
+  ###if((disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) && comp_required[["C0"]]) {
+  if(disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) {
     auc_len <- auc_len + 1 
     remove_extra_AUC <- TRUE
   } else {
@@ -567,18 +652,20 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, rep(paste0("AUCXPCTP",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("AUCXPCTP",1:di_col)))
   }
-  if(disp_required[["AUMCXPTO"]]){
-    col_names <- c(col_names, "AUMCXPTO")
-    regular_int_type <- c(regular_int_type, "AUMCXPTO")
-  }
+  ####REMOVING AUMC PARAMETERS  
+  ####if(disp_required[["AUMCXPTO"]]){
+  ####  col_names <- c(col_names, "AUMCXPTO")
+  ####  regular_int_type <- c(regular_int_type, "AUMCXPTO")
+  ####}
   if(disp_required[["AUMCXPTOi"]]){
     col_names <- c(col_names, rep(paste0("AUMCXPTO",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("AUMCXPTO",1:di_col)))
   }
-  if(disp_required[["AUMCXPTP"]]){
-    col_names <- c(col_names, "AUMCXPTP")
-    regular_int_type <- c(regular_int_type, "AUMCXPTP")
-  }
+  ####REMOVING AUMC PARAMETERS  
+  ####if(disp_required[["AUMCXPTP"]]){
+  ####  col_names <- c(col_names, "AUMCXPTP")
+  ####  regular_int_type <- c(regular_int_type, "AUMCXPTP")
+  ####}
   if(disp_required[["AUMCXPTPi"]]){
     col_names <- c(col_names, rep(paste0("AUMCXPTP",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("AUMCXPTP",1:di_col)))
@@ -634,6 +721,32 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if(disp_required[["VZTAUWi"]]) {
     col_names <- c(col_names, rep(paste0("VZTAUW",1:di_col)))
     regular_int_type <- c(regular_int_type, rep(paste0("VZTAUW",1:di_col)))
+  }
+  if(isTRUE(secondary)){
+    if(disp_required[["MRAUCINFO"]]) {
+      col_names <- c(col_names, "MRAUCINFO")
+      regular_int_type <- c(regular_int_type, "MRAUCINFO")
+    }
+    if(disp_required[["MRAUCINFP"]]) {
+      col_names <- c(col_names, "MRAUCINFP")
+      regular_int_type <- c(regular_int_type, "MRAUCINFP")
+    }
+    if(disp_required[["MRAUCLAST"]]) {
+      col_names <- c(col_names, "MRAUCLAST")
+      regular_int_type <- c(regular_int_type, "MRAUCLAST")
+    }
+    if(disp_required[["MRAUCTAUi"]]){
+      col_names <- c(col_names, rep(paste0("MRAUCTAU",1:di_col)))
+      regular_int_type <- c(regular_int_type, rep(paste0("MRAUCTAU",1:di_col)))
+    } 
+    if(disp_required[["MRCMAX"]]) {
+      col_names <- c(col_names, "MRCMAX")
+      regular_int_type <- c(regular_int_type, "MRCMAX")
+    }
+    if(disp_required[["MRCMAXi"]]){
+      col_names <- c(col_names, rep(paste0("MRCMAX",1:di_col)))
+      regular_int_type <- c(regular_int_type, rep(paste0("MRCMAX",1:di_col)))
+    } 
   }
   col_names <- c(col_names, rep(paste0("CONC",1:(auc_len+1))), rep(paste0("CONCTIME",1:(auc_len+1))))
   regular_int_type <- c(regular_int_type, rep(paste0("CONC",1:(auc_len+1))), rep(paste0("CONCTIME",1:(auc_len+1))))
@@ -756,27 +869,31 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
   if("OPTIMIZEKEL" %in% names(map_data)){
     if(!(is.na(map_data[,"OPTIMIZEKEL"]))){
-      if(map_data[,"OPTIMIZEKEL"] != 1 && map_data[,"OPTIMIZEKEL"] != 0){
+      if(map_data[,"OPTIMIZEKEL"] != 1 && map_data[,"OPTIMIZEKEL"] != 2){
         warning("Map 'OPTIMIZEKEL' does not have a valid value! Not using KEL optimization for this computation")
         optimize_kel <- FALSE
+        optimize_kel_method <- as.character(as.numeric(map_data[,"OPTIMIZEKEL"]))
       } else {
         optimize_kel <- as.logical(as.numeric(map_data[,"OPTIMIZEKEL"]))
+        optimize_kel_method <- as.character(as.numeric(map_data[,"OPTIMIZEKEL"]))
       }
     } else {
       optimize_kel <- FALSE
+      optimize_kel_method <- as.character(as.numeric(map_data[,"OPTIMIZEKEL"]))
     }
   } else {
     optimize_kel <- FALSE
+    optimize_kel_method <- as.character(as.numeric(map_data[,"OPTIMIZEKEL"]))
   }
   if(isTRUE(optimize_kel)){
-    comp_required[["KEL"]] <- TRUE
-    comp_required[["TMAX"]] <- TRUE
-    comp_required[["TMAXi"]] <- TRUE
-    comp_required[["TLAST"]] <- TRUE
-    comp_required[["TLASTi"]] <- TRUE
-    comp_required[["CMAX"]] <- TRUE
-    comp_required[["CLAST"]] <- TRUE 
-    comp_required[["AUCLAST"]] <- TRUE
+    ###comp_required[["KEL"]] <- TRUE
+    ###comp_required[["TMAX"]] <- TRUE
+    ###comp_required[["TMAXi"]] <- TRUE
+    ###comp_required[["TLAST"]] <- TRUE
+    ###comp_required[["TLASTi"]] <- TRUE
+    ###comp_required[["CMAX"]] <- TRUE
+    ###comp_required[["CLAST"]] <- TRUE 
+    ###comp_required[["AUCLAST"]] <- TRUE
     if(isTRUE(optimize_kel_debug)){
       debug_idx <- 1
       if("AUCXPCTO" %in% flag_df$VAR){
@@ -796,193 +913,201 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       warning("Flag 'INCLUDEEXTRAPOLATION' does not have a valid value! Please try again with numeric value (either 0 or 1)")
     }
   }
-  if(isTRUE(optimize_kel) && (!comp_required[["TMAX"]] || !comp_required[["TLAST"]] || !comp_required[["CMAX"]] || !comp_required[["CLAST"]] || !comp_required[["AUCLAST"]] ||
-     !"FLGACCEPTKELCRIT" %in% names(map_data) || !"FLGEXKEL" %in% names(map_data) || !map_data$FLGEXKEL %in% names(data_data))){
-    warning("Kel optimization cannot be performed because 'TMAXi', 'TLASTi', 'CMAXi', 'CLASTi', 'AUCLASTi' are not part of the calculated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGEXKEL' are not present in the dataset")
+  
+  ###if(isTRUE(optimize_kel) && (!comp_required[["TMAX"]] || !comp_required[["TLAST"]] || !comp_required[["CMAX"]] || !comp_required[["CLAST"]] || !comp_required[["AUCLAST"]] ||
+  ###   !"FLGACCEPTKELCRIT" %in% names(map_data) || !"FLGEXKEL" %in% names(map_data) || !map_data$FLGEXKEL %in% names(data_data))){
+  ###  warning("Kel optimization cannot be performed because 'TMAXi', 'TLASTi', 'CMAXi', 'CLASTi', 'AUCLASTi' are not part of the calculated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGEXKEL' are not present in the dataset")
+  ###}
+  
+  if(isTRUE(optimize_kel) && (optimize_kel_method != "1" && optimize_kel_method != "2")){
+    optimize_kel <- FALSE
+    warning("Flag 'OPTIMIZEKEL' does not have a valid value! Please try again with numeric value (either 1 or 2)")
   }
   
-  if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
-     "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
+  
+  ###if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
+  ###   "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
+  if(isTRUE(optimize_kel) && "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
     kel_flag_optimized <- integer()
     kel_opt_warning <- FALSE
   }
   
-  if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
-    comp_required[["TMAXi"]] <- TRUE
-    comp_required[["DOSEi"]] <- TRUE
-  }
+  ###if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
+  ###  comp_required[["TMAXi"]] <- TRUE
+  ###  comp_required[["DOSEi"]] <- TRUE
+  ###}
 
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
     sdeid <- unique(data_data[,map_data$SDEID])[i]
     
     tryCatch({
-      dof <- list()
+      dose_inf <- list()
       
-      if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]){
+      ###if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]){
         dose_c_i <- list()
-      }
-      if(comp_required[["CMAXi"]]) {
+      ###}
+      ###if(comp_required[["CMAXi"]]) {
         c_maxi <- list()
-      }
-      if(comp_required[["CMAXCi"]]) {
+      ###}
+      ###if(comp_required[["CMAXCi"]]) {
         c_maxci <- list()
-      }
-      if(comp_required[["CMAXDNi"]]) {
+      ###}
+      ###if(comp_required[["CMAXDNi"]]) {
         c_maxdni <- list()
-      }
-      if(comp_required[["CMINi"]]) {
+      ###}
+      ###if(comp_required[["CMINi"]]) {
         c_mini <- list()
-      }
-      if(comp_required[["CMINDNi"]]){
+      ###}
+      ###if(comp_required[["CMINDNi"]]){
         c_mindni <- list()
-      }
-      if(comp_required[["CLASTi"]]) {
+      ###}
+      ###if(comp_required[["CLASTi"]]) {
         c_lasti <- list()
-      }
-      if(comp_required[["TMAXi"]]) {
+      ###}
+      ###if(comp_required[["TMAXi"]]) {
         t_maxi <- list()
-      }
-      if(comp_required[["TMINi"]]) {
+      ###}
+      ###if(comp_required[["TMINi"]]) {
         t_mini <- list()
-      }
-      if(comp_required[["TLASTi"]]) {
+      ###}
+      ###if(comp_required[["TLASTi"]]) {
         t_lasti <- list()
-      }
-      if(comp_required[["LASTTIMEi"]]) {
+      ###}
+      ###if(comp_required[["LASTTIMEi"]]) {
         last_timei <- list()
-      }
-      if(comp_required[["CTROUGHi"]]){
+      ###}
+      ###if(comp_required[["CTROUGHi"]]){
         c_troughi <- list()
-      }
-      if(comp_required[["CTROUGHENDi"]]){
+      ###}
+      ###if(comp_required[["CTROUGHENDi"]]){
         c_troughendi <- list()
-      }
-      if(comp_required[["PTROUGHRi"]]){
+      ###}
+      ###\if(comp_required[["PTROUGHRi"]]){
         p_troughri <- list()
-      }
-      if(comp_required[["PTROUGHRENDi"]]){
+      ###}
+      ###if(comp_required[["PTROUGHRENDi"]]){
         p_troughrendi <- list()
-      }
-      if(comp_required[["AUCLAST"]]){
+      ###}
+      ###if(comp_required[["AUCLAST"]]){
         tmp_auclast <- list()
-      }
-      if(comp_required[["AUCALL"]]){
+      ###}
+      ###if(comp_required[["AUCALL"]]){
         tmp_aucall <- list()
-      }
-      if(comp_required[["AUMCLAST"]]){
+      ###}
+      ###if(comp_required[["AUMCLAST"]]){
         tmp_aumclast <- list()
-      }
-      if(comp_required[["AUCINFOi"]]) {
+      ###}
+      ###if(comp_required[["AUCINFOi"]]) {
         aucinfoi <- list()
-      }
-      if(comp_required[["AUCINFOCi"]]){
+      ###}
+      ###if(comp_required[["AUCINFOCi"]]){
         aucinfoi_c <- list()
-      }
-      if(comp_required[["AUCINFODNi"]]){
+      ###}
+      ###if(comp_required[["AUCINFODNi"]]){
         aucinfoi_dn <- list()
-      }
-      if(comp_required[["AUCINFPi"]]) {
+      ###}
+      ###if(comp_required[["AUCINFPi"]]) {
         aucinfpi <- list()
-      }
-      if(comp_required[["AUCINFPCi"]]){
+      ###}
+      ###if(comp_required[["AUCINFPCi"]]){
         aucinfpi_c <- list()
-      }
-      if(comp_required[["AUCINFPDNi"]]){
+      ###}
+      ###if(comp_required[["AUCINFPDNi"]]){
         aucinfpi_dn <- list()
-      }
-      if(comp_required[["AUMCINFOi"]]) {
+      ###}
+      ###if(comp_required[["AUMCINFOi"]]) {
         aumcinfoi <- list()
-      }
-      if(comp_required[["AUMCINFPi"]]) {
+      ###}
+      ###if(comp_required[["AUMCINFPi"]]) {
         aumcinfpi <- list()
-      }
-      if(comp_required[["AUCALLDN"]]) {
+      ###}
+      ###if(comp_required[["AUCALLDN"]]) {
         aucalldn <- list()
-      }
-      if(comp_required[["AUCLASTi"]]) {
+      ###}
+      ###if(comp_required[["AUCLASTi"]]) {
         auclasti <- list()
-      }
-      if(comp_required[["AUCLASTDNi"]]) {
+      ###}
+      ###if(comp_required[["AUCLASTDNi"]]) {
         auclasti_dn <- list()
-      }
-      if(comp_required[["AUMCLASTi"]]) {
+      ###}
+      ###if(comp_required[["AUMCLASTi"]]) {
         aumclasti <- list()
-      }
-      if(comp_required[["AUCXPCTOi"]]){
+      ###}
+      ###if(comp_required[["AUCXPCTOi"]]){
         aucxpctoi <- list()
-      }
-      if(comp_required[["AUCXPCTPi"]]){
+      ###}
+      ###if(comp_required[["AUCXPCTPi"]]){
         aucxpctpi <- list()
-      }
-      if(comp_required[["TAUi"]]) {
+      ###}
+      ###if(comp_required[["TAUi"]]) {
         tau <- list()
-      }
-      if(comp_required[["TOLDi"]]) {
+      ###}
+      ###if(comp_required[["TOLDi"]]) {
         told <- list()
-      }
-      if(comp_required[["AUCTAUi"]]) {
+      ###}
+      ###if(comp_required[["AUCTAUi"]]) {
         auctau <- list()
-      }
-      if(comp_required[["AUCTAUDNi"]]) {
+      ###}
+      ###if(comp_required[["AUCTAUDNi"]]) {
         auctaudn <- list()
-      }
-      if(comp_required[["AUMCTAUi"]]) {
+      ###}
+      ###if(comp_required[["AUMCTAUi"]]) {
         aumctaui <- list()
-      }
-      if(comp_required[["MRTLASTi"]]){
+      ###}
+      ###if(comp_required[["MRTLASTi"]]){
         mrtlasti <- list()
-      }
-      if(comp_required[["MRTIVIFOi"]]){
+      ###}
+      ###if(comp_required[["MRTIVIFOi"]]){
         mrtivifoi <- list()
-      }
-      if(comp_required[["MRTIVIFPi"]]){
+      ###}
+      ###if(comp_required[["MRTIVIFPi"]]){
         mrtivifpi <- list()
-      }
-      if(comp_required[["AUMCXPTOi"]]){
+      ###}
+      ###if(comp_required[["AUMCXPTOi"]]){
         aumcxptoi <- list()
-      }
-      if(comp_required[["AUMCXPTPi"]]){
+      ###}
+      ###if(comp_required[["AUMCXPTPi"]]){
         aumcxptpi <- list()
-      }
-      if(comp_required[["CAVi"]]) {
+      ###}
+      ###if(comp_required[["CAVi"]]) {
         ca_v <- list()
-      }
-      if(comp_required[["DIi"]]) {
+      ###}
+      ###if(comp_required[["DIi"]]) {
         di <- list()
-      }
-      if(comp_required[["DOSEi"]]) {
+      ###}
+      ###if(comp_required[["DOSEi"]]) {
         dose <- list()
-      }
-      if(comp_required[["CLTAUi"]]) {
+      ###}
+      ###if(comp_required[["CLTAUi"]]) {
         cl_tau <- list()
-      }
-      if(comp_required[["CLTAUWi"]]) {
+      ###}
+      ###if(comp_required[["CLTAUWi"]]) {
         cl_tauw <- list()
-      }
-      if(comp_required[["PTFi"]]) {
+      ###}
+      ###if(comp_required[["PTFi"]]) {
         pt_f <- list()
-      }
-      if(comp_required[["PTRi"]]) {
+      ###}
+      ###if(comp_required[["PTRi"]]) {
         pt_r <- list()
-      }
-      if(comp_required[["VSSOi"]]) {
+      ###}
+      ###if(comp_required[["VSSOi"]]) {
         vsso <- list()
-      }
-      if(comp_required[["VSSPi"]]) {
+      ###}
+      ###if(comp_required[["VSSPi"]]) {
         vssp <- list()
-      }
-      if(comp_required[["VSSOWi"]]) {
+      ###}
+      ###if(comp_required[["VSSOWi"]]) {
         vssow <- list()
-      }
-      if(comp_required[["VSSPWi"]]) {
+      ###}
+      ###if(comp_required[["VSSPWi"]]) {
         vsspw <- list()
-      }
-      if(comp_required[["VZTAUi"]]) {
+      ###}
+      ###if(comp_required[["VZTAUi"]]) {
         vz_tau <- list()
-      }
-      if(comp_required[["VZTAUWi"]]) {
+      ###}
+      ###if(comp_required[["VZTAUWi"]]) {
         vz_tauw <- list()
-      }
+      ###}
       ctold_est <- list()
 
       tmp_df <- data_data[data_data[,map_data$SDEID] == unique(data_data[,map_data$SDEID])[i],]
@@ -1065,19 +1190,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
       test_df_2 <- tmp_df[,c(map_data$TIME)]
       if(any(duplicated(test_df_2))){
-        tmp_df <- tmp_df[!duplicated(test_df_2),]
-        if(!is.null(ex_flag)){
-          ex_flag <- ex_flag[!duplicated(test_df_2)]
-        }
-        if(!is.null(kel_flag)){
-          kel_flag <- kel_flag[!duplicated(test_df_2)]
-        }
-        if(!is.null(auc_flag)){
-          auc_flag <- auc_flag[!duplicated(test_df_2)]
-        }
-        if(!is.null(emesis_flag)){
-          emesis_flag <- emesis_flag[!duplicated(test_df_2)]
-        }
+        tmp_df <- tmp_df[rep(FALSE, nrow(tmp_df)),]
+        
         warning(paste0("Removing SDEID: '", unique(data_data[,map_data$SDEID])[i], "' due to duplicate TIME but different CONC values"))
       }
       cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
@@ -1119,10 +1233,10 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         a_auc_flag <- auc_flag
         obs_c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
 
-        if(comp_required[["DOSEC"]]) {
+        ###if(comp_required[["DOSEC"]]) {
           dose_c <- dosec(data = tmp_df, map = map_data)
-        }
-        if(comp_required[["C0"]]) {
+        ###}
+        ###if(comp_required[["C0"]]) {
           est_c_0 <- est_c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], npts=2, returnall=TRUE)
           if(!is.na(est_c_0) && !is.null(est_c_0)){
             auc_conc <- auc_conc[auc_time != 0]
@@ -1141,25 +1255,25 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               remove_extra_AUC <- FALSE
             }
           }
-        }
-        if(comp_required[["V0"]]) {
+        ###}
+        ###if(comp_required[["V0"]]) {
           tmp_dose <- tmp_df[, as.character(map_data[c("DOSE1")])][1]
           v_0 <- v0(c0 = obs_c_0, dose = tmp_dose)
-        }
-        if(comp_required[["CMAX"]]) {
+        ###}
+        ###if(comp_required[["CMAX"]]) {
           c_max <- cmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
-        }
-        if(comp_required[["TMAX"]]) {
+        ###}
+        ###if(comp_required[["TMAX"]]) {
           t_max <- tmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
-        }
-        if(comp_required[["CLAST"]]) {
+        ###}
+        ###if(comp_required[["CLAST"]]) {
           c_last <- clast(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
-        }
-        if(comp_required[["TLAST"]]) {
+        ###}
+        ###if(comp_required[["TLAST"]]) {
           t_last <- tlast(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
-        } else {
-          t_last <- NULL
-        }
+        ###} else {
+        ###  t_last <- NULL
+        ###}
         for(d in 1:di_col){
           default_di_df <- default_df[default_df[c(paste0("DI", d, "F"))] == 1,]
           suppressWarnings(default_di_df <- default_di_df[order(as.numeric(default_di_df[,map_data$TIME])),])
@@ -1224,25 +1338,25 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
           
-          if(comp_required[["TAUi"]]) {
+          ###if(comp_required[["TAUi"]]) {
             tau[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TAU",d))])][1]
             tau[[d]] <- as.numeric(tau[[d]])
-          }
-          if(comp_required[["TOLDi"]]) {
+          ###}
+          ###if(comp_required[["TOLDi"]]) {
             told[[d]] <- tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1]
             told[[d]] <- as.numeric(told[[d]])
-          }
-          if(comp_required[["TMAXi"]]){
+          ###}
+          ###if(comp_required[["TMAXi"]]){
             if(toupper(map_data$ORGTIME) == "ACTUAL"){
               t_maxi[[d]] <- tmax(conc = tmp_conc_di, time = tmp_time_di, told = told[[d]])
             } else {
               t_maxi[[d]] <- tmax(conc = tmp_conc_di, time = tmp_time_di)
             }
-          }
-          if(comp_required[["TLASTi"]]) {
+          ###}
+          ###if(comp_required[["TLASTi"]]) {
             t_lasti[[d]] <- tlast(conc = tmp_conc_di, time = tmp_time_di)
-          }
-          if(comp_required[["AUCLAST"]]){
+          ###}
+          ###if(comp_required[["AUCLAST"]]){
             tmp_auclast[[d]] <- auc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_lasti[[d]], t_max = t_maxi[[d]])
             if(d == di_col){
               overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
@@ -1257,8 +1371,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 auclast <- ifelse(isTRUE(all(is.na(tmp_auclast))), NA, sum(unlist(tmp_auclast), na.rm = TRUE))
               }
             }
-          }
-          if(comp_required[["AUCALL"]]){
+          ###}
+          ###if(comp_required[["AUCALL"]]){
             tmp_aucall[[d]] <- auc_all(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
             if(d == di_col){
               overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
@@ -1273,8 +1387,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 aucall <- ifelse(isTRUE(all(is.na(tmp_aucall))), NA, sum(unlist(tmp_aucall), na.rm = TRUE))
               }
             }
-          }
-          if(comp_required[["AUMCLAST"]]) {
+          ###}
+          ###if(comp_required[["AUMCLAST"]]) {
             tmp_aumclast[[d]] <- aumc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
             if(d == di_col){
               overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
@@ -1289,10 +1403,11 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 aumclast <- ifelse(isTRUE(all(is.na(tmp_aumclast))), NA, sum(unlist(tmp_aumclast), na.rm = TRUE))
               }
             }
-          }
+          ###}
         }
-        if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
-           "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
+        ###if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
+        ###   "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
+        if(isTRUE(optimize_kel) && "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
           tmp_time <- orig_time
           tmp_conc <- orig_conc
 
@@ -1371,18 +1486,28 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             
             ulist <- list()
             if(length(tmp_time) >= kel_n){
-              if(kel_opt > saved_kel_opt || !isTRUE(first_kel_saved)){
-                if(!isTRUE(first_kel_saved)){
-                  first_kel_saved <- TRUE
-                }
-                if(j <= length(tmp_time)) {
-                  if(choose(length(tmp_time), j) == 1){
-                    tlist <- list(as.vector(combn(tmp_time, j)))
-                  } else {
-                    cbn <- combn(tmp_time, j)
-                    tlist <- lapply(seq(ncol(cbn)), function(i) cbn[,i])
+              if(optimize_kel_method == "1"){
+                idx <- c(1:length(tmp_time))
+                ulist <- list(idx)
+                
+                if(length(tmp_time) >= kel_n){
+                  for (j in kel_n:(length(tmp_time)-1) ){
+                    fit <- lm( tmp_conc[idx] ~ tmp_time[idx] )
+                    idx <- idx[-which(abs(residuals(fit)) == max(abs(residuals(fit))))]
+                    ulist <- c(ulist,list(idx))
                   }
-                  ulist <- c(ulist,tlist)
+                }
+              } else if(optimize_kel_method == "2"){
+                for(j in kel_n:length(tmp_time)){
+                  if(j <= length(tmp_time)) {
+                    if(choose(length(tmp_time), j) == 1){
+                      tlist <- list(as.vector(combn(tmp_time, j)))
+                    } else {
+                      cbn <- combn(tmp_time, j)
+                      tlist <- lapply(seq(ncol(cbn)), function(i) cbn[,i])
+                    }
+                    ulist <- c(ulist,tlist)
+                  }
                 }
               }
             }
@@ -1464,47 +1589,53 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
         }
 
-        if(comp_required[["CMAXDN"]]) {
+        ###if(comp_required[["CMAXDN"]]) {
           c_maxdn <- cmax_dn(cmax = c_max, dose = main_dose)
-        }
-        if(comp_required[["CMIN"]]) {
+        ###}
+        ###if(comp_required[["CMIN"]]) {
           c_min <- cmin(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
-        }
-        if(comp_required[["CMINDN"]]){
+        ###}
+        ###if(comp_required[["CMINDN"]]){
           c_mindn <- cmin_dn(cmin = c_min, dose = main_dose)
-        }
-        if(comp_required[["TMIN"]]) {
+        ###}
+        ###if(comp_required[["TMIN"]]) {
           t_min <- tmin(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
-        }
-        if(comp_required[["KEL"]] || comp_required[["KELTMLO"]] || comp_required[["KELTMHI"]] || comp_required[["KELNOPT"]] || comp_required[["THALF"]] || comp_required[["THALFF"]]) {
+        ###}
+        ###if(comp_required[["KEL"]] || comp_required[["KELTMLO"]] || comp_required[["KELTMHI"]] || comp_required[["KELNOPT"]] || comp_required[["THALF"]] || comp_required[["THALFF"]]) {
           span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
           kel_v <- kel(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], exflag = kel_flag, spanratio = span_ratio)
-        } else {
-          kel_v <- NULL
-        }
-        if(comp_required[["KELR"]] || comp_required[["KELRSQ"]] || comp_required[["KELRSQA"]]) {
+        ###} else {
+        ###  kel_v <- NULL
+        ###}
+        ###if(comp_required[["KELR"]] || comp_required[["KELRSQ"]] || comp_required[["KELRSQA"]]) {
           kelr_v <- kel_r(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], exflag = kel_flag)
-        }
-        if(comp_required[["LASTTIME"]]) {
+        ###}
+        ###if(comp_required[["LASTTIME"]]) {
           last_time <- lasttime(conc = default_df[,map_data$CONC], time = as.numeric(default_df[,map_data$TIME]))
-        }
-        if(comp_required[["CMAXC"]]) {
+        ###}
+        ###if(comp_required[["CMAXC"]]) {
           c_maxc <- cmaxc(kel = kel_v[["KEL"]], cmax = c_max, c0 = obs_c_0, tmax = t_max)
-        }
-        if(comp_required[["CEST"]] || parameter_required("KEL", names(kel_v)) || parameter_required("KELC0", names(kel_v))) {
+        ###}
+        ###if(comp_required[["CEST"]] || parameter_required("KEL", names(kel_v)) || parameter_required("KELC0", names(kel_v))) {
           span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
           c_est <- cest(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], kelflag = kel_flag, t_last = t_last, spanratio = span_ratio, kel = kel_v[["KEL"]])
-        }
-        if(comp_required[["AUCT"]] && auc_len > 1) {
+        ###}
+        ###if(comp_required[["AUCT"]] && auc_len > 1) {
+        ###  auct <- list()
+        ###}
+        ###if(comp_required[["AUCTDN"]] && auc_len > 1) {
+        ###  auctdn <- list()
+        ###}
+        ###if((comp_required[["AUCT"]] || comp_required[["AUCTDN"]]) && auc_len > 1) {
+        ###  auc_int <- list()
+        ###}
+        if(auc_len > 1){
           auct <- list()
-        }
-        if(comp_required[["AUCTDN"]] && auc_len > 1) {
           auctdn <- list()
-        }
-        if((comp_required[["AUCT"]] || comp_required[["AUCTDN"]]) && auc_len > 1) {
           auc_int <- list()
         }
-        if(comp_required[["AUCT1_T2"]] && auc_pair_check) {
+        ###if(comp_required[["AUCT1_T2"]] && auc_pair_check) {
+        if(auc_pair_check) {
           auct1_t2 <- list()
           auct1_t2_check <- as.list(rep(NA, auc_par_len))
           auct1_t2_names <- c(rep(paste0("AUC.", 1:auc_par_len, ".T1")), rep(paste0("AUC.", 1:auc_par_len, ".T2")))
@@ -1580,163 +1711,215 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
           
-          if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]) {
+          ###if(comp_required[["DOSECi"]] || comp_required[["DOSEC"]]) {
             if(!is.na(tmp_dose)) { 
               dose_c_i[[d]] <- dosec(data = tmp_di_df, map = map_data, idose=d)
             } else {
               dose_c_i[[d]] <- dose_c
             }
-          }
-          dof[[d]] <- ifelse(paste0("DOF",d) %in% names(map_data), ifelse(map_data[c(paste0("DOF",d))] %in% names(data_data), unique(tmp_di_df[,as.character(map_data[c(paste0("DOF",d))])])[1], NA), NA)
+          ###}
+          dose_inf[[d]] <- dof(tmp_di_df, map_data, dof_name = paste0("DOF",d))
           
-          if(comp_required[["CMAXi"]]) {
+          ###if(comp_required[["CMAXi"]]) {
             c_maxi[[d]] <- cmax(conc = tmp_conc_di, time = tmp_time_di)
-          }
-          if(comp_required[["CMINi"]]) {
+          ###}
+          ###if(comp_required[["CMINi"]]) {
             c_mini[[d]] <- cmin(conc = tmp_conc_di, time = tmp_time_di)
-          }
-          if(comp_required[["CLASTi"]]) {
+          ###}
+          ###if(comp_required[["CLASTi"]]) {
             c_lasti[[d]] <- clast(conc = tmp_conc_di, time = tmp_time_di)
-          }
-          if(comp_required[["CMAXDNi"]]) {
+          ###}
+          ###if(comp_required[["CMAXDNi"]]) {
             c_maxdni[[d]] <- cmax_dn(cmax = c_maxi[[d]], dose = tmp_dose)
-          }
-          if(comp_required[["CMINDNi"]]){
+          ###}
+          ###if(comp_required[["CMINDNi"]]){
             c_mindni[[d]] <- cmin_dn(cmin = c_mini[[d]], dose = tmp_dose)
-          }
-          if(comp_required[["TMAXi"]]){
+          ###}
+          ###if(comp_required[["TMAXi"]]){
             if(toupper(map_data$ORGTIME) == "ACTUAL"){
               t_maxi[[d]] <- tmax(conc = tmp_conc_di, time = tmp_time_di, told = told[[d]])
             } else {
               t_maxi[[d]] <- tmax(conc = tmp_conc_di, time = tmp_time_di)
             }
-          }
-          if(comp_required[["TMINi"]]){
+          ###}
+          ###if(comp_required[["TMINi"]]){
             if(toupper(map_data$ORGTIME) == "ACTUAL"){
               t_mini[[d]] <- tmin(conc = tmp_conc_di, time = tmp_time_di, told = told[[d]]) 
             } else {
               t_mini[[d]] <- tmin(conc = tmp_conc_di, time = tmp_time_di)
             }
-          }
-          if(comp_required[["LASTTIMEi"]]) {
+          ###}
+          ###if(comp_required[["LASTTIMEi"]]) {
             last_timei[[d]] <- lasttime(conc = default_di_df[,map_data$CONC], time = as.numeric(default_di_df[,map_data$TIME]))
-          }
-          if(comp_required[["CMAXCi"]]) {
+          ###}
+          ###if(comp_required[["CMAXCi"]]) {
             c_maxci[[d]] <- cmaxc(kel = kel_v[["KEL"]], cmax = c_maxi[[d]], c0 = obs_c_0, tmax = t_maxi[[d]])
-          }
-          if(comp_required[["AUCLASTi"]]) {
+          ###}
+          ###if(comp_required[["AUCLASTi"]]) {
             auclasti[[d]] <- auc_last(conc = tmp_conc_di, time = tmp_time_di, method = method, exflag = auc_flag, t_last = t_lasti[[d]], t_max = t_maxi[[d]])
-          }
-          if(comp_required[["AUCLASTDNi"]]) {
+          ###}
+          ###if(comp_required[["AUCLASTDNi"]]) {
             auclasti_dn[[d]] <- auc_dn(auc = auclasti[[d]], dose = tmp_dose)
-          }
-          if(comp_required[["AUMCLASTi"]]) {
+          ###}
+          ###if(comp_required[["AUMCLASTi"]]) {
             aumclasti[[d]] <- aumc_last(conc = tmp_conc_di, time = aumc_time, method = method, exflag = auc_flag, t_max = t_maxi[[d]])
-          }
-          if(comp_required[["AUCINFOi"]]) {
+          ###}
+          ###if(comp_required[["AUCINFOi"]]) {
             aucinfoi[[d]] <- auc_inf_o(conc = tmp_conc_di, time = tmp_time_di, method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclasti[[d]], c_last = c_lasti[[d]], kel = kel_v)
-          }
-          if(comp_required[["AUCINFOCi"]]){
+          ###}
+          ###if(comp_required[["AUCINFOCi"]]){
             aucinfoi_c[[d]] <- auc_inf_oc(kel = kel_v[["KEL"]], aucinfo = aucinfoi[[d]], c0 = obs_c_0)
-          }
-          if(comp_required[["AUCINFODNi"]]){
+          ###}
+          ###if(comp_required[["AUCINFODNi"]]){
             aucinfoi_dn[[d]] <- auc_dn(auc = aucinfoi[[d]], dose = tmp_dose)
-          }
-          if(comp_required[["AUCINFPi"]]) {
+          ###}
+          ###if(comp_required[["AUCINFPi"]]) {
             aucinfpi[[d]] <- auc_inf_p(conc = tmp_conc_di, time = tmp_di_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclasti[[d]], t_last = t_lasti[[d]], kel = kel_v)
-          }
-          if(comp_required[["AUCINFPCi"]]){
+          ###}
+          ###if(comp_required[["AUCINFPCi"]]){
             aucinfpi_c[[d]] <- auc_inf_pc(kel = kel_v[["KEL"]], aucinfp = aucinfpi[[d]], c0 = obs_c_0)
-          }
-          if(comp_required[["AUCINFPDNi"]]){
+          ###}
+          ###if(comp_required[["AUCINFPDNi"]]){
             aucinfpi_dn[[d]] <- auc_dn(auc = aucinfpi[[d]], dose = tmp_dose)
-          }
-          if(comp_required[["AUMCINFOi"]]) {
+          ###}
+          ###if(comp_required[["AUMCINFOi"]]) {
             aumcinfoi[[d]] <- aumc_inf_o(conc = tmp_conc_di, time = aumc_time, method = method, kelflag = kel_flag, aucflag = auc_flag, aumclast = aumclasti[[d]], t_last = t_lasti[[d]], c_last = c_lasti[[d]], kel = kel_v)
-          }
-          if(comp_required[["AUMCINFPi"]]) {
+          ###}
+          ###if(comp_required[["AUMCINFPi"]]) {
             aumcinfpi[[d]] <- aumc_inf_p(conc = tmp_conc_di, time = aumc_time, method = method, kelflag = kel_flag, aucflag = auc_flag, aumclast = aumclasti[[d]], t_last = t_lasti[[d]], kel = kel_v)
-          }
-          if(comp_required[["AUCTAUi"]]) {
+          ###}
+          ###if(comp_required[["AUCTAUi"]]) {
             auctau[[d]] <- auc_tau(conc = tmp_conc_di, time = tmp_time_di, method = method, exflag = auc_flag, tau = told[[d]]+tau[[d]], t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time, last_crit_factor = last_crit_factor, kel = kel_v, auclast = auclasti[[d]], lasttime = last_timei[[d]])
-          }
-          if(comp_required[["AUCTAUDNi"]]) {
+          ###}
+          ###if(comp_required[["AUCTAUDNi"]]) {
             auctaudn[[d]] <- auc_dn(auc = auctau[[d]], dose = tmp_dose)
-          }
-          if(comp_required[["AUMCTAUi"]]) {
-            aumctaui[[d]] <- aumc_tau(conc = tmp_conc_di, time = aumc_time, method = 1, exflag = auc_flag, tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = tmp_df[,map_data$CONC], orig_time = tmp_df[,map_data$TIME], returnNA = FALSE)
-          }
-          if(comp_required[["MRTLASTi"]]) {
-            mrtlasti[[d]] <- mrt_last(conc = tmp_conc_di, time = aumc_time, method = method, model = "M2", aucflag = auc_flag, dof = dof[[d]], auclast = auclasti[[d]], aumclast = aumclasti[[d]])
-          }
-          if(comp_required[["MRTIVIFOi"]]){
+          ###}
+          ###if(comp_required[["AUMCTAUi"]]){
+            if(isTRUE(exists("auctau"))){
+              if(isTRUE(is.na(auctau[[d]]) || is.null(auctau[[d]]))){
+                aumctaui[[d]] <- NA
+              } else {
+                aumctaui[[d]] <- aumc_tau(conc = tmp_conc_di, time = aumc_time, method = method, exflag = auc_flag, tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time, returnNA = FALSE)
+              }
+            } else {
+              aumctaui[[d]] <- aumc_tau(conc = tmp_conc_di, time = aumc_time, method = method, exflag = auc_flag, tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time, returnNA = FALSE)
+            }
+          ###}
+          ###if(comp_required[["MRTLASTi"]]) {
+            mrtlasti[[d]] <- mrt_last(conc = tmp_conc_di, time = aumc_time, method = method, model = "M2", aucflag = auc_flag, dof = dose_inf[[d]], auclast = auclasti[[d]], aumclast = aumclasti[[d]])
+          ###}
+          ###if(comp_required[["MRTIVIFOi"]]){
             mrtivifoi[[d]] <- mrt_ivif_o(conc = tmp_conc_di, time = aumc_time, method = method, model = "M2", parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfo = aucinfoi[[d]], aumcinfo = aumcinfoi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
-          }
-          if(comp_required[["MRTIVIFPi"]]){
+          ###}
+          ###if(comp_required[["MRTIVIFPi"]]){
               mrtivifpi[[d]] <- mrt_ivif_p(conc = tmp_conc_di, time = aumc_time, method = method, model = "M2", parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfp = aucinfpi[[d]], aumcinfp = aumcinfpi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
-          }
-          if(comp_required[["AUCXPCTOi"]]){
+          ###}
+          ###if(comp_required[["AUCXPCTOi"]]){
             aucxpctoi[[d]] <- auc_XpctO(conc = tmp_conc_di, time = tmp_time_di, method = method, kelflag = kel_flag, aucflag = auc_flag, auc_info = aucinfoi[[d]], auclast = auclasti[[d]])
-          }
-          if(comp_required[["AUCXPCTPi"]]){
+          ###}
+          ###if(comp_required[["AUCXPCTPi"]]){
             aucxpctpi[[d]] <- auc_XpctP(conc = tmp_conc_di, time = tmp_time_di, method = method, kelflag = kel_flag, aucflag = auc_flag, auc_infp = aucinfpi[[d]], auclast = auclasti[[d]])
-          }
-          if(comp_required[["AUMCXPTOi"]]){
+          ###}
+          ###if(comp_required[["AUMCXPTOi"]]){
             aumcxptoi[[d]] <- aumc_XpctO(conc = tmp_conc_di, time = aumc_time, method = method, kelflag = kel_flag, aucflag = auc_flag, aumcinfo = aumcinfoi[[d]], aumclast = aumclasti[[d]])
-          }
-          if(comp_required[["AUMCXPTPi"]]){
+          ###}
+          ###if(comp_required[["AUMCXPTPi"]]){
             aumcxptpi[[d]] <- aumc_XpctP(conc = tmp_conc_di, time = aumc_time, method = method, kelflag = kel_flag, aucflag = auc_flag, aumcinfp = aumcinfpi[[d]], aumclast = aumclasti[[d]])
-          }
-          if(comp_required[["CAVi"]]) {
+          ###}
+          ###if(comp_required[["CAVi"]]) {
             ca_v[[d]] <- cav(auctau = auctau[[d]], tau = tau[[d]])
-          }
-          if(comp_required[["DIi"]]) {
+          ###}
+          ###if(comp_required[["DIi"]]) {
             if(is.na(tmp_di_df[,map_data$TIME][1])){
               di[[d]] <- NA
             } else {
               di[[d]] <- paste0(tmp_di_df[,map_data$TIME][1], "-", tmp_di_df[,map_data$TIME][nrow(tmp_di_df)])
             }
-          }
-          if(comp_required[["DOSEi"]]) {
+          ###}
+          ###if(comp_required[["DOSEi"]]) {
             dose[[d]] <- tmp_dose
-          }
-          if(comp_required[["CTROUGHi"]]){
+          ###}
+          ###if(comp_required[["CTROUGHi"]]){
             c_troughi[[d]] <- ctrough(conc = tmp_conc_di, time = tmp_nomtime_di, tau = tau[[d]], told = told[[d]])
-          }
-          if(comp_required[["PTROUGHRi"]]){
+          ###}
+          ###if(comp_required[["PTROUGHRi"]]){
             p_troughri[[d]] <- ptroughr(cmax = c_maxi[[d]], ctrough = c_troughi[[d]])
+          ###}
+          ###if(comp_required[["CLTAUi"]]) {
+          ###  cl_tau[[d]] <- cltau(auctau = auctau[[d]], dose =  dose_c_i[[d]])
+          ###}
+          if(isTRUE(dose_by_mass)){
+            cl_tau[[d]] <- NA
+          } else {
+            cl_tau[[d]] <- cltau(auctau = auctau[[d]], dose = dose_c_i[[d]])
           }
-          if(comp_required[["CLTAUi"]]) {
-            cl_tau[[d]] <- cltau(auctau = auctau[[d]], dose =  dose_c_i[[d]])
-          }
-          if(comp_required[["CLTAUWi"]]) {
+          ###if(comp_required[["CLTAUWi"]]) {
+          ###  cl_tauw[[d]] <- cltauw(cltau = cl_tau[[d]], normbs = norm_bs)
+          ###}
+          if(isTRUE(dose_by_mass)){
+            cl_tauw[[d]] <- cltauw(cltau = tmp_dose, normbs = auctau[[d]])
+          } else {
             cl_tauw[[d]] <- cltauw(cltau = cl_tau[[d]], normbs = norm_bs)
           }
-          if(comp_required[["PTFi"]]) {
+          ###if(comp_required[["PTFi"]]) {
             pt_f[[d]] <- ptf(cmax = c_maxi[[d]], cmin = c_mini[[d]], cav = ca_v[[d]])
-          }
-          if(comp_required[["PTRi"]]) {
+          ###}
+          ###if(comp_required[["PTRi"]]) {
             pt_r[[d]] <- ptr(cmax = c_maxi[[d]], cmin = c_mini[[d]])
-          }
-          if(comp_required[["VSSOi"]]) {
+          ###}
+          ###if(comp_required[["VSSOi"]]) {
+          ###  vsso[[d]] <- vsso(clo = cl_tau[[d]], mrto = mrtivifoi[[d]])
+          ###}
+          if(isTRUE(dose_by_mass)){
+            vsso[[d]] <- NA
+          } else {
             vsso[[d]] <- vsso(clo = cl_tau[[d]], mrto = mrtivifoi[[d]])
           }
-          if(comp_required[["VSSPi"]]) {
+          ###if(comp_required[["VSSPi"]]) {
+          ###  vssp[[d]] <- vssp(cltau = cl_tau[[d]], mrtp = mrtivifpi[[d]])
+          ###}
+          if(isTRUE(dose_by_mass)){
+            vssp[[d]] <- NA
+          } else {
             vssp[[d]] <- vssp(cltau = cl_tau[[d]], mrtp = mrtivifpi[[d]])
           }
-          if(comp_required[["VSSOWi"]]) {
+          ###if(comp_required[["VSSOWi"]]) {
+          ###  vssow[[d]] <- vssow(vsso = vsso[[d]], normbs = norm_bs)
+          ###}
+          if(isTRUE(dose_by_mass)){
+            cl_ow <- clow(clo = tmp_dose, normbs = aucinfoi[[d]])
+            vssow[[d]] <- mrtivifoi[[d]] * cl_ow
+          } else {
             vssow[[d]] <- vssow(vsso = vsso[[d]], normbs = norm_bs)
           }
-          if(comp_required[["VSSPWi"]]) {
+          ###if(comp_required[["VSSPWi"]]) {
+          ###  vsspw[[d]] <- vsspw(vssp = vssp[[d]], normbs = norm_bs)
+          ###}
+          if(isTRUE(dose_by_mass)){
+            cl_pw <- clpw(clp = tmp_dose, normbs = aucinfpi[[d]])
+            vsspw[[d]] <- mrtivifpi[[d]] * cl_pw
+          } else {
             vsspw[[d]] <- vsspw(vssp = vssp[[d]], normbs = norm_bs)
           }
-          if(comp_required[["VZTAUi"]]) {
-            vz_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose =  dose_c_i[[d]])
+          ###if(comp_required[["VZTAUi"]]) {
+          ###  vz_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose =  dose_c_i[[d]])
+          ###}
+          if(isTRUE(dose_by_mass)){
+            vz_tau[[d]] <- NA
+          } else {
+            vz_tau[[d]] <- vzftau(kel = kel_v[["KEL"]], auctau = auctau[[d]], dose = dose_c_i[[d]])
           }
-          if(comp_required[["VZTAUWi"]]) {
+          ###if(comp_required[["VZTAUWi"]]) {
+          ###  vz_tauw[[d]] <- vzftauw(vzftau = vz_tau[[d]], normbs = norm_bs)
+          ###}
+          if(isTRUE(dose_by_mass)){
+            tmp_denom <- kel_v[["KEL"]] * auctau[[d]]
+            vz_tauw[[d]] <- vzftauw(vzftau = tmp_dose, normbs = tmp_denom)
+          } else {
             vz_tauw[[d]] <- vzftauw(vzftau = vz_tau[[d]], normbs = norm_bs)
-          }
-          if((comp_required[["AUCT"]] || comp_required[["AUCTDN"]]) && auc_len > 1) {
+          }  
+          ###if((comp_required[["AUCT"]] || comp_required[["AUCTDN"]]) && auc_len > 1) {
+          if(auc_len > 1) {
             time <- sort(auc_time)
             time_di <- sort(tmp_di_df[,map_data$TIME])
             if(d == 1 && !any(time_di == 0)){
@@ -1764,30 +1947,30 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 }
   
                 if(d == 1){
-                  if(comp_required[["AUCT"]]){
+                  ###if(comp_required[["AUCT"]]){
                     auct[[t-1]] <- tmp
-                  }
-                  if(comp_required[["AUCTDN"]]){
+                  ###}
+                  ###if(comp_required[["AUCTDN"]]){
                     auctdn[[t-1]] <- tmp_dn
-                  }
+                  ###}
                   auc_int[[t-1]] <- tmp_int
                 } else {
                   if(prev_na){
                     prev_na <- FALSE
                     if(is.numeric(tmp)){
-                      if(comp_required[["AUCT"]]){
+                      ###if(comp_required[["AUCT"]]){
                         prev_auc <- unlist(auct[[t-2]])
                         auct[[t-1]] <- sum(c(prev_auc, tmp), na.rm = TRUE)
-                      }
+                      ###}
                     }
                     if(is.numeric(tmp_dn)){
-                      if(comp_required[["AUCTDN"]]){
+                      ###if(comp_required[["AUCTDN"]]){
                         prev_auc_dn <- unlist(auctdn[[t-2]])
                         auctdn[[t-1]] <- sum(c(prev_auc_dn, tmp_dn), na.rm = TRUE)
-                      }
+                      ###}
                     }
                   } else {
-                    if(comp_required[["AUCT"]]){
+                    ###if(comp_required[["AUCT"]]){
                       if(!is.na(prev_auc)){
                         auct[[t-1]] <- sum(c(prev_auc, tmp), na.rm = TRUE)
                       } else {
@@ -1797,8 +1980,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                           auct[[t-1]] <- sum(c(auct[[t-1]], tmp), na.rm = TRUE)
                         }
                       }
-                    }
-                    if(comp_required[["AUCTDN"]]){
+                    ###}
+                    ###if(comp_required[["AUCTDN"]]){
                       if(!is.na(prev_auc_dn)){
                         auctdn[[t-1]] <- sum(c(prev_auc_dn, tmp_dn), na.rm = TRUE)
                       } else {
@@ -1808,7 +1991,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                           auctdn[[t-1]] <- sum(c(auctdn[[t-1]], tmp_dn), na.rm = TRUE)
                         }
                       }
-                    }
+                    ###}
                   }
                   auc_int[[t-1]] <- ifelse(auc_int[[t-1]] != tmp_int, tmp_int, auc_int[[t-1]])
   
@@ -1825,22 +2008,23 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               auc_int <- rep(NA, auc_len)
             }
             if(d == di_col){
-              if(comp_required[["AUCT"]]){
+              ###if(comp_required[["AUCT"]]){
                 if(length(auct) < auc_len) {
                   auct <- c(auct, rep(NA, (auc_len - length(auct))))
                 }
-              }
-              if(comp_required[["AUCTDN"]]){
+              ###}
+              ###if(comp_required[["AUCTDN"]]){
                 if(length(auctdn) < auc_len) {
                   auctdn <- c(auctdn, rep(NA, (auc_len - length(auctdn))))
                 }
-              }
+              ###}
               if(length(auc_int) < auc_len) {
                 auc_int <- c(auc_int, rep(NA, (auc_len - length(auc_int))))
               }
             }
           }
-          if(comp_required[["AUCT1_T2"]] && auc_pair_check) {
+          ###if(comp_required[["AUCT1_T2"]] && auc_pair_check) {
+          if(auc_pair_check) {
             time <- sort(unique(data_data[,map_data$TIME]))
             time_di <- sort(tmp_di_df[,map_data$TIME])
             nomtime_di <- sort(tmp_di_df[,map_data$NOMTIME])
@@ -1963,9 +2147,9 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
           
-          if(comp_required[["AUCALLDN"]]){
+          ###if(comp_required[["AUCALLDN"]]){
             aucalldn[[d]] <- auc_dn(auc = aucall, dose = tmp_dose)
-          }
+          ###}
           if((d+1) <= di_col){
             next_tmp_di_df  <- tmp_df[tmp_df[c(paste0("DI", d+1, "F"))] == 1,]
             next_tmp_di_df <- next_tmp_di_df[order(next_tmp_di_df[,map_data$TIME]),]
@@ -1985,78 +2169,84 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               next_tmp_conc_di <- next_est_tmp[[1]]
               next_ctold_est <- next_tmp_conc_di[1]
               
-              if(comp_required[["CTROUGHENDi"]]){
+              ###if(comp_required[["CTROUGHENDi"]]){
                 c_troughendi[[d]] <- ctroughend(conc = tmp_conc_di, time = tmp_nomtime_di, tau = tau[[d]], told = told[[d]], ctold = next_ctold_est)
-              }
-              if(comp_required[["PTROUGHRENDi"]]){
+              ###}
+              ###if(comp_required[["PTROUGHRENDi"]]){
                 p_troughrendi[[d]] <- ptroughrend(cmax = c_maxi[[d]], ctrough = c_troughendi[[d]])
-              }
+              ###}
             } else {
-              if(comp_required[["CTROUGHENDi"]]){
+              ###if(comp_required[["CTROUGHENDi"]]){
                 c_troughendi[[d]] <- ctroughend(conc = tmp_conc_di, time = tmp_nomtime_di, tau = tau[[d]], told = told[[d]])
-              }
-              if(comp_required[["PTROUGHRENDi"]]){
+              ###}
+              ###if(comp_required[["PTROUGHRENDi"]]){
                 p_troughrendi[[d]] <- ptroughrend(cmax = c_maxi[[d]], ctrough = c_troughendi[[d]])
-              }
+              ###}
             }
           } else {
-            if(comp_required[["CTROUGHENDi"]]){
+            ###if(comp_required[["CTROUGHENDi"]]){
               c_troughendi[[d]] <- ctroughend(conc = tmp_conc_di, time = tmp_nomtime_di, tau = tau[[d]], told = told[[d]])
-            }
-            if(comp_required[["PTROUGHRENDi"]]){
+            ###}
+            ###if(comp_required[["PTROUGHRENDi"]]){
               p_troughrendi[[d]] <- ptroughrend(cmax = c_maxi[[d]], ctrough = c_troughendi[[d]])
-            }
+            ###}
           }
         }
-        if(comp_required[["AUCINFO"]]){
+        ###if(comp_required[["AUCINFO"]]){
           aucinf_o <- auc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, c_last = c_last, kel = kel_v)
-        }
-        if(comp_required[["AUCINFP"]]){
+        ###}
+        ###if(comp_required[["AUCINFP"]]){
           aucinf_p <- auc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, t_last = t_last, kel = kel_v)
-        }
-        if(comp_required[["AUCLASTDN"]]) {
+        ###}
+        ###if(comp_required[["AUCLASTDN"]]) {
           auclastdn <- auc_dn(auc = auclast, dose = main_dose)
-        }
-        if(comp_required[["AUCXPCTO"]]){
+        ###}
+        ###if(comp_required[["AUCXPCTO"]]){
           aucxpcto <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_info = aucinf_o, auclast = auclast)
-        }
-        if(comp_required[["AUCXPCTP"]]){
+        ###}
+        ###if(comp_required[["AUCXPCTP"]]){
           aucxpctp <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_infp = aucinf_p, auclast = auclast)
-        }
-        if(comp_required[["AUCINFODN"]]) {
+        ###}
+        ###if(comp_required[["AUCINFODN"]]) {
           aucinf_odn <- auc_dn(auc = aucinf_o, dose = main_dose)
-        }
-        if(comp_required[["AUCINFPDN"]]) {
+        ###}
+        ###if(comp_required[["AUCINFPDN"]]) {
           aucinf_pdn <- auc_dn(auc = aucinf_p, dose = main_dose)
-        }
-        if(comp_required[["AUMCINFO"]]) {
-          aumcinf_o <- aumc_inf_o(conc = auc_conc, time = auc_time, method = method, kelflag = a_kel_flag, aucflag = a_auc_flag, aumclast = aumclast, c_last = c_last, t_last = t_last, kel = kel_v)
-        }
-        if(comp_required[["AUMCINFP"]]) {
-          aumcinf_p <- aumc_inf_p(conc = auc_conc, time = auc_time, method = method, kelflag = a_kel_flag, aucflag = a_auc_flag, aumclast = aumclast, t_last = t_last, kel = kel_v)
-        }
-        if(comp_required[["MRTLAST"]]) {
-          mrtlast <- mrt_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M2", aucflag = auc_flag, dof = dof[[d]], auclast = auclast, aumclast = aumclast)
-        }
-        if(comp_required[["AUCXPCTO"]]){
+        ###}
+          
+        ####REMOVING AUMC PARAMETERS  
+        ####if(comp_required[["AUMCINFO"]]) {
+        ####  aumcinf_o <- aumc_inf_o(conc = auc_conc, time = auc_time, method = method, kelflag = a_kel_flag, aucflag = a_auc_flag, aumclast = aumclast, c_last = c_last, t_last = t_last, kel = kel_v)
+        ####}
+        ####if(comp_required[["AUMCINFP"]]) {
+        ####  aumcinf_p <- aumc_inf_p(conc = auc_conc, time = auc_time, method = method, kelflag = a_kel_flag, aucflag = a_auc_flag, aumclast = aumclast, t_last = t_last, kel = kel_v)
+        ####}
+          
+        ###if(comp_required[["MRTLAST"]]) {
+          mrtlast <- mrt_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M2", aucflag = auc_flag, dof = dose_inf[[d]], auclast = auclast, aumclast = aumclast)
+        ###}
+        ###if(comp_required[["AUCXPCTO"]]){
           aucxpcto <- auc_XpctO(conc = auc_conc, time = auc_time, method = method, kelflag = a_kel_flag, aucflag = a_auc_flag, auc_info = aucinf_o, auclast = auclast)
-        }
-        if(comp_required[["AUCXPCTP"]]){
+        ###}
+        ###if(comp_required[["AUCXPCTP"]]){
           aucxpctp <- auc_XpctP(conc = auc_conc, time = auc_time, method = method, kelflag = a_kel_flag, aucflag = a_auc_flag, auc_infp = aucinf_p, auclast = auclast)
-        }
-        if(comp_required[["AUMCXPTO"]]){
-          aumcxpto <- aumc_XpctO(conc = auc_conc, time = auc_time, method = method, kelflag = a_kel_flag, aucflag = a_auc_flag, aumcinfo = aumcinf_o, aumclast = aumclast)
-        }
-        if(comp_required[["AUMCXPTP"]]){
-          aumcxptp <- aumc_XpctP(conc = auc_conc, time = auc_time, method = method, kelflag = a_kel_flag, aucflag = a_auc_flag, aumcinfp = aumcinf_p, aumclast = aumclast)
-        }
-        if(comp_required[["AUCXBPCTO"]]){
+        ###}
+          
+        ####REMOVING AUMC PARAMETERS  
+        ####if(comp_required[["AUMCXPTO"]]){
+        ####  aumcxpto <- aumc_XpctO(conc = auc_conc, time = auc_time, method = method, kelflag = a_kel_flag, aucflag = a_auc_flag, aumcinfo = aumcinf_o, aumclast = aumclast)
+        ####}
+        ####if(comp_required[["AUMCXPTP"]]){
+        ####  aumcxptp <- aumc_XpctP(conc = auc_conc, time = auc_time, method = method, kelflag = a_kel_flag, aucflag = a_auc_flag, aumcinfp = aumcinf_p, aumclast = aumclast)
+        ####}
+          
+        ###if(comp_required[["AUCXBPCTO"]]){
           aucxbpcto <- auc_XbpctO(conc = auc_conc, time = auc_time, method = method, kelflag = a_kel_flag, aucflag = a_auc_flag, auc_info = aucinf_o)
-        }
-        if(comp_required[["AUCXBPCTP"]]){
+        ###}
+        ###if(comp_required[["AUCXBPCTP"]]){
           aucxbpctp <- auc_XbpctP(conc = auc_conc, time = auc_time, method = method, kelflag = a_kel_flag, aucflag = a_auc_flag, auc_infp = aucinf_p)
-        }
-        if(comp_required[["KEL"]]){
+        ###}
+        ###if(comp_required[["KEL"]]){
           exflag <- !as.logical(kel_flag)
 
           pkdataid <- tmp_df[,map_data$FLGMERGE][exflag]
@@ -2066,9 +2256,9 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(!is.na(kel_v[["KEL"]])){
             cest_kel <- estimate_concentration(time, conc, slope=kel_v[["KEL"]])
           }
-        } else {
-          pkdataid <- NULL
-        }
+        ###} else {
+        ###  pkdataid <- NULL
+        ###}
 
         tmp_est_data <- data.frame(matrix(ncol = length(elist), nrow = 0))
         names(tmp_est_data) <- elist
@@ -2094,8 +2284,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
           for(e in 1:length(pkdataid)){
             est_row <- c(pkdataid[e], unique(data_data[,map_data$SDEID])[i], time[e], cest_kel[e], NA, NA, NA, NA)
-            
-            if(comp_required[["TLAST"]]) { if(!is.na(t_last)){ if(time[e]==t_last) { est_row[8] <- c_est } } }
+            ###if(comp_required[["TLAST"]]) { if(!is.na(t_last)){ if(time[e]==t_last) { est_row[8] <- c_est } } }
+            if(!is.na(t_last)){ if(time[e]==t_last) { est_row[8] <- c_est } }
             
             if(nrow(cest_tmp) > 0){
               cest_idx <- which(cest_tmp$TIME == time[e])
@@ -2406,15 +2596,17 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["AUCXPCTPi"]]){
           computation_df[i, paste0("AUCXPCTP",1:di_col)] <- unlist(aucxpctpi)
         }
-        if(disp_required[["AUMCXPTO"]]){
-          computation_df[i, "AUMCXPTO"] <- aumcxpto
-        }
+        ####REMOVING AUMC PARAMETERS  
+        ####if(disp_required[["AUMCXPTO"]]){
+        ####  computation_df[i, "AUMCXPTO"] <- aumcxpto
+        ####}
         if(disp_required[["AUMCXPTOi"]]){
           computation_df[i, paste0("AUMCXPTO",1:di_col)] <- unlist(aumcxptoi)
         }
-        if(disp_required[["AUMCXPTP"]]){
-          computation_df[i, "AUMCXPTP"] <- aumcxptp
-        }
+        ####REMOVING AUMC PARAMETERS  
+        ####if(disp_required[["AUMCXPTP"]]){
+        ####  computation_df[i, "AUMCXPTP"] <- aumcxptp
+        ####}
         if(disp_required[["AUMCXPTPi"]]){
           computation_df[i, paste0("AUMCXPTP",1:di_col)] <- unlist(aumcxptpi)
         }
@@ -2537,6 +2729,98 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
     }
   }
+  if(isTRUE(secondary)){
+    pkterm_parent <- map_data$PKTERMPARENT
+    secondary_mappings <- c("SDEID", 'MRSDEID', 'PKTERM', 'MW')
+    secondary_values <- as.character(map_data[,secondary_mappings])
+    secondary_data <- merge(x = computation_df, y = unique(data_data[,secondary_values]), by = map_data$SDEID, all.y = FALSE, all.x = FALSE)
+    
+    for(i in 1:length(unique(secondary_data[,map_data$SDEID]))){
+      tryCatch({
+        sdeid <- unique(secondary_data[,map_data$SDEID])[i]
+        tmp_df <- secondary_data[secondary_data[,map_data$SDEID] == sdeid,]
+        curr_mrsdeid <- unique(tmp_df[,map_data$MRSDEID])[1]
+        tmp_mr_df <- secondary_data[secondary_data[,map_data$MRSDEID] == curr_mrsdeid,]
+        tmp_orig_df <- data_data[data_data[,map_data$SDEID] == sdeid,]
+        tmp_mr_orig_df <- data_data[data_data[,map_data$MRSDEID] == curr_mrsdeid,]
+        
+        if(isTRUE(pkterm_parent %in% tmp_mr_df[,map_data$PKTERM])){
+          curr_pkterm <- unique(tmp_df[,map_data$PKTERM])[1]
+          tmp_parent_df <- tmp_mr_df[tmp_mr_df[,map_data$PKTERM] == pkterm_parent,]
+          tmp_parent_orig_df <- tmp_mr_orig_df[tmp_mr_orig_df[,map_data$PKTERM] == pkterm_parent,]
+          
+          if("CONCU" %in% names(map_data)){
+            if(map_data$CONCU %in% names(data_data)){
+              meta_unit <- unique(tmp_orig_df[,map_data$CONCU])[1]
+              parent_unit <- unique(tmp_parent_orig_df[,map_data$CONCU])[1]
+              if(parent_unit != meta_unit){
+                warning(paste0("Warning concentration units for parent '", pkterm_parent, "' (", parent_unit, ") and metabolite '", curr_pkterm, "' (", meta_unit, ") differ! Review metabolite ratio parameters carefully before accepting for SDEID '", sdeid, "'!"))
+              }
+            }
+          }
+          if("TIMEU" %in% names(map_data)){
+            if(map_data$TIMEU %in% names(data_data)){
+              meta_unit <- unique(tmp_orig_df[,map_data$TIMEU])[1]
+              parent_unit <- unique(tmp_parent_orig_df[,map_data$TIMEU])[1]
+              if(parent_unit != meta_unit){
+                warning(paste0("Warning time units for parent '", pkterm_parent, "' (", parent_unit, ") and metabolite '", curr_pkterm, "' (", meta_unit, ") differ! Review metabolite ratio parameters carefully before accepting for SDEID '", sdeid, "'!"))
+              }
+            }
+          }
+          if("DOSEU" %in% names(map_data)){
+            if(map_data$DOSEU %in% names(data_data)){
+              meta_unit <- unique(tmp_orig_df[,map_data$DOSEU])[1]
+              parent_unit <- unique(tmp_parent_orig_df[,map_data$DOSEU])[1]
+              if(parent_unit != meta_unit){
+                warning(paste0("Warning dose units for parent '", pkterm_parent, "' (", parent_unit, ") and metabolite '", curr_pkterm, "' (", meta_unit, ") differ! Review metabolite ratio parameters carefully before accepting for SDEID '", sdeid, "'!"))
+              }
+            }
+          }
+          
+          if(disp_required[["MRAUCINFO"]]) {
+            if(isTRUE(curr_pkterm != pkterm_parent)){
+              mr_aucinf_o <- mr_auc_inf_o(metabolite_aucinfo = tmp_df$AUCINFO, parent_aucinfo = tmp_parent_df$AUCINFO, parent_mw = tmp_parent_df$MW, metabolite_mw = tmp_df$MW)
+              computation_df[computation_df[,map_data$SDEID] == sdeid, "MRAUCINFO"] <- mr_aucinf_o
+            } 
+          }
+          if(disp_required[["MRAUCINFP"]]) {
+            if(isTRUE(curr_pkterm != pkterm_parent)){
+              mr_aucinf_p <- mr_auc_inf_p(metabolite_aucinfp = tmp_df$AUCINFP, parent_aucinfp = tmp_parent_df$AUCINFP, parent_mw = tmp_parent_df$MW, metabolite_mw = tmp_df$MW)
+              computation_df[computation_df[,map_data$SDEID] == sdeid, "MRAUCINFP"] <- mr_aucinf_p
+            }
+          }
+          if(disp_required[["MRAUCLAST"]]) {
+            if(isTRUE(curr_pkterm != pkterm_parent)){
+              mr_auclast <- mr_auc_last(metabolite_auclast = tmp_df$AUCLAST, parent_auclast = tmp_parent_df$AUCLAST, parent_mw = tmp_parent_df$MW, metabolite_mw = tmp_df$MW)
+              computation_df[computation_df[,map_data$SDEID] == sdeid, "MRAUCLAST"] <- mr_auclast
+            } 
+          }
+          if(disp_required[["MRCMAX"]]) {
+            if(isTRUE(curr_pkterm != pkterm_parent)){
+              mr_cmax <- mr_cmax(metabolite_cmax = tmp_df$CMAX, parent_cmax = tmp_parent_df$CMAX, parent_mw = tmp_parent_df$MW, metabolite_mw = tmp_df$MW)
+              computation_df[computation_df[,map_data$SDEID] == sdeid, "MRCMAX"] <- mr_cmax
+            }
+          }
+          for(d in 1:di_col){
+            if(disp_required[["MRAUCTAUi"]]) {
+              if(isTRUE(curr_pkterm != pkterm_parent)){
+                mr_auctau <- mr_auc_tau(metabolite_auctau = tmp_df[,paste0("AUCTAU",d)], parent_auctau = tmp_parent_df[,paste0("AUCTAU",d)], parent_mw = tmp_parent_df$MW, metabolite_mw = tmp_df$MW)
+                computation_df[computation_df[,map_data$SDEID] == sdeid, paste0("MRAUCTAU",d)] <- mr_auctau
+              } 
+            }
+            if(disp_required[["MRCMAXi"]]) {
+              if(isTRUE(curr_pkterm != pkterm_parent)){
+                mr_cmax_i <- mr_cmax(metabolite_cmax = tmp_df[,paste0("CMAX",d)], parent_cmax = tmp_parent_df[,paste0("CMAX",d)], parent_mw = tmp_parent_df$MW, metabolite_mw = tmp_df$MW)
+                computation_df[computation_df[,map_data$SDEID] == sdeid, paste0("MRCMAX",d)] <- mr_cmax_i
+              }
+            }
+          }
+        }
+      }, error = function(e) {
+        stop(paste0(e, "For SDEID ", sdeid))
+      })
+    }
+  }
 
   for(n in 1:length(regular_int_type)){
     tmp_int_type <- computation_df[,names(computation_df) == as.character(regular_int_type[n])]
@@ -2575,8 +2859,9 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   results_list$data_out <- computation_df
   results_list$est_data <- est_data
 
-  if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
-     "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
+  ###if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
+  ###   "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
+  if(isTRUE(optimize_kel) && "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
     results_list$optimized_kel_flag <- kel_flag_optimized
   }
   if(isTRUE(raw_results_debug)){

@@ -2,10 +2,16 @@
 % Please edit documentation in R/auc_last.R
 \name{auc_last}
 \alias{auc_last}
-\title{Area under the concentration versus time cruve from time 0 to time of the last mesurable concentration}
+\title{Area under the concentration versus time curve from time 0 to time of the last measurable concentration}
 \usage{
-auc_last(conc = NULL, time = NULL, method = 1, exflag = NULL,
-  t_last = NULL, t_max = NULL)
+auc_last(
+  conc = NULL,
+  time = NULL,
+  method = 1,
+  exflag = NULL,
+  t_last = NULL,
+  t_max = NULL
+)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}
@@ -29,9 +35,9 @@ Note: check 'Methods' section below for more details \cr}
 }
 \description{
 This function gets the area under the concentration versus time curve from time 0 to time (TLAST) of the
-last mesuarable concentraation (CLAST). As illustrated in the following figure, AUC_LAST includes the
-trapezoidal area upto the time of the last measurable concentration. Although there may be additional
-time points, there is no additonal AUC since by defination all subsequent concentrations are zero.\cr
+last measurable concentration (CLAST). As illustrated in the following figure, AUC_LAST includes the
+trapezoidal area up to the time of the last measurable concentration. Although there may be additional
+time points, there is no additional AUC since by definition all subsequent concentrations are zero.\cr
 \figure{auc_last.png}
 }
 \details{
@@ -48,7 +54,7 @@ time points, there is no additonal AUC since by defination all subsequent concen
 \strong{Methods:} You can use the following methods to calculate AUC: \cr
 \enumerate{
  \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
- first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
+ first occurrence of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
  \item \strong{Log Trapazoidal Rule}: The log trapezoidal method is used for the entire profile. If

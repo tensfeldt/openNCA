@@ -4,8 +4,7 @@
 \alias{vol_sum}
 \title{Cumulative Sum of Urine Volumes}
 \usage{
-vol_sum(vol = NULL, volu = NULL, na.rm = TRUE,
-  specific_gravity = 1.02)
+vol_sum(vol = NULL, volu = NULL, na.rm = TRUE, specific_gravity = 1.02)
 }
 \arguments{
 \item{vol}{The volume data with one value/sample collection interval (given in a vector form)}

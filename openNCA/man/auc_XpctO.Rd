@@ -4,8 +4,15 @@
 \alias{auc_XpctO}
 \title{Percentage of AUCINFO obtained by forward extrapolation}
 \usage{
-auc_XpctO(conc = NULL, time = NULL, method = 1, kelflag = NULL,
-  aucflag = NULL, auc_info = NULL, auclast = NULL)
+auc_XpctO(
+  conc = NULL,
+  time = NULL,
+  method = 1,
+  kelflag = NULL,
+  aucflag = NULL,
+  auc_info = NULL,
+  auclast = NULL
+)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

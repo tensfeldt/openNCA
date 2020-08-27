@@ -4,8 +4,12 @@
 \alias{specific_gravity_adjustment}
 \title{Adjust Urinary Amounts in weight units to volumne units}
 \usage{
-specific_gravity_adjustment(amt_units, specific_gravity = 1.02,
-  map = NULL, verbose = FALSE)
+specific_gravity_adjustment(
+  amt_units,
+  specific_gravity = 1.02,
+  map = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{specific_gravity}{- human urine specific gravity, default to 1.020 g/mL}

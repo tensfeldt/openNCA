@@ -4,8 +4,15 @@
 \alias{auc_XpctP}
 \title{Percentage of AUCINFP obtained by forward extrapolation}
 \usage{
-auc_XpctP(conc = NULL, time = NULL, method = 1, kelflag = NULL,
-  aucflag = NULL, auc_infp = NULL, auclast = NULL)
+auc_XpctP(
+  conc = NULL,
+  time = NULL,
+  method = 1,
+  kelflag = NULL,
+  aucflag = NULL,
+  auc_infp = NULL,
+  auclast = NULL
+)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

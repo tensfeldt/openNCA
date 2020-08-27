@@ -4,9 +4,17 @@
 \alias{auc_inf_o}
 \title{Area under the concentration versus time cruve from time 0 to infinity (Observed)}
 \usage{
-auc_inf_o(conc = NULL, time = NULL, method = 1, kelflag = NULL,
-  aucflag = NULL, auclast = NULL, c_last = NULL, spanratio = NULL,
-  kel = NULL)
+auc_inf_o(
+  conc = NULL,
+  time = NULL,
+  method = 1,
+  kelflag = NULL,
+  aucflag = NULL,
+  auclast = NULL,
+  c_last = NULL,
+  spanratio = NULL,
+  kel = NULL
+)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

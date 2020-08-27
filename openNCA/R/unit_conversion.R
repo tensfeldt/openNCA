@@ -27,10 +27,14 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
   function_name <- as.list(sys.call())[[1]]
 
   u_class  <- c("TIMEU", "AMOUNTU", "DOSEU", "VOLUMEU", "CONCU", "KELU", "CLU", "AUCU", "AUMCU", "AUCNORMU", "AURCU", "CONCNORMU", "RATEU", "VOLUMEWU", "CLWU", "ALL")
-  units    <- c("HR", "MIN", "LB", "KG", "GM", "DPM", "ngeq",  "DG", "CG", "MG", "UG", "MCG", "NG",  "PG",  "FG", "KL", "L", "DL", "CL", "ML", "UL", "NL",  "PL",  "FL",        "")
-  val      <- c(  60,     1,  453.592, 1e3,    1,     1,      1,  1e-1, 1e-2, 1e-3, 1e-6,  1e-6, 1e-9, 1e-12, 1e-15,  1e3,   1, 1e-1, 1e-2, 1e-3, 1e-6, 1e-9, 1e-12, 1e-15,        NA)
-  class    <- c( "T",   "T",  "M", "M",  "M",   "M",    "M",   "M",  "M",  "M",  "M",   "M",  "M",   "M",   "M",  "V", "V",  "V",  "V",  "V",  "V",  "V",   "V",   "V", "MISSING")
+  units    <- c("H", "HR", "MIN", "LB", "KG", "GM", "DPM", "ngeq",  "DG", "CG", "MG", "UG", "MCG", "NG",  "PG",  "FG", "KL", "L", "DL", "CL", "ML", "UL", "NL",  "PL",  "FL",        "")
+  val      <- c(  60, 60,     1,  453.592, 1e3,    1,     1,      1,  1e-1, 1e-2, 1e-3, 1e-6,  1e-6, 1e-9, 1e-12, 1e-15,  1e3,   1, 1e-1, 1e-2, 1e-3, 1e-6, 1e-9, 1e-12, 1e-15,        NA)
+  class    <- c( "T", "T",   "T",  "M", "M",  "M",   "M",    "M",   "M",  "M",  "M",  "M",   "M",  "M",   "M",   "M",  "V", "V",  "V",  "V",  "V",  "V",  "V",   "V",   "V", "MISSING")
 
+  dose_numerator <- c("DPM", "ngeq")
+  dose_denominator <- c("KM2", "M2", "DM2", "CM2", "MM2", "UM2", "NM2",  "PM2",  "FM2")
+  dose_ignore_params <- c('CLFO','CLFP','CLFTAUi','CLP','CLO','CLTAUi','VSSP','VSSPi','VSSO','VSSOi','VZFO','VZFP','VZFTAUi','VZO','VZP','VZTAUi','AEPCT','AETAUPTi','AETPCT')
+  
   if(is.null(data)){
     stop("Please provide a valid path for the 'data' parameter")
   } else {
@@ -233,7 +237,16 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         for(i in 1:length(doseuvar)){
           if(parameter_required(paste0("^", doseuvar[i], "$"),names(map_data))) {
             if(parameter_required(map_data[, doseuvar[i]], names(data_data))) {
-              inputUnit3 <- as.character(unique(data_data[, map_data[, doseuvar[i]]])[1])
+              if(length(grep("/", as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])) > 0)){
+                inputUnit3 <- as.character(unlist(strsplit(as.character(unique(data_data[, as.character(map_data[,doseuvar[i]])])[1]), "/")))
+                dose_mass_input <- TRUE
+                dose_mass_output <- FALSE
+              } else {
+                inputUnit3 <- as.character(unique(data_data[, map_data[, doseuvar[i]]])[1])
+                dose_mass_input <- FALSE
+                dose_mass_output <- FALSE
+              }
+              
               outputUnitLabel <- "DOSEOUTPUTUNIT"
               testunit <- is.element(outputUnitLabel, names(map))
               outputUnitFormat <- FALSE
@@ -242,33 +255,111 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
               if(testunit) {
                   outputUnit3 <- as.character(map_data[[outputUnitLabel]])
                   outputUnitFormat <- length(outputUnit3)>0 & isTRUE(!is.na(outputUnit3))
+                  if(outputUnitFormat && isTRUE(dose_mass_input)) {
+                    if(length(grep("/", outputUnit3)) > 0) { 
+                      outputUnit3 <- unlist(strsplit(outputUnit3, "/"))
+                      dose_mass_output <- TRUE
+                    } else { 
+                      outputUnitFormat <- FALSE
+                    }
+                  }
               }
               testunit <- testunit && outputUnitFormat
             
-              formattedinputUnit   <- inputUnit3
-              formattedoutputUnit  <- outputUnit3
+              if(isTRUE(dose_mass_input)) { 
+                formattedinputUnit   <- paste(inputUnit3,collapse="/")
+              } else {
+                formattedinputUnit   <- inputUnit3
+              }
+              if(isTRUE(dose_mass_output)) { 
+                formattedinputUnit   <- paste(outputUnit3,collapse="/")
+              } else {
+                formattedoutputUnit  <- outputUnit3
+              }
             
               if(testunit){
-                inputMatch3 <- match(inputUnit3, units, nomatch = missing_idx)
-                outputMatch3 <- match(outputUnit3, units, nomatch = missing_idx)
-  
-                if(inputMatch3 != missing_idx && outputMatch3 != missing_idx) {
-                  inputMScale3 <- val[inputMatch3]
-                  outputMScale3 <- val[outputMatch3]
-                  if(class[inputMatch3] == "M" && class[outpt2utMatch3] == "M") {
-                    doseUScaler <- ifelse(isTRUE(inputUnit3 == "DPM" || outputUnit3 == "DPM"), 1, inputMScale3/outputMScale3)
+                if(isTRUE(dose_mass_input) && isTRUE(dose_mass_output)){
+                  result_data[,names(result_data) %in% dose_ignore_params] <- NA
+                  
+                  doseUScaler <- numeric()
+                  inputMatch3 <- numeric()
+                  outputMatch3 <- numeric()
+                  DPMcheck <- FALSE
+                  
+                  for(i in 1:2) {
+                    if(!all(is.na(outputUnit3))){
+                      inputMatch3[i] <- match(inputUnit3[i], units, nomatch = missing_idx)
+                      outputMatch3[i] <- match(outputUnit3[i], units, nomatch = missing_idx)
+                      if(inputMatch3[i] != missing_idx && outputMatch3[i] != missing_idx) {
+                        inputMScale3 <- val[inputMatch3[i]]
+                        outputMScale3 <- val[outputMatch3[i]]
+                        if(class[inputMatch3[i]] == c("M", "M")[i] && class[outputMatch3[i]] == c("M", "M")[i]) {
+                          if(class[inputMatch3[i]] == "M" && class[outputMatch3[i]] == "M"){
+                            if(isTRUE(inputUnit3[i] == "DPM" || outputUnit3[i] == "DPM")){
+                              doseUScaler[i] <- 1
+                              DPMcheck <- TRUE
+                            } else {
+                              doseUScaler[i] <- inputMScale3/outputMScale3
+                            }
+                          } else {
+                            doseUScaler[i] <- inputMScale3/outputMScale3
+                          }
+                        } else if(i == 2 && isTRUE(DPMcheck) && class[inputMatch3[i]] == c("M", "V")[i] && class[outputMatch3[i]] == c("M", "V")[i]) {
+                          doseUScaler[i] <- inputMScale3/outputMScale3
+                        } else if(i == 2 && inputUnit3[i] %in% dose_denominator && outputUnit3[i] %in% dose_denominator) {
+                          doseUScaler[i] <- 1
+                          if(inputUnit3[i] != outputUnit3[i]){
+                            warning("'", inputUnit3[i], "' to '", outputUnit3[i], "' DOSEU conversion is not accounted for unit conversion")
+                          }
+                        } else {
+                          doseUScaler[i] <- 1
+                          warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
+                        }
+                      } else {
+                        doseUScaler[i] <- 1
+                        warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion")
+                      }
+                    }
+                  }
+                  if(testunit) { testunit <- testunit && !all(is.na(outputUnit3)) }
+                  if(testunit){
+                    doseUFinalScaler <- doseUScaler[1]/doseUScaler[2]
+                    doseUScaler <- doseUFinalScaler
+                  } else {
+                    result_data$DOSEU <- formattedinputUnit
+                    if(length(inputUnit3) != 2){
+                      warning("Unit data provided via the 'DOSEU' value provided via 'map' is not in the proper form! Please try again using 'Amount' or 'Amount/Amount' format!")
+                    }
+                    if(outputUnitFormat){
+                      warning("'", outputUnitLabel, "' is not present in the proper form! Please try again using 'Amount' or 'Amount/Amount' format!")
+                    }
+                  }
+                } else if(!isTRUE(dose_mass_input) && !isTRUE(dose_mass_output)){
+                  inputMatch3 <- match(inputUnit3, units, nomatch = missing_idx)
+                  outputMatch3 <- match(outputUnit3, units, nomatch = missing_idx)
+                  if(inputMatch3 != missing_idx && outputMatch3 != missing_idx) {
+                    inputMScale3 <- val[inputMatch3]
+                    outputMScale3 <- val[outputMatch3]
+                    if(class[inputMatch3] == "M" && class[outputMatch3] == "M") {
+                      doseUScaler <- ifelse(isTRUE(inputUnit3 == "DPM" || outputUnit3 == "DPM"), 1, inputMScale3/outputMScale3)
+                    } else {
+                      doseUScaler <- 1
+                      warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
+                    }
                   } else {
                     doseUScaler <- 1
-                    warning(paste0("'", i, "' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion"))
+                    warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion")
                   }
                 } else {
                   doseUScaler <- 1
-                  warning(paste0("'", i, "' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion"))
+                  warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion")
                 }
-  
-                dose_col <- names(result_data)[names(result_data) %in% dosevar[i]]
-                result_data[dose_col] <- result_data[dose_col] * doseUScaler
-                result_data[doseuvar[i]] <- ifelse(doseUScaler == 1 & as.character(formattedinputUnit) == as.character(formattedoutputUnit), as.character(formattedinputUnit), as.character(formattedoutputUnit))
+                
+                if(testunit){
+                  dose_col <- names(result_data)[names(result_data) %in% dosevar[i]]
+                  result_data[dose_col] <- result_data[dose_col] * doseUScaler
+                  result_data[doseuvar[i]] <- ifelse(doseUScaler == 1 & as.character(formattedinputUnit) == as.character(formattedoutputUnit), as.character(formattedinputUnit), as.character(formattedoutputUnit))
+                }
                 if(verbose) { cat(function_name, ': Unit Class 3 (Dose) dose_col: ', dose_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', doseUScaler, '\n') }
               } else {
                 result_data[doseuvar[i]] <- formattedinputUnit
@@ -291,7 +382,15 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
       } else {
         if(parameter_required(doseuvar, names(map_data))){
           if(parameter_required(map_data[,doseuvar], names(data_data))){
-            inputUnit3 <- as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])
+            if(length(grep("/", as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])) > 0)){
+              inputUnit3 <- as.character(unlist(strsplit(as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1]), "/")))
+              dose_mass_input <- TRUE
+              dose_mass_output <- FALSE
+            } else {
+              inputUnit3 <- as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])
+              dose_mass_input <- FALSE
+              dose_mass_output <- FALSE
+            }
   
             outputUnitLabel <- "DOSEOUTPUTUNIT"
             testunit <- is.element(outputUnitLabel, names(map))
@@ -300,35 +399,114 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
             if(testunit) {
                 outputUnit3 <- as.character(map_data[[outputUnitLabel]])
                 outputUnitFormat <- length(outputUnit3)>0 & isTRUE(!is.na(outputUnit3))
+                if(outputUnitFormat && isTRUE(dose_mass_input)) {
+                  if(length(grep("/", outputUnit3)) > 0) { 
+                    outputUnit3 <- unlist(strsplit(outputUnit3, "/"))
+                    dose_mass_output <- TRUE
+                  } else { 
+                    outputUnitFormat <- FALSE
+                  }
+                }
             }
             testunit <- testunit && outputUnitFormat
               
-            formattedinputUnit   <- inputUnit3
-            formattedoutputUnit  <- outputUnit3
+            if(isTRUE(dose_mass_input)) { 
+              formattedinputUnit   <- paste(inputUnit3,collapse="/")
+            } else {
+              formattedinputUnit   <- inputUnit3
+            }
+            if(isTRUE(dose_mass_output)) { 
+              formattedinputUnit   <- paste(outputUnit3,collapse="/")
+            } else {
+              formattedoutputUnit  <- outputUnit3
+            }
             
             if(testunit){
-              inputMatch3 <- match(inputUnit3, units, nomatch = missing_idx)
-              outputMatch3 <- match(outputUnit3, units, nomatch = missing_idx)
-              if(inputMatch3 != missing_idx && outputMatch3 != missing_idx) {
-                inputMScale3 <- val[inputMatch3]
-                outputMScale3 <- val[outputMatch3]
-                if(class[inputMatch3] == "M" && class[outputMatch3] == "M") {
-                  doseUScaler <- ifelse(isTRUE(inputUnit3 == "DPM" || outputUnit3 == "DPM"), 1, inputMScale3/outputMScale3)
+              if(isTRUE(dose_mass_input) && isTRUE(dose_mass_output)){
+                result_data[,names(result_data) %in% dose_ignore_params] <- NA
+                
+                doseUScaler <- numeric()
+                inputMatch3 <- numeric()
+                outputMatch3 <- numeric()
+                DPMcheck <- FALSE
+                
+                for(i in 1:2) {
+                  if(!all(is.na(outputUnit3))){
+                    inputMatch3[i] <- match(inputUnit3[i], units, nomatch = missing_idx)
+                    outputMatch3[i] <- match(outputUnit3[i], units, nomatch = missing_idx)
+                    if(inputMatch3[i] != missing_idx && outputMatch3[i] != missing_idx) {
+                      inputMScale3 <- val[inputMatch3[i]]
+                      outputMScale3 <- val[outputMatch3[i]]
+                      if(class[inputMatch3[i]] == c("M", "M")[i] && class[outputMatch3[i]] == c("M", "M")[i]) {
+                        if(class[inputMatch3[i]] == "M" && class[outputMatch3[i]] == "M"){
+                          if(isTRUE(inputUnit3[i] == "DPM" || outputUnit3[i] == "DPM")){
+                            doseUScaler[i] <- 1
+                            DPMcheck <- TRUE
+                          } else {
+                            doseUScaler[i] <- inputMScale3/outputMScale3
+                          }
+                        } else {
+                          doseUScaler[i] <- inputMScale3/outputMScale3
+                        }
+                      } else if(i == 2 && isTRUE(DPMcheck) && class[inputMatch3[i]] == c("M", "V")[i] && class[outputMatch3[i]] == c("M", "V")[i]) {
+                        doseUScaler[i] <- inputMScale3/outputMScale3
+                      } else if(i == 2 && inputUnit3[i] %in% dose_denominator && outputUnit3[i] %in% dose_denominator) {
+                        doseUScaler[i] <- 1
+                        if(inputUnit3[i] != outputUnit3[i]){
+                          warning("'", inputUnit3[i], "' to '", outputUnit3[i], "' DOSEU conversion is not accounted for unit conversion")
+                        }
+                      } else {
+                        doseUScaler[i] <- 1
+                        warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
+                      }
+                    } else {
+                      doseUScaler[i] <- 1
+                      warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion")
+                    }
+                  }
+                }
+                if(testunit) { testunit <- testunit && !all(is.na(outputUnit3)) }
+                if(testunit){
+                  doseUFinalScaler <- doseUScaler[1]/doseUScaler[2]
+                  doseUScaler <- doseUFinalScaler
+                } else {
+                  result_data$DOSEU <- formattedinputUnit
+                  if(length(inputUnit3) != 2){
+                    warning("Unit data provided via the 'DOSEU' value provided via 'map' is not in the proper form! Please try again using 'Amount' or 'Amount/Amount' format!")
+                  }
+                  if(outputUnitFormat){
+                    warning("'", outputUnitLabel, "' is not present in the proper form! Please try again using 'Amount' or 'Amount/Amount' format!")
+                  }
+                }
+              } else if(!isTRUE(dose_mass_input) && !isTRUE(dose_mass_output)){
+                inputMatch3 <- match(inputUnit3, units, nomatch = missing_idx)
+                outputMatch3 <- match(outputUnit3, units, nomatch = missing_idx)
+                if(inputMatch3 != missing_idx && outputMatch3 != missing_idx) {
+                  inputMScale3 <- val[inputMatch3]
+                  outputMScale3 <- val[outputMatch3]
+                  if(class[inputMatch3] == "M" && class[outputMatch3] == "M") {
+                    doseUScaler <- ifelse(isTRUE(inputUnit3 == "DPM" || outputUnit3 == "DPM"), 1, inputMScale3/outputMScale3)
+                  } else {
+                    doseUScaler <- 1
+                    warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
+                  }
                 } else {
                   doseUScaler <- 1
-                  warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
+                  warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion")
                 }
               } else {
                 doseUScaler <- 1
                 warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion")
               }
-  
-              dose_col <- names(result_data)[names(result_data) %in% DOSEUPARAM]
-              result_data[dose_col] <- result_data[dose_col] * doseUScaler
-              result_data$DOSEU <- ifelse(doseUScaler == 1 & as.character(formattedinputUnit) == as.character(formattedoutputUnit), as.character(formattedinputUnit), as.character(formattedoutputUnit))
+              
+              if(testunit){
+                dose_col <- names(result_data)[names(result_data) %in% DOSEUPARAM]
+                result_data[dose_col] <- result_data[dose_col] * doseUScaler
+                result_data$DOSEU <- ifelse(doseUScaler == 1 & as.character(formattedinputUnit) == as.character(formattedoutputUnit), as.character(formattedinputUnit), as.character(formattedoutputUnit))
+              }
               if(verbose) { cat(function_name, ': Unit Class 3 (Dose) dose_col: ', dose_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', doseUScaler, '\n') }
             } else {
-                result_data$DOSEU <- formattedinputUnit
+              result_data$DOSEU <- formattedinputUnit
               if(outputUnitFormat){
                 warning("'", outputUnitLabel, "' is not present in the proper form! Please try again using 'Dose Amount' format!")
               }
@@ -410,11 +588,11 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         }
       } else {
         result_data$VOLUMEU <- NA
-        warning("'CONCU' value provided via 'map' is not present in the dataset provided via 'data'")
+        warning(paste0("'", map_data$CONCU, " value provided via 'map' is not present in the dataset provided via 'data'"))
       }
     } else {
       result_data$VOLUMEU <- NA
-      warning("'CONCU' #5# is not present in the dataset provided via 'map'")
+      warning(paste0("'", map_data$CONCU, "' #5# is not present in the dataset provided via 'map'"))
     }
   }
 
@@ -507,7 +685,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         }
       } else {
         result_data$CONCU <- NA
-        warning("'CONCU' value provided via 'map' is not present in the dataset provided via 'data'")
+        warning(paste0("'", map_data$CONCU, "' value provided via 'map' is not present in the dataset provided via 'data'"))
       }
     } else {
         if(parameter_required("^CONCU$", names(map_data)) && parameter_required(map_data$CONCU, names(data_data))) {
@@ -515,7 +693,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         }
         else {
           result_data$CONCU <- NA
-          warning("'CONCU' #6# is not present in the dataset provided via 'map'")
+          warning(paste0("'", map_data$CONCU, "' #6# is not present in the dataset provided via 'map'"))
         }
     }
   }
@@ -676,21 +854,21 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
       } else {
         result_data$CLU <- NA
         if(!(map_data$TIMEU %in% names(data_data) && map_data$CONCU %in% names(data_data))) {
-          warning(paste0("'", map_data$TIMEU, "' and 'CONCU' values provided via 'map' #1# are not present in the dataset provided via 'data'"))
+          warning(paste0("'", map_data$TIMEU, "' and '", map_data$CONCU, "' values provided via 'map' #1# are not present in the dataset provided via 'data'"))
         } else if(!map_data$TIMEU %in% names(data_data)) {
           warning(paste0("'", map_data$TIMEU, "' value provided via 'map' is not present in the dataset provided via 'data'"))
         } else if(!map_data$CONCU %in% names(data_data)) {
-          warning("'CONCU' value provided via 'map' is not present in the dataset provided via 'data'")
+          warning(paste0("'", map_data$CONCU, "' value provided via 'map' is not present in the dataset provided via 'data'"))
         }
       }
     } else {
       result_data$CLU <- NA
       if(!(parameter_required(map_data$TIMEU, names(data_data)) && parameter_required(map_data$CONCU, names(data_data)))) {
-        warning(paste0("'", map_data$TIMEU, "' and 'CONCU' #1# are not present in the dataset provided via 'map'"))
+        warning(paste0("'", map_data$TIMEU, "' and '", map_data$CONCU, "' #1# are not present in the dataset provided via 'map'"))
       } else if(!(parameter_required(map_data$TIMEU, names(data_data)))) {
         warning(paste0("'", map_data$TIMEU, "' value #8# is not present in the dataset provided via 'map'"))
       } else if(!(parameter_required("^CONCU$", names(map_data)))) {
-        warning("'CONCU' #9# is not present in the dataset provided via 'map'")
+        warning(paste0("'", map_data$CONCU, "' #9# is not present in the dataset provided via 'map'"))
       }
     }
   }
@@ -786,21 +964,21 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
       } else {
         result_data$AUCU <- NA
         if(!(map_data$TIMEU %in% names(data_data) && map_data$CONCU %in% names(data_data))) {
-          warning(paste0("'", map_data$TIMEU, "' and 'CONCU' values provided via 'map' #3# are not present in the dataset provided via 'data'"))
+          warning(paste0("'", map_data$TIMEU, "' and '", map_data$CONCU, "' values provided via 'map' #3# are not present in the dataset provided via 'data'"))
         } else if(!(parameter_required(map_data$TIMEU, names(data_data)))) {
           warning(paste0("'", map_data$TIMEU, "' value provided via 'map' is not present in the dataset provided via 'data'"))
         } else if(!(parameter_required(map_data$CONCU, names(data_data)))) {
-          warning("'CONCU' value provided via 'map' is not present in the dataset provided via 'data'")
+          warning(paste0("'", map_data$CONCU, "' value provided via 'map' is not present in the dataset provided via 'data'"))
         }
       }
     } else {
       result_data$AUCU <- NA
       if(!(parameter_required(map_data$TIMEU, names(data_data)) && parameter_required(map_data$CONCU, names(data_data)))) {
-        warning(paste0("'", map_data$TIMEU, "' and 'CONCU' #4# are not present in the dataset provided via 'map'"))
+        warning(paste0("'", map_data$TIMEU, "' and '", map_data$CONCU, "' #4# are not present in the dataset provided via 'map'"))
       } else if(!(parameter_required(map_data$TIMEU,names(data_data)))) {
         warning(paste0("'", map_data$TIMEU, "' #10# is not present in the dataset provided via 'map'"))
       } else if(!(parameter_required("^CONCU$", names(map_data)))) {
-        warning("'CONCU' #11# is not present in the dataset provided via 'map'")
+        warning(paste0("'", map_data$CONCU, "' #11# is not present in the dataset provided via 'map'"))
       }
     }
   }
@@ -896,21 +1074,21 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
       } else {
         result_data$AUMCU <- NA
         if(!(map_data$TIMEU %in% names(data_data) && map_data$CONCU %in% names(data_data))) {
-          warning(paste0("'", map_data$TIMEU, "' and 'CONCU' values provided via 'map' #5# are not present in the dataset provided via 'data'"))
+          warning(paste0("'", map_data$TIMEU, "' and '", map_data$CONCU, "' values provided via 'map' #5# are not present in the dataset provided via 'data'"))
         } else if(!map_data$TIMEU %in% names(data_data)) {
           warning(paste0("'", map_data$TIMEU, "' value provided via 'map' is not present in the dataset provided via 'data'"))
         } else if(!map_data$CONCU %in% names(data_data)) {
-          warning("'CONCU' value provided via 'map' is not present in the dataset provided via 'data'")
+          warning(paste0("'", map_data$CONCU, "' value provided via 'map' is not present in the dataset provided via 'data'"))
         }
       }
     } else {
       result_data$AUMCU <- NA
       if(!(parameter_required("^TIMEU$", names(map_data)) && parameter_required("^CONCU$", names(map_data)))) {
-        warning(paste0("'", map_data$TIMEU, "' and 'CONCU' #6# are not present in the dataset provided via 'map'"))
+        warning(paste0("'", map_data$TIMEU, "' and '", map_data$CONCU, "' #6# are not present in the dataset provided via 'map'"))
       } else if(!(parameter_required("^TIMEU$", names(map_data)))) {
         warning(paste0("'", map_data$TIMEU, "' #13# is not present in the dataset provided via 'map'"))
       } else if(!"CONCU" %in% names(map_data)) {
-        warning("'CONCU' #14# is not present in the dataset provided via 'map'")
+        warning(paste0("'", map_data$CONCU, "' #14# is not present in the dataset provided via 'map'"))
       }
     }
   }
@@ -1004,41 +1182,41 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           }
         }
       } else {
-          xdoseu <- ifelse(!is.null(map_data$DOSEULIST), unlist(strsplit(map_data$DOSEULIST, ";"))[1], NA)
-          result_data$AUCNORMU <- NA
+        xdoseu <- ifelse(!is.null(map_data$DOSEULIST), unlist(strsplit(map_data$DOSEULIST, ";"))[1], NA)
+        result_data$AUCNORMU <- NA
         if(!(map_data$TIMEU %in% names(data_data) && map_data$CONCU %in% names(data_data) && map_data[,xdoseu] %in% names(data_data))) {
-          warning(paste0("'", map_data$TIMEU, "', 'CONCU' and 'DOSEU' values provided via 'map' #7# are not present in the dataset provided via 'data'"))
+          warning(paste0("'", map_data$TIMEU, "', '", map_data$CONCU, "' and '", map_data[,xdoseu], "' values provided via 'map' #7# are not present in the dataset provided via 'data'"))
         } else if(!(map_data$TIMEU %in% names(data_data) && map_data$CONCU %in% names(data_data))) {
-          warning(paste0("'", map_data$TIMEU, "' and 'CONCU' values provided via 'map' is not present in the dataset provided via 'data'"))
+          warning(paste0("'", map_data$TIMEU, "' and '", map_data$CONCU, "' values provided via 'map' is not present in the dataset provided via 'data'"))
         } else if(!(map_data$CONCU %in% names(data_data) && map_data$DOSEU %in% names(data_data))) {
-          warning("'CONCU' and 'DOSEU' values provided via 'map' is not present in the dataset provided via 'data'")
+          warning(paste0("'", map_data$CONCU, "' and '", map_data[,xdoseu], "' values provided via 'map' is not present in the dataset provided via 'data'"))
         } else if(!(map_data$TIMEU %in% names(data_data) && map_data$DOSEU %in% names(data_data))) {
-          warning(paste0("'", map_data$TIMEU, "' and 'DOSEU' values provided via 'map' is not present in the dataset provided via 'data'"))
+          warning(paste0("'", map_data$TIMEU, "' and '", map_data[,xdoseu], "' values provided via 'map' is not present in the dataset provided via 'data'"))
         } else if(!map_data$TIMEU %in% names(data_data)) {
           warning(paste0("'", map_data$TIMEU, "' value provided via 'map' is not present in the dataset provided via 'data'"))
         } else if(!map_data$CONCU %in% names(data_data)) {
-          warning("'CONCU' value provided via 'map' is not present in the dataset provided via 'data'")
+          warning(paste0("'", map_data$CONCU, "' value provided via 'map' is not present in the dataset provided via 'data'"))
         } else if(!map_data$DOSEU %in% names(data_data)) {
-          warning("'DOSEU' value provided via 'map' is not present in the dataset provided via 'data'")
+          warning(paste0("'", map_data[,xdoseu], "' value provided via 'map' is not present in the dataset provided via 'data'"))
         }
       }
     } else {
-          result_data$AUCNORMU <- NA
-          xdoseu <- ifelse(!is.null(map_data$DOSEULIST), unlist(strsplit(map_data$DOSEULIST, ";"))[1], NA)
+      result_data$AUCNORMU <- NA
+      xdoseu <- ifelse(!is.null(map_data$DOSEULIST), unlist(strsplit(map_data$DOSEULIST, ";"))[1], NA)
       if(!(map_data$TIMEU %in% names(map_data) && "CONCU" %in% names(map_data) && xdoseu %in% names(map_data))) {
-        warning(paste0("'", map_data$TIMEU, "', 'CONCU' and 'DOSEU' #8# are not present in the dataset provided via 'map'"))
+        warning(paste0("'", map_data$TIMEU, "', '", map_data$CONCU, "' and '", map_data[,xdoseu], "' #8# are not present in the dataset provided via 'map'"))
       } else if(!(map_data$TIMEU %in% names(map_data) && "CONCU" %in% names(map_data))) {
-        warning(paste0("'", map_data$TIMEU, "' and 'CONCU' #16# is not present in the dataset provided via 'map'"))
+        warning(paste0("'", map_data$TIMEU, "' and '", map_data$CONCU, "' #16# is not present in the dataset provided via 'map'"))
       } else if(!("CONCU" %in% names(map_data) && "DOSEU" %in% names(map_data))) {
-        warning("'CONCU' and 'DOSEU' #17# is not present in the dataset provided via 'map'")
+        warning(paste0("'", map_data$CONCU, "' and '", map_data[,xdoseu], "' #17# is not present in the dataset provided via 'map'"))
       } else if(!(map_data$TIMEU %in% names(map_data) && "DOSEU" %in% names(map_data))) {
-        warning(paste0("'", map_data$TIMEU, "' and 'DOSEU' #18# is not present in the dataset provided via 'map'"))
+        warning(paste0("'", map_data$TIMEU, "' and '", map_data[,xdoseu], "' #18# is not present in the dataset provided via 'map'"))
       } else if(!map_data$TIMEU %in% names(map_data)) {
         warning(paste0("'", map_data$TIMEU, "' #19# is not present in the dataset provided via 'map'"))
       } else if(!"CONCU" %in% names(map_data)) {
-        warning("'CONCU' #20# is not present in the dataset provided via 'map'")
+        warning(paste0("'", map_data$CONCU, "' #20# is not present in the dataset provided via 'map'"))
       } else if(!"DOSEU" %in% names(map_data)) {
-        warning("'DOSEU' #21# is not present in the dataset provided via 'map'")
+        warning(paste0("'", map_data[,xdoseu], "' #21# is not present in the dataset provided via 'map'"))
       }
     }
   }
@@ -1130,21 +1308,21 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
       } else {
         result_data$AURCU <- NA
         if(!(map_data$TIMEU %in% names(data_data) && map_data$CONCU %in% names(data_data))) {
-          warning(paste0("'", map_data$TIMEU, "' and 'CONCU' values provided via 'map' #9# are not present in the dataset provided via 'data'"))
+          warning(paste0("'", map_data$TIMEU, "' and '", map_data$CONCU, "' values provided via 'map' #9# are not present in the dataset provided via 'data'"))
         } else if(!map_data$TIMEU %in% names(data_data)) {
           warning(paste0("'", map_data$TIMEU, "' value provided via 'map' is not present in the dataset provided via 'data'"))
         } else if(!map_data$CONCU %in% names(data_data)) {
-          warning("'CONCU' value provided via 'map' is not present in the dataset provided via 'data'")
+          warning(paste0("'", map_data$CONCU, "' value provided via 'map' is not present in the dataset provided via 'data'"))
         }
       }
     } else {
       result_data$AURCU <- NA
       if(!(map_data$TIMEU %in% names(map_data) && "CONCU" %in% names(map_data))) {
-        warning(paste0("'", map_data$TIMEU, "' and 'CONCU' #10# are not present in the dataset provided via 'map'"))
+        warning(paste0("'", map_data$TIMEU, "' and '", map_data$CONCU, "' #10# are not present in the dataset provided via 'map'"))
       } else if(!map_data$TIMEU %in% names(map_data)) {
         warning(paste0("'", map_data$TIMEU, "' #22# is not present in the dataset provided via 'map'"))
       } else if(!"CONCU" %in% names(map_data)) {
-        warning("'CONCU' #23# is not present in the dataset provided via 'map'")
+        warning(paste0("'", map_data$CONCU, "' #23# is not present in the dataset provided via 'map'"))
       }
     }
   }
@@ -1309,11 +1487,11 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                   }
                 } else {
                   rateUScaler[i] <- 1
-                  warning(paste0("'", map_data$TIMEU, "' and/or 'CONCU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion"))
+                  warning(paste0("'", map_data$TIMEU, "' and/or '", map_data$CONCU, "' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion"))
                 }
               } else {
                 rateUScaler[i] <- 1
-                warning(paste0("'", map_data$TIMEU, "' and/or 'CONCU' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion"))
+                warning(paste0("'", map_data$TIMEU, "' and/or '", map_data$CONCU, "' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion"))
               }
             }
           }
@@ -1362,16 +1540,16 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         outputUnit14 <- NA
         
         if(testunit) {
-            outputUnit14 <- as.character(map_data[[outputUnitLabel]])
-            outputUnitFormat <- length(outputUnit14)>0 & isTRUE(!is.na(outputUnit14))
-            if(outputUnitFormat) {
-                if(length(grep("/", outputUnit14)) > 0) { outputUnit14 <- unlist(strsplit(outputUnit14, "[/]", perl=TRUE)) } else { outputUnitFormat <- FALSE }
-            }
+          outputUnit14 <- as.character(map_data[[outputUnitLabel]])
+          outputUnitFormat <- length(outputUnit14)>0 & isTRUE(!is.na(outputUnit14))
+          if(outputUnitFormat) {
+              if(length(grep("/", outputUnit14)) > 0) { outputUnit14 <- unlist(strsplit(outputUnit14, "[/]", perl=TRUE)) } else { outputUnitFormat <- FALSE }
+          }
         }
 
         testunit <- testunit && outputUnitFormat
         if(testunit){
-            testunit <- testunit && length(outputUnit14) == 2 && length(vwu_unit_tmp) == 2
+          testunit <- testunit && length(outputUnit14) == 2 && length(vwu_unit_tmp) == 2
         }
         
         formattedinputUnit   <- paste(inputUnit14, collapse="/")
@@ -1398,11 +1576,11 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                   }
                 } else {
                   volumewUScaler[i] <- 1
-                  warning("'CONCU' and/or 'NORMBSU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
+                  warning(paste0("'", map_data$CONCU, "' and/or '", map_data$NORMBSU, "' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion"))
                 }
               } else {
                 volumewUScaler[i] <- 1
-                warning("'CONCU' and/or 'NORMBSU' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion")
+                warning(paste0("'", map_data$CONCU, "' and/or '", map_data$NORMBSU, "' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion"))
               }
             }
           }
@@ -1424,22 +1602,28 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         }
       } else {
         result_data$VOLUMEWU <- NA
+        if(length(VOLUMEWUPARAM) > 0){
+          result_data[,names(result_data) %in% VOLUMEWUPARAM] <- NA
+        }
         if(!(map_data$CONCU %in% names(data_data) && map_data$NORMBSU %in% names(data_data))) {
-          warning("'CONCU' and 'NORMBSU' value provided via 'map' #13# are not present in the dataset provided via 'data'")
+          warning(paste0("'", map_data$CONCU, "' and '", map_data$NORMBSU, "' value provided via 'map' #13# are not present in the dataset provided via 'data'"))
         } else if(!map_data$CONCU %in% names(data_data)) {
-          warning("'CONCU' value provided via 'map' is not present in the dataset provided via 'data'")
+          warning(paste0("'", map_data$CONCU, "' value provided via 'map' is not present in the dataset provided via 'data'"))
         } else if(!map_data$NORMBSU %in% names(data_data)) {
-          warning("'NORMBSU' value provided via 'map' is not present in the dataset provided via 'data'")
+          warning(paste0("'", map_data$NORMBSU, "' value provided via 'map' is not present in the dataset provided via 'data'"))
         }
       }
     } else {
       result_data$VOLUMEWU <- NA
+      if(length(VOLUMEWUPARAM) > 0){
+        result_data[,names(result_data) %in% VOLUMEWUPARAM] <- NA
+      }
       if(!("CONCU" %in% names(map_data) && "NORMBSU" %in% names(map_data))) {
-        warning("'CONCU' and 'NORMBSU' #14# are not present in the dataset provided via 'map'")
+        warning(paste0("'", map_data$CONCU, "' and '", map_data$NORMBSU, "' #14# are not present in the dataset provided via 'map'"))
       } else if(!"CONCU" %in% names(map_data)) {
-        warning("'CONCU' value provided via 'map' #27# is not present in the dataset provided via 'map'")
+        warning(paste0("'", map_data$CONCU, "' value provided via 'map' #27# is not present in the dataset provided via 'map'"))
       } else if(!"NORMBSU" %in% names(map_data)) {
-        warning("'NORMBSU' value provided via 'map' #28# is not present in the dataset provided via 'map'")
+        warning(paste0("'", map_data$NORMBSU, "' value provided via 'map' #28# is not present in the dataset provided via 'map'"))
       }
     }
   }
@@ -1448,7 +1632,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
   #Unit Class 15: Volume/Time/Body weight
   if(unit_class == "CLWU" || unit_class == "ALL"){
     CLWUPARAM <- parameters_by_class("CLWU", names(result_data))
-
+    
     if(length(CLWUPARAM)>0 && parameter_required("^CONCU$", names(map_data)) && parameter_required("^TIMEU$", names(map_data)) && parameter_required("^NORMBSU$", names(map_data))){
       if(parameter_required(map_data$CONCU, names(data_data)) && parameter_required(map_data$TIMEU, names(data_data)) && parameter_required(map_data$NORMBSU, names(data_data))){
         if(!is.null(map_data$CONCU)){
@@ -1530,38 +1714,44 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         }
       } else {
         result_data$CLWU <- NA
+        if(length(CLWUPARAM) > 0){
+          result_data[,names(result_data) %in% CLWUPARAM] <- NA
+        }
         if(!(map_data$CONCU %in% names(data_data) && map_data$TIMEU %in% names(data_data) && map_data$NORMBSU %in% names(data_data))) {
-          warning(paste0("'CONCU', '", map_data$TIMEU, " and 'NORMBSU' value provided via 'map' #15# are not present in the dataset provided via 'data'"))
+          warning(paste0("'", map_data$CONCU, "', '", map_data$TIMEU, " and '", map_data$NORMBSU, "' value provided via 'map' #15# are not present in the dataset provided via 'data'"))
         } else if(!(map_data$CONCU %in% names(data_data) && map_data$TIMEU %in% names(data_data))) {
-          warning(paste0("'CONCU' and '", map_data$TIMEU, "' value provided via 'map' #16#  are not present in the dataset provided via 'data'"))
+          warning(paste0("'", map_data$CONCU, "' and '", map_data$TIMEU, "' value provided via 'map' #16#  are not present in the dataset provided via 'data'"))
         } else if(!(map_data$TIMEU %in% names(data_data) && map_data$NORMBSU %in% names(data_data))) {
-          warning(paste0("'", map_data$TIMEU, " and 'NORMBSU' value provided via 'map' #17# are not present in the dataset provided via 'data'"))
+          warning(paste0("'", map_data$TIMEU, " and '", map_data$NORMBSU, "' value provided via 'map' #17# are not present in the dataset provided via 'data'"))
         } else if(!(map_data$CONCU %in% names(data_data) && map_data$NORMBSU %in% names(data_data))) {
-          warning("'CONCU' and 'NORMBSU' value provided via 'map' #18# are not present in the dataset provided via 'data'")
+          warning(paste0("'", map_data$CONCU, "' and '", map_data$NORMBSU, "' value provided via 'map' #18# are not present in the dataset provided via 'data'"))
         } else if(!map_data$CONCU %in% names(data_data)) {
-          warning("'CONCU' value provided via 'map' is not present in the dataset provided via 'data'")
+          warning(paste0("'", map_data$CONCU, "' value provided via 'map' is not present in the dataset provided via 'data'"))
         } else if(!map_data$TIMEU %in% names(data_data)) {
           warning(paste0("'", map_data$TIMEU, " value provided via 'map' is not present in the dataset provided via 'data'"))
         } else if(!map_data$NORMBSU %in% names(data_data)) {
-          warning("'NORMBSU' value provided via 'map' is not present in the dataset provided via 'data'")
+          warning(paste0("'", map_data$NORMBSU, "' value provided via 'map' is not present in the dataset provided via 'data'"))
         }
       }
     } else {
       result_data$CLWU <- NA
+      if(length(CLWUPARAM) > 0){
+        result_data[,names(result_data) %in% CLWUPARAM] <- NA
+      }
       if(!("CONCU" %in% names(map_data) && map_data$TIMEU %in% names(map_data) && "NORMBSU" %in% names(data_data))) {
-        warning(paste0("'CONCU', '", map_data$TIMEU, " and 'NORMBSU' #19# are not present in the dataset provided via 'map'"))
+        warning(paste0("'", map_data$CONCU, "', '", map_data$TIMEU, " and '", map_data$NORMBSU, "' #19# are not present in the dataset provided via 'map'"))
       } else if(!("CONCU" %in% names(map_data) && map_data$TIMEU %in% names(map_data))) {
-        warning(paste0("'CONCU' and '", map_data$TIMEU, "' #20# are not present in the dataset provided via 'map'"))
+        warning(paste0("'", map_data$CONCU, "' and '", map_data$TIMEU, "' #20# are not present in the dataset provided via 'map'"))
       } else if(!(map_data$TIMEU %in% names(map_data) && "NORMBSU" %in% names(map_data))) {
-        warning(paste0("'", map_data$TIMEU, " and 'NORMBSU' #21# are not present in the dataset provided via 'map'"))
+        warning(paste0("'", map_data$TIMEU, " and '", map_data$NORMBSU, "' #21# are not present in the dataset provided via 'map'"))
       } else if(!("CONCU" %in% names(map_data) && "NORMBSU" %in% names(map_data))) {
-        warning("'CONCU' and 'NORMBSU' #22# are not present in the dataset provided via 'map'")
+        warning(paste0("'", map_data$CONCU, "' and '", map_data$NORMBSU, "' #22# are not present in the dataset provided via 'map'"))
       } else if(!"CONCU" %in% names(map_data)) {
-        warning("'CONCU' #29# is not present in the dataset provided via 'map'")
+        warning(paste0("'", map_data$CONCU, "' #29# is not present in the dataset provided via 'map'"))
       } else if(!map_data$TIMEU %in% names(map_data)) {
         warning(paste0("'", map_data$TIMEU, " #30# is not present in the dataset provided via 'map'"))
       } else if(!"NORMBSU" %in% names(map_data)) {
-        warning("'NORMBSU' #31# is not present in the dataset provided via 'map'")
+        warning(paste0("'", map_data$NORMBSU, "' #31# is not present in the dataset provided via 'map'"))
       }
     }
   }

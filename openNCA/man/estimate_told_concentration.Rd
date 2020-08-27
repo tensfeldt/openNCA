@@ -4,10 +4,19 @@
 \alias{estimate_told_concentration}
 \title{Helper Function for Estimating TOLD Concentration Data}
 \usage{
-estimate_told_concentration(conc = NULL, time = NULL,
-  interpolate = NULL, extrapolate = NULL, auc_method = NULL,
-  model = NULL, dosing_type = NULL, told = NULL, orig_conc = NULL,
-  orig_time = NULL, tmp = NULL)
+estimate_told_concentration(
+  conc = NULL,
+  time = NULL,
+  interpolate = NULL,
+  extrapolate = NULL,
+  auc_method = NULL,
+  model = NULL,
+  dosing_type = NULL,
+  told = NULL,
+  orig_conc = NULL,
+  orig_time = NULL,
+  tmp = NULL
+)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

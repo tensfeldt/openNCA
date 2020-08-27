@@ -4,10 +4,17 @@
 \alias{run_M1_SS_computation}
 \title{Run M1 SS Computation}
 \usage{
-run_M1_SS_computation(data = NULL, map = NULL, method = 1,
-  model_regex = "^M1(SS)*?$", parameter_list = list(),
-  return_list = list(), raw_results_debug = FALSE,
-  optimize_kel_debug = FALSE)
+run_M1_SS_computation(
+  data = NULL,
+  map = NULL,
+  method = 1,
+  model_regex = "^M1(SS)*?$",
+  parameter_list = list(),
+  return_list = list(),
+  raw_results_debug = FALSE,
+  optimize_kel_debug = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{The dataframe that contains the raw data}

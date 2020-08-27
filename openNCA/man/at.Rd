@@ -4,8 +4,7 @@
 \alias{at}
 \title{Amount of Drug in the body at time T, where T can have a numerical value.}
 \usage{
-at(conc = NULL, amt = NULL, time = NULL, amt_units = NULL,
-  map = NULL)
+at(conc = NULL, amt = NULL, time = NULL, amt_units = NULL, map = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

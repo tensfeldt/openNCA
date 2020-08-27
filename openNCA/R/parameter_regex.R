@@ -18,7 +18,7 @@
 #' parameter_regex("TMAX")
 #' #"^TMAX$"
 #' 
-#' parameter_regex("AUCT)
+#' parameter_regex("AUCT")
 #' #"^AUC(T|[0-9]+?)$"
 #' 
 #' @author

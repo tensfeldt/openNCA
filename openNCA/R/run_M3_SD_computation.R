@@ -117,9 +117,19 @@
 #'  \item website: \url{www.pfizer.com}
 #'  \item email: \url{thomas.g.tensfeldt@pfizer.com}
 #' }
-run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_regex = "^M3(SD)*?$", parameter_list = list(), return_list = list(), raw_results_debug = FALSE, optimize_kel_debug = FALSE){
+run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_regex = "^M3(SD)*?$", parameter_list = list(), return_list = list(), raw_results_debug = FALSE, optimize_kel_debug = FALSE, ...){
   function_name <- as.list(sys.call())[[1]]
-
+  additional_inputs <- list(...)
+  
+  if(isTRUE("print_version" %in% names(additional_inputs))){
+    if(isTRUE(additional_inputs$print_version)){
+      opennca_version()
+      cat(paste0("Computation Run Date/Time: ", Sys.time(), "\n"))
+    }
+  } else {
+    opennca_version()
+    cat(paste0("Computation Run Date/Time: ", Sys.time(), "\n"))
+  }
   if(is.null(data)){
     stop("Please provide a valid path for the 'data' parameter")
   } else {
@@ -190,16 +200,20 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     dosenames <- dosenames[!duplicated(as.character(unlist(dosevar)))]
   }
 
-  comp_required <- list()
-  disp_required <- list()
-  plist <- parameter_list
-  for(i in model_parameters()) {
-    rg <- parameter_regex(i)
-    pr <- parameter_required(rg, parameter_list=plist)
-    dp <- parameter_required(dependent_parameters(rg), plist)
-    comp_required[[i]] <- pr || dp
-    disp_required[[i]] <- pr
-  }
+  ###comp_required <- list()
+  ###disp_required <- list()
+  ###plist <- parameter_list
+  ###for(i in model_parameters()) {
+  ###  rg <- parameter_regex(i)
+  ###  pr <- parameter_required(rg, parameter_list=plist)
+  ###  dp <- parameter_required(dependent_parameters(rg), plist)
+  ###  comp_required[[i]] <- pr || dp
+  ###  disp_required[[i]] <- pr
+  ###}
+  all_parameters <- model_parameters("m3sd")
+  disp_required <- rep(FALSE, length(all_parameters))
+  names(disp_required) <- all_parameters
+  disp_required[names(disp_required) %in% parameter_list] <- TRUE
 
   if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
     if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
@@ -245,9 +259,79 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   elist <- c("PKDATAROWID", "SDEID","TIME","CEST_KEL","CEST_INT","CEST_EXT","CEST_C0","CEST_TLAST")
   est_data <- data.frame(matrix(ncol = length(elist), nrow = 0))
   names(est_data) <- elist
+  
+  if("DOSEU" %in% names(map_data)){
+    if(map_data$DOSEU %in% names(data_data)){
+      if(length(grep("/", as.character(unique(data_data[, as.character(map_data$DOSEU)])[1])) > 0)){
+        dose_by_mass <- TRUE
+      } else {
+        dose_by_mass <- FALSE
+      }
+    } else {
+      dose_by_mass <- FALSE
+    }
+  } else {
+    dose_by_mass <- FALSE
+  }
+  
+  if("MRSDEID" %in% names(map_data)){
+    if(map_data$MRSDEID %in% names(data_data)){
+      secondary <- TRUE
+    } else {
+      secondary <- FALSE
+    }
+  } else {
+    secondary <- FALSE
+  }
+  if(isTRUE(secondary)){
+    secondary_prereqs <- c('PKTERMPARENT', 'PKTERM', 'MW', 'METABOLITEPARAMETEREXCLUSIONLIST')
+    secondary_mappings <- c('PKTERM', 'MW')
+    if(!(all(secondary_prereqs %in% names(map_data)))){
+      missing_prereqs <- secondary_prereqs[!(secondary_prereqs %in% names(map_data))]
+      if(length(missing_prereqs) > 1){
+        warning(paste0("'", missing_prereqs, "' is not present in the dataset provided via 'map'! Cannot compute secondary parameters!"))
+      } else {
+        missing_msg <- ""
+        for(m in 1:length(missing_prereqs)){ 
+          if(m == 1){
+            missing_msg <- paste0(missing_msg, "'", missing_prereqs[i], "'")
+          } else if(m == length(missing_prereqs)){
+            missing_msg <- paste0(missing_msg, " and '", missing_prereqs[i], "'")
+          } else {
+            missing_msg <- paste0(missing_msg, ", '", missing_prereqs[i], "'")
+          }
+        }
+        warning(paste0(missing_msg, " are not present in the dataset provided via 'map'! Cannot compute secondary parameters!"))
+      }
+      secondary <- FALSE
+    } 
+    secondary_values <- as.character(map_data[,secondary_mappings])
+    if(!(all(secondary_values %in% names(data_data)))){
+      missing_values <- secondary_values[!(secondary_values %in% names(data_data))]
+      if(length(missing_values) > 1){
+        warning(paste0("'", missing_values, "' is not present in the dataset provided via 'data'! Cannot compute secondary parameters!"))
+      } else {
+        missing_msg <- ""
+        for(m in 1:length(missing_values)){ 
+          if(m == 1){
+            missing_msg <- paste0(missing_msg, "'", missing_values[i], "'")
+          } else if(m == length(missing_values)){
+            missing_msg <- paste0(missing_msg, " and '", missing_values[i], "'")
+          } else {
+            missing_msg <- paste0(missing_msg, ", '", missing_values[i], "'")
+          }
+        }
+        warning(paste0(missing_msg, " are not present in the dataset provided via 'data'! Cannot compute secondary parameters!"))
+      }
+      secondary <- FALSE
+    } 
+  }
+  if(isTRUE(secondary)){
+    exclusion_list <- unlist(strsplit(map_data$METABOLITEPARAMETEREXCLUSIONLIST, ";"))
+    disp_required[names(disp_required) %in% exclusion_list] <- FALSE
+  }
 
   col_names <- c("SDEID")
-  
   if(disp_required[["DOSE"]] || disp_required[["DOSEi"]]) {
     col_names <- c(col_names, dosenames)
     regular_int_type <- c(regular_int_type, dosenames)
@@ -294,6 +378,10 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   if(disp_required[["CMAXDN"]]) {
     col_names <- c(col_names, "CMAXDN")
     regular_int_type <- c(regular_int_type, "CMAXDN")
+  }
+  if(disp_required[["CMINDN"]]) {
+    col_names <- c(col_names, "CMINDN")
+    regular_int_type <- c(regular_int_type, "CMINDN")
   }
   if(disp_required[["TMAX"]]) {
     col_names <- c(col_names, "TMAX")
@@ -508,6 +596,24 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, "VSSPW")
     regular_int_type <- c(regular_int_type, "VSSPW")
   }
+  if(isTRUE(secondary)){
+    if(disp_required[["MRAUCINFO"]]) {
+      col_names <- c(col_names, "MRAUCINFO")
+      regular_int_type <- c(regular_int_type, "MRAUCINFO")
+    }
+    if(disp_required[["MRAUCINFP"]]) {
+      col_names <- c(col_names, "MRAUCINFP")
+      regular_int_type <- c(regular_int_type, "MRAUCINFP")
+    }
+    if(disp_required[["MRAUCLAST"]]) {
+      col_names <- c(col_names, "MRAUCLAST")
+      regular_int_type <- c(regular_int_type, "MRAUCLAST")
+    }
+    if(disp_required[["MRCMAX"]]) {
+      col_names <- c(col_names, "MRCMAX")
+      regular_int_type <- c(regular_int_type, "MRCMAX")
+    }
+  }
   col_names <- c(col_names, rep(paste0("CONC",1:(auc_len+1))), rep(paste0("CONCTIME",1:(auc_len+1))))
   regular_int_type <- c(regular_int_type, rep(paste0("CONC",1:(auc_len+1))), rep(paste0("CONCTIME",1:(auc_len+1))))
 
@@ -526,6 +632,10 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               regular_int_type <- c(regular_int_type, "TOLD1")
           }
       }
+  }
+  if(disp_required[["CTOLDesti"]]){
+    col_names <- c(col_names, rep(paste0("CTOLDest1")))
+    regular_int_type <- c(regular_int_type, rep(paste0("CTOLDest1")))
   }
   computation_df <- data.frame(matrix(ncol = length(col_names), nrow = length(unique(data_data[,map_data$SDEID]))))
   names(computation_df) <- col_names
@@ -630,25 +740,29 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
   if("OPTIMIZEKEL" %in% names(map_data)){
     if(!(is.na(map_data[,"OPTIMIZEKEL"]))){
-      if(map_data[,"OPTIMIZEKEL"] != 1 && map_data[,"OPTIMIZEKEL"] != 0){
+      if(map_data[,"OPTIMIZEKEL"] != 1 && map_data[,"OPTIMIZEKEL"] != 2){
         warning("Map 'OPTIMIZEKEL' does not have a valid value! Not using KEL optimization for this computation")
         optimize_kel <- FALSE
+        optimize_kel_method <- as.character(as.numeric(map_data[,"OPTIMIZEKEL"]))
       } else {
         optimize_kel <- as.logical(as.numeric(map_data[,"OPTIMIZEKEL"]))
+        optimize_kel_method <- as.character(as.numeric(map_data[,"OPTIMIZEKEL"]))
       }
     } else {
       optimize_kel <- FALSE
+      optimize_kel_method <- as.character(as.numeric(map_data[,"OPTIMIZEKEL"]))
     }
   } else {
     optimize_kel <- FALSE
+    optimize_kel_method <- as.character(as.numeric(map_data[,"OPTIMIZEKEL"]))
   }
   if(isTRUE(optimize_kel)){
-    comp_required[["KEL"]] <- TRUE
-    comp_required[["TMAX"]] <- TRUE
-    comp_required[["TLAST"]] <- TRUE
-    comp_required[["CMAX"]] <- TRUE
-    comp_required[["CLAST"]] <- TRUE 
-    comp_required[["AUCLAST"]] <- TRUE
+    ###comp_required[["KEL"]] <- TRUE
+    ###comp_required[["TMAX"]] <- TRUE
+    ###comp_required[["TLAST"]] <- TRUE
+    ###comp_required[["CMAX"]] <- TRUE
+    ###comp_required[["CLAST"]] <- TRUE 
+    ###comp_required[["AUCLAST"]] <- TRUE
     if(isTRUE(optimize_kel_debug)){
       debug_idx <- 1
       if("AUCXPCTO" %in% flag_df$VAR){
@@ -668,20 +782,27 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       warning("Flag 'INCLUDEEXTRAPOLATION' does not have a valid value! Please try again with numeric value (either 0 or 1)")
     }
   }
-  if(isTRUE(optimize_kel) && (!comp_required[["TMAX"]] || !comp_required[["TLAST"]] || !comp_required[["CMAX"]] || !comp_required[["CLAST"]] || !comp_required[["AUCLAST"]] ||
-     !"FLGACCEPTKELCRIT" %in% names(map_data) || !"FLGEXKEL" %in% names(map_data) || !map_data$FLGEXKEL %in% names(data_data))){
-    warning("Kel optimization cannot be performed because 'TMAX', 'TLAST', 'CMAX', 'CLAST', 'AUCLAST' are not part of the calculated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGEXKEL' are not present in the dataset")
+  
+  ###if(isTRUE(optimize_kel) && (!comp_required[["TMAX"]] || !comp_required[["TLAST"]] || !comp_required[["CMAX"]] || !comp_required[["CLAST"]] || !comp_required[["AUCLAST"]] ||
+  ###   !"FLGACCEPTKELCRIT" %in% names(map_data) || !"FLGEXKEL" %in% names(map_data) || !map_data$FLGEXKEL %in% names(data_data))){
+  ###  warning("Kel optimization cannot be performed because 'TMAX', 'TLAST', 'CMAX', 'CLAST', 'AUCLAST' are not part of the calculated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGEXKEL' are not present in the dataset")
+  ###}
+  
+  if(isTRUE(optimize_kel) && (optimize_kel_method != "1" && optimize_kel_method != "2")){
+    optimize_kel <- FALSE
+    warning("Flag 'OPTIMIZEKEL' does not have a valid value! Please try again with numeric value (either 1 or 2)")
   }
   
-  if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
-     "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
+  ###if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
+  ###   "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
+  if(isTRUE(optimize_kel) && "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
     kel_flag_optimized <- integer()
     kel_opt_warning <- FALSE
   }
   
-  if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
-    comp_required[["TMAX"]] <- TRUE
-  }
+  ###if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
+  ###  comp_required[["TMAX"]] <- TRUE
+  ###}
 
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
     tryCatch({
@@ -764,19 +885,8 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
       test_df_2 <- tmp_df[,c(map_data$TIME)]
       if(any(duplicated(test_df_2))){
-        tmp_df <- tmp_df[!duplicated(test_df_2),]
-        if(!is.null(ex_flag)){
-          ex_flag <- ex_flag[!duplicated(test_df_2)]
-        }
-        if(!is.null(kel_flag)){
-          kel_flag <- kel_flag[!duplicated(test_df_2)]
-        }
-        if(!is.null(auc_flag)){
-          auc_flag <- auc_flag[!duplicated(test_df_2)]
-        }
-        if(!is.null(emesis_flag)){
-          emesis_flag <- emesis_flag[!duplicated(test_df_2)]
-        }
+        tmp_df <- tmp_df[rep(FALSE, nrow(tmp_df)),]
+        
         warning(paste0("Removing SDEID: '", unique(data_data[,map_data$SDEID])[i], "' due to duplicate TIME but different CONC values"))
       }
       cest_tmp <- data.frame("CONC" = numeric(), "TIME" = numeric(), "INT_EXT" = character())
@@ -796,7 +906,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         extrapolation <- FALSE
       }
       
-      dof <- ifelse("DOF1" %in% names(map_data), ifelse(map_data$DOF1 %in% names(data_data), unique(tmp_df[,map_data$DOF1])[1], NA), ifelse("DOF" %in% names(map_data), ifelse(map_data$DOF %in% names(data_data), unique(tmp_df[,map_data$DOF])[1], NA), NA))
+      dose_inf <- dof(tmp_df, map_data, dof_name = "DOF1")
       conc_check <- TRUE
       time_check <- TRUE
       suppressWarnings(blq_lloq_check <- default_df[,map_data$CONC][is.na(default_df[,map_data$CONC])])
@@ -816,38 +926,74 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         orig_time <- tmp_df[,map_data$TIME]
         orig_conc <- tmp_df[,map_data$CONC]
         
-        obs_c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
-        if(comp_required[["DOSEC"]]) {
-          dose_c <- dosec(data = tmp_df, map = map_data)
+        tmp_told <- ifelse(opt_list[3] %in% names(map_data), ifelse(map_data[, opt_list[3]] %in% names(tmp_df), as.numeric(tmp_df[, map_data[, opt_list[3]]][1]), NA), NA)
+        ctold_exists <- FALSE 
+        if(tmp_told %in% tmp_df[,map_data$NOMTIME]){
+          idx <- which(tmp_df[,map_data$NOMTIME] == tmp_told)
+          tmp_ctold <- tmp_df[,map_data$CONC][length(idx)]
+          if(!is.na(tmp_ctold)){
+            ctold_exists <- TRUE
+          }
         }
-        if(comp_required[["CMAX"]]) {
-          c_max <- cmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        tmp_tau <- ifelse(opt_list[2] %in% names(map_data), ifelse(map_data[, opt_list[2]] %in% names(tmp_df), as.numeric(tmp_df[, map_data[, opt_list[2]]][1]), NA), NA)
+        tmp_tau <- tmp_tau + tmp_told
+        ctau_exists <- FALSE 
+        if(tmp_tau %in% tmp_df[,map_data$NOMTIME]){
+          idx <- which(tmp_df[,map_data$NOMTIME] == tmp_tau)
+          tmp_ctau <- tmp_df[,map_data$CONC][length(idx)]
+          if(!is.na(tmp_ctau)){
+            ctau_exists <- TRUE
+          }
         }
-        if(comp_required[["TMAX"]]) {
-          t_max <- tmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
-        }
-        if(comp_required[["CENDINF"]]){
-          cend_inf <- cendinf(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], dof = dof, cmax = c_max)
-        }
-        if(comp_required[["CENDINFDN"]]){
-          cend_infdn <- cendinf_dn(cendinf = cend_inf, dose = tmp_dose)
-        }
-        if(comp_required[["TENDINF"]]){
-          tend_inf <- tendinf(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], dof = dof, tmax = t_max)
-        }
-        if(comp_required[["CLAST"]]) {
-          c_last <- clast(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
-        }
-        if(comp_required[["TLAST"]]) {
-          t_last <- tlast(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        if(!isTRUE(ctold_exists) && !is.na(tmp_told)){
+          tmp_conc <- c(NA, tmp_df[,map_data$CONC])
+          if(tmp_told %in% tmp_df[,map_data$NOMTIME]){
+            tmp_time <- c(tmp_df[,map_data$TIME])
+          } else {
+            tmp_time <- c(tmp_told, tmp_df[,map_data$TIME])
+          }
+          est_tmp <- estimate_told_concentration(conc = tmp_conc, time = tmp_time, interpolate = TRUE, extrapolate = TRUE, auc_method = "LIN", model = "M3", dosing_type = "SD", told = tmp_told, orig_conc = orig_conc, orig_time = orig_time)
+          tmp_conc <- est_tmp[[1]]
+          ctold_est <- tmp_conc[1]
         } else {
-          t_last <- NULL
+          tmp_conc <- tmp_df[,map_data$CONC]
+          tmp_time <- tmp_df[,map_data$TIME]
+          ctold_est <- NA
         }
-        if(comp_required[["AUCLAST"]]) {
+        
+        obs_c_0 <- c0(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        ###if(comp_required[["DOSEC"]]) {
+          dose_c <- dosec(data = tmp_df, map = map_data)
+        ###}
+        ###if(comp_required[["CMAX"]]) {
+          c_max <- cmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        ###}
+        ###if(comp_required[["TMAX"]]) {
+          t_max <- tmax(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        ###}
+        ###if(comp_required[["CENDINF"]]){
+          cend_inf <- cendinf(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], dof = dose_inf, cmax = c_max)
+        ###}
+        ###if(comp_required[["CENDINFDN"]]){
+          cend_infdn <- cendinf_dn(cendinf = cend_inf, dose = tmp_dose)
+        ###}
+        ###if(comp_required[["TENDINF"]]){
+          tend_inf <- tendinf(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], dof = dose_inf, tmax = t_max)
+        ###}
+        ###if(comp_required[["CLAST"]]) {
+          c_last <- clast(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        ###}
+        ###if(comp_required[["TLAST"]]) {
+          t_last <- tlast(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
+        ###} else {
+        ###  t_last <- NULL
+        ###}
+        ###if(comp_required[["AUCLAST"]]) {
           auclast <- auc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_last, t_max = t_max)
-        }
-        if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
-           "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
+        ###}
+        ###if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
+        ###   "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
+        if(isTRUE(optimize_kel) && "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
           orig_time <- tmp_df[,map_data$TIME]
           orig_conc <- tmp_df[,map_data$CONC]
           tmp_time <- orig_time
@@ -928,15 +1074,28 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   
             ulist <- list()
             if(length(tmp_time) >= kel_n){
-              for(j in kel_n:length(tmp_time)){
-                if(j <= length(tmp_time)) {
-                  if(choose(length(tmp_time), j) == 1){
-                    tlist <- list(as.vector(combn(tmp_time, j)))
-                  } else {
-                    cbn <- combn(tmp_time, j)
-                    tlist <- lapply(seq(ncol(cbn)), function(i) cbn[,i])
+              if(optimize_kel_method == "1"){
+                idx <- c(1:length(tmp_time))
+                ulist <- list(idx)
+                
+                if(length(tmp_time) >= kel_n){
+                  for (j in kel_n:(length(tmp_time)-1) ){
+                    fit <- lm( tmp_conc[idx] ~ tmp_time[idx] )
+                    idx <- idx[-which(abs(residuals(fit)) == max(abs(residuals(fit))))]
+                    ulist <- c(ulist,list(idx))
                   }
-                  ulist <- c(ulist,tlist)
+                }
+              } else if(optimize_kel_method == "2"){
+                for(j in kel_n:length(tmp_time)){
+                  if(j <= length(tmp_time)) {
+                    if(choose(length(tmp_time), j) == 1){
+                      tlist <- list(as.vector(combn(tmp_time, j)))
+                    } else {
+                      cbn <- combn(tmp_time, j)
+                      tlist <- lapply(seq(ncol(cbn)), function(i) cbn[,i])
+                    }
+                    ulist <- c(ulist,tlist)
+                  }
                 }
               }
             }
@@ -1017,47 +1176,50 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           }
         }
-       
-        if(comp_required[["CMIN"]]) {
+        ###if(comp_required[["CMIN"]]) {
           c_min <- cmin(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
-        }
-        if(comp_required[["CMAXDN"]]) {
+        ###}
+        ###if(comp_required[["CMAXDN"]]) {
           cmaxdn <- cmax_dn(cmax = c_max, dose = tmp_dose)
-        }
-        if(comp_required[["TMIN"]]) {
+        ###}
+        ###if(comp_required[["CMINDN"]]){
+          cmindn <- cmin_dn(cmin = c_min, dose = tmp_dose)
+        ###}
+        ###if(comp_required[["TMIN"]]) {
           t_min <- tmin(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME])
-        }
-        if(comp_required[["KEL"]] || comp_required[["KELC0"]] || comp_required[["KELTMLO"]] || comp_required[["KELTMHI"]] || comp_required[["KELNOPT"]] || comp_required[["THALF"]] || comp_required[["THALFF"]]) {
+        ###}
+        ###if(comp_required[["KEL"]] || comp_required[["KELC0"]] || comp_required[["KELTMLO"]] || comp_required[["KELTMHI"]] || comp_required[["KELNOPT"]] || comp_required[["THALF"]] || comp_required[["THALFF"]]) {
           span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
           kel_v <- kel(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], exflag = kel_flag, spanratio = span_ratio)
-        } else {
-          kel_v <- NULL
-        }
-        if(comp_required[["KELR"]] || comp_required[["KELRSQ"]] || comp_required[["KELRSQA"]]) {
+        ###} else {
+        ###  kel_v <- NULL
+        ###}
+        ###if(comp_required[["KELR"]] || comp_required[["KELRSQ"]] || comp_required[["KELRSQA"]]) {
           kelr_v <- kel_r(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], exflag = kel_flag)
-        }
-        if(comp_required[["LASTTIME"]]) {
+        ###}
+        ###if(comp_required[["LASTTIME"]]) {
           last_time <- lasttime(conc = default_df[,map_data$CONC], time = default_df[,map_data$TIME])
-        }
-        if(comp_required[["CEST"]] || parameter_required("KEL", names(kel_v)) || parameter_required("KELC0", names(kel_v))) {
+        ###}
+        ###if(comp_required[["CEST"]] || parameter_required("KEL", names(kel_v)) || parameter_required("KELC0", names(kel_v))) {
           c_est <- cest(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], kelflag=kel_flag, t_last=t_last, spanratio=span_ratio, kel=kel_v[["KEL"]], kelc0=kel_v[["KELC0"]])
-        }
-        if(comp_required[["AUCALL"]]) {
+        ###}
+        ###if(comp_required[["AUCALL"]]) {
           aucall <- auc_all(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
-        }
-        if(comp_required[["AUCALLDN"]]) {
+        ###}
+        ###if(comp_required[["AUCALLDN"]]) {
           aucalldn <- auc_dn(auc = aucall, dose = tmp_dose)
-        }
-        if(comp_required[["AUCLASTC"]]) {
+        ###}
+        ###if(comp_required[["AUCLASTC"]]) {
           auclast_c <- auc_lastc(kel = kel_v[["KEL"]], auclast = auclast, c0 = obs_c_0, tlast = t_last)
-        }
-        if(comp_required[["AUCLASTDN"]]) {
+        ###}
+        ###if(comp_required[["AUCLASTDN"]]) {
           auclastdn <- auc_dn(auc = auclast, dose = tmp_dose)
-        }
-        if(comp_required[["AUMCLAST"]]) {
+        ###}
+        ###if(comp_required[["AUMCLAST"]]) {
           aumclast <- aumc_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_max)
-        }
-        if((comp_required[["AUCT"]] || comp_required[["AUCTDN"]]) && auc_len > 1) {
+        ###}
+        ###if((comp_required[["AUCT"]] || comp_required[["AUCTDN"]]) && auc_len > 1) {
+        if(auc_len > 1) {
           auct <- NULL
           auctdn <- NULL
           auc_int <- NULL
@@ -1070,41 +1232,42 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               tmp_int <- NA
             }
 
-            if(comp_required[["AUCT"]]){
+            ###if(comp_required[["AUCT"]]){
               if(is.null(auct)){
                 auct <- tmp
               } else {
                 auct <- c(auct, tmp)
               }
-            }
-            if(comp_required[["AUCTDN"]]){
+            ###}
+            ###if(comp_required[["AUCTDN"]]){
               if(is.null(auctdn)){
                 auctdn <- tmp_dn
               } else {
                 auctdn <- c(auctdn, tmp_dn)
               }
-            }
+            ###}
             if(is.null(auc_int)){
               auc_int <- tmp_int
             } else {
               auc_int <- c(auc_int, tmp_int)
             }
           }
-          if(comp_required[["AUCT"]]){
+          ###if(comp_required[["AUCT"]]){
             if(length(auct) < auc_col) {
               auct <- c(auct, rep(NA, (auc_col - length(auct))))
             }
-          }
-          if(comp_required[["AUCTDN"]]){
+          ###}
+          ###if(comp_required[["AUCTDN"]]){
             if(length(auctdn) < auc_col) {
               auctdn <- c(auctdn, rep(NA, (auc_col - length(auctdn))))
             }
-          }
+          ###}
           if(length(auc_int) < auc_col) {
             auc_int <- c(auc_int, rep(NA, (auc_col - length(auc_int))))
           }
         }
-        if(comp_required[["AUCT1_T2"]] && auc_pair_check) {
+        ###if(comp_required[["AUCT1_T2"]] && auc_pair_check) {
+        if(auc_pair_check) {
           auct1_t2 <- NULL
           auct1_t2_names <- c(rep(paste0("AUC.", 1:auc_par_len, ".T1")), rep(paste0("AUC.", 1:auc_par_len, ".T2")))
           if(!all(auct1_t2_names %in% names(map_data))){
@@ -1146,88 +1309,150 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
         }
 
-        if(comp_required[["AUCINFO"]]) {
+        ###if(comp_required[["AUCINFO"]]) {
           aucinf_o <- auc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, c_last = c_last, kel = kel_v)
-        }
-        if(comp_required[["AUCINFOC"]]) {
+        ###}
+        ###if(comp_required[["AUCINFOC"]]) {
           aucinf_oc <- auc_inf_oc(kel = kel_v[["KEL"]], aucinfo = aucinf_o, c0 = obs_c_0)
-        }
-        if(comp_required[["AUCINFODN"]]) {
+        ###}
+        ###if(comp_required[["AUCINFODN"]]) {
           aucinfo_dn <- auc_dn(auc = aucinf_o, dose = tmp_dose)
-        }
-        if(comp_required[["AUCINFP"]]) {
+        ###}
+        ###if(comp_required[["AUCINFP"]]) {
           aucinf_p <- auc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, t_last = t_last, kel = kel_v)
-        }
-        if(comp_required[["AUCINFPC"]]) {
+        ###}
+        ###if(comp_required[["AUCINFPC"]]) {
           aucinf_pc <- auc_inf_pc(kel = kel_v[["KEL"]], aucinfp = aucinf_p, c0 = obs_c_0)
-        }
-        if(comp_required[["AUCINFPDN"]]) {
+        ###}
+        ###if(comp_required[["AUCINFPDN"]]) {
           aucinfp_dn <- auc_dn(auc = aucinf_p, dose = tmp_dose)
-        }
-        if(comp_required[["AUMCINFO"]]) {
+        ###}
+        ###if(comp_required[["AUMCINFO"]]) {
           aumcinf_o <- aumc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumclast = aumclast, c_last = c_last, t_last = t_last, kel = kel_v)
-        }
-        if(comp_required[["AUMCINFP"]]) {
+        ###}
+        ###if(comp_required[["AUMCINFP"]]) {
           aumcinf_p <- aumc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumclast = aumclast, t_last = t_last, kel = kel_v)
-        }
-        if(comp_required[["MRTLAST"]]) {
-          mrtlast <- mrt_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M3", aucflag = auc_flag, dof = dof, auclast = auclast, aumclast = aumclast)
-        }
-        if(comp_required[["MRTIVIFO"]]){
-          mrto <- mrt_ivif_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M3", parameter = "SD", kelflag = kel_flag, aucflag = auc_flag, dof = dof, aucinfo = aucinf_o, aumcinfo = aumcinf_o)
-        }
-        if(comp_required[["MRTIVIFP"]]){
-          mrtp <- mrt_ivif_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M3", parameter = "SD", kelflag = kel_flag, aucflag = auc_flag, dof = dof, aucinfp = aucinf_p, aumcinfp = aumcinf_p)
-        }
-        if(comp_required[["AUCXPCTO"]]){
+        ###}
+        ###if(comp_required[["MRTLAST"]]) {
+          mrtlast <- mrt_last(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M3", aucflag = auc_flag, dof = dose_inf, auclast = auclast, aumclast = aumclast)
+        ###}
+        ###if(comp_required[["MRTIVIFO"]]){
+          mrto <- mrt_ivif_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M3", parameter = "SD", kelflag = kel_flag, aucflag = auc_flag, dof = dose_inf, aucinfo = aucinf_o, aumcinfo = aumcinf_o)
+        ###}
+        ###if(comp_required[["MRTIVIFP"]]){
+          mrtp <- mrt_ivif_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, model = "M3", parameter = "SD", kelflag = kel_flag, aucflag = auc_flag, dof = dose_inf, aucinfp = aucinf_p, aumcinfp = aumcinf_p)
+        ###}
+        ###if(comp_required[["AUCXPCTO"]]){
           aucxpcto <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_info = aucinf_o, auclast = auclast)
-        }
-        if(comp_required[["AUCXPCTP"]]){
+        ###}
+        ###if(comp_required[["AUCXPCTP"]]){
           aucxpctp <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_infp = aucinf_p, auclast = auclast)
-        }
-        if(comp_required[["AUMCXPTO"]]){
+        ###}
+        ###if(comp_required[["AUMCXPTO"]]){
           aumcxpto <- aumc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumcinfo = aumcinf_o, aumclast = aumclast)
-        }
-        if(comp_required[["AUMCXPTP"]]){
+        ###}
+        ###if(comp_required[["AUMCXPTP"]]){
           aumcxptp <- aumc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, aumcinfp = aumcinf_p, aumclast = aumclast)
-        }
-        if(comp_required[["CLO"]]) {
+        ###}
+        ###if(comp_required[["CLO"]]) {
+        ###  cl_o <- clo(aucinfo = aucinf_o, dose = dose_c)
+        ###}
+        if(isTRUE(dose_by_mass)){
+          cl_o <- NA
+        } else {
           cl_o <- clo(aucinfo = aucinf_o, dose = dose_c)
         }
-        if(comp_required[["CLOW"]]) {
+        ###if(comp_required[["CLOW"]]) {
+        ###  cl_ow <- clow(clo = cl_o, normbs = norm_bs)
+        ###}
+        if(isTRUE(dose_by_mass)){
+          cl_ow <- clow(clo = unique(tmp_df[, dosevar])[1], normbs = aucinf_o)
+        } else {
           cl_ow <- clow(clo = cl_o, normbs = norm_bs)
         }
-        if(comp_required[["CLP"]]) {
+        ###if(comp_required[["CLP"]]) {
+        ###  cl_p <- clp(aucinfp = aucinf_p, dose = dose_c)
+        ###}
+        if(isTRUE(dose_by_mass)){
+          cl_p <- NA
+        } else {
           cl_p <- clp(aucinfp = aucinf_p, dose = dose_c)
         }
-        if(comp_required[["CLPW"]]) {
+        ###if(comp_required[["CLPW"]]) {
+        ###  cl_pw <- clpw(clp = cl_p, normbs = norm_bs)
+        if(isTRUE(dose_by_mass)){
+          cl_pw <- clpw(clp = unique(tmp_df[, dosevar])[1], normbs = aucinf_p)
+        } else {
           cl_pw <- clpw(clp = cl_p, normbs = norm_bs)
         }
-        if(comp_required[["VZO"]]) {
+        ###}
+        ###if(comp_required[["VZO"]]) {
+        ###  vz_o <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinf_o, dose = dose_c)
+        ###}
+        if(isTRUE(dose_by_mass)){
+          vz_o
+        } else {
           vz_o <- vzo(kel = kel_v[["KEL"]], aucinfo = aucinf_o, dose = dose_c)
-        }
-        if(comp_required[["VZOW"]]) {
+        } 
+        ###if(comp_required[["VZOW"]]) {
+        ###  vz_ow <- vzow(vzo = vz_o, normbs = norm_bs)
+        ###}
+        if(isTRUE(dose_by_mass)){
+          tmp_denom <- kel_v[["KEL"]] * aucinf_o
+          vz_ow <- vzow(vzo = unique(tmp_df[, dosevar])[1], normbs = tmp_denom)
+        } else {
           vz_ow <- vzow(vzo = vz_o, normbs = norm_bs)
         }
-        if(comp_required[["VZP"]]) {
+        ###if(comp_required[["VZP"]]) {
+        ###  vz_p <- vzp(kel = kel_v[["KEL"]], aucinfp = aucinf_p, dose = dose_c)
+        ###}
+        if(isTRUE(dose_by_mass)){
+          vz_p <- NA
+        } else {
           vz_p <- vzp(kel = kel_v[["KEL"]], aucinfp = aucinf_p, dose = dose_c)
         }
-        if(comp_required[["VZPW"]]) {
+        ###if(comp_required[["VZPW"]]) {
+        ###  vz_pw <- vzpw(vzp = vz_p, normbs = norm_bs)
+        ###}
+        if(isTRUE(dose_by_mass)){
+          tmp_denom <- kel_v[["KEL"]] * aucinf_p
+          vz_pw <- vzpw(vzp = unique(tmp_df[, dosevar])[1], normbs = tmp_denom)
+        } else {
           vz_pw <- vzpw(vzp = vz_p, normbs = norm_bs)
         }
-        if(comp_required[["VSSO"]]) {
+        ###if(comp_required[["VSSO"]]) {
+        ###  vsso <- vsso(clo = cl_o, mrto = mrto)
+        ###}
+        if(isTRUE(dose_by_mass)){
+          vsso <- NA
+        } else {
           vsso <- vsso(clo = cl_o, mrto = mrto)
         }
-        if(comp_required[["VSSP"]]) {
+        ###if(comp_required[["VSSP"]]) {
+        ###  vssp <- vssp(cltau = cl_p, mrtp = mrtp)
+        ###}
+        if(isTRUE(dose_by_mass)){
+          vssp <- NA
+        } else {
           vssp <- vssp(cltau = cl_p, mrtp = mrtp)
         }
-        if(comp_required[["VSSOW"]]) {
+        ###if(comp_required[["VSSOW"]]) {
+        ###  vssow <- vssow(vsso = vsso, normbs = norm_bs)
+        ###}
+        if(isTRUE(dose_by_mass)){
+          vssow <- mrto * cl_ow
+        } else {
           vssow <- vssow(vsso = vsso, normbs = norm_bs)
         }
-        if(comp_required[["VSSPW"]]) {
+        ###if(comp_required[["VSSPW"]]) {
+        ###  vsspw <- vsspw(vssp = vssp, normbs = norm_bs)
+        ###}
+        if(isTRUE(dose_by_mass)){
+          vsspw <- mrtp * cl_pw
+        } else {
           vsspw <- vsspw(vssp = vssp, normbs = norm_bs)
         }
-        if(comp_required[["KEL"]]){
+        ###if(comp_required[["KEL"]]){
           exflag <- !as.logical(kel_flag)
 
           pkdataid <- tmp_df[,map_data$FLGMERGE][exflag]
@@ -1237,9 +1462,9 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(!is.na(kel_v[["KEL"]])){
             cest_kel <- estimate_concentration(time, conc, slope=kel_v[["KEL"]])
           }
-        } else {
-          pkdataid <- NULL
-        }
+        ###} else {
+        ###  pkdataid <- NULL
+        ###}
 
         tmp_est_data <- data.frame(matrix(ncol = length(elist), nrow = 0))
         names(tmp_est_data) <- elist
@@ -1265,7 +1490,8 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
           for(e in 1:length(pkdataid)){
             est_row <- c(pkdataid[e], unique(data_data[,map_data$SDEID])[i], time[e], cest_kel[e], NA, NA, NA, NA)
-            if(comp_required[["TLAST"]]) { if(!is.na(t_last)){ if(time[e]==t_last) { est_row[8] <- c_est } } }
+            ###if(comp_required[["TLAST"]]) { if(!is.na(t_last)){ if(time[e]==t_last) { est_row[8] <- c_est } } }
+            if(!is.na(t_last)){ if(time[e]==t_last) { est_row[8] <- c_est } }
             
             if(nrow(cest_tmp) > 0){
               cest_idx <- which(cest_tmp$TIME == time[e])
@@ -1307,7 +1533,7 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           computation_df[i, "DOSEC"] <- dose_c
         }
         if(disp_required[["DOFi"]]){
-          computation_df[i, "DOF"] <- dof
+          computation_df[i, "DOF"] <- dose_inf
         }
         if(disp_required[["CENDINF"]]){
           computation_df[i, "CENDINF"] <- cend_inf
@@ -1345,6 +1571,9 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         if(disp_required[["CMAXDN"]]) {
           computation_df[i, "CMAXDN"] <- cmaxdn
+        }
+        if(disp_required[["CMINDN"]]) {
+          computation_df[i, "CMINDN"] <- cmindn
         }
         if(disp_required[["TMAX"]]) {
           computation_df[i, "TMAX"] <- t_max
@@ -1547,6 +1776,9 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 }
             }
         }
+        if(disp_required[["CTOLDesti"]]){
+          computation_df[i, paste0("CTOLDest1")] <- ctold_est
+        }
       } else {
         if(isTRUE(optimize_kel)){
           kel_flag_optimized <- c(kel_flag_optimized, kel_flag)
@@ -1604,6 +1836,84 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
     }
   }
+  if(isTRUE(secondary)){
+    pkterm_parent <- map_data$PKTERMPARENT
+    secondary_mappings <- c("SDEID", 'MRSDEID', 'PKTERM', 'MW')
+    secondary_values <- as.character(map_data[,secondary_mappings])
+    secondary_data <- merge(x = computation_df, y = unique(data_data[,secondary_values]), by = map_data$SDEID, all.y = FALSE, all.x = FALSE)
+    
+    for(i in 1:length(unique(secondary_data[,map_data$SDEID]))){
+      tryCatch({
+        sdeid <- unique(secondary_data[,map_data$SDEID])[i]
+        tmp_df <- secondary_data[secondary_data[,map_data$SDEID] == sdeid,]
+        curr_mrsdeid <- unique(tmp_df[,map_data$MRSDEID])[1]
+        tmp_mr_df <- secondary_data[secondary_data[,map_data$MRSDEID] == curr_mrsdeid,]
+        tmp_orig_df <- data_data[data_data[,map_data$SDEID] == sdeid,]
+        tmp_mr_orig_df <- data_data[data_data[,map_data$MRSDEID] == curr_mrsdeid,]
+        
+        if(isTRUE(pkterm_parent %in% tmp_mr_df[,map_data$PKTERM])){
+          curr_pkterm <- unique(tmp_df[,map_data$PKTERM])[1]
+          tmp_parent_df <- tmp_mr_df[tmp_mr_df[,map_data$PKTERM] == pkterm_parent,]
+          tmp_parent_orig_df <- tmp_mr_orig_df[tmp_mr_orig_df[,map_data$PKTERM] == pkterm_parent,]
+          
+          if("CONCU" %in% names(map_data)){
+            if(map_data$CONCU %in% names(data_data)){
+              meta_unit <- unique(tmp_orig_df[,map_data$CONCU])[1]
+              parent_unit <- unique(tmp_parent_orig_df[,map_data$CONCU])[1]
+              if(parent_unit != meta_unit){
+                warning(paste0("Warning concentration units for parent '", pkterm_parent, "' (", parent_unit, ") and metabolite '", curr_pkterm, "' (", meta_unit, ") differ! Review metabolite ratio parameters carefully before accepting for SDEID '", sdeid, "'!"))
+              }
+            }
+          }
+          if("TIMEU" %in% names(map_data)){
+            if(map_data$TIMEU %in% names(data_data)){
+              meta_unit <- unique(tmp_orig_df[,map_data$TIMEU])[1]
+              parent_unit <- unique(tmp_parent_orig_df[,map_data$TIMEU])[1]
+              if(parent_unit != meta_unit){
+                warning(paste0("Warning time units for parent '", pkterm_parent, "' (", parent_unit, ") and metabolite '", curr_pkterm, "' (", meta_unit, ") differ! Review metabolite ratio parameters carefully before accepting for SDEID '", sdeid, "'!"))
+              }
+            }
+          }
+          if("DOSEU" %in% names(map_data)){
+            if(map_data$DOSEU %in% names(data_data)){
+              meta_unit <- unique(tmp_orig_df[,map_data$DOSEU])[1]
+              parent_unit <- unique(tmp_parent_orig_df[,map_data$DOSEU])[1]
+              if(parent_unit != meta_unit){
+                warning(paste0("Warning dose units for parent '", pkterm_parent, "' (", parent_unit, ") and metabolite '", curr_pkterm, "' (", meta_unit, ") differ! Review metabolite ratio parameters carefully before accepting for SDEID '", sdeid, "'!"))
+              }
+            }
+          }
+          
+          if(disp_required[["MRAUCINFO"]]) {
+            if(isTRUE(curr_pkterm != pkterm_parent)){
+              mr_aucinf_o <- mr_auc_inf_o(metabolite_aucinfo = tmp_df$AUCINFO, parent_aucinfo = tmp_parent_df$AUCINFO, parent_mw = tmp_parent_df$MW, metabolite_mw = tmp_df$MW)
+              computation_df[computation_df[,map_data$SDEID] == sdeid, "MRAUCINFO"] <- mr_aucinf_o
+            } 
+          }
+          if(disp_required[["MRAUCINFP"]]) {
+            if(isTRUE(curr_pkterm != pkterm_parent)){
+              mr_aucinf_p <- mr_auc_inf_p(metabolite_aucinfp = tmp_df$AUCINFP, parent_aucinfp = tmp_parent_df$AUCINFP, parent_mw = tmp_parent_df$MW, metabolite_mw = tmp_df$MW)
+              computation_df[computation_df[,map_data$SDEID] == sdeid, "MRAUCINFP"] <- mr_aucinf_p
+            }
+          }
+          if(disp_required[["MRAUCLAST"]]) {
+            if(isTRUE(curr_pkterm != pkterm_parent)){
+              mr_auclast <- mr_auc_last(metabolite_auclast = tmp_df$AUCLAST, parent_auclast = tmp_parent_df$AUCLAST, parent_mw = tmp_parent_df$MW, metabolite_mw = tmp_df$MW)
+              computation_df[computation_df[,map_data$SDEID] == sdeid, "MRAUCLAST"] <- mr_auclast
+            } 
+          }
+          if(disp_required[["MRCMAX"]]) {
+            if(isTRUE(curr_pkterm != pkterm_parent)){
+              mr_cmax <- mr_cmax(metabolite_cmax = tmp_df$CMAX, parent_cmax = tmp_parent_df$CMAX, parent_mw = tmp_parent_df$MW, metabolite_mw = tmp_df$MW)
+              computation_df[computation_df[,map_data$SDEID] == sdeid, "MRCMAX"] <- mr_cmax
+            }
+          }
+        }
+      }, error = function(e) {
+        stop(paste0(e, "For SDEID ", sdeid))
+      })
+    }
+  }
   
   for(n in 1:length(regular_int_type)){
     tmp_int_type <- computation_df[,names(computation_df) == as.character(regular_int_type[n])]
@@ -1642,8 +1952,9 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   results_list$data_out <- computation_df
   results_list$est_data <- est_data
 
-  if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
-     "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
+  ###if(isTRUE(optimize_kel) && comp_required[["TMAX"]] && comp_required[["TLAST"]] && comp_required[["CMAX"]] && comp_required[["CLAST"]] && comp_required[["AUCLAST"]] &&
+  ###   "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
+  if(isTRUE(optimize_kel) && "FLGACCEPTKELCRIT" %in% names(map_data) && "FLGEXKEL" %in% names(map_data) && map_data$FLGEXKEL %in% names(data_data)){
     results_list$optimized_kel_flag <- kel_flag_optimized
   }
   if(isTRUE(raw_results_debug)){

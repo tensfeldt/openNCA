@@ -1,7 +1,7 @@
 #' Maximum Observed Concentration
 #'
-#' This function gets the maxiumum observed concentration that is obtained by the inspection of the data.
-#' It is designed as the first occurance within a dosing interval. In the case of multiple dosing, CMAXi
+#' This function gets the maximum observed concentration that is obtained by the inspection of the data.
+#' It is designed as the first occurrence within a dosing interval. In the case of multiple dosing, CMAXi
 #' is obtained by inspection of the data during each dosing interval i.
 #'
 #' @details If all the concentrations are 0's then CMAXi will be 0. Also the interval must be in the

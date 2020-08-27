@@ -66,6 +66,9 @@ rate <- function(start_time = NULL, end_time = NULL, conc = NULL, vol = NULL, vo
       if(any(is.infinite(r))){
         r[is.infinite(r)] <- 0
       }
+      if(any(is.nan(r))){
+        r[is.nan(r)] <- NA
+      }
     }
   }
   

@@ -4,8 +4,13 @@
 \alias{interpolate_lin}
 \title{interpolate_lin performs linear interpolation between two data points}
 \usage{
-interpolate_lin(conc1 = NULL, time1 = NULL, conc2 = NULL,
-  time2 = NULL, est_time = NULL)
+interpolate_lin(
+  conc1 = NULL,
+  time1 = NULL,
+  conc2 = NULL,
+  time2 = NULL,
+  est_time = NULL
+)
 }
 \description{
 interpolate_lin performs linear interpolation between two data points

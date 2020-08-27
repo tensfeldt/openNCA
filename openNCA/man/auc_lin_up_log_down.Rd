@@ -4,10 +4,20 @@
 \alias{auc_lin_up_log_down}
 \title{Linear Up-Log Down Trapezoidal Area Under the Concentration-Time Curve (AUC) Calculation Method}
 \usage{
-auc_lin_up_log_down(conc = NULL, time = NULL, exflag = NULL,
-  interpolate = NULL, extrapolate = NULL, model = NULL,
-  dosing_type = NULL, told = NULL, kel = NULL, orig_conc = NULL,
-  orig_time = NULL, includeNA = FALSE)
+auc_lin_up_log_down(
+  conc = NULL,
+  time = NULL,
+  exflag = NULL,
+  interpolate = NULL,
+  extrapolate = NULL,
+  model = NULL,
+  dosing_type = NULL,
+  told = NULL,
+  kel = NULL,
+  orig_conc = NULL,
+  orig_time = NULL,
+  includeNA = FALSE
+)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

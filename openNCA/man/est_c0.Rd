@@ -4,8 +4,7 @@
 \alias{est_c0}
 \title{Estimated C0 concentration estimated for IV bolus administration}
 \usage{
-est_c0(conc = NULL, time = NULL, npts = 2, verbose = FALSE,
-  returnall = TRUE)
+est_c0(conc = NULL, time = NULL, npts = 2, verbose = FALSE, returnall = TRUE)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

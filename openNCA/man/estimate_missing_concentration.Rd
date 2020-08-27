@@ -4,10 +4,20 @@
 \alias{estimate_missing_concentration}
 \title{Helper Function for Estimating Missing Concentration Data for AUC Start and End Times}
 \usage{
-estimate_missing_concentration(conc = NULL, time = NULL,
-  interpolate = NULL, extrapolate = NULL, auc_method = NULL,
-  model = NULL, dosing_type = NULL, t_max = NULL, told = NULL,
-  kel = NULL, orig_conc = NULL, orig_time = NULL)
+estimate_missing_concentration(
+  conc = NULL,
+  time = NULL,
+  interpolate = NULL,
+  extrapolate = NULL,
+  auc_method = NULL,
+  model = NULL,
+  dosing_type = NULL,
+  t_max = NULL,
+  told = NULL,
+  kel = NULL,
+  orig_conc = NULL,
+  orig_time = NULL
+)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

@@ -115,11 +115,15 @@ tlag <- function(conc = NULL, time = NULL){
   if(sum(tmp$conc, na.rm=T) == 0){
     return(t_lag)
   }
+  if(all(tmp$conc > 0)){
+    return(0)
+  }
   tmp <- tmp[order(tmp$time),]
 
   for(i in 1:nrow(tmp)){
     tmp_c <- tmp$conc[i]
-    if(!is.na(tmp_c) && is.numeric(tmp_c)){
+    tmp_next_c <- tmp$conc[i+1]
+    if(!is.na(tmp_c) && isTRUE(tmp_next_c != 0) && is.numeric(tmp_c)){
       t_lag <- tmp$time[i]
       break
     }

@@ -4,8 +4,14 @@
 \alias{aumc_last}
 \title{Area under the first moment curve}
 \usage{
-aumc_last(conc = NULL, time = NULL, method = 1, exflag = NULL,
-  t_last = NULL, t_max = NULL)
+aumc_last(
+  conc = NULL,
+  time = NULL,
+  method = 1,
+  exflag = NULL,
+  t_last = NULL,
+  t_max = NULL
+)
 }
 \arguments{
 \item{method}{The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr

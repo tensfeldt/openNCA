@@ -4,8 +4,15 @@
 \alias{rate}
 \title{Excretion Rate for each collection interval}
 \usage{
-rate(start_time = NULL, end_time = NULL, conc = NULL, vol = NULL,
-  volu = NULL, type = "INTERVAL", map = NULL)
+rate(
+  start_time = NULL,
+  end_time = NULL,
+  conc = NULL,
+  vol = NULL,
+  volu = NULL,
+  type = "INTERVAL",
+  map = NULL
+)
 }
 \description{
 Excretion Rate for each collection interval

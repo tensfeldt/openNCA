@@ -4,11 +4,25 @@
 \alias{auc_t1_t2}
 \title{Partial Area under the concentration (AUC) versus time cruve from time T1 until time T2}
 \usage{
-auc_t1_t2(conc = NULL, time = NULL, t1 = NULL, t2 = NULL,
-  method = 1, exflag = NULL, t_max = NULL, dose_time = NULL,
-  interpolate = NULL, extrapolate = NULL, model = NULL,
-  dosing_type = NULL, told = NULL, kel = NULL, orig_conc = NULL,
-  orig_time = NULL, includeNA = FALSE)
+auc_t1_t2(
+  conc = NULL,
+  time = NULL,
+  t1 = NULL,
+  t2 = NULL,
+  method = 1,
+  exflag = NULL,
+  t_max = NULL,
+  dose_time = NULL,
+  interpolate = NULL,
+  extrapolate = NULL,
+  model = NULL,
+  dosing_type = NULL,
+  told = NULL,
+  kel = NULL,
+  orig_conc = NULL,
+  orig_time = NULL,
+  includeNA = FALSE
+)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

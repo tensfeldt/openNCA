@@ -4,9 +4,17 @@
 \alias{auc_inf_p}
 \title{Area under the concentration versus time cruve from time 0 to infinity (Predicted)}
 \usage{
-auc_inf_p(conc = NULL, time = NULL, method = 1, kelflag = NULL,
-  aucflag = NULL, auclast = NULL, t_last = NULL, spanratio = NULL,
-  kel = NULL)
+auc_inf_p(
+  conc = NULL,
+  time = NULL,
+  method = 1,
+  kelflag = NULL,
+  aucflag = NULL,
+  auclast = NULL,
+  t_last = NULL,
+  spanratio = NULL,
+  kel = NULL
+)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

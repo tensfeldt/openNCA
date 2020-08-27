@@ -4,8 +4,7 @@
 \alias{auc_all}
 \title{Area under the concentration versus time cruve from time 0 until the last time point}
 \usage{
-auc_all(conc = NULL, time = NULL, method = 1, exflag = NULL,
-  t_max = NULL)
+auc_all(conc = NULL, time = NULL, method = 1, exflag = NULL, t_max = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

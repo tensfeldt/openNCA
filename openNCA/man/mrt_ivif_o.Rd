@@ -5,11 +5,25 @@
 \title{The mean residence time (MRT) extrapolated to infinity for a substance administered by extravascular
 dosing, calculated using the observed value of the last non-zero concentration.}
 \usage{
-mrt_ivif_o(conc = NULL, time = NULL, method = 1, model = "M2",
-  parameter = "SD", kelflag = NULL, aucflag = NULL, tau = NULL,
-  dof = NULL, spanratio = NULL, kel = NULL, orig_conc = NULL,
-  orig_time = NULL, aucinfo = NULL, aumcinfo = NULL, auctau = NULL,
-  aumctau = NULL)
+mrt_ivif_o(
+  conc = NULL,
+  time = NULL,
+  method = 1,
+  model = "M2",
+  parameter = "SD",
+  kelflag = NULL,
+  aucflag = NULL,
+  tau = NULL,
+  dof = NULL,
+  spanratio = NULL,
+  kel = NULL,
+  orig_conc = NULL,
+  orig_time = NULL,
+  aucinfo = NULL,
+  aumcinfo = NULL,
+  auctau = NULL,
+  aumctau = NULL
+)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

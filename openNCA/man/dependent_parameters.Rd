@@ -4,8 +4,7 @@
 \alias{dependent_parameters}
 \title{Dependant Parameters}
 \usage{
-dependent_parameters(parameter, dl = create_dependency_list(),
-  depth = TRUE)
+dependent_parameters(parameter, dl = create_dependency_list(), depth = TRUE)
 }
 \arguments{
 \item{parameter}{Parameter Name}

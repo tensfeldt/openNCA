@@ -4,10 +4,17 @@
 \alias{run_M3_SD_computation}
 \title{Run M3 SD Computation}
 \usage{
-run_M3_SD_computation(data = NULL, map = NULL, method = 1,
-  model_regex = "^M3(SD)*?$", parameter_list = list(),
-  return_list = list(), raw_results_debug = FALSE,
-  optimize_kel_debug = FALSE)
+run_M3_SD_computation(
+  data = NULL,
+  map = NULL,
+  method = 1,
+  model_regex = "^M3(SD)*?$",
+  parameter_list = list(),
+  return_list = list(),
+  raw_results_debug = FALSE,
+  optimize_kel_debug = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{The dataframe that contains the raw data}

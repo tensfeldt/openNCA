@@ -22,6 +22,17 @@ This function returns the regular expression associated to the specified paramet
 }
 }
 
+\examples{
+parameter_regex("CMAX")
+#"^CMAX$"
+
+parameter_regex("TMAX")
+#"^TMAX$"
+
+parameter_regex("AUCT")
+#"^AUC(T|[0-9]+?)$"
+
+}
 \author{
 \itemize{
  \item \strong{Thomas Tensfeldt, Pfizer}

@@ -170,7 +170,7 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = N
     return(0)
   }
 ###
-###cat('auc_tau.R: tau: ', tau, ' time: ', time, ' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' tau: ', tau, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
+###  cat('auc_tau.R: tau: ', tau, ' time: ', time, ' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' tau: ', tau, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
   
   if(isTRUE(tau %in% time && time[length(time)] == tau)){
     if(method == 1){
@@ -256,15 +256,20 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = N
         return(auc_lin_up_log_down(conc = new_conc, time = new_time, exflag = exflag))
       }
     } else {
+###      cat('last_crit_factor: ', last_crit_factor, '\n')
       time_min_range <- ifelse(!is.null(last_crit_factor), as.numeric(last_crit_factor) * tau, NA)
+###      cat('time_min_range: ', time_min_range, '\n')
       auctau <- NA
       if(!is.na(time_min_range)){
         if(!is.null(kel) && "KEL" %in% names(kel) && "KELC0" %in% names(kel)){
           if(!is.na(kel[["KEL"]])){
             tau_conc <- NA
-            tau_conc <- cest(conc = conc, time = time, t_last = time[1], kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
+            tau_conc <- cest(conc = conc, time = time, t_last = tau, kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
             new_time <- c(time, tau)
             new_conc <- c(conc, tau_conc)
+            
+###            cat('new_conc: ', new_conc, '\n')
+###            cat('new_time: ', new_time, '\n')
             
             if(method == 1){
               auctau <- auc_lin_log(conc = new_conc, time = new_time, exflag = exflag, t_max = t_max)
@@ -275,11 +280,13 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = N
             } else if(method == 4){
               auctau <- auc_lin_up_log_down(conc = new_conc, time = new_time, exflag = exflag)
             }
+###            cat('auctau: ', auctau, '\n')
           } else if(!is.null(auclast)){
+###            cat('auclast: ', auclast, '\n')
             auctau <- auclast
           }
         }
-        if(isTRUE(time_min_range <= lastttime)){
+        if(isTRUE(time_min_range <= lasttime)){
           return(auctau)
         } else {
           auctau <- ifelse(!is.null(auclast), ifelse(isTRUE(auctau <= (as.numeric(auclast) * 1.20)), auctau, NA), NA)

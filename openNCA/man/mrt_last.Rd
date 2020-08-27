@@ -4,8 +4,16 @@
 \alias{mrt_last}
 \title{Mean residence time from the time of dosing to the last measurable concentration.}
 \usage{
-mrt_last(conc = NULL, time = NULL, method = 1, model = "M1",
-  aucflag = NULL, dof = NULL, auclast = NULL, aumclast = NULL)
+mrt_last(
+  conc = NULL,
+  time = NULL,
+  method = 1,
+  model = "M1",
+  aucflag = NULL,
+  dof = NULL,
+  auclast = NULL,
+  aumclast = NULL
+)
 }
 \arguments{
 \item{method}{The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr

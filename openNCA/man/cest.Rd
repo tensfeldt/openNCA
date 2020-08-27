@@ -4,8 +4,15 @@
 \alias{cest}
 \title{Estimated concentration at time of occurrence of Time of Last Dose (TLAST)}
 \usage{
-cest(conc = NULL, time = NULL, kelflag = NULL, t_last = NULL,
-  spanratio = NULL, kel = NULL, kelc0 = NULL)
+cest(
+  conc = NULL,
+  time = NULL,
+  kelflag = NULL,
+  t_last = NULL,
+  spanratio = NULL,
+  kel = NULL,
+  kelc0 = NULL
+)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

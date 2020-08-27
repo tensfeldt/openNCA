@@ -4,8 +4,7 @@
 \alias{tendinf}
 \title{Observed time at the end of infusion}
 \usage{
-tendinf(conc = NULL, time = NULL, dof = NULL, tmax = NULL,
-  told = NULL)
+tendinf(conc = NULL, time = NULL, dof = NULL, tmax = NULL, told = NULL)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

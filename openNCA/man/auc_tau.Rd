@@ -4,10 +4,20 @@
 \alias{auc_tau}
 \title{Area under the concentration versus time cruve from time 0 until the last time point}
 \usage{
-auc_tau(conc = NULL, time = NULL, method = 1, exflag = NULL,
-  tau = NULL, t_max = NULL, orig_conc = NULL, orig_time = NULL,
-  last_crit_factor = NULL, kel = NULL, auclast = NULL,
-  lasttime = NULL)
+auc_tau(
+  conc = NULL,
+  time = NULL,
+  method = 1,
+  exflag = NULL,
+  tau = NULL,
+  t_max = NULL,
+  orig_conc = NULL,
+  orig_time = NULL,
+  last_crit_factor = NULL,
+  kel = NULL,
+  auclast = NULL,
+  lasttime = NULL
+)
 }
 \arguments{
 \item{conc}{The concentration data (given in a vector form)}

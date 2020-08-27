@@ -24,9 +24,19 @@
 #'  \item email: \url{Thomas.G.Tensfeldt@pfizer.com}
 #' }
 #' @export
-run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset = NULL, return_merged_data_in = FALSE, return_partitioned_data_in = FALSE, merged_data_in_debug = FALSE, partitioned_data_in_debug = FALSE, raw_results_debug = FALSE, optimize_kel_debug = FALSE){
+run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset = NULL, return_merged_data_in = FALSE, return_partitioned_data_in = FALSE, merged_data_in_debug = FALSE, partitioned_data_in_debug = FALSE, raw_results_debug = FALSE, optimize_kel_debug = FALSE, ...){
   function_name <- as.list(sys.call())[[1]]
-
+  additional_inputs <- list(...)
+  
+  if(isTRUE("print_version" %in% names(additional_inputs))){
+    if(isTRUE(additional_inputs$print_version)){
+      opennca_version()
+      cat(paste0("Computation Run Date/Time: ", Sys.time(), "\n"))
+    }
+  } else {
+    opennca_version()
+    cat(paste0("Computation Run Date/Time: ", Sys.time(), "\n"))
+  }
   if(is.null(data)){
     stop("Please provide a valid path for the 'data' parameter")
   } else {
@@ -106,7 +116,7 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
   }
   if("OPTIMIZEKEL" %in% names(map_data)){
     if(!(is.na(map_data[,"OPTIMIZEKEL"]))){
-      if(map_data[,"OPTIMIZEKEL"] != 1 && map_data[,"OPTIMIZEKEL"] != 0){
+      if(map_data[,"OPTIMIZEKEL"] != 1 && map_data[,"OPTIMIZEKEL"] != 2){
         warning("Map 'OPTMIZEKEL' does not have a valid value! Not using KEL optmization for this computation")
         optimize_kel <- FALSE
       } else {
@@ -284,9 +294,9 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
 
   model_regex <- paste0("^", map_data$MODEL, "(", map_data$DOSINGTYPE, ")*?$")
 
-  parameter_list <- list()
-  if(is.null(map_data$PARAMETERLIST) || is.na(map_data$PARAMETERLIST)) { parameter_list <- model_parameters(model_regex) }
-  else { parameter_list <- unlist(strsplit(map_data$PARAMETERLIST, ";")) }
+  ###parameter_list <- list()
+  ###if(is.null(map_data$PARAMETERLIST) || is.na(map_data$PARAMETERLIST)) { parameter_list <- model_parameters(model_regex) }
+  ###else { parameter_list <- unlist(strsplit(map_data$PARAMETERLIST, ";")) }
   
   if(parameterset=="PARAMETERLIST"){
     if("RETURNCOLS" %in% names(map_data)){
@@ -376,44 +386,45 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
   if(is.null(map_data$PARAMETERDISPLAYLIST) || is.na(map_data$PARAMETERDISPLAYLIST)) { display_list <- model_parameters(model_regex) }
   else { display_list <- as.list(strsplit(map_data$PARAMETERDISPLAYLIST, ";")[[1]]) }
   
-  if(parameterset=="PARAMETERDISPLAYLIST") { 
-      parameter_list <- display_list
-  }
-
+  ###if(parameterset=="PARAMETERDISPLAYLIST") { 
+  ###  parameter_list <- display_list
+  ###}
+  
+  parameter_list <- model_parameters(model_regex)
   parameter_list <- as.list(parameter_list)
   
   if(toupper(map_data$MODEL) == 'M1' && toupper(map_data$DOSINGTYPE) == 'SD'){
     data_out <- run_M1_SD_computation(data = merged_data, map = map_data, method = method, model_regex = model_regex,
                                       parameter_list = parameter_list, return_list = return_list, raw_results_debug = raw_results_debug,
-                                      optimize_kel_debug = optimize_kel_debug)
+                                      optimize_kel_debug = optimize_kel_debug, print_version = FALSE)
   } else if(toupper(map_data$MODEL) == 'M1' && toupper(map_data$DOSINGTYPE) == 'SS'){
     data_out <- run_M1_SS_computation(data = merged_data, map = map_data, method = method, model_regex = model_regex,
                                       parameter_list = parameter_list, return_list = return_list, raw_results_debug = raw_results_debug,
-                                      optimize_kel_debug = optimize_kel_debug)
+                                      optimize_kel_debug = optimize_kel_debug, print_version = FALSE)
   } else if (toupper(map_data$MODEL) == 'M2' && toupper(map_data$DOSINGTYPE) == 'SD'){
     data_out <- run_M2_SD_computation(data = merged_data, map = map_data, method = method, model_regex = model_regex,
                                       parameter_list = parameter_list, return_list = return_list, raw_results_debug = raw_results_debug,
-                                      optimize_kel_debug = optimize_kel_debug)
+                                      optimize_kel_debug = optimize_kel_debug, print_version = FALSE)
   } else if (toupper(map_data$MODEL) == 'M2' && toupper(map_data$DOSINGTYPE) == 'SS'){
     data_out <- run_M2_SS_computation(data = merged_data, map = map_data, method = method, model_regex = model_regex,
                                       parameter_list = parameter_list, return_list = return_list, raw_results_debug = raw_results_debug,
-                                      optimize_kel_debug = optimize_kel_debug)
+                                      optimize_kel_debug = optimize_kel_debug, print_version = FALSE)
   } else if (toupper(map_data$MODEL) == 'M3' && toupper(map_data$DOSINGTYPE) == 'SD'){
     data_out <- run_M3_SD_computation(data = merged_data, map = map_data, method = method, model_regex = model_regex,
                                       parameter_list = parameter_list, return_list = return_list, raw_results_debug = raw_results_debug,
-                                      optimize_kel_debug = optimize_kel_debug)
+                                      optimize_kel_debug = optimize_kel_debug, print_version = FALSE)
   } else if(toupper(map_data$MODEL) == 'M3' && toupper(map_data$DOSINGTYPE) == 'SS'){
     data_out <- run_M3_SS_computation(data = merged_data, map = map_data, method = method, model_regex = model_regex,
                                       parameter_list = parameter_list, return_list = return_list, raw_results_debug = raw_results_debug,
-                                      optimize_kel_debug = optimize_kel_debug)
+                                      optimize_kel_debug = optimize_kel_debug, print_version = FALSE)
   } else if (toupper(map_data$MODEL) == 'M4' && toupper(map_data$DOSINGTYPE) == 'SD'){
     data_out <- run_M4_SD_computation(data = merged_data, map = map_data, method = method, model_regex = model_regex,
                                       parameter_list = parameter_list, return_list = return_list, raw_results_debug = raw_results_debug,
-                                      optimize_kel_debug = optimize_kel_debug)
+                                      optimize_kel_debug = optimize_kel_debug, print_version = FALSE)
   } else if(toupper(map_data$MODEL) == 'M4' && toupper(map_data$DOSINGTYPE) == 'SS'){
     data_out <- run_M4_SS_computation(data = merged_data, map = map_data, method = method, model_regex = model_regex,
                                       parameter_list = parameter_list, return_list = return_list, raw_results_debug = raw_results_debug,
-                                      optimize_kel_debug = optimize_kel_debug)
+                                      optimize_kel_debug = optimize_kel_debug, print_version = FALSE)
   }
   if(parameterset=="PARAMETERDISPLAYLIST") { 
       k <- grep("^CONC((TIME)*?)[0-9]*?$", names(data_out$data_out), ignore.case=TRUE, perl=TRUE)
@@ -425,19 +436,26 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
   
   results_list <- list()
   if(optimize_kel){
-    pkdata_order <- as.numeric(row.names(merged_data[order(merged_data[map_data$SDEID]),]))
     if("KEL" %in% parameter_list){
       results_list$data_out <- data_out$data_out
       results_list$flag_data <- flag_data[1:nrow(merged_data),]
       if(!is.null(data_out$optimized_kel_flag)){
-        results_list$flag_data[pkdata_order,map_data$FLGEXKEL] <- data_out$optimized_kel_flag
+        tmp_data <- merged_data[,c(map_data$SDEID, map_data$FLGMERGE)]
+        tmp_flag <- merge(results_list$flag_data, tmp_data, by = map_data$FLGMERGE)
+        tmp_flag <- tmp_flag[order(tmp_flag[map_data$SDEID]),]
+        tmp_flag[,map_data$FLGEXKEL] <- data_out$optimized_kel_flag
+        results_list$flag_data <- tmp_flag
       }
       results_list$est_data <- data_out$est_data
     } else {
       results_list$data_out <- data_out$data_out
       results_list$flag_data <- flag_data[1:nrow(merged_data),]
       if(!is.null(data_out$optimized_kel_flag)){
-        results_list$flag_data[pkdata_order,map_data$FLGEXKEL] <- data_out$optimized_kel_flag
+        tmp_data <- merged_data[,c(map_data$SDEID, map_data$FLGMERGE)]
+        tmp_flag <- merge(results_list$flag_data, tmp_data, by = map_data$FLGMERGE)
+        tmp_flag <- tmp_flag[order(tmp_flag[map_data$SDEID]),]
+        tmp_flag[,map_data$FLGEXKEL] <- data_out$optimized_kel_flag
+        results_list$flag_data <- tmp_flag
       }
       if(!all(unlist(lapply(data_out$est_data, length)) == 0)){
         results_list$est_data <- data_out$est_data 

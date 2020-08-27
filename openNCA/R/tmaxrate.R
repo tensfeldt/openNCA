@@ -42,6 +42,6 @@ tmaxrate <- function(midpt = NULL, rate = NULL){
     stop("Error in tmaxrate: length of 'midpt' and 'rate' vectors are not equal")
   }
 
-  tmax_rate <- midpt[rate %in% max(rate)][1]
+  tmax_rate <- midpt[rate %in% max(rate, na.rm = TRUE)][1]
   return(tmax_rate)
 }

@@ -4,8 +4,13 @@
 \alias{interpolate_log}
 \title{interpolate_log performs log-linear interpolation between two data points}
 \usage{
-interpolate_log(conc1 = NULL, time1 = NULL, conc2 = NULL,
-  time2 = NULL, est_time = NULL)
+interpolate_log(
+  conc1 = NULL,
+  time1 = NULL,
+  conc2 = NULL,
+  time2 = NULL,
+  est_time = NULL
+)
 }
 \description{
 interpolate_log performs log-linear interpolation between two data points

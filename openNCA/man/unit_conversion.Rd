@@ -4,8 +4,13 @@
 \alias{unit_conversion}
 \title{Run Computation}
 \usage{
-unit_conversion(data = NULL, map = NULL, result = NULL,
-  unit_class = "ALL", verbose = TRUE)
+unit_conversion(
+  data = NULL,
+  map = NULL,
+  result = NULL,
+  unit_class = "ALL",
+  verbose = TRUE
+)
 }
 \arguments{
 \item{data}{The dataframe that contains the raw data}
