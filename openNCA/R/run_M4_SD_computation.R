@@ -398,8 +398,9 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, rep(paste0("MIDPT",1:(row_len-1))))
     regular_int_type <- c(regular_int_type, rep(paste0("MIDPT",1:(row_len-1))))
   }
-  col_names <- c(col_names, rep(paste0("CONC",1:(aet_len))), rep(paste0("CONCTIME",1:(aet_len))))
-  regular_int_type <- c(regular_int_type, rep(paste0("CONC",1:(aet_len))), rep(paste0("CONCTIME",1:(aet_len))))
+  #FEEDBACK: Removed CONC/CONCTIME Based of 3.23 scope item (Based on tc1572_M4SSS)
+  #col_names <- c(col_names, rep(paste0("CONC",1:(aet_len))), rep(paste0("CONCTIME",1:(aet_len))))
+  #regular_int_type <- c(regular_int_type, rep(paste0("CONC",1:(aet_len))), rep(paste0("CONCTIME",1:(aet_len))))
   
   computation_df <- data.frame(matrix(ncol = length(col_names), nrow = length(unique(data_data[,map_data$SDEID]))))
   names(computation_df) <- col_names
@@ -1235,8 +1236,8 @@ run_M4_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(parameter_required("^(MIDPT)([0-9]*?|A|N)$", parameter_list) || parameter_required(dependent_parameters("^(MIDPT)([0-9]*?|A|N)$"), parameter_list)) {
           computation_df[i, paste0("MIDPT",1:(row_len-1))] <- c(mid_pt, rep(NA, ((row_len-1) - length(mid_pt))))
         }
-        computation_df[i, paste0("CONC",1:(aet_len))] <- c(tmp_df[,map_data$CONC], rep(NA, ((aet_len) - length(tmp_df[,map_data$CONC]))))
-        computation_df[i, paste0("CONCTIME",1:(aet_len))] <- c(tmp_df[,map_data$TIME], rep(NA, ((aet_len) - length(tmp_df[,map_data$TIME]))))
+        #computation_df[i, paste0("CONC",1:(aet_len))] <- c(tmp_df[,map_data$CONC], rep(NA, ((aet_len) - length(tmp_df[,map_data$CONC]))))
+        #computation_df[i, paste0("CONCTIME",1:(aet_len))] <- c(tmp_df[,map_data$TIME], rep(NA, ((aet_len) - length(tmp_df[,map_data$TIME]))))
       } else {
         if(isTRUE(optimize_kel)){
           kel_flag_optimized <- c(kel_flag_optimized, kel_flag)

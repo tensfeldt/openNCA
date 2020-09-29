@@ -326,7 +326,9 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
   if(isTRUE(secondary)){
     exclusion_list <- unlist(strsplit(map_data$METABOLITEPARAMETEREXCLUSIONLIST, ";"))
-    disp_required[names(disp_required) %in% exclusion_list] <- FALSE
+    #FEEDBACK: Commented the code to account for exclusion of metabolite exclusion list
+    #Based of 3.0a scope item (Based on tc1606_M1SD)
+    #disp_required[names(disp_required) %in% exclusion_list] <- FALSE
   }
 
   col_names <- c("SDEID")
@@ -899,7 +901,8 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         orig_time <- tmp_df[,map_data$TIME]
         orig_conc <- tmp_df[,map_data$CONC]
         
-        tmp_told <- ifelse(opt_list[3] %in% names(map_data), ifelse(map_data[, opt_list[3]] %in% names(tmp_df), as.numeric(tmp_df[, map_data[, opt_list[3]]][1]), NA), NA)
+        #FEEDBACK: Default TOLD value for SD models is 0, Based of 3.10 scope item (Based on tc1510_M1SD)
+        tmp_told <- ifelse(opt_list[3] %in% names(map_data), ifelse(map_data[, opt_list[3]] %in% names(tmp_df), as.numeric(tmp_df[, map_data[, opt_list[3]]][1]), 0), 0)
         ctold_exists <- FALSE 
         if(tmp_told %in% tmp_df[,map_data$NOMTIME]){
           idx <- which(tmp_df[,map_data$NOMTIME] == tmp_told)
@@ -1567,7 +1570,35 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 tau_val <- unique(tmp_df[, map_data[, opt_list[2]]])[1]
                 if(!is.na(tau_val) && is.numeric(tau_val) && !is.na(last_crit_factor) && is.numeric(last_crit_factor)){
                   lt_accept_crit <- tau_val * last_crit_factor
-                  computation_df[i, "FLGACCEPTTAU"] <- ifelse(last_time >= lt_accept_crit, 1, 0)
+                  kel_val <- ifelse("KEL" %in% names(kel_v), kel_v[["KEL"]], NA)
+                  kel_nopt_val <- ifelse("KELNOPT" %in% names(kel_v), kel_v[["KELNOPT"]], NA)
+                  #FEEDBACK: Commented the code to account for new logic for FLGACCEPTTAU (New scope item)
+                  #computation_df[i, "FLGACCEPTTAU"] <- ifelse(last_time >= lt_accept_crit, 1, 0)
+                  if(isTRUE(last_time >= tau_val)){
+                    computation_df[i, "FLGACCEPTTAU"] <- 1
+                  } else if(isTRUE(last_time < tau_val && last_time >= lt_accept_crit)){
+                    if(isTRUE(is.na(kel_val))){
+                      computation_df[i, "FLGACCEPTTAU"] <- 1
+                    } else if(isTRUE(is.numeric(kel_val))){
+                      if(isTRUE(kel_nopt_val >= 3 && kel_val > 0)){
+                        computation_df[i, "FLGACCEPTTAU"] <- 1
+                      } else {
+                        computation_df[i, "FLGACCEPTTAU"] <- 0
+                      }
+                    } else {
+                      computation_df[i, "FLGACCEPTTAU"] <- 0
+                    }
+                  } else if(isTRUE(last_time < lt_accept_crit)){
+                    if(isTRUE(is.na(kel_val))){
+                      computation_df[i, "FLGACCEPTTAU"] <- 0
+                    } else {
+                      computation_df[i, "FLGACCEPTTAU"] <- 1
+                      #The logic for FLGACCEPTTAU with respect to FLGACCEPTKEL 
+                      #will be updated after the main for loops ends (down below)
+                    }
+                  } else {
+                    computation_df[i, "FLGACCEPTTAU"] <- 0
+                  }
                 } else {
                   computation_df[i, "FLGACCEPTTAU"] <- 0
                 }
@@ -1731,10 +1762,18 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
     }
   }
+  #FEEDBACK: Commented the code to account for new logic for FLGACCEPTTAU (New scope item)
+  #if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
+  #  if("FLGACCEPTKEL" %in% names(computation_df)){
+  #    if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
+  #      computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
+  #    }
+  #  }
+  #}
   if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
     if("FLGACCEPTKEL" %in% names(computation_df)){
-      if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
-        computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
+      if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & !is.na(computation_df[,"KEL"]) & is.numeric(computation_df[,"KEL"]),]) > 0){ 
+        computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & !is.na(computation_df[,"KEL"]) & is.numeric(computation_df[,"KEL"]),][,"FLGACCEPTTAU"] <- 0  
       }
     }
   }
@@ -1827,6 +1866,16 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             if(isTRUE(curr_pkterm != pkterm_parent)){
               mr_cmax <- mr_cmax(metabolite_cmax = tmp_df$CMAX, parent_cmax = tmp_parent_df$CMAX, parent_mw = tmp_parent_df$MW, metabolite_mw = tmp_df$MW)
               computation_df[computation_df[,map_data$SDEID] == sdeid, "MRCMAX"] <- mr_cmax
+            }
+          }
+          
+          #FEEDBACK: Commented the code to account for exclusion of metabolite exclusion list
+          #Based of 3.0a scope item (Based on tc1606_M1SD)
+          if(length(exclusion_list) > 0){
+            if(isTRUE(any(names(computation_df) %in% exclusion_list))){
+              if(isTRUE(curr_pkterm != pkterm_parent)){
+                computation_df[computation_df[,map_data$SDEID] == sdeid, exclusion_list] <- NA
+              }
             }
           }
         }

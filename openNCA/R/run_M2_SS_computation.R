@@ -1357,7 +1357,9 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             t_lasti[[d]] <- tlast(conc = tmp_conc_di, time = tmp_time_di)
           ###}
           ###if(comp_required[["AUCLAST"]]){
-            tmp_auclast[[d]] <- auc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_lasti[[d]], t_max = t_maxi[[d]])
+            #FEEDBACK: Removed CONC/CONCTIME Based of 3.10 scope item
+            #tmp_auclast[[d]] <- auc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_last = t_lasti[[d]], t_max = t_maxi[[d]])
+            tmp_auclast[[d]] <- auc_last(conc = tmp_conc_di, time = tmp_time_di, method = method, exflag = auc_flag, t_last = t_lasti[[d]], t_max = t_maxi[[d]])
             if(d == di_col){
               overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
               tmp_last_time <- tmp_di_df[nrow(tmp_di_df),map_data$TIME]
@@ -1373,7 +1375,9 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           ###}
           ###if(comp_required[["AUCALL"]]){
-            tmp_aucall[[d]] <- auc_all(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
+            #FEEDBACK: Removed CONC/CONCTIME Based of 3.10 scope item
+            #tmp_aucall[[d]] <- auc_all(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
+            tmp_aucall[[d]] <- auc_all(conc = tmp_conc_di, time = tmp_time_di, method = method, exflag = auc_flag, t_max = t_maxi[[d]])
             if(d == di_col){
               overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
               tmp_last_time <- tmp_di_df[nrow(tmp_di_df),map_data$TIME]
@@ -1389,7 +1393,9 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           ###}
           ###if(comp_required[["AUMCLAST"]]) {
-            tmp_aumclast[[d]] <- aumc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
+            #FEEDBACK: Removed CONC/CONCTIME Based of 3.10 scope item
+            #tmp_aumclast[[d]] <- aumc_last(conc = tmp_di_df[,map_data$CONC], time = tmp_di_df[,map_data$TIME], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
+            tmp_aumclast[[d]] <- aumc_last(conc = tmp_conc_di, time = aumc_time, method = method, exflag = auc_flag, t_max = t_maxi[[d]])
             if(d == di_col){
               overall_last_time <- tmp_df[nrow(tmp_df),map_data$TIME]
               tmp_last_time <- tmp_di_df[nrow(tmp_di_df),map_data$TIME]
@@ -2477,7 +2483,35 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 tau_val <- unique(tmp_df[, map_data[, paste0("TAU",di_col)]])[1]
                 if(!is.na(tau_val) && is.numeric(tau_val) && !is.na(last_crit_factor) && is.numeric(last_crit_factor)){
                   lt_accept_crit <- tau_val * last_crit_factor
-                  computation_df[i, "FLGACCEPTTAU"] <- ifelse(last_time >= lt_accept_crit, 1, 0)
+                  kel_val <- ifelse("KEL" %in% names(kel_v), kel_v[["KEL"]], NA)
+                  kel_nopt_val <- ifelse("KELNOPT" %in% names(kel_v), kel_v[["KELNOPT"]], NA)
+                  #FEEDBACK: Commented the code to account for new logic for FLGACCEPTTAU (New scope item)
+                  #computation_df[i, "FLGACCEPTTAU"] <- ifelse(last_time >= lt_accept_crit, 1, 0)
+                  if(isTRUE(last_time >= tau_val)){
+                    computation_df[i, "FLGACCEPTTAU"] <- 1
+                  } else if(isTRUE(last_time < tau_val && last_time >= lt_accept_crit)){
+                    if(isTRUE(is.na(kel_val))){
+                      computation_df[i, "FLGACCEPTTAU"] <- 1
+                    } else if(isTRUE(is.numeric(kel_val))){
+                      if(isTRUE(kel_nopt_val >= 3 && kel_val > 0)){
+                        computation_df[i, "FLGACCEPTTAU"] <- 1
+                      } else {
+                        computation_df[i, "FLGACCEPTTAU"] <- 0
+                      }
+                    } else {
+                      computation_df[i, "FLGACCEPTTAU"] <- 0
+                    }
+                  } else if(isTRUE(last_time < lt_accept_crit)){
+                    if(isTRUE(is.na(kel_val))){
+                      computation_df[i, "FLGACCEPTTAU"] <- 0
+                    } else {
+                      computation_df[i, "FLGACCEPTTAU"] <- 1
+                      #The logic for FLGACCEPTTAU with respect to FLGACCEPTKEL 
+                      #will be updated after the main for loops ends (down below)
+                    }
+                  } else {
+                    computation_df[i, "FLGACCEPTTAU"] <- 0
+                  }
                 } else {
                   computation_df[i, "FLGACCEPTTAU"] <- 0
                 }
@@ -2701,13 +2735,23 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       }
     }
   }
+  #FEEDBACK: Commented the code to account for new logic for FLGACCEPTTAU (New scope item)
+  #if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
+  #  if("FLGACCEPTKEL" %in% names(computation_df)){
+  #    if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
+  #      computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
+  #    }
+  #  }
+  #}
   if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
     if("FLGACCEPTKEL" %in% names(computation_df)){
-      if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,]) > 0){
-        computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1,][,"FLGACCEPTTAU"] <- 0  
+      if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & !is.na(computation_df[,"KEL"]) & is.numeric(computation_df[,"KEL"]),]) > 0){ 
+        computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & !is.na(computation_df[,"KEL"]) & is.numeric(computation_df[,"KEL"]),][,"FLGACCEPTTAU"] <- 0  
+        computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & !is.na(computation_df[,"KEL"]) & is.numeric(computation_df[,"KEL"]),][,paste0("AUCTAU",1:di_col)] <- NA  
       }
     }
   }
+  
   if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
     for(f in 1:length(unique(computation_df[,map_data$SDEID]))){
       tmp_df <- data_data[data_data[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],]

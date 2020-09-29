@@ -21,11 +21,12 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
   }
   
 ## 2019-11-24/RD Removing any CONC value that is equal to 0
-  sel_idx <- which(orig_conc == 0)
-  if(length(sel_idx) > 0){
-    orig_conc <- orig_conc[-sel_idx]
-    orig_time <- orig_time[-sel_idx] 
-  }
+  #FEEDBACK: Commented the code to account for interpolation between two 0 concentrations
+  #sel_idx <- which(orig_conc == 0)
+  #if(length(sel_idx) > 0){
+  #  orig_conc <- orig_conc[-sel_idx]
+  #  orig_time <- orig_time[-sel_idx] 
+  #}
   tmp <- data.frame("CONC" = conc, "TIME" = time, "INT_EXT" = NA)
 
   for(i in 1:(nrow(tmp)-1)){
@@ -47,7 +48,12 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
                   if(isTRUE(time[1] < t_max)){
                     conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
                   } else {
-                    conc[1] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
+                    #FEEDBACK: Added code to account for interpolation between two 0 concentrations
+                    if(isTRUE(orig_conc[idx] != 0 && orig_conc[idx+1] != 0)){
+                      conc[1] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                    } else {
+                      conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                    }
                   }
                 } else {
                   conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
@@ -55,12 +61,20 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
               } else if(auc_method == "LIN"){
                 conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
               } else if(auc_method == "LOG"){
-                conc[1] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
+                if(isTRUE(orig_conc[idx] != 0 && orig_conc[idx+1] != 0)){
+                  conc[1] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                } else {
+                  conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                }
               } else if(auc_method == "LINUP-LOGDOWN"){
                 if(isTRUE(orig_conc[idx] < orig_conc[idx+1])){
                   conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
                 } else {
-                  conc[1] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
+                  if(isTRUE(orig_conc[idx] != 0 && orig_conc[idx+1] != 0)){
+                    conc[1] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                  } else {
+                    conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                  }
                 }
               }
               tmp$INT_EXT[1] <- "INT"
@@ -99,26 +113,46 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
                     if(isTRUE(time[1] < t_max)){
                       conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
                     } else {
-                      conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                      if(isTRUE(orig_conc[idx] != 0 && orig_conc[idx+1] != 0)){
+                        conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                      } else {
+                        conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                      }
                     }
                   } else {
-                    conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                    if(isTRUE(orig_conc[idx] != 0 && orig_conc[idx+1] != 0)){
+                      conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                    } else {
+                      conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                    }
                   }
                 } else if(auc_method == "LIN"){
                   conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
                 } else if(auc_method == "LOG"){
-                  conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                  if(isTRUE(orig_conc[idx] != 0 && orig_conc[idx+1] != 0)){
+                    conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                  } else {
+                    conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                  }
                 } else if(auc_method == "LINUP-LOGDOWN"){
                   if(isTRUE(orig_conc[idx] < orig_conc[idx+1])){
                     conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
                   } else {
-                    conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                    if(isTRUE(orig_conc[idx] != 0 && orig_conc[idx+1] != 0)){
+                      conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                    } else {
+                      conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                    }
                   }
                 }
                 if(auc_method == "LIN"){
                   conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
                 } else if(auc_method == "LOG" || auc_method == "LINLOG"){
-                  conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                  if(isTRUE(orig_conc[idx] != 0 && orig_conc[idx+1] != 0)){
+                    conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                  } else {
+                    conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                  }
                 }
                 tmp$INT_EXT[nrow(tmp)] <- "INT"
               }
@@ -140,26 +174,46 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
                   if(isTRUE(time[1] < t_max)){
                     conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
                   } else {
-                    conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                    if(isTRUE(orig_conc[idx] != 0 && orig_conc[idx+1] != 0)){
+                      conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                    } else {
+                      conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                    }
                   }
                 } else {
-                  conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                  if(isTRUE(orig_conc[idx] != 0 && orig_conc[idx+1] != 0)){
+                    conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                  } else {
+                    conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                  }
                 }
               } else if(auc_method == "LIN"){
                 conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
               } else if(auc_method == "LOG"){
-                conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                if(isTRUE(orig_conc[idx] != 0 && orig_conc[idx+1] != 0)){
+                  conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                } else {
+                  conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                }
               } else if(auc_method == "LINUP-LOGDOWN"){
                 if(isTRUE(orig_conc[idx] < orig_conc[idx+1])){
                   conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
                 } else {
-                  conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                  if(isTRUE(orig_conc[idx] != 0 && orig_conc[idx+1] != 0)){
+                    conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                  } else {
+                    conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                  }
                 }
               }
               if(auc_method == "LIN"){
                 conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
               } else if(auc_method == "LOG" || auc_method == "LINLOG"){
-                conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                if(isTRUE(orig_conc[idx] != 0 && orig_conc[idx+1] != 0)){
+                  conc[nrow(tmp)] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                } else {
+                  conc[nrow(tmp)] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                }
               }
               tmp$INT_EXT[nrow(tmp)] <- "INT"
             }
