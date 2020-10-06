@@ -538,7 +538,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     }
   } else {
     optimize_kel <- FALSE
-    optimize_kel_method <- as.character(as.numeric(map_data[,"OPTIMIZEKEL"]))
+    optimize_kel_method <- NA
   }
   if(isTRUE(optimize_kel)){
     ###comp_required[["KEL"]] <- TRUE
@@ -573,7 +573,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   ###  warning("Kel optimization cannot be performed because 'TMAXi', 'TLASTi', 'CMAXi', 'CLASTi', 'AUCLASTi' are not part of the calculated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGEXKEL' are not present in the dataset")
   ###}
   
-  if(isTRUE(optimize_kel) && (optimize_kel_method != "1" && optimize_kel_method != "2")){
+  if(isTRUE(optimize_kel) && isTRUE(optimize_kel_method != "1" && optimize_kel_method != "2")){
     optimize_kel <- FALSE
     warning("Flag 'OPTIMIZEKEL' does not have a valid value! Please try again with numeric value (either 1 or 2)")
   }
@@ -962,7 +962,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                   aurct[[t-1]] <- tmp
                   aurc_int[[t-1]] <- tmp_int
                 } else {
-                  prev_aurc <- ifelse((t-2) >= 0, unlist(aurct[[t-2]]), NA)
+                  prev_aurc <- ifelse((t-2) > 0, unlist(aurct[[t-2]]), NA)
                   if(prev_na){
                     prev_na <- FALSE
                     if(is.numeric(tmp)){
@@ -1162,7 +1162,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             
             ulist <- list()
             if(length(tmp_time) >= kel_n){
-              if(optimize_kel_method == "1"){
+              if(isTRUE(optimize_kel_method == "1")){
                 idx <- c(1:length(tmp_time))
                 ulist <- list(idx)
                 
@@ -1173,7 +1173,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                     ulist <- c(ulist,list(idx))
                   }
                 }
-              } else if(optimize_kel_method == "2"){
+              } else if(isTRUE(optimize_kel_method == "2")){
                 for(j in kel_n:length(tmp_time)){
                   if(j <= length(tmp_time)) {
                     if(choose(length(tmp_time), j) == 1){

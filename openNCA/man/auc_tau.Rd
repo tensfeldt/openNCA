@@ -9,6 +9,7 @@ auc_tau(
   time = NULL,
   method = 1,
   exflag = NULL,
+  told = NULL,
   tau = NULL,
   t_max = NULL,
   orig_conc = NULL,
@@ -16,7 +17,10 @@ auc_tau(
   last_crit_factor = NULL,
   kel = NULL,
   auclast = NULL,
-  lasttime = NULL
+  lasttime = NULL,
+  orgtime = "NOMINAL",
+  nom_time = NULL,
+  ctoldest = NULL
 )
 }
 \arguments{
@@ -34,6 +38,8 @@ auc_tau(
 Note: check 'Methods' section below for more details \cr}
 
 \item{exflag}{The exclude flag data (given in a numeric vector)}
+
+\item{told}{The time duration of last dose (numeric value)}
 
 \item{tau}{The time duration of dosing interval (numeric value)}
 

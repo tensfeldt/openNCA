@@ -883,7 +883,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     }
   } else {
     optimize_kel <- FALSE
-    optimize_kel_method <- as.character(as.numeric(map_data[,"OPTIMIZEKEL"]))
+    optimize_kel_method <- NA
   }
   if(isTRUE(optimize_kel)){
     ###comp_required[["KEL"]] <- TRUE
@@ -919,7 +919,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   ###  warning("Kel optimization cannot be performed because 'TMAXi', 'TLASTi', 'CMAXi', 'CLASTi', 'AUCLASTi' are not part of the calculated parameters AND Flag 'FLGACCEPTKELCRIT' and Flag 'FLGEXKEL' are not present in the dataset")
   ###}
   
-  if(isTRUE(optimize_kel) && (optimize_kel_method != "1" && optimize_kel_method != "2")){
+  if(isTRUE(optimize_kel) && isTRUE(optimize_kel_method != "1" && optimize_kel_method != "2")){
     optimize_kel <- FALSE
     warning("Flag 'OPTIMIZEKEL' does not have a valid value! Please try again with numeric value (either 1 or 2)")
   }
@@ -1284,8 +1284,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           
           tmp_told <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1])
           ctold_exists <- FALSE 
-          if(tmp_told %in% tmp_di_df[,map_data$NOMTIME]){
-            idx <- which(tmp_di_df[,map_data$NOMTIME] == tmp_told)
+          if(tmp_told %in% tmp_di_df[,map_data$TIME]){
+            idx <- which(tmp_di_df[,map_data$TIME] == tmp_told)
             tmp_ctold <- tmp_di_df[,map_data$CONC][length(idx)]
             if(!is.na(tmp_ctold)){
               ctold_exists <- TRUE
@@ -1303,10 +1303,12 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
           if(!isTRUE(ctold_exists) && !is.na(tmp_told)){
             tmp_conc_di <- c(NA, tmp_di_df[,map_data$CONC])
-            if(tmp_told %in% tmp_di_df[,map_data$NOMTIME]){
+            if(tmp_told %in% tmp_di_df[,map_data$TIME]){
               tmp_time_di <- c(tmp_di_df[,map_data$TIME])
+              tmp_nom_time_di <- c(tmp_di_df[,map_data$NOMTIME])
             } else {
               tmp_time_di <- c(tmp_told, tmp_di_df[,map_data$TIME])
+              tmp_nom_time_di <- c(tmp_di_df[,map_data$NOMTIME])
             }
             est_tmp <- estimate_told_concentration(conc = tmp_conc_di, time = tmp_time_di, interpolate = TRUE, extrapolate = TRUE, auc_method = "LIN", model = "M3", dosing_type = "SS", told = tmp_told, orig_conc = orig_conc, orig_time = orig_time)
             tmp_conc_di <- est_tmp[[1]]
@@ -1314,6 +1316,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           } else {
             tmp_conc_di <- tmp_di_df[,map_data$CONC]
             tmp_time_di <- tmp_di_df[,map_data$TIME]
+            tmp_nom_time_di <- c(tmp_di_df[,map_data$NOMTIME])
             ctold_est[[d]] <- NA
           }
           if(d == 1){ 
@@ -1492,7 +1495,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             
             ulist <- list()
             if(length(tmp_time) >= kel_n){
-              if(optimize_kel_method == "1"){
+              if(isTRUE(optimize_kel_method == "1")){
                 idx <- c(1:length(tmp_time))
                 ulist <- list(idx)
                 
@@ -1503,7 +1506,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                     ulist <- c(ulist,list(idx))
                   }
                 }
-              } else if(optimize_kel_method == "2"){
+              } else if(isTRUE(optimize_kel_method == "2")){
                 for(j in kel_n:length(tmp_time)){
                   if(j <= length(tmp_time)) {
                     if(choose(length(tmp_time), j) == 1){
@@ -1661,8 +1664,8 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           
           tmp_told <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",d))])][1])
           ctold_exists <- FALSE 
-          if(tmp_told %in% tmp_di_df[,map_data$NOMTIME]){
-            idx <- which(tmp_di_df[,map_data$NOMTIME] == tmp_told)
+          if(tmp_told %in% tmp_di_df[,map_data$TIME]){
+            idx <- which(tmp_di_df[,map_data$TIME] == tmp_told)
             tmp_ctold <- tmp_di_df[,map_data$CONC][length(idx)]
             if(!is.na(tmp_ctold)){
               ctold_exists <- TRUE
@@ -1686,15 +1689,48 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           
           if(!isTRUE(ctold_exists) && !is.na(tmp_told)){
             tmp_conc_di <- c(NA, tmp_di_df[,map_data$CONC])
-            tmp_time_di <- c(tmp_told, tmp_di_df[,map_data$TIME])
+            if(tmp_told %in% tmp_di_df[,map_data$TIME]){
+              tmp_time_di <- c(tmp_di_df[,map_data$TIME])
+              tmp_nom_time_di <- c(tmp_di_df[,map_data$NOMTIME])
+            } else {
+              tmp_time_di <- c(tmp_told, tmp_di_df[,map_data$TIME])
+              tmp_nom_time_di <- c(tmp_told, tmp_di_df[,map_data$NOMTIME])
+            }
             est_tmp <- estimate_told_concentration(conc = tmp_conc_di, time = tmp_time_di, interpolate = TRUE, extrapolate = TRUE, auc_method = "LIN", model = "M2", dosing_type = "SS", told = tmp_told, orig_conc = orig_conc, orig_time = orig_time)
             tmp_conc_di <- est_tmp[[1]]
             ctold_est[[d]] <- tmp_conc_di[1]
           } else {
             tmp_conc_di <- tmp_di_df[,map_data$CONC]
             tmp_time_di <- tmp_di_df[,map_data$TIME]
+            tmp_nom_time_di <- tmp_di_df[,map_data$NOMTIME]
             ctold_est[[d]] <- NA
           }
+          
+          if((d+1) <= di_col){
+            nxt_tmp_di_df  <- tmp_df[tmp_df[c(paste0("DI", d+1, "F"))] == 1,]
+            nxt_tmp_di_df <- nxt_tmp_di_df[order(nxt_tmp_di_df[,map_data$TIME]),]
+            nxt_tmp_told <- as.numeric(nxt_tmp_di_df[, as.character(map_data[c(paste0("TOLD",d+1))])][1])
+            nxt_ctold_exists <- FALSE 
+            if(nxt_tmp_told %in% nxt_tmp_di_df[,map_data$TIME]){
+              idx <- which(nxt_tmp_di_df[,map_data$TIME] == nxt_tmp_told)
+              nxt_tmp_ctold <- nxt_tmp_di_df[,map_data$CONC][length(idx)]
+              if(!is.na(nxt_tmp_ctold)){
+                nxt_ctold_exists <- TRUE
+              }
+            }
+            if(!isTRUE(nxt_ctold_exists)){
+              nxt_tmp_conc_di <- c(NA, nxt_tmp_di_df[,map_data$CONC])
+              nxt_tmp_time_di <- c(nxt_tmp_told, nxt_tmp_di_df[,map_data$TIME])
+              nxt_est_tmp <- estimate_told_concentration(conc = nxt_tmp_conc_di, time = nxt_tmp_time_di, interpolate = TRUE, extrapolate = TRUE, auc_method = "LIN", model = "M1", dosing_type = "SS", told = nxt_tmp_told, orig_conc = orig_conc, orig_time = orig_time)
+              nxt_tmp_conc_di <- nxt_est_tmp[[1]]
+              nxt_ctold_est <- nxt_tmp_conc_di[1]
+            } else {
+              nxt_ctold_est <- NA
+            }
+          } else {
+            nxt_ctold_est <- NA
+          }
+          
           if(d == 1){ 
             aumc_time <- tmp_time_di
           } else {
@@ -1795,7 +1831,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             aumcinfpi[[d]] <- aumc_inf_p(conc = tmp_conc_di, time = aumc_time, method = method, kelflag = kel_flag, aucflag = auc_flag, aumclast = aumclasti[[d]], t_last = t_lasti[[d]], kel = kel_v)
           ###}
           ###if(comp_required[["AUCTAUi"]]) {
-            auctau[[d]] <- auc_tau(conc = tmp_conc_di, time = tmp_time_di, method = method, exflag = auc_flag, tau = told[[d]]+tau[[d]], t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time, last_crit_factor = last_crit_factor, kel = kel_v, auclast = auclasti[[d]], lasttime = last_timei[[d]])
+            auctau[[d]] <- auc_tau(conc = tmp_conc_di, time = tmp_time_di, method = method, exflag = auc_flag, told = told[[d]], tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time, last_crit_factor = last_crit_factor, kel = kel_v, auclast = auclasti[[d]], lasttime = last_timei[[d]], orgtime = tolower(map_data$ORGTIME), nom_time = tmp_nom_time_di, ctoldest = nxt_ctold_est)
           ###}
           ###if(comp_required[["AUCTAUDNi"]]) {
             auctaudn[[d]] <- auc_dn(auc = auctau[[d]], dose = tmp_dose)
@@ -1818,7 +1854,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             mrtivifoi[[d]] <- mrt_ivif_o(conc = tmp_conc_di, time = aumc_time, method = method, model = "M2", parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfo = aucinfoi[[d]], aumcinfo = aumcinfoi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
           ###}
           ###if(comp_required[["MRTIVIFPi"]]){
-              mrtivifpi[[d]] <- mrt_ivif_p(conc = tmp_conc_di, time = aumc_time, method = method, model = "M2", parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfp = aucinfpi[[d]], aumcinfp = aumcinfpi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
+            mrtivifpi[[d]] <- mrt_ivif_p(conc = tmp_conc_di, time = aumc_time, method = method, model = "M2", parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfp = aucinfpi[[d]], aumcinfp = aumcinfpi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
           ###}
           ###if(comp_required[["AUCXPCTOi"]]){
             aucxpctoi[[d]] <- auc_XpctO(conc = tmp_conc_di, time = tmp_time_di, method = method, kelflag = kel_flag, aucflag = auc_flag, auc_info = aucinfoi[[d]], auclast = auclasti[[d]])

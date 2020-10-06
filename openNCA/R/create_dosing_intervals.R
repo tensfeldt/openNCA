@@ -183,13 +183,17 @@ create_dosing_intervals <- function(data, map, flag, maxdosingintervals) {
                 
                 if(is.na(told_i) || is.na(tau_i)){
                   if(is.na(told_i)){
-                    if(casefold(map$ORGTIME)=='actual'){
-                      told <- s_time[told < s_time][1]
-                      told_i <- match(told, s_time)
-                      tau_i <- match((tau+told), e_time)
-                    } else {
-                      stop("8 Unable to generate dosing interval for Steady State data! TOLD value not found in the provided TIME data")
-                    }
+                    told <- s_time[told < s_time][1]
+                    told_i <- match(told, s_time)
+                    tau_i <- match((tau+told), e_time)
+                    ## RD\ Commenting original implementation 10/5/2020
+                    ##if(casefold(map$ORGTIME)=='actual'){
+                    ##  told <- s_time[told < s_time][1]
+                    ##  told_i <- match(told, s_time)
+                    ##  tau_i <- match((tau+told), e_time)
+                    ##} else {
+                    ##  stop("8 Unable to generate dosing interval for Steady State data! TOLD value not found in the provided TIME data")
+                    ##}
                   }
                   if(is.na(tau_i)){
                     if(length(e_time[e_time < (tau+told)]) > 0 || length(e_time) == 1){

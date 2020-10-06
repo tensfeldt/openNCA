@@ -47,6 +47,7 @@
 #' }
 #' Note: check 'Methods' section below for more details \cr
 #' @param exflag The exclude flag data (given in a numeric vector)
+#' @param told The time duration of last dose (numeric value)
 #' @param tau The time duration of dosing interval (numeric value)
 #' @param t_max The first time at which CMAXi us observed within a dosing interval (numeric value)s
 #' @param orig_conc The original (full) concentration data (given in a numeric vector)
@@ -139,13 +140,15 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = NULL, t_max = NULL, orig_conc = NULL, orig_time = NULL, last_crit_factor = NULL, kel = NULL, auclast = NULL, lasttime = NULL){
+auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told = NULL, tau = NULL, t_max = NULL, orig_conc = NULL, orig_time = NULL, last_crit_factor = NULL, kel = NULL, auclast = NULL, lasttime = NULL, orgtime = "nominal", nom_time = NULL, ctoldest = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in auc_tau: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
     stop("Error in auc_tau: 'conc' vector is NULL")
   } else if(is.null(time)) {
     stop("Error in auc_tau: 'time' vectors is NULL")
+  } else if(is.null(told)){
+    stop("Error in auc_tau: 'told' value is NULL")
   } else if(is.null(tau)){
     stop("Error in auc_tau: 'tau' value is NULL")
   } else if(all(is.na(time))) { # 2019-09-11/TGT/
@@ -166,13 +169,59 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = N
   if(method != 1 && method != 2 && method != 3 && method != 4){
     stop("Error in auc_tau: the value provided for 'method' is not correct")
   }
+  if(!(is.numeric(told) && is.vector(told)) && !is.na(told)){
+    stop("Error in auc_tau: 'told' is not a numeric vector")
+  }
+  if(!(is.numeric(tau) && is.vector(tau)) && !is.na(tau)){
+    stop("Error in auc_tau: 'tau' is not a numeric vector")
+  }
+  if(tolower(orgtime) != "nominal" && tolower(orgtime) != "actual"){
+    stop("Error in auc_tau: 'orgtime' is not 'nominal' or 'actual'")
+  }
   if(sum(conc, na.rm = T) == 0){
     return(0)
   }
-###
-###  cat('auc_tau.R: tau: ', tau, ' time: ', time, ' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' tau: ', tau, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
   
-  if(isTRUE(tau %in% time && time[length(time)] == tau)){
+  curr_tau <- as.numeric(told + tau)
+  time_min_range <- ifelse(!is.null(last_crit_factor), as.numeric(last_crit_factor) * curr_tau, NA)
+  if(tolower(orgtime) == "actual"){
+    if(!isTRUE(curr_tau %in% time)){
+      if(length(which(time == curr_tau)) > 0){
+        tmp_told <- time[which(time == curr_tau)]
+        tmp_ctold <- conc[which(time == tmp_told)]
+      } else if(length(which(time < curr_tau)) > 0){
+        tmp_told <- time[which(time < curr_tau)]
+        tmp_told <- ifelse(isTRUE(length(tmp_told) > 0), tmp_told[length(tmp_told)], NA)
+        tmp_ctold <- conc[which(time == tmp_told)]
+      } else {
+        tmp_told <- NA
+      }
+      if(!is.na(tmp_told)){
+        if(isTRUE(time_min_range <= tmp_told && tmp_told <= curr_tau)){
+          ctold <- ifelse(isTRUE(length(tmp_ctold) > 0), tmp_ctold[length(tmp_ctold)], NA)
+          time[which(time == tmp_told)] <- curr_tau
+        } else {
+          ctold <- ifelse(!is.null(ctoldest), as.numeric(ctoldest), NA)
+          time[length(time)+1] <- curr_tau
+          conc[length(time)] <- ctold
+        }
+      }
+    } 
+  } else {
+    if(length(which(time == curr_tau)) > 0){
+      tmp_told <- time[which(time == curr_tau)]
+      tmp_ctold <- conc[which(time == tmp_told)]
+    } else {
+      tmp_told <- NA
+    }
+    if(!is.na(tmp_told)){
+      time[which(time == curr_tau)] <- curr_tau
+    }
+  }
+###
+###  cat('auc_tau.R: told: ', told, ' tau: ', tau, ' time: ', time, ' nomtime: ', nom_time,' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' curr_tau: ', curr_tau, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
+  
+  if(isTRUE(curr_tau %in% time && time[length(time)] == curr_tau)){
     if(method == 1){
       return(auc_lin_log(conc = conc, time = time, exflag = exflag, t_max = t_max))
     } else if(method == 2){
@@ -202,8 +251,8 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = N
     }
 
 ### 2019-08-28/TGT/ There doesn't appear to be any implement extrapolation method for auc_tau.R if tau>max(time)
-    if(isTRUE(tau < orig_time[length(orig_time)])){
-      idx <- which(orig_time < tau)
+    if(isTRUE(curr_tau < orig_time[length(orig_time)])){
+      idx <- which(orig_time < curr_tau)
       idx <- idx[length(idx)]
       time_1 <- orig_time[idx]
       conc_1 <- orig_conc[idx]
@@ -211,33 +260,33 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = N
       conc_2 <- orig_conc[idx+1]
 ###
 ###      cat('auc_tau.R: time_1: ', time_1,' conc_1: ', conc_1, ' time_2: ', time_2,' conc_2: ', conc_2, '\n')
-###      cat('auc_tau.R: t_max: ', t_max,' class(tau): ', class(tau), ' tau: ', tau, '\n')
+###      cat('auc_tau.R: t_max: ', t_max,' class(curr_tau): ', class(curr_tau), ' curr_tau: ', curr_tau, '\n')
 
       tau_conc <- NA
       if(method == 1){
         if(is.null(t_max)){
           t_max <- tmax(conc = conc, time = time)
         }
-        if(!is.na(t_max) & tau <= t_max){
-          tau_conc <- interpolate_lin(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = tau)
+        if(!is.na(t_max) & curr_tau <= t_max){
+          tau_conc <- interpolate_lin(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = curr_tau)
         } else {
-          tau_conc <- interpolate_log(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = tau)
+          tau_conc <- interpolate_log(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = curr_tau)
         }
       } else if(method == 2){
-        tau_conc <- interpolate_lin(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = tau)
+        tau_conc <- interpolate_lin(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = curr_tau)
       } else if(method == 3){
-        tau_conc <- interpolate_log(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = tau)
+        tau_conc <- interpolate_log(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = curr_tau)
       } else if(method == 4){
         if(time_1 <= time_2){
-          tau_conc <- interpolate_lin(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = tau)
+          tau_conc <- interpolate_lin(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = curr_tau)
         } else {
-          tau_conc <- interpolate_log(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = tau)
+          tau_conc <- interpolate_log(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = curr_tau)
         }
       }
-      new_time <- c(time, tau)
+      new_time <- c(time, curr_tau)
       new_time <- sort(new_time)
-      index <- which(new_time < tau)
-      new_time <- c(new_time[index], tau)
+      index <- which(new_time < curr_tau)
+      new_time <- c(new_time[index], curr_tau)
       new_conc <- c(conc[index], tau_conc)
       
       if(sum(new_conc, na.rm = T) == 0){
@@ -257,15 +306,15 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = N
       }
     } else {
 ###      cat('last_crit_factor: ', last_crit_factor, '\n')
-      time_min_range <- ifelse(!is.null(last_crit_factor), as.numeric(last_crit_factor) * tau, NA)
+      time_min_range <- ifelse(!is.null(last_crit_factor), as.numeric(last_crit_factor) * curr_tau, NA)
 ###      cat('time_min_range: ', time_min_range, '\n')
       auctau <- NA
       if(!is.na(time_min_range)){
         if(!is.null(kel) && "KEL" %in% names(kel) && "KELC0" %in% names(kel)){
           if(!is.na(kel[["KEL"]])){
             tau_conc <- NA
-            tau_conc <- cest(conc = conc, time = time, t_last = tau, kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
-            new_time <- c(time, tau)
+            tau_conc <- cest(conc = conc, time = time, t_last = curr_tau, kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
+            new_time <- c(time, curr_tau)
             new_conc <- c(conc, tau_conc)
             
 ###            cat('new_conc: ', new_conc, '\n')

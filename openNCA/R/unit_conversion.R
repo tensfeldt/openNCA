@@ -288,6 +288,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
             
               valid_input_unit <- TRUE
               valid_output_unit <- TRUE
+              valid_conversion <- TRUE
               if(testunit){
                 if(isTRUE(dose_mass_input) && isTRUE(dose_mass_output)){
                   result_data[,names(result_data) %in% dose_ignore_params] <- NA
@@ -322,6 +323,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                           if(inputUnit3[i] != outputUnit3[i]){
                             warning("'", inputUnit3[i], "' to '", outputUnit3[i], "' DOSEU conversion is not accounted for unit conversion")
                           }
+                        } else if(i == 2 && inputUnit3[i] %in% dose_denominator || outputUnit3[i] %in% dose_denominator) {
+                          doseUScaler[i] <- 1
+                          valid_conversion <- FALSE
+                          warning("'", inputUnit3[i], "' to '", outputUnit3[i], "' DOSEU conversion is not accounted for unit conversion")
                         } else {
                           doseUScaler[i] <- 1
                           warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
@@ -340,7 +345,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                       valid_output_unit <- FALSE
                     }
                   }
-                  if(testunit) { testunit <- testunit && valid_input_unit && valid_output_unit }
+                  if(testunit) { testunit <- testunit && valid_input_unit && valid_output_unit && valid_conversion }
                   if(testunit){
                     doseUFinalScaler <- doseUScaler[1]/doseUScaler[2]
                     doseUScaler <- doseUFinalScaler
@@ -458,6 +463,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
             
             valid_input_unit <- TRUE
             valid_output_unit <- TRUE
+            valid_conversion <- TRUE
             if(testunit){
               if(isTRUE(dose_mass_input) && isTRUE(dose_mass_output)){
                 result_data[,names(result_data) %in% dose_ignore_params] <- NA
@@ -492,6 +498,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                         if(inputUnit3[i] != outputUnit3[i]){
                           warning("'", inputUnit3[i], "' to '", outputUnit3[i], "' DOSEU conversion is not accounted for unit conversion")
                         }
+                      } else if(i == 2 && (inputUnit3[i] %in% dose_denominator && !(outputUnit3[i] %in% dose_denominator)) || (!(inputUnit3[i] %in% dose_denominator) && outputUnit3[i] %in% dose_denominator)) {
+                        doseUScaler[i] <- 1
+                        valid_conversion <- FALSE
+                        warning("'", inputUnit3[i], "' to '", outputUnit3[i], "' DOSEU conversion is not accounted for unit conversion")
                       } else {
                         doseUScaler[i] <- 1
                         warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
@@ -510,7 +520,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                     valid_output_unit <- FALSE
                   }
                 }
-                if(testunit) { testunit <- testunit && valid_input_unit && valid_output_unit }
+                if(testunit) { testunit <- testunit && valid_input_unit && valid_output_unit && valid_conversion }
                 if(testunit){
                   doseUFinalScaler <- doseUScaler[1]/doseUScaler[2]
                   doseUScaler <- doseUFinalScaler
@@ -1576,7 +1586,28 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
   if(unit_class == "VOLUMEWU" || unit_class == "ALL"){
     VOLUMEWUPARAM <- parameters_by_class("VOLUMEWU", names(result_data))
     
-    if(length(VOLUMEWUPARAM)>0 && parameter_required("^CONCU$", names(map_data)) && parameter_required("^NORMBSU$", names(map_data))){
+    dose_by_weight <- FALSE
+    if(parameter_required("^DOSELIST$", names(map_data)) && parameter_required("^DOSEULIST$", names(map_data))){
+      doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
+      dosevar <- ifelse(!is.null(doselist), ifelse(!is.null(map_data[,doselist]), unlist(strsplit(map_data[,doselist], ";")), NA), NA)
+      doseulist <- names(parameter_indices("^DOSEULIST$", names(map_data), simplify=FALSE))
+      doseuvar <- ifelse(!is.null(doseulist), ifelse(!is.null(map_data[,doselist]), unlist(strsplit(map_data[,doseulist], ";")), NA), NA)
+      
+      interval_len <- length(dosevar)
+      if(interval_len > 1){
+        if(length(grep("/", as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])) > 0)){
+          vwu_dose_unit_tmp <- as.character(unlist(strsplit(as.character(unique(data_data[, as.character(map_data[,doseuvar[i]])])[1]), "/")))
+          dose_by_weight <- TRUE
+        }
+      } else {
+        if(length(grep("/", as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])) > 0)){
+          vwu_dose_unit_tmp <- as.character(unlist(strsplit(as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1]), "/")))
+          dose_by_weight <- TRUE
+        }
+      }
+    }
+    
+    if(length(VOLUMEWUPARAM)>0 && parameter_required("^CONCU$", names(map_data)) && (parameter_required("^NORMBSU$", names(map_data)) || isTRUE(dose_by_weight))){
       if(parameter_required(map_data$CONCU, names(data_data)) && parameter_required(map_data$NORMBSU, names(data_data))){
         if(!is.null(map_data$CONCU)){
           if(!is.null(unique(data_data[, map_data$CONCU])[1])){
@@ -1587,7 +1618,11 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         } else {
           vwu_unit_tmp <- NA
         }
-        inputUnit14 <- c(as.character(vwu_unit_tmp[2]), as.character(unique(data_data[, map_data$NORMBSU])[1]))
+        if(dose_by_weight){
+          inputUnit14 <- c(as.character(vwu_unit_tmp[2]), as.character(vwu_dose_unit_tmp[2]))
+        } else {
+          inputUnit14 <- c(as.character(vwu_unit_tmp[2]), as.character(unique(data_data[, map_data$NORMBSU])[1]))
+        }
 
         outputUnitLabel <- "VOLUMENORMOUTPUTUNIT"
         testunit <- is.element(outputUnitLabel, names(map))
@@ -1616,6 +1651,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
 
         valid_input_unit <- TRUE
         valid_output_unit <- TRUE
+        valid_conversion <- TRUE
         if(testunit){
           for(i in 1:2) {
             if(outputUnitFormat){
@@ -1635,6 +1671,15 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                   volumewUScaler[i] <- 1
                   warning(paste0("'", map_data$CONCU, "' and/or '", map_data$NORMBSU, "' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion"))
                 }
+              } else if(i == 2 && inputUnit14[i] %in% dose_denominator && outputUnit14[i] %in% dose_denominator) {
+                volumewUScaler[i] <- 1
+                if(inputUnit14[i] != outputUnit14[i]){
+                  warning("'", inputUnit14[i], "' to '", outputUnit14[i], "' VOLUMEWU conversion is not accounted for unit conversion")
+                }
+              } else if(i == 2 && ((inputUnit14[i] %in% dose_denominator && !(outputUnit14[i] %in% dose_denominator)) || (!(inputUnit14[i] %in% dose_denominator) && outputUnit14[i] %in% dose_denominator))) {
+                volumewUScaler[i] <- 1
+                valid_conversion <- FALSE
+                warning("'", inputUnit14[i], "' to '", outputUnit14[i], "' VOLUMEWU conversion is not accounted for unit conversion")
               } else {
                 if(inputMatch14[i] == missing_idx){
                   valid_input_unit <- FALSE
@@ -1650,7 +1695,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
             }
           }
         }
-        if(testunit) { testunit <- testunit && valid_input_unit && valid_output_unit }
+        if(testunit) { testunit <- testunit && valid_input_unit && valid_output_unit && valid_conversion }
         if(testunit){
           volumewUFinalScaler <- volumewUScaler[1] / volumewUScaler[2]
           volumew_col <- names(result_data)[names(result_data) %in% VOLUMEWUPARAM]
@@ -1659,7 +1704,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           if(verbose) { cat(function_name, ': Unit Class 14: (Volume/Body Weight) volumew_col: ', volumew_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', volumewUFinalScaler, '\n') }
         } else {
           result_data$VOLUMEWU <- formattedinputUnit
-          if(!valid_input_unit || !valid_output_unit){
+          if(!valid_input_unit || !valid_output_unit || !valid_conversion){
             if(length(VOLUMEWUPARAM) > 0){
               result_data[,names(result_data) %in% VOLUMEWUPARAM] <- NA
             }
@@ -1704,7 +1749,28 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
   if(unit_class == "CLWU" || unit_class == "ALL"){
     CLWUPARAM <- parameters_by_class("CLWU", names(result_data))
     
-    if(length(CLWUPARAM)>0 && parameter_required("^CONCU$", names(map_data)) && parameter_required("^TIMEU$", names(map_data)) && parameter_required("^NORMBSU$", names(map_data))){
+    dose_by_weight <- FALSE
+    if(parameter_required("^DOSELIST$", names(map_data)) && parameter_required("^DOSEULIST$", names(map_data))){
+      doselist <- names(parameter_indices("^DOSELIST$", names(map_data), simplify=FALSE))
+      dosevar <- ifelse(!is.null(doselist), ifelse(!is.null(map_data[,doselist]), unlist(strsplit(map_data[,doselist], ";")), NA), NA)
+      doseulist <- names(parameter_indices("^DOSEULIST$", names(map_data), simplify=FALSE))
+      doseuvar <- ifelse(!is.null(doseulist), ifelse(!is.null(map_data[,doselist]), unlist(strsplit(map_data[,doseulist], ";")), NA), NA)
+      
+      interval_len <- length(dosevar)
+      if(interval_len > 1){
+        if(length(grep("/", as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])) > 0)){
+          clwu_dose_unit_tmp <- as.character(unlist(strsplit(as.character(unique(data_data[, as.character(map_data[,doseuvar[i]])])[1]), "/")))
+          dose_by_weight <- TRUE
+        }
+      } else {
+        if(length(grep("/", as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])) > 0)){
+          clwu_dose_unit_tmp <- as.character(unlist(strsplit(as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1]), "/")))
+          dose_by_weight <- TRUE
+        }
+      }
+    }
+    
+    if(length(CLWUPARAM)>0 && parameter_required("^CONCU$", names(map_data)) && parameter_required("^TIMEU$", names(map_data)) && (parameter_required("^NORMBSU$", names(map_data)) || isTRUE(dose_by_weight))){
       if(parameter_required(map_data$CONCU, names(data_data)) && parameter_required(map_data$TIMEU, names(data_data)) && parameter_required(map_data$NORMBSU, names(data_data))){
         if(!is.null(map_data$CONCU)){
           if(!is.null(unique(data_data[, map_data$CONCU])[1])){
@@ -1715,8 +1781,12 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         } else {
           clwu_unit_tmp <- NA
         }
-        inputUnit15 <- c(as.character(clwu_unit_tmp[2]), as.character(unique(data_data[, map_data$TIMEU])[[1]]), as.character(unique(data_data[, map_data$NORMBSU])[1]))
-
+        if(dose_by_weight){
+          inputUnit15 <- c(as.character(clwu_unit_tmp[2]), as.character(unique(data_data[, map_data$TIMEU])[[1]]), as.character(clwu_dose_unit_tmp[2]))
+        } else {
+          inputUnit15 <- c(as.character(clwu_unit_tmp[2]), as.character(unique(data_data[, map_data$TIMEU])[[1]]), as.character(unique(data_data[, map_data$NORMBSU])[1]))
+        }
+        
         outputUnitLabel <- "CLNORMOUTPUTUNIT"
         testunit <- is.element(outputUnitLabel, names(map))
         outputUnitFormat <- FALSE
@@ -1744,6 +1814,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
 
         valid_input_unit <- TRUE
         valid_output_unit <- TRUE
+        valid_conversion <- TRUE
         if(testunit){
           for(i in 1:3) {
             if(outputUnitFormat){
@@ -1761,8 +1832,17 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                   }
                 } else {
                   clwUScaler[i] <- 1
-                  warning(paste0("'CONCU' and/or '", map_data$TIMEU, " and/or 'NORMBSU' and/or '", outputUnitFormat, "' value provided via 'map' is not accounted for unit conversion"))
+                  warning(paste0("'CONCU' and/or '", map_data$TIMEU, " and/or 'NORMBSU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion"))
                 }
+              } else if(i == 3 && inputUnit15[i] %in% dose_denominator && outputUnit15[i] %in% dose_denominator) {
+                clwUScaler[i] <- 1
+                if(inputUnit15[i] != outputUnit15[i]){
+                  warning("'", inputUnit15[i], "' to '", outputUnit15[i], "' CLWU conversion is not accounted for unit conversion")
+                }
+              } else if(i == 3 && ((inputUnit15[i] %in% dose_denominator && !(outputUnit15[i] %in% dose_denominator)) || (!(inputUnit15[i] %in% dose_denominator) && outputUnit15[i] %in% dose_denominator))) {
+                clwUScaler[i] <- 1
+                valid_conversion <- FALSE
+                warning("'", inputUnit15[i], "' to '", outputUnit15[i], "' CLWU conversion is not accounted for unit conversion")
               } else {
                 if(inputMatch15[i] == missing_idx){
                   valid_input_unit <- FALSE
@@ -1771,14 +1851,14 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                   valid_output_unit <- FALSE
                 }
                 clwUScaler[i] <- 1
-                warning(paste0("'CONCU' and/or '", map_data$TIMEU, " and/or 'NORMBSU' and/or '", outputUnitFormat, "' value provided via 'map' is not valid for unit conversion"))
+                warning(paste0("'CONCU' and/or '", map_data$TIMEU, "' and/or 'NORMBSU' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion"))
               }
             } else {
               valid_output_unit <- FALSE
             }
           }
         }
-        if(testunit) { testunit <- testunit && valid_input_unit && valid_output_unit }
+        if(testunit) { testunit <- testunit && valid_input_unit && valid_output_unit && valid_conversion }
         if(testunit){
           clwUFinalScaler <- clwUScaler[1] / clwUScaler[2] / clwUScaler[3]
           clw_col <- names(result_data)[names(result_data) %in% CLWUPARAM]
@@ -1787,8 +1867,10 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           if(verbose) { cat(function_name, ': Unit Class 15: (Volume/Time/Body Weight) clw_col: ', clw_col, ' parameters are scaled from ', formattedinputUnit, ' to ', formattedoutputUnit, ' via scaling factor: ', clwUFinalScaler, '\n') }
         } else {
           result_data$CLWU <- formattedinputUnit
-          if(length(VOLUMEWUPARAM) > 0){
-            result_data[,names(result_data) %in% VOLUMEWUPARAM] <- NA
+          if(!valid_input_unit || !valid_output_unit || !valid_conversion){
+            if(length(CLWUPARAM) > 0){
+              result_data[,names(result_data) %in% CLWUPARAM] <- NA
+            }
           }
           if(length(clwu_unit_tmp) != 2){
             warning("Unit data provided via the 'CONCU' value provided via 'map' is not in the proper form! Please try again using 'Amount/Volume' format!")
@@ -1799,10 +1881,8 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         }
       } else {
         result_data$CLWU <- NA
-        if(!valid_input_unit || !valid_output_unit){
-          if(length(CLWUPARAM) > 0){
-            result_data[,names(result_data) %in% CLWUPARAM] <- NA
-          }
+        if(length(CLWUPARAM) > 0){
+          result_data[,names(result_data) %in% CLWUPARAM] <- NA
         }
         if(!(map_data$CONCU %in% names(data_data) && map_data$TIMEU %in% names(data_data) && map_data$NORMBSU %in% names(data_data))) {
           warning(paste0("'", map_data$CONCU, "', '", map_data$TIMEU, " and '", map_data$NORMBSU, "' value provided via 'map' #15# are not present in the dataset provided via 'data'"))
