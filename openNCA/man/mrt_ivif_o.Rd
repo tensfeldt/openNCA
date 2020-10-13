@@ -32,10 +32,10 @@ mrt_ivif_o(
 
 \item{method}{The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr
 \enumerate{
-\item Linear-Log Trapazoidal Rule (default)
-\item Linear Trapazoidal Rule
-\item Log Trapazoidal Rule
-\item Linear Up - Log DownTrapazoidal Rule
+\item Linear-Log Trapezoidal Rule (default)
+\item Linear Trapezoidal Rule
+\item Log Trapezoidal Rule
+\item Linear Up - Log Down Trapezoidal Rule
 }
 Note: check 'Methods' section below for more details \cr}
 
@@ -48,9 +48,27 @@ Note: check 'Methods' section below for more details \cr}
 \item{aucflag}{The auc exclude flag data (given in a numeric vector)}
 
 \item{tau}{The time duration of dosing interval (numeric value)}
+
+\item{dof}{The duration of infusion (numeric value)}
+
+\item{spanratio}{The SPAN Ratio (numeric value)}
+
+\item{kel}{The terminal phase rate constant for the concentration-time profile of interest (numeric value)}
+
+\item{orig_conc}{The original (full) concentration data (given in a numeric vector)}
+
+\item{orig_time}{The original (full) time data (given in a numeric vector)}
+
+\item{aucinfo}{The area under the concentration versus time curve from time 0 to infinity (Observed) (numeric value)}
+
+\item{aumcinfo}{The area under the first moment curve from time 0 to infinity (Observed) (numeric value)}
+
+\item{auctau}{The area under the concentration versus time curve from time 0 until the end of the ith dosing interval (numeric value)}
+
+\item{aumctau}{The area under the first moment curve from time time of last dose (TOLDi) until the end of the ith dosing interval (numeric value)}
 }
 \description{
-Note that the parameter naming convention for Release 2 of the Computaton Engine Specifications
+Note that the parameter naming convention for Release 2 of the Computation Engine Specifications
 referred to MRTEVIFO(i) as MRTOi for extravascular administration. This has been changed to MRTEVIFO(i)
 with Release 3 to distinguish between intra- and extravascular administration.\cr
 }

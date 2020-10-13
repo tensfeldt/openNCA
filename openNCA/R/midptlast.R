@@ -6,7 +6,7 @@
 #' @section Returns:
 #' \strong{Value} \cr 
 #' \itemize{
-#'  \item MIDPTLAST: last measureable rate
+#'  \item MIDPTLAST: last measurable rate
 #' }
 #' 
 #' @examples 

@@ -5,10 +5,10 @@
 \title{Cumulative total amount of drug recovered unchanged in the urine, from time zero to infinity,
 expressed as percentage of administered dose}
 \usage{
-aepct(ae = NULL, dose = NULL)
+aepct(a_e = NULL, dose = NULL)
 }
 \arguments{
-\item{ae}{Cumulative total amount of drug}
+\item{a_e}{Cumulative total amount of drug}
 
 \item{dose}{The dose data (given in a vector form)}
 }
@@ -24,7 +24,7 @@ expressed as percentage of administered dose
   \tab \figure{aepct.png} \cr
  }
  \eqn{AE = Cumulative total amount of drug from time zero to infinity (wt)} \cr
- \eqn{Dose = administered dose  (wt)} \cr
+ \eqn{Dose = administered dose (wt)} \cr
 }
 }
 \section{Note}{
@@ -61,7 +61,7 @@ time_vector <- c(0, 1, 2)
 ae_vector <- amt_vector
 dose_vector <- c(400, 450, 500)
 
-aepct(ae = ae_vector, dose = dose_vector)
+aepct(a_e = ae_vector, dose = dose_vector)
 #0.7225000 0.5533333 0.4940000
 
 ############
@@ -81,7 +81,7 @@ time_vector <- c(0, 1, 2)
 ae_vector <- amt_vector
 dose_vector <- c(400, 450, 500)
 
-aepct(ae = ae_vector, dose = dose_vector)
+aepct(a_e = ae_vector, dose = dose_vector)
 #0 0 0
 
 ############
@@ -102,7 +102,7 @@ time_vector <- c(0, 1, 2, "None")
 ae_vector <- amt_vector
 dose_vector <- c(400, 450, 500, 520)
 
-aepct(ae = ae_vector, dose = dose_vector)
+aepct(a_e = ae_vector, dose = dose_vector)
 #0.2975000 0.2733333 0.2680000 0.2538462
 
 }

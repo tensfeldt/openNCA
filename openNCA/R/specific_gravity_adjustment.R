@@ -1,19 +1,18 @@
-#' Adjust Urinary Amounts in weight units to volumne units
+#' Adjust Urinary Amounts in weight units to volume units
 #'
 #' @details
-#' If urine amounts are reported in weight units, apply specific gravity correction to convert to volumne units.
+#' If urine amounts are reported in weight units, apply specific gravity correction to convert to volume units.
 #' The standard correction utilized is 1.020 g/mL = specific gravity or urine. 
 #'
 #' Default Human Urine Specific Gravity Value obtained from Pagana, KD. Mosbys
 #' Diagnostic and Laboratory Test Reference (Eighth Edition). 2007, Page 968.
 #' The range for adult is 1.005-1.030, with a median derived value of 1.020 g/mL.
 #'
+#' @param amt_units The units for each sample amount measurement
+#' @param specific_gravity - human urine specific gravity, default to 1.020 g/mL
 #' @param map Model Configuration Template (MCT/map) can include a user specified correct for specific
 #'            gravity or a data column that provides that information for a specific subject/experimental unit.
-#' @param sample_amount The sample amount data (volume or weight) with one value/sample collection interval (given in a vector form) 
-#' @param sample_amountu The units for each sample amount measurement
-#' @param na.rm Pass nm.rm to sum function, true by default
-#' @param specific_gravity - human urine specific gravity, default to 1.020 g/mL
+#' @param verbose The value that will print out additional details (logical value)
 #' 
 #' @section Returns:
 #' \strong{Value} \cr

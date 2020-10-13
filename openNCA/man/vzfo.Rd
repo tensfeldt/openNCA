@@ -9,7 +9,7 @@ vzfo(kel = NULL, aucinfo = NULL, dose = NULL)
 \arguments{
 \item{kel}{The terminal phase rate constant for the concentration-time profile of interest (numeric value)}
 
-\item{aucinfo}{The area under the concentration versus time cruve from time 0 to infinity (Observed) (numeric value)}
+\item{aucinfo}{The area under the concentration versus time curve from time 0 to infinity (Observed) (numeric value)}
 
 \item{dose}{The dose data (numeric value)}
 }

@@ -17,9 +17,9 @@ If all the RATE's are 0's then RATELAST will return 'NA'.
 }
 \section{Returns}{
 
-\strong{Value} \cr 
+\strong{Value} \cr
 \itemize{
- \item RATELAST: last measureable rate
+ \item RATELAST: last measurable rate
 }
 }
 

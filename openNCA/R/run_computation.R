@@ -6,7 +6,14 @@
 #' @param map The dataframe that contains the map data
 #' @param flag The dataframe that contains the flag data
 #' @param parameterset set to either "PARAMETERLIST" or "PARAMETERDISPLAYLIST"
-#'
+#' @param return_merged_data_in The value that determines if only the merged raw data and flag data is returned (logical value)
+#' @param return_partitioned_data_in The value that determines if only the partitioned data is returned (logical value)
+#' @param merged_data_in_debug The value that determines the merged raw data and flag data is returned (logical value)
+#' @param partitioned_data_in_debug The value that determines the partitioned data is returned (logical value)
+#' @param raw_results_debug The value that determines the raw results is returned prior to unit conversion (logical value)
+#' @param optimize_kel_debug The value that determines the optimize kel analysis is returned (logical value)
+#' @param ... Additional arguments
+#' 
 #' @section Returns:
 #' \strong{List} \cr
 #' \itemize{

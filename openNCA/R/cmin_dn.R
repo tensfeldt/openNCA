@@ -2,7 +2,7 @@
 #'
 #' @details
 #' \strong{Equation} \cr
-#' \figure{cmin_dn.png} \cr
+#' \figure{cmin_dn.png} \cr 
 #'
 #' @section Note:
 #' \strong{cmin}: Refer to \code{\link{cmin}} for more details
@@ -29,7 +29,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' cmin()
+#' #cmin()
 #' #Error in cmin: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47)

@@ -64,7 +64,8 @@
 #' clp(aucinfp = 50.52326, dose = 300)
 #' #5.937859
 #'
-#' auc_inf_p(conc = conc_vector, time = time_vector, method = 1,  kelflag = kelflag_vector, aucflag = aucflag_vector)
+#' auc_inf_p(conc = conc_vector, time = time_vector, method = 1, 
+#'           kelflag = kelflag_vector, aucflag = aucflag_vector)
 #' #47.84769
 #'
 #' clp(aucinfp = 47.84769, dose = 300)

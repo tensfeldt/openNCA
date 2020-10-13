@@ -2,7 +2,7 @@
 % Please edit documentation in R/mr_auc_inf_o.R
 \name{mr_auc_inf_o}
 \alias{mr_auc_inf_o}
-\title{Derived Metabolite of the area under the concentration versus time cruve from time 0 to infinity (Observed)}
+\title{Derived Metabolite of the area under the concentration versus time curve from time 0 to infinity (Observed)}
 \usage{
 mr_auc_inf_o(
   metabolite_aucinfo = NULL,
@@ -12,9 +12,9 @@ mr_auc_inf_o(
 )
 }
 \arguments{
-\item{metabolite_aucinfo}{The metabolite area under the concentration versus time cruve from time 0 to infinity (Observed) (numeric value)}
+\item{metabolite_aucinfo}{The metabolite area under the concentration versus time curve from time 0 to infinity (Observed) (numeric value)}
 
-\item{parent_aucinfo}{The parent area under the concentration versus time cruve from time 0 to infinity (Observed) (numeric value)}
+\item{parent_aucinfo}{The parent area under the concentration versus time curve from time 0 to infinity (Observed) (numeric value)}
 
 \item{parent_mw}{The parent molecular weight (numeric value)}
 

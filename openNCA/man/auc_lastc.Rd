@@ -9,7 +9,7 @@ auc_lastc(kel = NULL, auclast = NULL, c0 = NULL, tlast = NULL)
 \arguments{
 \item{kel}{The terminal phase rate constant for the concentration-time profile of interest (numeric value)}
 
-\item{auclast}{The area under the concentration versus time cruve from time 0 to time of the last mesurable concentration (numeric value)}
+\item{auclast}{The area under the concentration versus time curve from time 0 to time of the last measurable concentration (numeric value)}
 
 \item{c0}{The residual plasma concentration observed at time zero (numeric value)}
 
@@ -73,7 +73,7 @@ AUCLAST corrected using estimates of KEL and C0
 
 #Data mentioned will be used for the following example
 
-auc_lastc()
+#auc_lastc()
 #Error in auc_lastc: 'kel', 'auclast', 'c0', 'tlast' vectors are NULL
 
 conc_vector <- c(1.01, 1.16, 1.17, 1.13, 1.21, 0.976, 0.785, 0.55, 0.368, 0.289, 0.118, 0.0608, 0)

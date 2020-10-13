@@ -26,7 +26,7 @@
 #' }
 #'
 #' @examples
-#' clpw()
+#' #clpw()
 #' #Error in clftauw: 'clftau' and 'normbs' vectors are NULL
 #' 
 #' clpw(clp = 10.34535, normbs = 1.234)

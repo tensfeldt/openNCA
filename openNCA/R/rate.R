@@ -1,4 +1,12 @@
 #' Excretion Rate for each collection interval
+#' 
+#' @param start_time The start time data (given in a vector form)
+#' @param end_time The end time data (given in a vector form)
+#' @param conc The concentration data (given in a vector form)
+#' @param vol The volume data (given in a vector form)
+#' @param volu The volume units data (given in a vector form)
+#' @param type The type associated to rate (usually 'INTERVAL')
+#' @param map The dataframe that contains the map data
 #'
 #' @export
 ### 2019-10-03/TGT/

@@ -2,7 +2,7 @@
 % Please edit documentation in R/dependent_parameters.R
 \name{dependent_parameters}
 \alias{dependent_parameters}
-\title{Dependant Parameters}
+\title{Dependent Parameters}
 \usage{
 dependent_parameters(parameter, dl = create_dependency_list(), depth = TRUE)
 }
@@ -11,21 +11,21 @@ dependent_parameters(parameter, dl = create_dependency_list(), depth = TRUE)
 
 \item{dl}{Dependency List}
 
-\item{depth}{Logical Value to enable sub-dependant parameters}
+\item{depth}{Logical Value to enable sub-dependent parameters}
 }
 \description{
-This function will generate a list of dependant parameters based on the specified parameter\cr
+This function will generate a list of dependent parameters based on the specified parameter\cr
 }
 \section{Returns}{
 
 \strong{List} \cr
 \itemize{
- \item List of dependant parameters
+ \item List of dependent parameters
 }
 }
 
 \examples{
-No appropriate examples
+#No appropriate examples
 
 }
 \author{

@@ -7,13 +7,13 @@
 create_dosing_intervals(data, map, flag, maxdosingintervals)
 }
 \arguments{
-\item{data}{input concentration dataset}
+\item{data}{The dataframe that contains the raw data}
 
-\item{map}{Model Configuration Template (MCT)}
+\item{map}{The dataframe that contains the map data}
+
+\item{flag}{The dataframe that contains the flag data}
 
 \item{maxdosingintervals}{number of maximum dosing intervals}
-
-\item{flags}{input flags dataset}
 }
 \value{
 data
@@ -27,8 +27,8 @@ that map$TIME variable either points to a valid variable in data or is nominal/a
 map$TIME is either a value of "Nominal" or "Actual" or it points directly to a column/data field in the data dataframe.
 if map$TIME=="Nominal" then map$NOMTIME/map$NOMTIMEU will point to the column/data field in the data dataframe for TIME
 if map$TIME=="Actual"  then map$ACTTIME/map$ACTTIMEU will point to the column/data field in the data dataframe for TIME
-if map$TIME=="Nominal"  then map$NOMTIME will be used to create the dosing intevals with respect to TOLDi and TAUi
-if map$TIME=="Actual"  then map$NOMTIME will be used to create the dosing intevals with respect to TOLDi and TAUi
+if map$TIME=="Nominal"  then map$NOMTIME will be used to create the dosing intervals with respect to TOLDi and TAUi
+if map$TIME=="Actual"  then map$NOMTIME will be used to create the dosing intervals with respect to TOLDi and TAUi
 }
 \section{Returns}{
 
@@ -36,6 +36,6 @@ updated concentration data
 }
 
 \examples{
-No appropriate examples
+#No appropriate examples
 
 }

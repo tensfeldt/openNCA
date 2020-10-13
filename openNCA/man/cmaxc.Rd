@@ -13,7 +13,7 @@ cmaxc(kel = NULL, cmax = NULL, c0 = NULL, tmax = NULL)
 
 \item{c0}{The c0 data (numeric value)}
 
-\item{t_max}{The first time at which CMAXi is observed within the dosing interval (numeric value)}
+\item{tmax}{The first time at which CMAXi is observed within the dosing interval (numeric value)}
 }
 \description{
 CMAXi corrected using estimates of KEL and C0, the residual plasma concentration observed at
@@ -60,7 +60,7 @@ to CMAXC1, i.e. the first dosing interval of a concentration time profile.\cr
 
 #Data mentioned will be used for the following example
 
-cmax()
+#cmax()
 #Error in cmax: 'conc' and 'time' vectors are NULL
 
 conc_vector <- c(2.89, 2.49, 2.47)

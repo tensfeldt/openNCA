@@ -1,9 +1,9 @@
-#' Area under the concentration versus time cruve from time 0 until the last time point
+#' Area under the concentration versus time curve from time 0 until the last time point
 #'
 #' This function gets the area under the concentration versus time curve from time 0 until the last
 #' time point. As illustrated in the following figure, AUC_ALL includes the trapezoidal area from the
 #' time of the last measurable concentration to the next time point. Although there may be additional
-#' time points, there is no additonal AUC since by defination all subsequent concentrations are zero.\cr
+#' time points, there is no additional AUC since by definition all subsequent concentrations are zero.\cr
 #' \figure{auc_all.png}
 #'
 #' @details
@@ -11,7 +11,7 @@
 #' \figure{auc_1.png} \cr
 #' \strong{Log Method} \cr
 #' \figure{auc_2.png} \cr
-#' \eqn{AUC = Area under the cruve} \cr
+#' \eqn{AUC = Area under the curve} \cr
 #' \eqn{C_{i} = Concentration 1}{Ci = Concentration 1} \cr
 #' \eqn{C_{i+1} = Concentration 2}{Ci+1 = Concentration 2} \cr
 #' \eqn{T_{i} = Time 1}{Ti = Time 1} \cr
@@ -20,7 +20,7 @@
 #' \strong{Methods:} You can use the following methods to calculate AUC: \cr
 #' \enumerate{
 #'  \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
-#'  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
+#'  first occurrence of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
 #'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
 #'  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
 #'  \item \strong{Log Trapazoidal Rule}: The log trapezoidal method is used for the entire profile. If
@@ -39,10 +39,10 @@
 #' @param time The time data (given in a vector form)
 #' @param method The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr
 #' \enumerate{
-#' \item Linear-Log Trapazoidal Rule (default)
-#' \item Linear Trapazoidal Rule
-#' \item Log Trapazoidal Rule
-#' \item Linear Up - Log DownTrapazoidal Rule
+#' \item Linear-Log Trapezoidal Rule (default)
+#' \item Linear Trapezoidal Rule
+#' \item Log Trapezoidal Rule
+#' \item Linear Up - Log Down Trapezoidal Rule
 #' }
 #' Note: check 'Methods' section below for more details \cr
 #' @param exflag The exclude flag data (given in a numeric vector)
@@ -78,7 +78,7 @@
 #' time_vector <- c(0, 1, 2, 3, 4, 5, 6)
 #' exflag_vector <- c(0, 1, 0, 0, 0, 1, 1)
 #'
-#' auc_all(conc = conc_vector, time = time_vector, method = NA)
+#' #auc_all(conc = conc_vector, time = time_vector, method = NA)
 #' #Error in auc_all: the value provided for 'method' is not correct
 #'
 #' auc_all(conc = conc_vector, time = time_vector, method = 2)

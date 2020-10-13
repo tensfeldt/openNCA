@@ -12,6 +12,10 @@ tendinf(conc = NULL, time = NULL, dof = NULL, tmax = NULL, told = NULL)
 \item{time}{The time data (given in a vector form)}
 
 \item{dof}{The duration of infusion data (given as a numeric value)}
+
+\item{tmax}{The first time at which CMAXi is observed within the dosing interval (numeric value)}
+
+\item{told}{The time of last dose (given in a numeric value)}
 }
 \description{
 This function gets the observed time at the end of infusion. In the case of multiple dosing, CENDINFi
@@ -42,7 +46,7 @@ are also of the same length. \cr
 
 #Data mentioned will be used for the following example
 
-tendinf()
+#tendinf()
 #Error in tendinf: 'conc' and 'time' vectors are NULL
 
 conc_vector <- c(2.89, 2.49, 2.47)
@@ -85,7 +89,7 @@ tendinf(conc = conc_vector, time = time_vector, dof = NA)
 conc_vector <- c(1.19, 1.23, 1.34, 1.32)
 time_vector <- c(0, 1, 2, "None")
 
-tendinf(conc = conc_vector, time = time_vector)
+#tendinf(conc = conc_vector, time = time_vector)
 #Error in tendinf: 'time' is not a numeric vector
 
 }

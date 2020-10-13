@@ -7,13 +7,13 @@
 update_mct_data(map, data, flag, verbose = FALSE)
 }
 \arguments{
-\item{map}{Model Configuration Template (MCT)}
+\item{map}{The dataframe that contains the map data}
 
-\item{data}{input concentration dataset}
+\item{data}{The dataframe that contains the raw data}
+
+\item{flag}{The dataframe that contains the flag data}
 
 \item{verbose}{logs selected time/concentration values and units to stdout}
-
-\item{flags}{input flags dataset}
 }
 \value{
 map
@@ -32,11 +32,11 @@ if map$TIME points directly to a column/data field in the data dataframe, then m
 }
 \section{Returns}{
 
-updated Model Confuguration Template/MCT/map
+updated Model Configuration Template/MCT/map
 }
 
 \examples{
-No appropriate examples
+#No appropriate examples
 
 }
 \author{

@@ -26,7 +26,8 @@
 #' @param amt The amount data (given in a vector form) either represents the volume or weight
 #' @param time The time data (given in a vector form)
 #' @param amt_units The units data for the amount (given in a vector form)
-#'
+#' @param map The dataframe that contains the map data
+#'  
 #' @section Returns:
 #' \strong{Value} \cr
 #' \itemize{
@@ -105,7 +106,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-at <- function(conc = NULL, amt = NULL, time = NULL, amt_units = NULL, map=NULL){
+at <- function(conc = NULL, amt = NULL, time = NULL, amt_units = NULL, map = NULL){
   function_name <- as.list(sys.call())[[1]]
 
   if(is.null(time) || is.null(conc) || is.null(amt) || is.null(amt_units)){

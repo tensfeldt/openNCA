@@ -14,6 +14,8 @@ at(conc = NULL, amt = NULL, time = NULL, amt_units = NULL, map = NULL)
 \item{time}{The time data (given in a vector form)}
 
 \item{amt_units}{The units data for the amount (given in a vector form)}
+
+\item{map}{The dataframe that contains the map data}
 }
 \description{
 Amount of Drug in the body at time T, where T can have a numerical value.

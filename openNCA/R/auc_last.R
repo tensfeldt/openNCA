@@ -41,20 +41,20 @@
 #' @param time The time data (given in a vector form)
 #' @param method The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr
 #' \enumerate{
-#' \item Linear-Log Trapazoidal Rule (default)
-#' \item Linear Trapazoidal Rule
-#' \item Log Trapazoidal Rule
-#' \item Linear Up - Log DownTrapazoidal Rule
+#' \item Linear-Log Trapezoidal Rule (default)
+#' \item Linear Trapezoidal Rule
+#' \item Log Trapezoidal Rule
+#' \item Linear Up - Log Down Trapezoidal Rule
 #' }
 #' Note: check 'Methods' section below for more details \cr
 #' @param exflag The exclude flag data (given in a numeric vector)
-#' @param t_last The time of last measureable (non-zero) plasma concentration (numeric value)
+#' @param t_last The time of last measurable (non-zero) plasma concentration (numeric value)
 #' @param t_max The first time at which CMAXi is observed within the dosing interval (numeric value)
 #'
 #' @section Returns:
 #' \strong{Value} \cr
 #' \itemize{
-#'  \item AUCLAST: area under the curve until time of last mesurable concentration
+#'  \item AUCLAST: area under the curve until time of last measurable concentration
 #' }
 #'
 #' @examples
@@ -74,14 +74,14 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' auc_last()
+#' #auc_last()
 #' #Error in auc_last: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28, 0)
 #' time_vector <- c(0, 1, 2, 3, 4, 5, 6)
 #' exflag_vector <- c(0, 1, 0, 0, 0, 1, 1)
 #'
-#' auc_last(conc = conc_vector, time = time_vector, method = NA)
+#' #auc_last(conc = conc_vector, time = time_vector, method = NA)
 #' #Error in auc_last: the value provided for 'method' is not correct
 #'
 #' auc_last(conc = conc_vector, time = time_vector, method = 2)

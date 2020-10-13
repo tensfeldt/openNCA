@@ -2,6 +2,7 @@
 #' 
 #' @details If all the RATE's are 0's then RATELAST will return 'NA'. 
 #'
+#' @param midpt The midpoint data (given in a vector form)
 #' @param rate The rate data (given in a vector form)
 #'
 #' @section Returns:

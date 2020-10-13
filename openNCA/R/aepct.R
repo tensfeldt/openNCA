@@ -9,13 +9,13 @@
 #'   \tab \figure{aepct.png} \cr
 #'  }
 #'  \eqn{AE = Cumulative total amount of drug from time zero to infinity (wt)} \cr
-#'  \eqn{Dose = administered dose  (wt)} \cr
+#'  \eqn{Dose = administered dose (wt)} \cr
 #' }
 #'
 #' @section Note:
 #' \strong{ae}: Refer to \code{\link{ae}} for more details
 #'
-#' @param ae Cumulative total amount of drug
+#' @param a_e Cumulative total amount of drug
 #' @param dose The dose data (given in a vector form)
 #'
 #' @section Returns:
@@ -45,7 +45,7 @@
 #' ae_vector <- amt_vector
 #' dose_vector <- c(400, 450, 500)
 #'
-#' aepct(ae = ae_vector, dose = dose_vector)
+#' aepct(a_e = ae_vector, dose = dose_vector)
 #' #0.7225000 0.5533333 0.4940000
 #'
 #' ############
@@ -65,7 +65,7 @@
 #' ae_vector <- amt_vector
 #' dose_vector <- c(400, 450, 500)
 #'
-#' aepct(ae = ae_vector, dose = dose_vector)
+#' aepct(a_e = ae_vector, dose = dose_vector)
 #' #0 0 0
 #'
 #' ############
@@ -86,7 +86,7 @@
 #' ae_vector <- amt_vector
 #' dose_vector <- c(400, 450, 500, 520)
 #'
-#' aepct(ae = ae_vector, dose = dose_vector)
+#' aepct(a_e = ae_vector, dose = dose_vector)
 #' #0.2975000 0.2733333 0.2680000 0.2538462
 #'
 #' @author
@@ -96,30 +96,32 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-aepct <- function(ae = NULL, dose = NULL){
-  if(is.null(ae) && is.null(dose)) {
-    stop("Error in aepct: 'ae' and 'dose' vectors are NULL")
-  } else if(is.null(ae)) {
-    stop("Error in aepct: 'ae' vector is NULL")
+aepct <- function(a_e = NULL, dose = NULL){
+  if(is.null(a_e) && is.null(dose)) {
+    stop("Error in aepct: 'a_e' and 'dose' vectors are NULL")
+  } else if(is.null(a_e)) {
+    stop("Error in aepct: 'a_e' vector is NULL")
   } else if(is.null(dose)) {
     stop("Error in aepct: 'dose' vector is NULL")
-  } else if(all(is.na(ae))) { # 2019-11-24/RD/
+  } else if(all(is.na(a_e))) { # 2019-11-24/RD/
     return(NA)
   } else if(all(is.na(dose))) { # 2019-11-24/RD/
     return(NA)
   }
 
-  if(!(is.numeric(ae) && is.vector(ae))){
-    stop("Error in aepct: 'ae' is not a numeric vector")
+  if(!(is.numeric(a_e) && is.vector(a_e))){
+    stop("Error in aepct: 'a_e' is not a numeric vector")
   }
   if(!(is.numeric(dose) && is.vector(dose))){
     stop("Error in aepct: 'dose' is not a numeric vector")
   }
 
-  if(is.na(dose) || (0 %in% dose) || is.na(ae)) {
+  print(dose)
+  print(a_e)
+  if(isTRUE(any(is.na(dose)) || (0 %in% dose) || any(is.na(a_e)))) {
     ae_pct <- NA
   } else {
-    ae_pct <- (ae/dose) * 100
+    ae_pct <- (a_e/dose) * 100
     ae_pct <- replace(ae_pct, is.infinite(ae_pct), NA)
   }
 

@@ -1,13 +1,13 @@
-#' Area under the concentration versus time cruve from time 0 to infinity (Predicted)
+#' Area under the concentration versus time curve from time 0 to infinity (Predicted)
 #'
 #' This function gets the area under the concentration versus time curve from time 0 to
-#' infinity (Preducted). Estimated concentration at the time of the last mesurable concentration
-#' is used to calcualate extrapolated AUC.\cr
+#' infinity (Predicted). Estimated concentration at the time of the last measurable concentration
+#' is used to calculate extrapolated AUC.\cr
 #'
 #' @details
 #' \strong{Equation}
 #' \enumerate{
-#'  \item Calculate the estimated concentration (Cest) at the time of the last mesurable concentraion: \cr
+#'  \item Calculate the estimated concentration (Cest) at the time of the last measurable concentration: \cr
 #'  \tabular{rl}{
 #'   \tab \figure{auc_inf_p1.png} \cr
 #'  }
@@ -36,7 +36,7 @@
 #' \strong{Methods:} You can use the following methods to calculate AUC: \cr
 #' \enumerate{
 #'  \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
-#'  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
+#'  first occurrence of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
 #'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
 #'  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
 #'  \item \strong{Log Trapazoidal Rule}: The log trapezoidal method is used for the entire profile. If
@@ -57,16 +57,18 @@
 #' @param time The time data (given in a vector form)
 #' @param method The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr
 #' \enumerate{
-#' \item Linear-Log Trapazoidal Rule (default)
-#' \item Linear Trapazoidal Rule
-#' \item Log Trapazoidal Rule
-#' \item Linear Up - Log DownTrapazoidal Rule
+#' \item Linear-Log Trapezoidal Rule (default)
+#' \item Linear Trapezoidal Rule
+#' \item Log Trapezoidal Rule
+#' \item Linear Up - Log Down Trapezoidal Rule
 #' }
 #' Note: check 'Methods' section below for more details \cr
 #' @param kelflag The KEL exclude flag data (given in a numeric vector)
 #' @param aucflag The AUC exclude flag data (given in a numeric vector)
 #' @param auclast The area under the concentration versus time curve from zero time until the time (TLAST) of the last measurable concentration (CLASTi) during the ith dosing interval (numeric value)
 #' @param t_last The time of last measurable (non-zero) plasma concentration (numeric value)
+#' @param spanratio The SPAN Ratio (numeric value)
+#' @param kel The terminal phase rate constant for the concentration-time profile of interest (numeric value)
 #'
 #' @section Returns:
 #' \strong{Value} \cr
@@ -90,7 +92,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' auc_inf_p()
+#' #auc_inf_p()
 #' #Error in auc_inf_p: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28)
@@ -98,7 +100,7 @@
 #' kelflag_vector <- c(0, 1, 0, 0, 0, 1)
 #' aucflag_vector <- c(1, 0, 0, 0, 1, 0)
 #'
-#' auc_inf_p(conc = conc_vector, time = time_vector, method = NA)
+#' #auc_inf_p(conc = conc_vector, time = time_vector, method = NA)
 #' #Error in auc_inf_p: the value provided for 'method' is not correct
 #'
 #' auc_inf_p(conc = conc_vector, time = time_vector, method = 2)

@@ -22,6 +22,16 @@ aet(
 \item{time}{The time data (given in a vector form)}
 
 \item{t}{The post-dose time value (numeric value)}
+
+\item{orig_time}{The original time data (given in a vector form)}
+
+\item{curr_time}{The current time data (given in a vector form)}
+
+\item{all_time}{The time data for given profile (given in a vector form)}
+
+\item{end_time}{The end time data (given in a vector form)}
+
+\item{returnNA}{Determines if NAs should be returned or not (given in a logical form)}
 }
 \description{
 Cumulative (running sum) amount of drug recovered unchanged in the urine up to time t post-dose,

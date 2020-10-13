@@ -10,7 +10,7 @@
 #' \eqn{CMAXi = Maximum observed concentration} \cr   
 #' \eqn{CMINi = Minimum observed concentration} \cr  
 #' 
-#' @param cmax The maxium observed concentration data (given in a vector form) 
+#' @param cmax The maximum observed concentration data (given in a vector form) 
 #' @param cmin The minimum observed concentration data (given in a vector form)
 #' 
 #' @section Returns:

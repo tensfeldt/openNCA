@@ -41,7 +41,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' auc_inf_o()
+#' #auc_inf_o()
 #' #Error in auc_inf_o: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28)
@@ -61,7 +61,8 @@
 #' clo(aucinfo = 52.88634, dose = 300)
 #' #5.672542
 #'
-#' auc_inf_o(conc = conc_vector, time = time_vector, method = 1,  kelflag = kelflag_vector, aucflag = aucflag_vector)
+#' auc_inf_o(conc = conc_vector, time = time_vector, method = 1,
+#'           kelflag = kelflag_vector, aucflag = aucflag_vector)
 #' #50.21078
 #'
 #' clo(aucinfo = 50.21078, dose = 300)

@@ -13,7 +13,7 @@
 #' @section Returns:
 #' \strong{Value} \cr
 #' \itemize{
-#'  \item CLAST: last measureable plasma concentration
+#'  \item CLAST: last measurable plasma concentration
 #' }
 #'
 #' @examples
@@ -29,11 +29,11 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' clast()
+#' #clast()
 #' #Error in clast: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47)
-#' time_vector <- data$TIME
+#' time_vector <- c(0, 1, 2)
 #'
 #' clast(conc = conc_vector, time = time_vector)
 #' #2.47

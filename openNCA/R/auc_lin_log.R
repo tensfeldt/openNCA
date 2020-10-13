@@ -12,13 +12,19 @@
 #' @param extrapolate The value to determine whether to extrapolate data points (given in a logical form)
 #' @param model The model specification (either 'M1', 'M2', 'M3', or 'M4')
 #' @param dosing_type The dosing type specification (either 'SD' or 'SS')
+#' @param dosing_interval The current dosing interval (numeric value)
 #' @param told The time of last dose (given in a numeric value)
+#' @param prev_told The time of last dose from previous interval (given in a numeric value)
+#' @param prev_tau The time duration of previous dosing interval (given in a numeric value)
+#' @param last_crit_factor The criteria value for last time acceptance criteria (numeric value)
 #' @param kel The KEL value (given as a numeric)
 #' @param orig_conc The original (full) concentration data (given in a numeric vector)
 #' @param orig_time The original (full) time data (given in a numeric vector)
+#' @param orgtime The original time value from the map data ('nominal' or 'actual')
+#' @param includeNA The value that determines if NA values should be removed from concentration and time data (given in logical value) 
 #' 
 #! @export
-auc_lin_log <- function(conc = NULL, time = NULL, exflag = NULL, t_max = NULL, interpolate = NULL, extrapolate = NULL, model = NULL, dosing_type = NULL, told = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL, includeNA = FALSE){
+auc_lin_log <- function(conc = NULL, time = NULL, exflag = NULL, t_max = NULL, interpolate = NULL, extrapolate = NULL, model = NULL, dosing_type = NULL, dosing_interval = NULL, told = NULL, prev_told = NULL, prev_tau = NULL, last_crit_factor = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL, orgtime = NULL, includeNA = FALSE){
   interpolate_check <- ifelse(is.null(interpolate), FALSE, isTRUE(interpolate))
   extrapolate_check <- ifelse(is.null(extrapolate), FALSE, isTRUE(extrapolate))
   
@@ -123,7 +129,7 @@ auc_lin_log <- function(conc = NULL, time = NULL, exflag = NULL, t_max = NULL, i
       if(isTRUE(interpolate) || isTRUE(extrapolate)){
 ##        2019-11-08/RD Added helper function for Interpolation
 ##
-        est_tmp <- estimate_missing_concentration(conc = conc, time = time, interpolate = interpolate, extrapolate = extrapolate, auc_method = "LINLOG", model = model, dosing_type = dosing_type, t_max = t_max, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time)
+        est_tmp <- estimate_missing_concentration(conc = conc, time = time, interpolate = interpolate, extrapolate = extrapolate, auc_method = "LINLOG", model = model, dosing_type = dosing_type, dosing_interval = dosing_interval, t_max = t_max, told = told, prev_told = prev_told, prev_tau = prev_tau, last_crit_factor = last_crit_factor, kel = kel, orig_conc = orig_conc, orig_time = orig_time, orgtime = orgtime)
         conc <- est_tmp[[1]]
         tmp <- data.frame(time, conc)
       }

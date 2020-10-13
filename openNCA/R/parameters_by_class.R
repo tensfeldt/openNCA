@@ -3,7 +3,7 @@
 #' This function returns the list of parameters based on the each Unit Class
 #'
 #' @param unitclass Unit Class 
-#' @param check_list The character vector of parameter names from the PARAMETERLIST of the Model Configuration Template
+#' @param checklist The character vector of parameter names from the PARAMETERLIST of the Model Configuration Template
 #' @param dl Dependency List (Please refer to \code{\link{create_dependency_list}})
 #' 
 #' @section Returns:

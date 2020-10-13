@@ -14,7 +14,7 @@
 #' \eqn{Dosei = dose value for drug dosing interval i} \cr
 #'
 #' @param kel The terminal phase rate constant for the concentration-time profile of interest (numeric value)
-#' @param aucinfo The area under the concentration versus time cruve from time 0 to infinity (Observed) (numeric value)
+#' @param aucinfo The area under the concentration versus time curve from time 0 to infinity (Observed) (numeric value)
 #' @param dose The dose data (numeric value)
 #'
 #' @section Returns:

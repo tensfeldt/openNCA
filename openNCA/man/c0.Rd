@@ -36,14 +36,15 @@ Initial concentration resulting immediately after an IV bolus administration.
 ##   30  ##    5   ##   2.28   ##
 #################################
 
-data <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
+#data <- data.frame(
+#    SID = ...,
+#    TIME = ...,
+#    RESULT = ...
+#)
+data <- data.frame(SID=rep(30, 6), TIME = c(0,1,2,3,4,5), CONC=c(2.89,2.49,2.47,2.38,2.32,2.28))
 #Same data as above, just represented as a dataframe
 
-c0()
+#c0()
 #Error in c0: 'conc' and 'time' vectors are NULL
 
 conc_vector <- data$CONC
@@ -62,11 +63,12 @@ c0(conc = conc_vector, time = time_vector)
 ##   31  ##    2   ##      0   ##
 #################################
 
-data2 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
+#data2 <- data.frame(
+#    SID = ...,
+#    TIME = ...,
+#    RESULT = ...
+#)
+data2 <- data.frame(SID=rep(31,3), TIME=c(0,1,2), CONC=rep(0,3))
 #Same data as above, just represented as a dataframe
 
 conc_vector <- data2$CONC
@@ -85,11 +87,12 @@ c0(conc = conc_vector, time = time_vector)
 ##   32  ##    2   ##   1.34   ##
 #################################
 
-data3 <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
+#data3 <- data.frame(
+#    SID = ...,
+#    TIME = ...,
+#    RESULT = ...
+#)
+data3 <- data.frame(SID=rep(32,3), TIME=c(0,1,2), CONC=c(1.19,1.23,1.34))
 #Same data as above, just represented as a dataframe
 
 conc_vector <- data3$CONC

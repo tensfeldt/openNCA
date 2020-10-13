@@ -10,6 +10,8 @@ tmin(conc = NULL, time = NULL, told = NULL)
 \item{conc}{The concentration data (given in a vector form)}
 
 \item{time}{The time data (given in a vector form)}
+
+\item{told}{The time of last dose (given in a numeric value)}
 }
 \description{
 This function gets the first time at which minimum observed concentration is observed
@@ -42,7 +44,7 @@ are also of the same length. \cr
 
 #Data mentioned will be used for the following example
 
-tmin()
+#tmin()
 #Error in tmin: 'conc' and 'time' vectors are NULL
 
 conc_vector <- c(2.89, 2.49, 2.47)

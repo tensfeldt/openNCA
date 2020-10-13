@@ -1,8 +1,8 @@
 #' Minimum Observed Concentration
 #'
 #' This function gets the minimum observed concentration that is obtained by the inspection of the data.
-#' It is designed as the first occurance within a dosing interval. In the case of multiple dosing, CMINi
-#' is obtained by inspection of the data during each dosing interval i.
+#' It is designed as the first occurrence within a dosing interval. In the case of multiple dosing, CMINi
+#' is obtained by inspection of the data during each dosing interval i. 
 #'
 #' @details If all the concentrations are 0's then CMINi will return NA.
 #' Also the interval must be in the range of the times listed in the data. \cr
@@ -31,7 +31,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' cmin()
+#' #cmin()
 #' #Error in cmin: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89,2.49, 2.47)
@@ -74,7 +74,7 @@
 #' conc_vector <- c(1.19, 1.23, 1.34, 1.32)
 #' time_vector <- c(0, 1, 2, "None")
 #'
-#' cmin(conc = conc_vector, time = time_vector)
+#' #cmin(conc = conc_vector, time = time_vector)
 #' #Error in cmin: 'time' is not a numeric vector
 #'
 #' @author

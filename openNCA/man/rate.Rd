@@ -14,6 +14,21 @@ rate(
   map = NULL
 )
 }
+\arguments{
+\item{start_time}{The start time data (given in a vector form)}
+
+\item{end_time}{The end time data (given in a vector form)}
+
+\item{conc}{The concentration data (given in a vector form)}
+
+\item{vol}{The volume data (given in a vector form)}
+
+\item{volu}{The volume units data (given in a vector form)}
+
+\item{type}{The type associated to rate (usually 'INTERVAL')}
+
+\item{map}{The dataframe that contains the map data}
+}
 \description{
 Excretion Rate for each collection interval
 }

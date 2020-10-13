@@ -19,6 +19,7 @@
 #' @param aet Cumulative (running sum) amount of drug
 #' @param time The time data (given in a vector form)
 #' @param t The post-dose time value (numeric value)
+#' @param returnNA Determines if NAs should be returned or not (logical value)
 #'
 #' @section Returns:
 #' \strong{Value} \cr

@@ -25,7 +25,7 @@
 #' \strong{tlast}: Refer to \code{\link{tlast}} for more details \cr
 #'
 #' @param kel The terminal phase rate constant for the concentration-time profile of interest (numeric value)
-#' @param auclast The area under the concentration versus time cruve from time 0 to time of the last mesurable concentration (numeric value)
+#' @param auclast The area under the concentration versus time curve from time 0 to time of the last measurable concentration (numeric value)
 #' @param c0 The residual plasma concentration observed at time zero (numeric value)
 #' @param tlast The time of Last Measurable (non-zero) Plasma Concentration (numeric value)
 #'
@@ -58,7 +58,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' auc_lastc()
+#' #auc_lastc()
 #' #Error in auc_lastc: 'kel', 'auclast', 'c0', 'tlast' vectors are NULL
 #'
 #' conc_vector <- c(1.01, 1.16, 1.17, 1.13, 1.21, 0.976, 0.785, 0.55, 0.368, 0.289, 0.118, 0.0608, 0)
@@ -124,7 +124,7 @@ auc_lastc <- function(kel = NULL, auclast = NULL, c0 = NULL, tlast = NULL){
     }
   }
 
-  if(is.na(kel) || is.na(c0) || is.na(auclast) || is.na(tlast)) {
+  if(isTRUE(is.na(kel) || is.na(c0) || is.na(auclast) || is.na(tlast))) {
     auclastc <- NA
   } else {
     c_last_res <- c0 * exp(-1*tlast*kel)

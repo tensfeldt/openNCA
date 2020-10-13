@@ -10,18 +10,18 @@
 #' if map$TIME points directly to a column/data field in the data dataframe, then map$TIMEU is an required field in map that
 #'  points to avalud column/data field in the data dataframe for the units of time.
 #'
-#' @param map Model Configuration Template (MCT)
-#' @param data input concentration dataset
-#' @param flags input flags dataset
+#' @param data The dataframe that contains the raw data
+#' @param map The dataframe that contains the map data
+#' @param flag The dataframe that contains the flag data
 #' @param verbose logs selected time/concentration values and units to stdout
 #' 
 #' @section Returns:
-#' updated Model Confuguration Template/MCT/map
+#' updated Model Configuration Template/MCT/map
 #'
 #' @return map
 #' 
 #' @examples
-#' No appropriate examples
+#' #No appropriate examples
 #'
 #' @author
 #' \itemize{

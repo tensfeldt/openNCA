@@ -13,6 +13,7 @@
 #'
 #' @param amt The amount data (given in a vector form)
 #' @param time The time data (given in a vector form)
+#' @param orig_time The original time data (given in a vector form)
 #'
 #' @section Returns:
 #' \strong{Value} \cr

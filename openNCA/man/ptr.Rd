@@ -7,7 +7,7 @@
 ptr(cmax = NULL, cmin = NULL)
 }
 \arguments{
-\item{cmax}{The maxium observed concentration data (given in a vector form)}
+\item{cmax}{The maximum observed concentration data (given in a vector form)}
 
 \item{cmin}{The minimum observed concentration data (given in a vector form)}
 }

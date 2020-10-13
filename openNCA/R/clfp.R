@@ -14,7 +14,7 @@
 #' \eqn{Dose = dose unit value for drug dosing interval} \cr
 #' \eqn{AUCINFP = Area under the first moment curve from zero time to infinity  (Predicted)} \cr
 #'
-#' @param aucinfo The AUCINFO data (given in a vector form)
+#' @param aucinfp The AUCINFP data (given in a vector form)
 #' @param dose The dose data (given in a vector form)
 #'
 #' @section Returns:
@@ -39,7 +39,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' auc_inf_p()
+#' #auc_inf_p()
 #' #Error in auc_inf_p: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28)
@@ -47,7 +47,7 @@
 #' kelflag_vector <- c(0, 1, 0, 0, 0, 1)
 #' aucflag_vector <- c(1, 0, 0, 0, 1, 0)
 #'
-#' auc_inf_p(conc = conc_vector, time = time_vector, method = NA)
+#' #auc_inf_p(conc = conc_vector, time = time_vector, method = NA)
 #' #Error in auc_inf_p: the value provided for 'method' is not correct
 #'
 #' auc_inf_p(conc = conc_vector, time = time_vector, method = 2)
@@ -62,7 +62,8 @@
 #' clfp(aucinfp = 50.52326, dose = 300)
 #' #5.937859
 #'
-#' auc_inf_p(conc = conc_vector, time = time_vector, method = 1,  kelflag = kelflag_vector, aucflag = aucflag_vector)
+#' auc_inf_p(conc = conc_vector, time = time_vector, method = 1, 
+#'           kelflag = kelflag_vector, aucflag = aucflag_vector)
 #' #47.84769
 #'
 #' clfp(aucinfp = 47.84769, dose = 300)

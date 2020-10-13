@@ -7,11 +7,11 @@
 estimate_concentration(time, conc, slope)
 }
 \arguments{
+\item{time}{The vector of time point data}
+
 \item{conc}{The vector of concentration data}
 
 \item{slope}{The slope of the log-lin regression of the time-conc data generated following selection of the data points}
-
-\item{tine}{The vector of time point data}
 }
 \description{
 Estimate concentrations from results of linear regression of the time-conc data

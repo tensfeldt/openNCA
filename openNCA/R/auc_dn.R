@@ -19,7 +19,7 @@
 #' \strong{Methods:} You can use the following methods to calculate AUC: \cr
 #' \enumerate{
 #'  \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
-#'  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
+#'  first occurrence of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
 #'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
 #'  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
 #'  \item \strong{Log Trapazoidal Rule}: The log trapezoidal method is used for the entire profile. If
@@ -107,7 +107,7 @@ auc_dn <- function(auc = NULL, dose = NULL){
     stop("Error in auc_dn: length of vector arguments do not match")
   }
 
-  if(is.na(dose) || (0 %in% dose) || is.na(auc)) {
+  if(isTRUE(any(is.na(dose)) || (0 %in% dose) || any(is.na(auc)))) {
     aucdn <- NA
   } else {
     aucdn <- auc/dose

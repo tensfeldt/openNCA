@@ -23,7 +23,7 @@ This function will generate a list of parameters based on the specified model an
 }
 
 \examples{
-No appropriate examples
+#No appropriate examples
 
 }
 \author{

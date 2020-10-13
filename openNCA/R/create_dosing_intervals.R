@@ -7,12 +7,12 @@
 #' map$TIME is either a value of "Nominal" or "Actual" or it points directly to a column/data field in the data dataframe.
 #' if map$TIME=="Nominal" then map$NOMTIME/map$NOMTIMEU will point to the column/data field in the data dataframe for TIME
 #' if map$TIME=="Actual"  then map$ACTTIME/map$ACTTIMEU will point to the column/data field in the data dataframe for TIME
-#' if map$TIME=="Nominal"  then map$NOMTIME will be used to create the dosing intevals with respect to TOLDi and TAUi
-#' if map$TIME=="Actual"  then map$NOMTIME will be used to create the dosing intevals with respect to TOLDi and TAUi
+#' if map$TIME=="Nominal"  then map$NOMTIME will be used to create the dosing intervals with respect to TOLDi and TAUi
+#' if map$TIME=="Actual"  then map$NOMTIME will be used to create the dosing intervals with respect to TOLDi and TAUi
 #'
-#' @param data input concentration dataset
-#' @param map Model Configuration Template (MCT)
-#' @param flags input flags dataset
+#' @param data The dataframe that contains the raw data
+#' @param map The dataframe that contains the map data
+#' @param flag The dataframe that contains the flag data
 #' @param maxdosingintervals number of maximum dosing intervals
 #' 
 #' @section Returns:
@@ -21,7 +21,7 @@
 #' @return data
 #' 
 #' @examples
-#' No appropriate examples
+#' #No appropriate examples
 #'
 #' @export
 create_dosing_intervals <- function(data, map, flag, maxdosingintervals) {

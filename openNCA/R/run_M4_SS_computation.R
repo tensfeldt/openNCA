@@ -16,7 +16,7 @@
 #' \strong{Methods:} You can use the following methods to calculate AUC: \cr
 #' \enumerate{
 #'  \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
-#'  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
+#'  first occurrence of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
 #'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
 #'  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
 #'  \item \strong{Log Trapazoidal Rule}: The log trapezoidal method is used for the entire profile. If
@@ -55,13 +55,13 @@
 #'
 #' @section Note:
 #' By default all the return list options are selected and calculated if 'parameter_list' is not specified. Please refer to MCT
-#' to get more calrification on how to specify which parameters to calculate to this function if you wish to subset the default caculated parameters. \cr
-#' By default 'display_list' argument is empty, which means that this function will return all caculated parameters specifed by the 'parameter_list' argument.
-#' Only specfiy a list of parameters to the 'display_list' if you want to subset the calculated parameters returned as a result of this function. \cr
+#' to get more calcification on how to specify which parameters to calculate to this function if you wish to subset the default calculated parameters. \cr
+#' By default 'display_list' argument is empty, which means that this function will return all calculated parameters specified by the 'parameter_list' argument.
+#' Only specify a list of parameters to the 'display_list' if you want to subset the calculated parameters returned as a result of this function. \cr
 #' By default 'return_list' argument is empty, which means that this function will not append parameters passed from 'data' argument.
-#' Only specfiy a list of parameters to the 'return_list' if you want to return them as a result of this function. \cr
+#' Only specify a list of parameters to the 'return_list' if you want to return them as a result of this function. \cr
 #' If 'optimize_kel' is FALSE AND KEL is not one of the parameters (default or specified by 'parameter_list' argument) then
-#' this functions will return a datafram. If 'optimize_kel' is FALSE AND KEL is one of the parameters (default or specified by 'parameter_list' argument) then
+#' this functions will return a dataframe. If 'optimize_kel' is FALSE AND KEL is one of the parameters (default or specified by 'parameter_list' argument) then
 #' this functions will return a list with 'data_out' and 'est_data'. If 'optimize_kel' is TRUE AND KEL is one of the parameters (default or specified
 #' by 'parameter_list' argument) then this functions will return a list with 'data_out', 'optimized_kel_flag' and 'est_data'.
 #' If 'optimize_kel' is TRUE AND KEL is not one of the parameters (default or specified by 'parameter_list' argument) then
@@ -71,21 +71,31 @@
 #'
 #' @param data The dataframe that contains the raw data
 #' @param map The dataframe that contains the map data
-#' @param method The methos of calculation for Area Under the Curve (see Details below)
+#' @param method The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr
+#' \enumerate{
+#' \item Linear-Log Trapezoidal Rule (default)
+#' \item Linear Trapezoidal Rule
+#' \item Log Trapezoidal Rule
+#' \item Linear Up - Log Down Trapezoidal Rule
+#' }
+#' Note: check 'Methods' section below for more details \cr
+#' @param model_regex The regular expression that identifies the model and dosing type (default: "^M4(SS)*?$")
 #' @param parameter_list The list of parameters to calculate (empty by default)
-#' @param display_list The list of parameters to return (empty by default)
 #' @param return_list The list of parameters to return from the original data (empty by default)
-#'
+#' @param raw_results_debug The value that determines the raw results is returned prior to unit conversion (logical value)
+#' @param optimize_kel_debug The value that determines the optimize kel analysis is returned (logical value)
+#' @param ... Additional arguments
+#' 
 #' @section Returns:
 #' \strong{Dataframe} \cr
 #' \itemize{
-#'  \item M4SS_Parameters: Caculated default/specified parameters
+#'  \item M4SS_Parameters: Calculated default/specified parameters
 #' }
 #' OR \cr
 #' \strong{List} \cr
 #' \itemize{
 #'  \item data_out: Calculated default/specified M4SS Parameters
-#'  \item optimized_kel_flag: Optimized KEL flag data used to calulate KEL based parameters
+#'  \item optimized_kel_flag: Optimized KEL flag data used to calculate KEL based parameters
 #'  \item est_data: Calculated Estimated Parameters
 #' }
 #'
@@ -918,19 +928,19 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             dose[[d]] <- tmp_dose
           ###}
           ###if(comp_required[["AEPCTi"]]) {
-            ae_pct_i[[d]] <- aepct(ae = a_e, dose = dose_c_i[[d]])
+            ae_pct_i[[d]] <- aepct(a_e = a_e, dose = dose_c_i[[d]])
           ###}
           ###if(comp_required[["AETAUi"]]){
             tmp_amt <- amt[sort(unique(data_data[,map_data$ENDTIME]))[1:aet_len] %in% na.omit(tmp_df[,map_data$ENDTIME])]
             aetau_i[[d]] <- aetau(aet = tmp_amt, time = na.omit(tmp_df[,map_data$ENDTIME]), t = told[[d]]+tau[[d]], returnNA = FALSE)
           ###}
           ###if(comp_required[["AETAUPTi"]]) {
-          ###  aetau_pt_i[[d]] <- aepct(ae = aetau_i[[d]], dose = dose_c_i[[d]])
+          ###  aetau_pt_i[[d]] <- aepct(a_e = aetau_i[[d]], dose = dose_c_i[[d]])
           ###}
           if(isTRUE(dose_by_mass)){
             aetau_pt_i[[d]] <- NA
           } else {
-            aetau_pt_i[[d]] <- aepct(ae = aetau_i[[d]], dose = dose_c_i[[d]])
+            aetau_pt_i[[d]] <- aepct(a_e = aetau_i[[d]], dose = dose_c_i[[d]])
           }
           ###if(comp_required[["AURCT"]] && row_len > 2) {
           if(row_len > 2) {
@@ -1236,7 +1246,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                       first_kel_saved <- TRUE
                     }
                     if(isTRUE("KEL" %in% flag_df$VAR)){
-                      if(kel_tmp > kel_val){
+                      if(isTRUE(kel_tmp > kel_val)){
                         saved_kel_opt <- kel_opt
                         selected_idx <- match(sel_time, orig_time)
                       }

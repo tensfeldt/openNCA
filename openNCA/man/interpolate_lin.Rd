@@ -12,6 +12,17 @@ interpolate_lin(
   est_time = NULL
 )
 }
+\arguments{
+\item{conc1}{The first concentration data (given in a vector form)}
+
+\item{time1}{The first time data (given in a vector form)}
+
+\item{conc2}{The second concentration data (given in a vector form)}
+
+\item{time2}{The second time data (given in a vector form)}
+
+\item{est_time}{The estimated time data (given in a vector form)}
+}
 \description{
 interpolate_lin performs linear interpolation between two data points
 }

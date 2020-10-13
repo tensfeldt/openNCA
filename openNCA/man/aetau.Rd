@@ -13,6 +13,8 @@ aetau(aet = NULL, time = NULL, t = NULL, returnNA = TRUE)
 \item{time}{The time data (given in a vector form)}
 
 \item{t}{The post-dose time value (numeric value)}
+
+\item{returnNA}{Determines if NAs should be returned or not (logical value)}
 }
 \description{
 Cumulative amount of drug recovered unchanged in the urine during a dosing interval i post dose.

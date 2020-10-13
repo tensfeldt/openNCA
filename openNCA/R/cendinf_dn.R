@@ -29,7 +29,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' cendinf()
+#' #cendinf()
 #' #Error in cendinf: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47)
@@ -56,7 +56,7 @@
 #' conc_vector <- c(0, 0, 0)
 #' time_vector <- c(0, 1, 2)
 #'
-#' cendinf(conc = conc_vector, time = time_vector)
+#' cendinf(conc = conc_vector, time = time_vector, dof = NA)
 #' #NA
 #'
 #' cendinf_dn(cendinf = NA, dose = 200)

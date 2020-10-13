@@ -5,6 +5,8 @@
 #' @param data The dataframe that contains the raw data
 #' @param map The dataframe that contains the map data
 #' @param result The dataframe that contains the computation engine result data
+#' @param unit_class The value that determines for which unit class unit conversion will be applied (default: 'ALL')
+#' @param verbose The value that will print out additional details (logical value)
 #'
 #' @section Returns:
 #' \strong{List} \cr
@@ -93,14 +95,14 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
       
     if(length(TIMEUPARAM)>0 && parameter_required("^TIMEU$", names(map_data))){
       if(parameter_required(map_data$TIMEU, names(data_data))){
-        inputUnit1 <- as.character(unique(data_data[, map_data$TIMEU])[1])
+        inputUnit1 <- toupper(as.character(unique(data_data[, map_data$TIMEU])[1]))
         outputUnitLabel <- "TIMEOUTPUTUNIT"
         testunit <- is.element(outputUnitLabel, names(map))
         outputUnitFormat <- FALSE
         outputUnit1 <- NA
         
         if(testunit) {
-          outputUnit1 <- as.character(map_data[[outputUnitLabel]])
+          outputUnit1 <- toupper(as.character(map_data[[outputUnitLabel]]))
           outputUnitFormat <- length(outputUnit1)>0 & isTRUE(!is.na(outputUnit1))
         } 
         testunit <- testunit && outputUnitFormat
@@ -163,7 +165,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           conc_unit_tmp <- NA
         }
         if(length(grep("/", as.character(unique(data_data[, map_data$CONCU])))) > 0){
-          inputUnit2 <- as.character(conc_unit_tmp[1])
+          inputUnit2 <- toupper(as.character(conc_unit_tmp[1]))
         } else {
           inputUnit2 <- NA
         }
@@ -174,7 +176,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         outputUnit2 <- NA
         
         if(testunit) {
-            outputUnit2 <- as.character(map_data[[outputUnitLabel]])
+            outputUnit2 <- toupper(as.character(map_data[[outputUnitLabel]]))
             outputUnitFormat <- length(outputUnit2)>0 & isTRUE(!is.na(outputUnit2))
         }
         testunit <- testunit && outputUnitFormat
@@ -242,11 +244,11 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
               #Also based of 3.11 scope item (Based on tc1661_M1SD)
               if(length(unique(data_data[, as.character(map_data[,doseuvar])])) == 1){
                 if(length(grep("/", as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])) > 0)){
-                  inputUnit3 <- as.character(unlist(strsplit(as.character(unique(data_data[, as.character(map_data[,doseuvar[i]])])[1]), "/")))
+                  inputUnit3 <- toupper(as.character(unlist(strsplit(as.character(unique(data_data[, as.character(map_data[,doseuvar[i]])])[1]), "/"))))
                   dose_mass_input <- TRUE
                   dose_mass_output <- FALSE
                 } else {
-                  inputUnit3 <- as.character(unique(data_data[, map_data[, doseuvar[i]]])[1])
+                  inputUnit3 <- toupper(as.character(unique(data_data[, map_data[, doseuvar[i]]])[1]))
                   dose_mass_input <- FALSE
                   dose_mass_output <- FALSE
                 }
@@ -262,7 +264,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
               outputUnit3 <- NA
               
               if(testunit) {
-                  outputUnit3 <- as.character(map_data[[outputUnitLabel]])
+                  outputUnit3 <- toupper(as.character(map_data[[outputUnitLabel]]))
                   outputUnitFormat <- length(outputUnit3)>0 & isTRUE(!is.na(outputUnit3))
                   if(outputUnitFormat && isTRUE(dose_mass_input)) {
                     if(length(grep("/", outputUnit3)) > 0) { 
@@ -418,11 +420,11 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           if(parameter_required(map_data[,doseuvar], names(data_data))){
             if(length(unique(data_data[, as.character(map_data[,doseuvar])])) == 1){
               if(length(grep("/", as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])) > 0)){
-                inputUnit3 <- as.character(unlist(strsplit(as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1]), "/")))
+                inputUnit3 <- toupper(as.character(unlist(strsplit(as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1]), "/"))))
                 dose_mass_input <- TRUE
                 dose_mass_output <- FALSE
               } else {
-                inputUnit3 <- as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])
+                inputUnit3 <- toupper(as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1]))
                 dose_mass_input <- FALSE
                 dose_mass_output <- FALSE
               }
@@ -437,7 +439,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
             outputUnit3 <- ""
 
             if(testunit) {
-              outputUnit3 <- as.character(map_data[[outputUnitLabel]])
+              outputUnit3 <- toupper(as.character(map_data[[outputUnitLabel]]))
               outputUnitFormat <- length(outputUnit3)>0 & isTRUE(!is.na(outputUnit3))
               if(outputUnitFormat && isTRUE(dose_mass_input)) {
                 if(length(grep("/", outputUnit3)) > 0) { 
@@ -604,7 +606,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         } else {
           volume_unit_tmp <- NA
         }
-        inputUnit4 <- ifelse(length(as.character(volume_unit_tmp)) == 2, as.character(volume_unit_tmp[2]), NA)
+        inputUnit4 <- ifelse(length(as.character(volume_unit_tmp)) == 2, toupper(as.character(volume_unit_tmp[2])), NA)
 
         outputUnitLabel <- "VOLUMEOUTPUTUNIT"
         testunit <- is.element(outputUnitLabel, names(map))
@@ -612,7 +614,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         outputUnit4 <- NA
         
         if(testunit) {
-            outputUnit4 <- as.character(map_data[[outputUnitLabel]])
+            outputUnit4 <- toupper(as.character(map_data[[outputUnitLabel]]))
             outputUnitFormat <- length(outputUnit4)>0 & isTRUE(!is.na(outputUnit4))
         }
         testunit <- testunit && outputUnitFormat
@@ -678,7 +680,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           conc_unit_tmp <- NA
         }
         if(length(grep("/", as.character(unique(data_data[, map_data$CONCU])))) > 0){
-          inputUnit5 <- as.character(conc_unit_tmp)
+          inputUnit5 <- toupper(as.character(conc_unit_tmp))
         } else {
           inputUnit5 <- NA
         }
@@ -688,7 +690,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         outputUnit5 <- NA
         
         if(testunit) {
-            outputUnit5 <- as.character(map_data[[outputUnitLabel]])
+            outputUnit5 <- toupper(as.character(map_data[[outputUnitLabel]]))
             outputUnitFormat <- length(outputUnit5)>0 & isTRUE(!is.na(outputUnit5))
             if(outputUnitFormat) {
                 if(length(grep("/", outputUnit5)) > 0) { outputUnit5 <- unlist(strsplit(outputUnit5, "/")) } else { outputUnitFormat <- FALSE }
@@ -772,7 +774,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           parameter_required(map_data$TIMEU, names(data_data)))) {
         inputUnit6 <- NA
         outputUnit6 <- NA
-        if(parameter_required(map_data$TIMEU, names(data_data))) { inputUnit6 <- as.character(unique(data_data[,map_data$TIMEU])) }  
+        if(parameter_required(map_data$TIMEU, names(data_data))) { inputUnit6 <- toupper(as.character(unique(data_data[,map_data$TIMEU]))) }  
           outputUnit6 <- ifelse(!is.null(map_data$KELOUTPUTUNIT), ifelse(length(grep("/", map_data$KELOUTPUTUNIT)) > 0,
                          ifelse(as.character(unlist(strsplit(as.character(map_data$KELOUTPUTUNIT), "/")))[1] == "1",
                                 as.character(unlist(strsplit(as.character(map_data$KELOUTPUTUNIT), "/")))[2], NA), NA), NA)
@@ -785,7 +787,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
 
         numerator <- "1"
         if(testunit) {
-            baseUnit6 <- outputUnit6 <- as.character(map_data[[outputUnitLabel]])
+            baseUnit6 <- outputUnit6 <- toupper(as.character(map_data[[outputUnitLabel]]))
             outputUnitFormat <- length(outputUnit6)>0 & isTRUE(!is.na(outputUnit6))
             if(outputUnitFormat) { 
                 if(length(grep("/", outputUnit6) > 0)) {
@@ -852,7 +854,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         } else {
           clu_unit_tmp <- NA
         }
-        inputUnit7 <- c(as.character(clu_unit_tmp[2]), as.character(unique(data_data[, map_data$TIMEU])[[1]]))
+        inputUnit7 <- toupper(c(as.character(clu_unit_tmp[2]), as.character(unique(data_data[, map_data$TIMEU])[[1]])))
 
         outputUnitLabel <- "CLOUTPUTUNIT"
         testunit <- is.element(outputUnitLabel, names(map))
@@ -860,7 +862,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         outputUnit7 <- NA
       
         if(testunit) {
-            outputUnit7 <- as.character(map_data[[outputUnitLabel]])
+            outputUnit7 <- toupper(as.character(map_data[[outputUnitLabel]]))
             outputUnitFormat <- length(outputUnit7)>0 & isTRUE(!is.na(outputUnit7))
             if(outputUnitFormat) {
                 if(length(grep("/", outputUnit7)) > 0) { outputUnit7 <- unlist(strsplit(outputUnit7, "/")) } else { outputUnitFormat <- FALSE }
@@ -958,15 +960,15 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           auc_unit_tmp <- NA
         }
         
-        inputUnit8 <- c(as.character(auc_unit_tmp[1]), as.character(unique(data_data[, map_data$TIMEU])[[1]]), as.character(auc_unit_tmp[2]))
-        outputUnit8 <- ifelse(!is.null(map_data$AUCOUTPUTUNIT), unlist(strsplit(unlist(strsplit(as.character(map_data$AUCOUTPUTUNIT), "/")), "[.]")), NA)          
+        inputUnit8 <- toupper(c(as.character(auc_unit_tmp[1]), as.character(unique(data_data[, map_data$TIMEU])[[1]]), as.character(auc_unit_tmp[2])))
+        outputUnit8 <- ifelse(!is.null(map_data$AUCOUTPUTUNIT), toupper(unlist(strsplit(unlist(strsplit(as.character(map_data$AUCOUTPUTUNIT), "/")), "[.]"))), NA)          
         outputUnitLabel <- "AUCOUTPUTUNIT"
         testunit <- is.element(outputUnitLabel, names(map))
         outputUnitFormat <- FALSE
         outputUnit8 <- NA
         
         if(testunit) {
-            outputUnit8 <- as.character(map_data[[outputUnitLabel]])
+            outputUnit8 <- toupper(as.character(map_data[[outputUnitLabel]]))
             outputUnitFormat <- length(outputUnit8)>0 & isTRUE(!is.na(outputUnit8))
             if(outputUnitFormat) {
                 if(length(grep("/", outputUnit8)) > 0) { outputUnit8 <- unlist(strsplit(outputUnit8, "[./]", perl=TRUE)) } else { outputUnitFormat <- FALSE }
@@ -1068,7 +1070,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           aumc_unit_tmp <- NA
         }
         aumc_unit_tmp2 <- as.character(unique(data_data[, map_data$TIMEU])[[1]])
-        inputUnit9 <- c(as.character(aumc_unit_tmp[1]), aumc_unit_tmp2, aumc_unit_tmp2, as.character(aumc_unit_tmp[2]))
+        inputUnit9 <- toupper(c(as.character(aumc_unit_tmp[1]), aumc_unit_tmp2, aumc_unit_tmp2, as.character(aumc_unit_tmp[2])))
 
         outputUnitLabel <- "AUMCOUTPUTUNIT"
         testunit <- is.element(outputUnitLabel, names(map))
@@ -1076,7 +1078,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         outputUnit9 <- NA
         
         if(testunit) {
-            outputUnit9 <- as.character(map_data[[outputUnitLabel]])
+            outputUnit9 <- toupper(as.character(map_data[[outputUnitLabel]]))
             outputUnitFormat <- length(outputUnit9)>0 & isTRUE(!is.na(outputUnit9))
             if(outputUnitFormat) {
                 if(length(grep("/", outputUnit9)) > 0) { outputUnit9 <- unlist(strsplit(outputUnit9, "[./^]", perl=TRUE)) } else { outputUnitFormat <- FALSE }
@@ -1179,7 +1181,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         }
         aucdn_unit_tmp2 <- as.character(unique(data_data[, map_data$TIMEU])[[1]])
         aucdn_unit_tmp3 <- as.character(unique(data_data[, map_data[,unlist(strsplit(map_data$DOSEULIST, ";"))[1]]]))
-        inputUnit10 <- c(as.character(aucdn_unit_tmp[1]), aucdn_unit_tmp2, as.character(aucdn_unit_tmp[2]), aucdn_unit_tmp3)
+        inputUnit10 <- toupper(c(as.character(aucdn_unit_tmp[1]), aucdn_unit_tmp2, as.character(aucdn_unit_tmp[2]), aucdn_unit_tmp3))
 
         outputUnitLabel <- "AUCNORMOUTPUTUNIT"
         testunit <- is.element(outputUnitLabel, names(map))
@@ -1187,7 +1189,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         outputUnit10 <- NA
         
         if(testunit) {
-            outputUnit10 <- as.character(map_data[[outputUnitLabel]])
+            outputUnit10 <- toupper(as.character(map_data[[outputUnitLabel]]))
             outputUnitFormat <- length(outputUnit10)>0 & isTRUE(!is.na(outputUnit10))
             if(outputUnitFormat) {
                 if(length(grep("/", outputUnit10)) > 0) { outputUnit10 <- unlist(strsplit(outputUnit10, "[./^]", perl=TRUE)) } else { outputUnitFormat <- FALSE }
@@ -1302,7 +1304,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         } else {
           aurc_unit_tmp <- NA
         }
-        inputUnit11 <- c(as.character(aurc_unit_tmp[2]), as.character(aurc_unit_tmp[1]), as.character(aurc_unit_tmp[2]))
+        inputUnit11 <- toupper(c(as.character(aurc_unit_tmp[2]), as.character(aurc_unit_tmp[1]), as.character(aurc_unit_tmp[2])))
 
         outputUnitLabel <- "AUROUTPUTUNIT"
         testunit <- is.element(outputUnitLabel, names(map))
@@ -1310,7 +1312,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         outputUnit11 <- NA
         
         if(testunit) {
-            outputUnit11 <- as.character(map_data[[outputUnitLabel]])
+            outputUnit11 <- toupper(as.character(map_data[[outputUnitLabel]]))
             outputUnitFormat <- length(outputUnit11)>0 & isTRUE(!is.na(outputUnit11))
             if(outputUnitFormat) {
                 if(length(grep("/", outputUnit11)) > 0) { outputUnit11 <- unlist(strsplit(outputUnit11, "[./]", perl=TRUE)) } else { outputUnitFormat <- FALSE }
@@ -1410,7 +1412,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
             conc_unit_tmp <- NA
           }
           conc_unit_tmp2 <- as.character(unique(data_data[,map_data[,unlist(strsplit(map_data$DOSEULIST, ";"))[1]]]))
-          inputUnit12 <- c(as.character(conc_unit_tmp[1]), as.character(conc_unit_tmp[2]), conc_unit_tmp2)
+          inputUnit12 <- toupper(c(as.character(conc_unit_tmp[1]), as.character(conc_unit_tmp[2]), conc_unit_tmp2))
   
           outputUnitLabel <- "CONCNORMOUTPUTUNIT"
           testunit <- is.element(outputUnitLabel, names(map))
@@ -1418,7 +1420,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           outputUnit12 <- NA
           
           if(testunit) {
-              outputUnit12 <- as.character(map_data[[outputUnitLabel]])
+              outputUnit12 <- toupper(as.character(map_data[[outputUnitLabel]]))
               outputUnitFormat <- length(outputUnit12)>0 & isTRUE(!is.na(outputUnit12))
               if(outputUnitFormat) {
                   if(length(grep("/", outputUnit12)) > 0) { outputUnit12 <- unlist(strsplit(outputUnit12, "[./]", perl=TRUE)) } else { outputUnitFormat <- FALSE }
@@ -1508,7 +1510,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         } else {
           rate_unit_tmp <- NA
         }
-        inputUnit13 <- c(as.character(rate_unit_tmp[1]), as.character(unique(data_data[, map_data$TIMEU])[[1]]))
+        inputUnit13 <- toupper(c(as.character(rate_unit_tmp[1]), as.character(unique(data_data[, map_data$TIMEU])[[1]])))
 
         outputUnitLabel <- "RATEOUTPUTUNIT"
         testunit <- is.element(outputUnitLabel, names(map))
@@ -1516,7 +1518,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         outputUnit13 <- NA
         
         if(testunit) {
-            outputUnit13 <- as.character(map_data[[outputUnitLabel]])
+            outputUnit13 <- toupper(as.character(map_data[[outputUnitLabel]]))
             outputUnitFormat <- length(outputUnit13)>0 & isTRUE(!is.na(outputUnit13))
             if(outputUnitFormat) {
                 if(length(grep("/", outputUnit13)) > 0) { outputUnit13 <- unlist(strsplit(outputUnit13, "[/]", perl=TRUE)) } else { outputUnitFormat <- FALSE }
@@ -1619,9 +1621,9 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           vwu_unit_tmp <- NA
         }
         if(dose_by_weight){
-          inputUnit14 <- c(as.character(vwu_unit_tmp[2]), as.character(vwu_dose_unit_tmp[2]))
+          inputUnit14 <- toupper(c(as.character(vwu_unit_tmp[2]), as.character(vwu_dose_unit_tmp[2])))
         } else {
-          inputUnit14 <- c(as.character(vwu_unit_tmp[2]), as.character(unique(data_data[, map_data$NORMBSU])[1]))
+          inputUnit14 <- toupper(c(as.character(vwu_unit_tmp[2]), as.character(unique(data_data[, map_data$NORMBSU])[1])))
         }
 
         outputUnitLabel <- "VOLUMENORMOUTPUTUNIT"
@@ -1630,7 +1632,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         outputUnit14 <- NA
         
         if(testunit) {
-          outputUnit14 <- as.character(map_data[[outputUnitLabel]])
+          outputUnit14 <- toupper(as.character(map_data[[outputUnitLabel]]))
           outputUnitFormat <- length(outputUnit14)>0 & isTRUE(!is.na(outputUnit14))
           if(outputUnitFormat) {
               if(length(grep("/", outputUnit14)) > 0) { outputUnit14 <- unlist(strsplit(outputUnit14, "[/]", perl=TRUE)) } else { outputUnitFormat <- FALSE }
@@ -1732,6 +1734,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
     } else {
       result_data$VOLUMEWU <- NA
       if(length(VOLUMEWUPARAM) > 0){
+        print(VOLUMEWUPARAM)
         result_data[,names(result_data) %in% VOLUMEWUPARAM] <- NA
       }
       if(!("CONCU" %in% names(map_data) && "NORMBSU" %in% names(map_data))) {
@@ -1782,9 +1785,9 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
           clwu_unit_tmp <- NA
         }
         if(dose_by_weight){
-          inputUnit15 <- c(as.character(clwu_unit_tmp[2]), as.character(unique(data_data[, map_data$TIMEU])[[1]]), as.character(clwu_dose_unit_tmp[2]))
+          inputUnit15 <- toupper(c(as.character(clwu_unit_tmp[2]), as.character(unique(data_data[, map_data$TIMEU])[[1]]), as.character(clwu_dose_unit_tmp[2])))
         } else {
-          inputUnit15 <- c(as.character(clwu_unit_tmp[2]), as.character(unique(data_data[, map_data$TIMEU])[[1]]), as.character(unique(data_data[, map_data$NORMBSU])[1]))
+          inputUnit15 <- toupper(c(as.character(clwu_unit_tmp[2]), as.character(unique(data_data[, map_data$TIMEU])[[1]]), as.character(unique(data_data[, map_data$NORMBSU])[1])))
         }
         
         outputUnitLabel <- "CLNORMOUTPUTUNIT"
@@ -1793,7 +1796,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
         outputUnit15 <- NA
         
         if(testunit) {
-            outputUnit15 <- as.character(map_data[[outputUnitLabel]])
+            outputUnit15 <- toupper(as.character(map_data[[outputUnitLabel]]))
             outputUnitFormat <- length(outputUnit15)>0 & isTRUE(!is.na(outputUnit15))
             if(outputUnitFormat) {
                 if(length(grep("/", outputUnit15)) > 0) { outputUnit15 <- unlist(strsplit(outputUnit15, "[/]", perl=TRUE)) } else { outputUnitFormat <- FALSE }
@@ -1882,6 +1885,7 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
       } else {
         result_data$CLWU <- NA
         if(length(CLWUPARAM) > 0){
+          print(CLWUPARAM)
           result_data[,names(result_data) %in% CLWUPARAM] <- NA
         }
         if(!(map_data$CONCU %in% names(data_data) && map_data$TIMEU %in% names(data_data) && map_data$NORMBSU %in% names(data_data))) {

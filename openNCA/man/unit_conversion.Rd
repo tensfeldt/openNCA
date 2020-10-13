@@ -18,6 +18,10 @@ unit_conversion(
 \item{map}{The dataframe that contains the map data}
 
 \item{result}{The dataframe that contains the computation engine result data}
+
+\item{unit_class}{The value that determines for which unit class unit conversion will be applied (default: 'ALL')}
+
+\item{verbose}{The value that will print out additional details (logical value)}
 }
 \description{
 This function will compute all the relevant parameters for based specified fields provided via map argument.\cr

@@ -1,4 +1,4 @@
-#' Area under the concentration (AUC) versus time cruve from time 0 to time T
+#' Area under the concentration (AUC) versus time curve from time 0 to time T
 #'
 #' This function gets the area under the concentration versus time curve from time 0 to time T for
 #' all recorded times T.
@@ -17,7 +17,7 @@
 #' \strong{Methods:} You can use the following methods to calculate AUC: \cr
 #' \enumerate{
 #'  \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
-#'  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
+#'  first occurrence of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
 #'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
 #'  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
 #'  \item \strong{Log Trapazoidal Rule}: The log trapezoidal method is used for the entire profile. If
@@ -35,10 +35,10 @@
 #' @param time The time data (given in a vector form)
 #' @param method The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr
 #' \enumerate{
-#' \item Linear-Log Trapazoidal Rule (default)
-#' \item Linear Trapazoidal Rule
-#' \item Log Trapazoidal Rule
-#' \item Linear Up - Log DownTrapazoidal Rule
+#' \item Linear-Log Trapezoidal Rule (default)
+#' \item Linear Trapezoidal Rule
+#' \item Log Trapezoidal Rule
+#' \item Linear Up - Log Down Trapezoidal Rule
 #' }
 #' Note: check 'Methods' section below for more details \cr
 #' @param exflag The exclude flag data (given in a numeric vector)
@@ -65,7 +65,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' auc_t()
+#' #auc_t()
 #' #Error in auc_t: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28)

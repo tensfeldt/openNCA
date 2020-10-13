@@ -18,7 +18,7 @@ Midpoint of collection interval associated with last measurable (nonzero) rate
 
 \strong{Value} \cr 
 \itemize{
- \item MIDPTLAST: last measureable rate
+ \item MIDPTLAST: last measurable rate
 }
 }
 

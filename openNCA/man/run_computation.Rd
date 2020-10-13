@@ -26,6 +26,20 @@ run_computation(
 \item{flag}{The dataframe that contains the flag data}
 
 \item{parameterset}{set to either "PARAMETERLIST" or "PARAMETERDISPLAYLIST"}
+
+\item{return_merged_data_in}{The value that determines if only the merged raw data and flag data is returned (logical value)}
+
+\item{return_partitioned_data_in}{The value that determines if only the partitioned data is returned (logical value)}
+
+\item{merged_data_in_debug}{The value that determines the merged raw data and flag data is returned (logical value)}
+
+\item{partitioned_data_in_debug}{The value that determines the partitioned data is returned (logical value)}
+
+\item{raw_results_debug}{The value that determines the raw results is returned prior to unit conversion (logical value)}
+
+\item{optimize_kel_debug}{The value that determines the optimize kel analysis is returned (logical value)}
+
+\item{...}{Additional arguments}
 }
 \description{
 This function will compute all the relevant parameters for based specified fields provided via map argument.\cr

@@ -7,9 +7,9 @@
 cltauw(cltau = NULL, normbs = NULL)
 }
 \arguments{
-\item{normbs}{The dose data (numeric value)}
+\item{cltau}{The total body clearance (numeric value)}
 
-\item{clftau}{The total body clearance (numeric value)}
+\item{normbs}{The dose data (numeric value)}
 }
 \description{
 The total body clearance for intravascular administration, calculated using AUCTAU, divided by the weight.  \cr

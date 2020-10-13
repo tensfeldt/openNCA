@@ -2,7 +2,7 @@
 % Please edit documentation in R/mr_auc_tau.R
 \name{mr_auc_tau}
 \alias{mr_auc_tau}
-\title{Derived Metabolite of the area under the concentration versus time cruve from time 0 until the last time point}
+\title{Derived Metabolite of the area under the concentration versus time curve from time 0 until the last time point}
 \usage{
 mr_auc_tau(
   metabolite_auctau = NULL,
@@ -12,9 +12,9 @@ mr_auc_tau(
 )
 }
 \arguments{
-\item{metabolite_auctau}{The metabolite area under the concentration versus time cruve from time 0 until the last time point (numeric value)}
+\item{metabolite_auctau}{The metabolite area under the concentration versus time curve from time 0 until the last time point (numeric value)}
 
-\item{parent_auctau}{The parent area under the concentration versus time cruve from time 0 until the last time point (numeric value)}
+\item{parent_auctau}{The parent area under the concentration versus time curve from time 0 until the last time point (numeric value)}
 
 \item{parent_mw}{The parent molecular weight (numeric value)}
 

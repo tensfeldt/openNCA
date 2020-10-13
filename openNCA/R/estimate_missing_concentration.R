@@ -7,12 +7,18 @@
 #' @param auc_method The method specified for AUC (either 'LIN' or 'LOG')
 #' @param model The model specification (either 'M1', 'M2', 'M3', or 'M4')
 #' @param dosing_type The dosing type specification (either 'SD' or 'SS')
+#' @param dosing_interval The current dosing interval (numeric value)
+#' @param t_max The first time at which CMAXi is observed within the dosing interval (numeric value)
 #' @param told The time of last dose (given in a numeric value)
+#' @param prev_told The time of last dose from previous interval (given in a numeric value)
+#' @param prev_tau The time duration of previous dosing interval (given in a numeric value)
+#' @param last_crit_factor The criteria value for last time acceptance criteria (numeric value)
 #' @param kel The KEL value (given as a numeric)
 #' @param orig_conc The original (full) concentration data (given in a numeric vector)
 #' @param orig_time The original (full) time data (given in a numeric vector)
+#' @param orgtime The original time value from the map data ('nominal' or 'actual')
 #' 
-estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate = NULL, extrapolate = NULL, auc_method = NULL, model = NULL, dosing_type = NULL, t_max = NULL, told = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL) {
+estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate = NULL, extrapolate = NULL, auc_method = NULL, model = NULL, dosing_type = NULL, dosing_interval = NULL, t_max = NULL, told = NULL, prev_told = NULL, prev_tau = NULL, last_crit_factor = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL, orgtime = NULL) {
   if(is.null(auc_method)){
     stop("Error in estimate_missing_concentration: 'auc_method' is NULL")
   }
@@ -35,7 +41,7 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
     if(is.na(conc[1]) && i == 1){
       if(length(orig_time) > 0 && length(orig_conc) > 0){
         if(isTRUE(time[1] <= orig_time[1])){
-          est_tmp <- estimate_told_concentration(conc = conc, time = time, interpolate = interpolate, extrapolate = extrapolate, auc_method = "LIN", model = model, dosing_type = dosing_type, told = told, orig_conc = orig_conc, orig_time = orig_time, tmp = tmp)
+          est_tmp <- estimate_told_concentration(conc = conc, time = time, interpolate = interpolate, extrapolate = extrapolate, auc_method = "LIN", model = model, dosing_type = dosing_type, dosing_interval = dosing_interval, told = told, prev_told = prev_told, prev_tau = prev_tau, last_crit_factor = last_crit_factor, orig_conc = orig_conc, orig_time = orig_time, orgtime = orgtime, tmp = tmp)
           conc <- est_tmp[[1]]
           tmp <- est_tmp[[2]]
         } else if(isTRUE((orig_time[1] < time[1]) && (time[1] < orig_time[length(orig_time)]))){
@@ -50,9 +56,9 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
                   } else {
                     #FEEDBACK: Added code to account for interpolation between two 0 concentrations
                     if(isTRUE(orig_conc[idx] != 0 && orig_conc[idx+1] != 0)){
-                      conc[1] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                      conc[1] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
                     } else {
-                      conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                      conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
                     }
                   }
                 } else {
@@ -62,18 +68,18 @@ estimate_missing_concentration <- function(conc = NULL, time = NULL, interpolate
                 conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
               } else if(auc_method == "LOG"){
                 if(isTRUE(orig_conc[idx] != 0 && orig_conc[idx+1] != 0)){
-                  conc[1] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                  conc[1] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
                 } else {
-                  conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                  conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
                 }
               } else if(auc_method == "LINUP-LOGDOWN"){
                 if(isTRUE(orig_conc[idx] < orig_conc[idx+1])){
                   conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
                 } else {
                   if(isTRUE(orig_conc[idx] != 0 && orig_conc[idx+1] != 0)){
-                    conc[1] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                    conc[1] <- interpolate_log(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
                   } else {
-                    conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[nrow(tmp)])
+                    conc[1] <- interpolate_lin(conc1 = orig_conc[idx], time1 = orig_time[idx], conc2 = orig_conc[idx+1], time2 = orig_time[idx+1], est_time = time[1])
                   }
                 }
               }

@@ -18,12 +18,15 @@
 #' @param time The time data (given in a vector form)
 #' @param method The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr
 #' \enumerate{
-#' \item Linear-Log Trapazoidal Rule (default)
-#' \item Linear Trapazoidal Rule
-#' \item Log Trapazoidal Rule
-#' \item Linear Up - Log DownTrapazoidal Rule
+#' \item Linear-Log Trapezoidal Rule (default)
+#' \item Linear Trapezoidal Rule
+#' \item Log Trapezoidal Rule
+#' \item Linear Up - Log Down Trapezoidal Rule
 #' }
 #' Note: check 'Methods' section below for more details \cr
+#' @param kelflag The KEL exclude flag data (given in a numeric vector)
+#' @param aucflag The AUC exclude flag data (given in a numeric vector)
+#' @param auc_info The area under the concentration versus time curve from time 0 to infinity (Observed) (numeric value)
 #'
 #' @section Returns:
 #' \strong{Value} \cr
@@ -50,7 +53,7 @@
 #' #    TIME = ...,
 #' #    RESULT = ...
 #' #)
-#' data <- data.frame(SID=rep(30, 6), TIME = c(0,1,2,3,4), CONC=c(2.89,2.49,2.47,2.38,2.32,2.28))
+#' data <- data.frame(SID=rep(30, 6), TIME = c(0,1,2,3,4,5), CONC=c(2.89,2.49,2.47,2.38,2.32,2.28))
 #' #Same data as above, just represented as a dataframe
 #'
 #' #auc_XpctO()

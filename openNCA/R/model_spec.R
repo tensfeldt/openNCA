@@ -11,7 +11,7 @@
 #' \strong{FALSE} \cr
 #'
 #' @examples
-#' No appropriate examples
+#' #No appropriate examples
 #'
 #' @author
 #' \itemize{

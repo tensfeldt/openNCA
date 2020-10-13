@@ -51,7 +51,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' kel()
+#' #kel_r()
 #' #Error in kel_r: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47)

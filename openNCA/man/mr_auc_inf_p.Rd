@@ -2,7 +2,7 @@
 % Please edit documentation in R/mr_auc_inf_p.R
 \name{mr_auc_inf_p}
 \alias{mr_auc_inf_p}
-\title{Derived Metabolite of the area under the concentration versus time cruve from time 0 to infinity (Predicted)}
+\title{Derived Metabolite of the area under the concentration versus time curve from time 0 to infinity (Predicted)}
 \usage{
 mr_auc_inf_p(
   metabolite_aucinfp = NULL,
@@ -12,9 +12,9 @@ mr_auc_inf_p(
 )
 }
 \arguments{
-\item{metabolite_aucinfp}{The metabolite area under the concentration versus time cruve from time 0 to infinity (Predicted) (numeric value)}
+\item{metabolite_aucinfp}{The metabolite area under the concentration versus time curve from time 0 to infinity (Predicted) (numeric value)}
 
-\item{parent_aucinfp}{The parent area under the concentration versus time cruve from time 0 to infinity (Predicted) (numeric value)}
+\item{parent_aucinfp}{The parent area under the concentration versus time curve from time 0 to infinity (Predicted) (numeric value)}
 
 \item{parent_mw}{The parent molecular weight (numeric value)}
 

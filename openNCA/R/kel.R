@@ -24,7 +24,7 @@
 #' by user at the time of primary parameter computaitons via interactive concentration-time plots(refer to KEL
 #' tab on the front end) \cr \cr
 #' Set time of last dose TDOSE to 0 and shift T accordingly in calculation of KEL. This impacts the C0 the intercept
-#' used in other paramerter calculations AUCINF \cr \cr
+#' used in other parameter calculations AUCINF \cr \cr
 #' \strong{Equation for KEL}\cr \eqn{KEL = S x -1} \cr \cr
 #' \strong{Terminal Phase Half-Life Equation} \cr
 #' \figure{thalf.png} \cr
@@ -56,7 +56,7 @@
 #' \itemize{
 #'  \item KEL: maximum observed concentration
 #'  \item KELCO: the intercept on natural log of plasma drug concentration axis (y-intercept)
-#'  \item KELTMLO: intial timepoint used in the calculation of KEL
+#'  \item KELTMLO: initial timepoint used in the calculation of KEL
 #'  \item KELTMHI: final timepoint used in the calculation of KEL
 #'  \item KELNOPT: number of time points used in the calculation of KEL
 #'  \item THALF: terminal phase half-life
@@ -80,7 +80,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' kel()
+#' #kel()
 #' #Error in kel: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47)

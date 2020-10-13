@@ -14,7 +14,7 @@
 #'
 #' @section Additional Details:
 #'
-#' @param clftau The total body clearance (numeric value)
+#' @param cltau The total body clearance (numeric value)
 #' @param normbs The dose data (numeric value)
 #'
 #' @section Returns:

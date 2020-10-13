@@ -15,6 +15,11 @@
 #' @param amt The amount data (given in a vector form) either represents the volume or weight
 #' @param time The time data (given in a vector form)
 #' @param t The post-dose time value (numeric value)
+#' @param orig_time The original time data (given in a vector form)
+#' @param curr_time The current time data (given in a vector form)
+#' @param all_time The time data for given profile (given in a vector form)
+#' @param end_time The end time data (given in a vector form)
+#' @param returnNA Determines if NAs should be returned or not (given in a logical form)
 #'
 #' @section Returns:
 #' \strong{Value} \cr

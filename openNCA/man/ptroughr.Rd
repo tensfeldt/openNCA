@@ -45,7 +45,7 @@ The maximum concentration during the ith dosing interval divided by the pre-dose
 
 #Data mentioned will be used for the following example
 
-ctrough()
+#ctrough()
 #Error in ctrough: 'conc' and 'time' vectors are NULL
 
 conc_vector <- c(2.89, 2.49, 2.47)

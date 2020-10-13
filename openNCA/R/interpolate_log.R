@@ -1,5 +1,11 @@
 #' interpolate_log performs log-linear interpolation between two data points
 #' 
+#' @param conc1 The first concentration data (given in a vector form)
+#' @param time1 The first time data (given in a vector form)
+#' @param conc2 The second concentration data (given in a vector form)
+#' @param time2 The second time data (given in a vector form)
+#' @param est_time The estimated time data (given in a vector form)
+#' 
 #' @export
 interpolate_log <- function(conc1 = NULL, time1 = NULL, conc2 = NULL, time2 = NULL, est_time = NULL){
 ### 2019-10-18/TGT/ change error messages from "inerpolate_log" to "interpolate_log"

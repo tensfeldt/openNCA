@@ -5,9 +5,9 @@
 #' @param rate The rate data (given in a vector form)
 #' 
 #' @section Returns:
-#' \strong{Value} \cr 
+#' \strong{Value} \cr
 #' \itemize{
-#'  \item RATELAST: last measureable rate
+#'  \item RATELAST: last measurable rate
 #' }
 #' 
 #' @examples 

@@ -4,7 +4,7 @@
 #' concentrations are decreasing; the assessment is made on a step by step basis for
 #' each portion of the profile i.e. t1 to t2. If Ci or Ci+1 is 0 then the linear trapezoidal
 #' rule is used.
-#' 
+#'
 #' @param conc The concentration data (given in a vector form)
 #' @param time The time data (given in a vector form)
 #' @param exflag The exclude flag data (given in a numeric vector)

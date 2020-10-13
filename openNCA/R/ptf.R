@@ -11,7 +11,7 @@
 #' \eqn{CMINi = Minimum observed concentration} \cr  
 #' \eqn{CAVi = Average concentration at steady-state for interval i} \cr 
 #' 
-#' @param cmax The maxium observed concentration data (given in a vector form) 
+#' @param cmax The maximum observed concentration data (given in a vector form) 
 #' @param cmin The minimum observed concentration data (given in a vector form)
 #' @param cav The average concentration data (given in a vector form)
 #' 

@@ -12,9 +12,14 @@ estimate_told_concentration(
   auc_method = NULL,
   model = NULL,
   dosing_type = NULL,
+  dosing_interval = NULL,
   told = NULL,
+  prev_told = NULL,
+  prev_tau = NULL,
+  last_crit_factor = NULL,
   orig_conc = NULL,
   orig_time = NULL,
+  orgtime = NULL,
   tmp = NULL
 )
 }
@@ -33,11 +38,23 @@ estimate_told_concentration(
 
 \item{dosing_type}{The dosing type specification (either 'SD' or 'SS')}
 
+\item{dosing_interval}{The current dosing interval (numeric value)}
+
 \item{told}{The time of last dose (given in a numeric value)}
+
+\item{prev_told}{The time of last dose from previous interval (given in a numeric value)}
+
+\item{prev_tau}{The time duration of previous dosing interval (given in a numeric value)}
+
+\item{last_crit_factor}{The criteria value for last time acceptance criteria (numeric value)}
 
 \item{orig_conc}{The original (full) concentration data (given in a numeric vector)}
 
 \item{orig_time}{The original (full) time data (given in a numeric vector)}
+
+\item{orgtime}{The original time value from the map data ('nominal' or 'actual')}
+
+\item{tmp}{The helper variable (used for internal calls)}
 }
 \description{
 Helper Function for Estimating TOLD Concentration Data

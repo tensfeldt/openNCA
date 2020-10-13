@@ -1,4 +1,4 @@
-#' Derived Metabolite of the area under the concentration versus time cruve from time 0 to infinity (Predicted)
+#' Derived Metabolite of the area under the concentration versus time curve from time 0 to infinity (Predicted)
 #'
 #' This function gets derived metabolite of the area under the concentration versus time curve from time 0 to
 #' infinity (Predicted).\cr
@@ -13,8 +13,8 @@
 #' \strong{mw_parent}: Molecular Weight (parent)
 #' \strong{mw_metabolite}: Molecular Weight (metabolite)
 #'
-#' @param metabolite_aucinfp The metabolite area under the concentration versus time cruve from time 0 to infinity (Predicted) (numeric value)
-#' @param parent_aucinfp The parent area under the concentration versus time cruve from time 0 to infinity (Predicted) (numeric value)
+#' @param metabolite_aucinfp The metabolite area under the concentration versus time curve from time 0 to infinity (Predicted) (numeric value)
+#' @param parent_aucinfp The parent area under the concentration versus time curve from time 0 to infinity (Predicted) (numeric value)
 #' @param parent_mw The parent molecular weight (numeric value)
 #' @param metabolite_mw The metabolite molecular weight (numeric value)
 #'

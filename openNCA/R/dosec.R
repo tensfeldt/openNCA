@@ -8,6 +8,7 @@
 #'
 #' @param data The dataframe that contains the raw data
 #' @param map The dataframe that contains the map data
+#' @param idose The current dosing interval 
 #'
 #' @section Returns:
 #' \strong{Value} \cr
@@ -16,7 +17,7 @@
 #' }
 #'
 #' @examples
-#' No appropriate examples
+#' #No appropriate examples
 #'
 #' @author
 #' \itemize{
@@ -51,7 +52,7 @@ dosec <- function(data = NULL, map = NULL, idose = NULL){
   ### Concentration Units from data_data
   xconcu <- unique(data_data[,map_data$CONCU])
   ### Determine amount unit for concentration, i.e. if CONCU is "NG/ML" return "NG"
-  k <- regexpr("(?<concamtu>[a-zA-Z]{1,2})/[a-zA-Z]{1,2}", xconcu, ignore.case=TRUE, perl=TRUE)
+  k <- regexpr("(?<concamtu>[a-zA-Z]{1,3})/[a-zA-Z]{1,2}", xconcu, ignore.case=TRUE, perl=TRUE)
 
   concamtu <- as.character(unlist(unique(parse.reg(xconcu, k))))
   

@@ -24,7 +24,7 @@
 #' @param kel The terminal phase rate constant for the concentration-time profile of interest (numeric value)
 #' @param cmax The cmax data (numeric value)
 #' @param c0 The c0 data (numeric value)
-#' @param t_max The first time at which CMAXi is observed within the dosing interval (numeric value)
+#' @param tmax The first time at which CMAXi is observed within the dosing interval (numeric value)
 #'
 #' @section Returns:
 #' \strong{Value} \cr
@@ -45,7 +45,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' cmax()
+#' #cmax()
 #' #Error in cmax: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47)

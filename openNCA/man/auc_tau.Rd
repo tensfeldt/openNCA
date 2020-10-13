@@ -2,7 +2,7 @@
 % Please edit documentation in R/auc_tau.R
 \name{auc_tau}
 \alias{auc_tau}
-\title{Area under the concentration versus time cruve from time 0 until the last time point}
+\title{Area under the concentration versus time curve from time 0 until the last time point}
 \usage{
 auc_tau(
   conc = NULL,
@@ -18,7 +18,7 @@ auc_tau(
   kel = NULL,
   auclast = NULL,
   lasttime = NULL,
-  orgtime = "NOMINAL",
+  orgtime = "nominal",
   nom_time = NULL,
   ctoldest = NULL
 )
@@ -48,12 +48,26 @@ Note: check 'Methods' section below for more details \cr}
 \item{orig_conc}{The original (full) concentration data (given in a numeric vector)}
 
 \item{orig_time}{The original (full) time data (given in a numeric vector)}
+
+\item{last_crit_factor}{The criteria value for last time acceptance criteria (numeric value)}
+
+\item{kel}{The terminal phase rate constant for the concentration-time profile of interest (numeric value)}
+
+\item{auclast}{The area under the concentration versus time curve from zero time until the time (TLAST) of the last measurable concentration (CLASTi) during the ith dosing interval (numeric value)}
+
+\item{lasttime}{The time of the last measured concentration point of the profile (numeric value)}
+
+\item{orgtime}{The original time value from the map data ('nominal' or 'actual')}
+
+\item{nom_time}{The nominal time data (given in a vector form)}
+
+\item{ctoldest}{The estimated concentration at the time of last dose (numeric value)}
 }
 \description{
 This function gets the area under the concentration versus time curve from time 0 until the last
 time point. As illustrated in the following figure, AUC_ALL includes the trapezoidal area from the
 time of the last measurable concentration to the next time point. Although there may be additional
-time points, there is no additonal AUC since by defination all subsequent concentrations are zero.\cr
+time points, there is no additional AUC since by definition all subsequent concentrations are zero.\cr
 \figure{auc_all.png}
 }
 \details{
@@ -70,7 +84,7 @@ time points, there is no additonal AUC since by defination all subsequent concen
 \strong{Methods:} You can use the following methods to calculate AUC: \cr
 \enumerate{
  \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
- first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
+ first occurrence of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
  \item \strong{Log Trapazoidal Rule}: The log trapezoidal method is used for the entire profile. If
@@ -112,24 +126,26 @@ If 'orig_conc' input is optional and is needed to interpolate missing data point
 
 #Data mentioned will be used for the following example
 
-auc_tau()
+#auc_tau()
 #Error in auc_tau: 'conc' and 'time' vectors are NULL
 
 conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28)
 time_vector <- c(0, 1, 2, 3, 4, 5)
 tau_val <- 5
+told_val <- 0
 
-auc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #12.23956
 
 tau_val <- 2
 
-auc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+#auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #Error in auc_tau(conc = conc_vector, time = time_vector, tau = tau_val) :
-#  Error in auc_tau: 'orig_conc' and 'orig_time' vectors are NULL, cannot interpolate data if original data is not provided!
+#  Error in auc_tau: 'orig_conc' and 'orig_time' vectors are NULL, 
+#  cannot interpolate data if original data is not provided!
 
-auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, orig_conc = conc_vector,
-        orig_time = time_vector)
+auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val,
+        orig_conc = conc_vector, orig_time = time_vector)
 #12.23956
 
 ############
@@ -147,8 +163,9 @@ auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, orig_conc = conc_
 conc_vector <- c(0, 0, 0)
 time_vector <- c(0, 1, 2)
 tau_val <- 2
+told_val <- 0
 
-auc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #0
 
 ############
@@ -166,8 +183,9 @@ auc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
 conc_vector <- c(1.19, 1.23, 1.34)
 time_vector <- c(0, 1, 2)
 tau_val <- 2
+told_val <- 0
 
-auc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #2.495
 
 }

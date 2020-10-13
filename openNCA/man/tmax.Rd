@@ -10,11 +10,13 @@ tmax(conc = NULL, time = NULL, told = NULL)
 \item{conc}{The concentration data (given in a vector form)}
 
 \item{time}{The time data (given in a vector form)}
+
+\item{told}{The time of last dose (given in a numeric value)}
 }
 \description{
 This function gets the first time at which CMAXi is observed within a dosing interval
 and is obtained by the inspection of the data. In the case of multiple dosing, TMAXi is obtained
-by inspection of the data during the dose inteval i.
+by inspection of the data during the dose interval i.
 }
 \details{
 If all the concentrations are 0's then TMAXi will return NA.
@@ -43,7 +45,7 @@ are also of the same length. \cr
 
 #Data mentioned will be used for the following example
 
-tmax()
+#tmax()
 #Error in tmax: 'conc' and 'time' vectors are NULL
 
 conc_vector <- c(2.89, 2.49, 2.47)

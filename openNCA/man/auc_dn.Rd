@@ -31,7 +31,7 @@ until the last time point.
 \strong{Methods:} You can use the following methods to calculate AUC: \cr
 \enumerate{
  \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
- first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
+ first occurrence of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
  \item \strong{Log Trapazoidal Rule}: The log trapezoidal method is used for the entire profile. If

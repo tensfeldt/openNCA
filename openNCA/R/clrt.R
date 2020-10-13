@@ -21,11 +21,11 @@
 #' }
 #'
 #' @examples
-#' clrt()
-#' #Error in clr: 'aet' and 'auct' vectors are NULL
+#' #clrt()
+#' #Error in clrt: 'aet' and 'auct' vectors are NULL
 #' 
-#' clr(aet = 9.335, ae = 1.234)
-#' #0.1321907
+#' clrt(aet = 9.335, auct = 1.234)
+#' #7.56483
 #' 
 #' @author
 #' \itemize{

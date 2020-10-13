@@ -142,7 +142,7 @@ aetpct <- function(aet = NULL, dose = NULL){
     stop("Error in aetpct: 'dose' is not a numeric vector")
   }
 
-  if(is.na(dose) || (0 %in% dose) || is.na(aet)) {
+  if(isTRUE(any(is.na(dose)) || (0 %in% dose) || any(is.na(aet)))) {
     aet_pct <- NA
   } else {
     aet_pct <- (aet/dose) * 100

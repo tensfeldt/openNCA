@@ -38,7 +38,7 @@ Single Dose Equation:
 }
 
 \examples{
-cav()
+#cav()
 #Error in cav: 'auctau' and 'tau' vectors are NULL
 
 cav(auctau = 15.679, tau = 12)

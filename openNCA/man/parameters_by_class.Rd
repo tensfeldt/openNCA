@@ -9,9 +9,9 @@ parameters_by_class(unitclass, checklist, dl = create_dependency_list())
 \arguments{
 \item{unitclass}{Unit Class}
 
-\item{dl}{Dependency List (Please refer to \code{\link{create_dependency_list}})}
+\item{checklist}{The character vector of parameter names from the PARAMETERLIST of the Model Configuration Template}
 
-\item{check_list}{The character vector of parameter names from the PARAMETERLIST of the Model Configuration Template}
+\item{dl}{Dependency List (Please refer to \code{\link{create_dependency_list}})}
 }
 \description{
 This function returns the list of parameters based on the each Unit Class

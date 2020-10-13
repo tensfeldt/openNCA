@@ -1,4 +1,4 @@
-#' Derived Metabolite of the area under the concentration versus time cruve from time 0 until the last time point
+#' Derived Metabolite of the area under the concentration versus time curve from time 0 until the last time point
 #'
 #' This function gets derived metabolite of the area under the concentration versus time curve from time 0 until the last
 #' time point.\cr
@@ -13,8 +13,8 @@
 #' \strong{mw_parent}: Molecular Weight (parent)
 #' \strong{mw_metabolite}: Molecular Weight (metabolite)
 #'
-#' @param metabolite_auctau The metabolite area under the concentration versus time cruve from time 0 until the last time point (numeric value)
-#' @param parent_auctau The parent area under the concentration versus time cruve from time 0 until the last time point (numeric value)
+#' @param metabolite_auctau The metabolite area under the concentration versus time curve from time 0 until the last time point (numeric value)
+#' @param parent_auctau The parent area under the concentration versus time curve from time 0 until the last time point (numeric value)
 #' @param parent_mw The parent molecular weight (numeric value)
 #' @param metabolite_mw The metabolite molecular weight (numeric value)
 #'

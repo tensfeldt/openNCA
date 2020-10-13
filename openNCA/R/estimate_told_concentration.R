@@ -7,11 +7,17 @@
 #' @param auc_method The method specified for AUC (either 'LIN' or 'LOG')
 #' @param model The model specification (either 'M1', 'M2', 'M3', or 'M4')
 #' @param dosing_type The dosing type specification (either 'SD' or 'SS')
+#' @param dosing_interval The current dosing interval (numeric value)
 #' @param told The time of last dose (given in a numeric value)
+#' @param prev_told The time of last dose from previous interval (given in a numeric value)
+#' @param prev_tau The time duration of previous dosing interval (given in a numeric value)
+#' @param last_crit_factor The criteria value for last time acceptance criteria (numeric value)
 #' @param orig_conc The original (full) concentration data (given in a numeric vector)
 #' @param orig_time The original (full) time data (given in a numeric vector)
+#' @param orgtime The original time value from the map data ('nominal' or 'actual')
+#' @param tmp The helper variable (used for internal calls)
 #' 
-estimate_told_concentration <- function(conc = NULL, time = NULL, interpolate = NULL, extrapolate = NULL, auc_method = NULL, model = NULL, dosing_type = NULL, told = NULL, orig_conc = NULL, orig_time = NULL, tmp = NULL) {
+estimate_told_concentration <- function(conc = NULL, time = NULL, interpolate = NULL, extrapolate = NULL, auc_method = NULL, model = NULL, dosing_type = NULL, dosing_interval = NULL, told = NULL, prev_told = NULL, prev_tau = NULL, last_crit_factor = NULL, orig_conc = NULL, orig_time = NULL, orgtime = NULL, tmp = NULL) {
   if(is.null(auc_method)){
     stop("Error in estimate_told_concentration: 'auc_method' is NULL")
   }
@@ -29,6 +35,7 @@ estimate_told_concentration <- function(conc = NULL, time = NULL, interpolate = 
     tmp <- data.frame("CONC" = conc, "TIME" = time, "INT_EXT" = NA) 
   }
 
+  conc_s_tmp <- NULL
   if(model == "M2"){
     if(nrow(tmp) >= 2){
       k <- (log(na.omit(tmp)[["conc"]][2])-log(na.omit(tmp)[["conc"]][1]))/(na.omit(tmp)[["time"]][2]-na.omit(tmp)[["time"]][1])
@@ -46,12 +53,59 @@ estimate_told_concentration <- function(conc = NULL, time = NULL, interpolate = 
     if(dosing_type == "SD"){
       conc_s_tmp <- 0
     } else if(dosing_type == "SS"){
-      conc_s_tmp <- cmin(conc = conc, time = time)
+      if(tolower(orgtime) == "actual"){
+        time_min_range <- ifelse(!is.null(last_crit_factor), as.numeric(last_crit_factor) * prev_tau, NA)
+        
+        #Find the concentration/time value closest to TOLD
+        if(length(which(time == told)) > 0){
+          tmp_told <- time[which(time == told)]
+          tmp_ctold <- conc[which(time == told)]
+          if(isTRUE(is.na(tmp_ctold))){
+            if(length(which(time < told)) > 0){
+              tmp_told <- time[which(time < told)]
+              tmp_told <- ifelse(isTRUE(length(tmp_told) > 0), tmp_told[length(tmp_told)], NA)
+              tmp_ctold <- conc[which(time == tmp_told)]
+            }
+          }
+        } else if(length(which(time < told)) > 0){
+          tmp_told <- time[which(time < told)]
+          tmp_told <- ifelse(isTRUE(length(tmp_told) > 0), tmp_told[length(tmp_told)], NA)
+          tmp_ctold <- conc[which(time == tmp_told)]
+        } else {
+          tmp_told <- told
+          tmp_ctold <- NA
+        }
+        if(isTRUE(dosing_interval == 1)){
+          adj_time <- as.numeric(tmp_told)
+        } else {
+          adj_time <- as.numeric(tmp_told - prev_told)
+        }
+        if(!is.na(tmp_ctold)){
+          if(isTRUE(time_min_range <= tmp_told && tmp_told <= prev_tau)){
+            conc_s_tmp <- ifelse(isTRUE(length(tmp_ctold) > 0), tmp_ctold[length(tmp_ctold)], NA)
+          } else {
+            conc_s_tmp <- cmin(conc = conc, time = time)
+          }
+        } else {
+          conc_s_tmp <- cmin(conc = conc, time = time)
+        }
+      } else {
+        conc_s_tmp <- cmin(conc = conc, time = time)
+      }
     }
   }
-  if(isTRUE(time[1] == told)){
+  
+  ctold_missing <- TRUE
+  if(length(which(time == told)) > 0){
+    orig_told <- time[which(time == told)]
+    orig_ctold <- conc[which(time == told)]
+    if(isTRUE(!is.na(orig_ctold))){
+      ctold_missing <- TRUE
+    }
+  }
+  if(isTRUE(ctold_missing)){
     if(isTRUE(extrapolate) && !is.null(conc_s_tmp)){
-      conc[1] <- conc_s_tmp
+      conc[which(time == told)] <- conc_s_tmp
       tmp$INT_EXT[1] <- "EXT" 
     }
   } else {

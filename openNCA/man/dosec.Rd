@@ -10,6 +10,8 @@ dosec(data = NULL, map = NULL, idose = NULL)
 \item{data}{The dataframe that contains the raw data}
 
 \item{map}{The dataframe that contains the map data}
+
+\item{idose}{The current dosing interval}
 }
 \description{
 DOSEC - DOSEADJ - Dose Scaled to Concentration Units
@@ -30,7 +32,7 @@ unit_conversion is used for DOSE unit scaling. \cr
 }
 
 \examples{
-No appropriate examples
+#No appropriate examples
 
 }
 \author{

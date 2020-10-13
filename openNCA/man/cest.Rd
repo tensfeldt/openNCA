@@ -21,7 +21,13 @@ cest(
 
 \item{kelflag}{The KEL exclude flag data (given in a numeric vector)}
 
-\item{t_last}{The time of last measureable (non-zero) plasma concentration (numeric value)}
+\item{t_last}{The time of last measurable (non-zero) plasma concentration (numeric value)}
+
+\item{spanratio}{The SPAN Ratio (numeric value)}
+
+\item{kel}{The terminal phase rate constant for the concentration-time profile of interest (numeric value)}
+
+\item{kelc0}{The intercept on natural log of plasma drug concentration axis (y-intercept) (numeric value)}
 }
 \description{
 Calculate the predicted concentration (CEST) at the time of the last measurable concentration
@@ -66,14 +72,15 @@ The inputs 'kelflag', 'tlast', 'spanratio' and 'kel' are optional.\cr
 ##   30  ##    5   ##   2.28   ##
 #################################
 
-data <- data.frame(
-    SID = ...,
-    TIME = ...,
-    RESULT = ...
-)
+#data <- data.frame(
+#    SID = ...,
+#    TIME = ...,
+#    RESULT = ...
+#)
+data <- data.frame(SID=rep(30, 6), TIME = c(0,1,2,3,4,5), CONC=c(2.89,2.49,2.47,2.38,2.32,2.28))
 #Same data as above, just represented as a dataframe
 
-cest()
+#cest()
 #Error in cest: 'conc' and 'time' vectors are NULL
 
 conc_vector <- data$CONC

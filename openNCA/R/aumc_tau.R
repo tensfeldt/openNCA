@@ -1,4 +1,4 @@
-#' Area under the concentration versus time cruve from time 0 until the dosing interval i
+#' Area under the concentration versus time curve from time 0 until the dosing interval i
 #'
 #' This function gets the area under the concentration versus time curve from time 0 until the dosing
 #' interval i.
@@ -17,7 +17,7 @@
 #' \strong{Methods:} You can use the following methods to calculate AUC: \cr
 #' \enumerate{
 #'  \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
-#'  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
+#'  first occurrence of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
 #'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
 #'  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
 #'  \item \strong{Log Trapazoidal Rule}: The log trapezoidal method is used for the entire profile. If
@@ -37,10 +37,10 @@
 #' @param time The time data (given in a vector form)
 #' @param method The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr
 #' \enumerate{
-#' \item Linear-Log Trapazoidal Rule (default)
-#' \item Linear Trapazoidal Rule
-#' \item Log Trapazoidal Rule
-#' \item Linear Up - Log DownTrapazoidal Rule
+#' \item Linear-Log Trapezoidal Rule (default)
+#' \item Linear Trapezoidal Rule
+#' \item Log Trapezoidal Rule
+#' \item Linear Up - Log Down Trapezoidal Rule
 #' }
 #' Note: check 'Methods' section below for more details \cr
 #' @param exflag The exclude flag data (given in a numeric vector)
@@ -48,7 +48,8 @@
 #' @param t_max The first time at which CMAXi us observed within a dosing interval (numeric value)s
 #' @param orig_conc The original (full) concentration data (given in a numeric vector)
 #' @param orig_time The original (full) time data (given in a numeric vector)
-#'
+#' @param returnNA Determines if NAs should be returned or not (logical value)
+#' 
 #' @section Returns:
 #' \strong{Value} \cr
 #' \itemize{
@@ -71,7 +72,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' aumc_tau()
+#' #aumc_tau()
 #' #Error in aumc_tau: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28)
@@ -83,11 +84,13 @@
 #'
 #' tau_val <- 2
 #'
-#' aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+#' #aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
 #' #Error in aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val) :
-#' #Error in aumc_tau: 'orig_conc' and 'orig_time' vectors are NULL, cannot interpolate data if original data is not provided!
+#' #  Error in aumc_tau: 'orig_conc' and 'orig_time' vectors are NULL, 
+#' #  cannot interpolate data if original data is not provided!
 #'
-#' aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, orig_conc = conc_vector, orig_time = time_vector)
+#' aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, 
+#'          orig_conc = conc_vector, orig_time = time_vector)
 #' #29.64777
 #'
 #' ############

@@ -1,6 +1,6 @@
 #' Estimate concentrations from results of linear regression of the time-conc data
 #'
-#' @param tine The vector of time point data
+#' @param time The vector of time point data
 #' @param conc The vector of concentration data
 #' @param slope The slope of the log-lin regression of the time-conc data generated following selection of the data points
 #'

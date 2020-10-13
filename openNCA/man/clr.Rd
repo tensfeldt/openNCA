@@ -4,12 +4,12 @@
 \alias{clr}
 \title{The clearance of a substance from the blood by the kidneys}
 \usage{
-clr(aucinfp = NULL, ae = NULL)
+clr(aucinfp = NULL, a_e = NULL)
 }
 \arguments{
-\item{aucinfp}{The area under the concentration versus time cruve from time 0 to infinity (Predicted) (numeric value)}
+\item{aucinfp}{The area under the concentration versus time curve from time 0 to infinity (Predicted) (numeric value)}
 
-\item{ae}{Cumulative total amount of drug (numeric value)}
+\item{a_e}{Cumulative total amount of drug (numeric value)}
 }
 \description{
 The clearance of a substance from the blood by the kidneys
@@ -34,10 +34,10 @@ Calculated for single dose studies.
 }
 
 \examples{
-clr()
-#Error in clr: 'aucinfp' and 'ae' vectors are NULL
+#clr()
+#Error in clr: 'aucinfp' and 'a_e' vectors are NULL
 
-clr(aucinfp = 9.335, ae = 1.234)
+clr(aucinfp = 9.335, a_e = 1.234)
 #0.1321907
 
 }

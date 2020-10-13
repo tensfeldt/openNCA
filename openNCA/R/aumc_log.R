@@ -6,7 +6,7 @@
 #' @param conc The concentration data (given in a vector form)
 #' @param time The time data (given in a vector form)
 #' @param exflag The exclude flag data (given in a numeric vector)
-#' 
+#'
 #! @export
 aumc_log <- function(conc = NULL, time = NULL, exflag = NULL){
   if(is.null(conc) && is.null(time)){

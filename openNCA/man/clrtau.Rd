@@ -33,11 +33,11 @@ The clearance of a substance from the blood by the kidneys
 }
 
 \examples{
-clrtau()
-#Error in clr: 'aucinfp' and 'ae' vectors are NULL
+#clrtau()
+#Error in clrtau: 'aetau' and 'auctau' vectors are NULL
 
-clrtau(aucinfp = 9.335, ae = 1.234)
-#0.1321907
+clrtau(aetau = 9.335, auctau = 1.234)
+#7.56483
 
 }
 \author{

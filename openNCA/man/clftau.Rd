@@ -29,7 +29,7 @@ Steady-State Equation:
 
 \strong{Value} \cr
 \itemize{
- \item CLFTAU: total body clearance divided by dose abosrbed
+ \item CLFTAU: total body clearance divided by dose absorbed
 }
 }
 

@@ -30,8 +30,8 @@
 parse.reg <- function(res, result) {
   m <- do.call(rbind, lapply(seq_along(res), function(i) {
     if(result[i] == -1) return("")
-    st <- attr(result, "capture.start")[i, ]
-    substring(res[i], st, st + attr(result, "capture.length")[i, ] - 1)
+    st <- attr(result, "capture.start")[i, ] - 1
+    substring(res[i], st, st + attr(result, "capture.length")[i, ])
   }))
   x <- attr(result, "capture.names")
   colnames(m) <- attr(result, "capture.names")

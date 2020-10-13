@@ -1,9 +1,9 @@
-#' Area under the concentration versus time cruve from time 0 until the last time point
+#' Area under the concentration versus time curve from time 0 until the last time point
 #'
 #' This function gets the area under the concentration versus time curve from time 0 until the last
 #' time point. As illustrated in the following figure, AUC_ALL includes the trapezoidal area from the
 #' time of the last measurable concentration to the next time point. Although there may be additional
-#' time points, there is no additonal AUC since by defination all subsequent concentrations are zero.\cr
+#' time points, there is no additional AUC since by definition all subsequent concentrations are zero.\cr
 #' \figure{auc_all.png}
 #'
 #' @details
@@ -20,7 +20,7 @@
 #' \strong{Methods:} You can use the following methods to calculate AUC: \cr
 #' \enumerate{
 #'  \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
-#'  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
+#'  first occurrence of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
 #'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
 #'  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
 #'  \item \strong{Log Trapazoidal Rule}: The log trapezoidal method is used for the entire profile. If
@@ -52,6 +52,13 @@
 #' @param t_max The first time at which CMAXi us observed within a dosing interval (numeric value)s
 #' @param orig_conc The original (full) concentration data (given in a numeric vector)
 #' @param orig_time The original (full) time data (given in a numeric vector)
+#' @param last_crit_factor The criteria value for last time acceptance criteria (numeric value)
+#' @param kel The terminal phase rate constant for the concentration-time profile of interest (numeric value)
+#' @param auclast The area under the concentration versus time curve from zero time until the time (TLAST) of the last measurable concentration (CLASTi) during the ith dosing interval (numeric value)
+#' @param lasttime The time of the last measured concentration point of the profile (numeric value)
+#' @param orgtime The original time value from the map data ('nominal' or 'actual')
+#' @param nom_time The nominal time data (given in a vector form)
+#' @param ctoldest The estimated concentration at the time of last dose (numeric value)
 #'
 #' @section Returns:
 #' \strong{Value} \cr
@@ -75,24 +82,26 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' auc_tau()
+#' #auc_tau()
 #' #Error in auc_tau: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28)
 #' time_vector <- c(0, 1, 2, 3, 4, 5)
 #' tau_val <- 5
+#' told_val <- 0
 #'
-#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #' #12.23956
 #'
 #' tau_val <- 2
 #'
-#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+#' #auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #' #Error in auc_tau(conc = conc_vector, time = time_vector, tau = tau_val) :
-#' #  Error in auc_tau: 'orig_conc' and 'orig_time' vectors are NULL, cannot interpolate data if original data is not provided!
+#' #  Error in auc_tau: 'orig_conc' and 'orig_time' vectors are NULL, 
+#' #  cannot interpolate data if original data is not provided!
 #'
-#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, orig_conc = conc_vector,
-#'         orig_time = time_vector)
+#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val,
+#'         orig_conc = conc_vector, orig_time = time_vector)
 #' #12.23956
 #'
 #' ############
@@ -110,8 +119,9 @@
 #' conc_vector <- c(0, 0, 0)
 #' time_vector <- c(0, 1, 2)
 #' tau_val <- 2
+#' told_val <- 0
 #'
-#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #' #0
 #'
 #' ############
@@ -129,8 +139,9 @@
 #' conc_vector <- c(1.19, 1.23, 1.34)
 #' time_vector <- c(0, 1, 2)
 #' tau_val <- 2
+#' told_val <- 0
 #'
-#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #' #2.495
 #'
 #' @author
@@ -181,7 +192,10 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told = 
   if(sum(conc, na.rm = T) == 0){
     return(0)
   }
+
+###  cat('auc_tau.R: told: ', told, ' tau: ', tau, ' time: ', time, ' nomtime: ', nom_time,' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
   
+  #Replace the time point closest to TAU if TAU is not present in the dataset
   curr_tau <- as.numeric(told + tau)
   time_min_range <- ifelse(!is.null(last_crit_factor), as.numeric(last_crit_factor) * curr_tau, NA)
   if(tolower(orgtime) == "actual"){
@@ -194,9 +208,10 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told = 
         tmp_told <- ifelse(isTRUE(length(tmp_told) > 0), tmp_told[length(tmp_told)], NA)
         tmp_ctold <- conc[which(time == tmp_told)]
       } else {
-        tmp_told <- NA
+        tmp_told <- curr_tau
+        tmp_ctold <- NA
       }
-      if(!is.na(tmp_told)){
+      if(!is.na(tmp_ctold)){
         if(isTRUE(time_min_range <= tmp_told && tmp_told <= curr_tau)){
           ctold <- ifelse(isTRUE(length(tmp_ctold) > 0), tmp_ctold[length(tmp_ctold)], NA)
           time[which(time == tmp_told)] <- curr_tau
@@ -212,12 +227,21 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told = 
       tmp_told <- time[which(time == curr_tau)]
       tmp_ctold <- conc[which(time == tmp_told)]
     } else {
-      tmp_told <- NA
+      tmp_told <- curr_tau
+      tmp_ctold <- NA
     }
-    if(!is.na(tmp_told)){
+    if(!is.na(tmp_ctold)){
       time[which(time == curr_tau)] <- curr_tau
     }
   }
+  #Remove any time points that are before TOLD
+  idx <- which(time < told)
+  if(length(idx) > 0){
+    idx <- which(time >= told)
+    time <- time[idx]
+    conc <- conc[idx]
+  }
+  
 ###
 ###  cat('auc_tau.R: told: ', told, ' tau: ', tau, ' time: ', time, ' nomtime: ', nom_time,' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' curr_tau: ', curr_tau, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
   

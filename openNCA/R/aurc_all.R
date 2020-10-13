@@ -3,7 +3,7 @@
 #' This function gets the area under urinary excretion rate curve from time 0 until the last
 #' time point. As illustrated in the following figure, AUC_ALL includes the trapezoidal area from the
 #' time of the last measurable concentration to the next time point. Although there may be additional
-#' time points, there is no additonal AUC since by defination all subsequent concentrations are zero.\cr
+#' time points, there is no additional AUC since by definition all subsequent concentrations are zero.\cr
 #' \figure{auc_all.png}
 #'
 #' @details
@@ -20,7 +20,7 @@
 #' \strong{Methods:} You can use the following methods to calculate AUC: \cr
 #' \enumerate{
 #'  \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
-#'  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
+#'  first occurrence of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
 #'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
 #'  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
 #'  \item \strong{Log Trapazoidal Rule}: The log trapezoidal method is used for the entire profile. If
@@ -38,10 +38,10 @@
 #' @param time The time data (given in a vector form)
 #' @param method The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr
 #' \enumerate{
-#' \item Linear-Log Trapazoidal Rule (default)
-#' \item Linear Trapazoidal Rule
-#' \item Log Trapazoidal Rule
-#' \item Linear Up - Log DownTrapazoidal Rule
+#' \item Linear-Log Trapezoidal Rule (default)
+#' \item Linear Trapezoidal Rule
+#' \item Log Trapezoidal Rule
+#' \item Linear Up - Log Down Trapezoidal Rule
 #' }
 #' Note: check 'Methods' section below for more details \cr
 #'
@@ -65,20 +65,21 @@
 #' ##   30  ##    5   ##   2.28   ##
 #' #################################
 #'
-#' data <- data.frame(
-#'     SID = ...,
-#'     TIME = ...,
-#'     RESULT = ...
-#' )
+#' #data <- data.frame(
+#' #    SID = ...,
+#' #    TIME = ...,
+#' #    RESULT = ...
+#' #)
+#' data <- data.frame(SID=rep(30, 6), TIME = c(0,1,2,3,4,5), CONC=c(2.89,2.49,2.47,2.38,2.32,2.28))
 #' #Same data as above, just represented as a dataframe
 #'
-#' aucr_all()
-#' #Error in aucr_all: 'conc' and 'time' vectors are NULL
+#' #aurc_all()
+#' #Error in aurc_all: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- data$CONC
 #' time_vector <- data$TIME
 #'
-#' aucr_all(conc = conc_vector, time = time_vector)
+#' aurc_all(conc = conc_vector, time = time_vector)
 #' #12.23956
 #'
 #' ############
@@ -91,17 +92,18 @@
 #' ##   31  ##    2   ##      0   ##
 #' #################################
 #'
-#' data2 <- data.frame(
-#'     SID = ...,
-#'     TIME = ...,
-#'     RESULT = ...
-#' )
+#' #data2 <- data.frame(
+#' #    SID = ...,
+#' #    TIME = ...,
+#' #    RESULT = ...
+#' #)
+#' data2 <- data.frame(SID=rep(31,3), TIME=c(0,1,2), CONC=rep(0,3))
 #' #Same data as above, just represented as a dataframe
 #'
 #' conc_vector <- data2$CONC
 #' time_vector <- data2$TIME
 #'
-#' aucr_all(conc = conc_vector, time = time_vector)
+#' #aurc_all(conc = conc_vector, time = time_vector)
 #' #Error in auc_lin_log(conc, time) :
 #' #  Error in auc_lin_log: 'tmax' is NA
 #'
@@ -115,17 +117,18 @@
 #' ##   32  ##    2   ##   1.34   ##
 #' #################################
 #'
-#' data3 <- data.frame(
-#'     SID = ...,
-#'     TIME = ...,
-#'     RESULT = ...
-#' )
+#' #data3 <- data.frame(
+#' #    SID = ...,
+#' #    TIME = ...,
+#' #    RESULT = ...
+#' #)
+#' data3 <- data.frame(SID=rep(32,3), TIME=c(0,1,2), CONC=c(1.19,1.23,1.34))
 #' #Same data as above, just represented as a dataframe
 #'
 #' conc_vector <- data3$CONC
 #' time_vector <- data3$TIME
 #'
-#' aucr_all(conc = conc_vector, time = time_vector)
+#' aurc_all(conc = conc_vector, time = time_vector)
 #' #2.494215
 #'
 #' @author

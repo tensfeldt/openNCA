@@ -7,9 +7,11 @@
 dof(data, map, dof_name = "DOF1")
 }
 \arguments{
-\item{data}{input concentration dataset}
+\item{data}{The dataframe that contains the raw data}
 
-\item{map}{Model Configuration Template (MCT)}
+\item{map}{The dataframe that contains the map data}
+
+\item{dof_name}{The name of the DOF column in the map data}
 }
 \description{
 This function returns the duration of infusion

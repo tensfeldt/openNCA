@@ -10,6 +10,10 @@ ctrough(conc = NULL, time = NULL, tau = NULL, told = NULL)
 \item{conc}{The concentration data (given in a vector form)}
 
 \item{time}{The time data (given in a vector form)}
+
+\item{tau}{The time duration of dosing interval (numeric value)}
+
+\item{told}{The time of last dose (given in a numeric value)}
 }
 \description{
 This function gets the pre-dose concentration defined as nominal time 0 during multiple dosing.
@@ -40,7 +44,7 @@ are also of the same length. \cr
 
 #Data mentioned will be used for the following example
 
-ctrough()
+#ctrough()
 #Error in ctrough: 'conc' and 'time' vectors are NULL
 
 conc_vector <- c(2.89, 2.49, 2.47)

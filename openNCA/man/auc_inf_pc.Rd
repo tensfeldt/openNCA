@@ -9,7 +9,7 @@ auc_inf_pc(kel = NULL, aucinfp = NULL, c0 = NULL)
 \arguments{
 \item{kel}{The terminal phase rate constant for the concentration-time profile of interest (numeric value)}
 
-\item{aucinfp}{The area under the concentration versus time cruve from time 0 to infinity (Predicted) (numeric value)}
+\item{aucinfp}{The area under the concentration versus time curve from time 0 to infinity (Predicted) (numeric value)}
 
 \item{c0}{The residual plasma concentration observed at time zero (numeric value)}
 }

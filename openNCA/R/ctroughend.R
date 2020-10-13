@@ -10,6 +10,8 @@
 #' @param conc The concentration data (given in a vector form)
 #' @param time The time data (given in a vector form)
 #' @param tau The tau data (given in a vector form)
+#' @param told The time of last dose (given in a numeric value)
+#' @param ctold The concentration at the time of last dose (given in a numeric value)
 #'
 #' @section Returns:
 #' \strong{Value} \cr
@@ -30,7 +32,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' ctroughend()
+#' #ctroughend()
 #' #Error in ctrough: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47)

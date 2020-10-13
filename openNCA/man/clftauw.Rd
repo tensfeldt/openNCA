@@ -34,7 +34,7 @@ calculated using AUCTAU, divided by the weight
 }
 
 \examples{
-clftauw()
+#clftauw()
 #Error in clftauw: 'clftau' and 'normbs' vectors are NULL
 
 clftauw(clftau = 10.34535, normbs = 1.234)

@@ -1,19 +1,19 @@
-#' Dependant Parameters
+#' Dependent Parameters
 #' 
-#' This function will generate a list of dependant parameters based on the specified parameter\cr
+#' This function will generate a list of dependent parameters based on the specified parameter\cr
 #' 
 #' @param parameter Parameter Name
 #' @param dl Dependency List
-#' @param depth Logical Value to enable sub-dependant parameters
+#' @param depth Logical Value to enable sub-dependent parameters
 #' 
 #' @section Returns:
 #' \strong{List} \cr
 #' \itemize{
-#'  \item List of dependant parameters
+#'  \item List of dependent parameters
 #' }
 #' 
 #' @examples
-#' No appropriate examples
+#' #No appropriate examples
 #'
 #' @author
 #' \itemize{

@@ -17,7 +17,7 @@
 #' \strong{kel}: Refer to \code{\link{kel}} for more details \cr
 #'
 #' @param kel The terminal phase rate constant for the concentration-time profile of interest (numeric value)
-#' @param aucinfo The area under the concentration versus time cruve from time 0 to infinity (Observed) (numeric value)
+#' @param aucinfo The area under the concentration versus time curve from time 0 to infinity (Observed) (numeric value)
 #' @param c0 The residual plasma concentration observed at time zero (numeric value)
 #'
 #' @section Returns:
@@ -103,7 +103,7 @@ auc_inf_oc <- function(kel = NULL, aucinfo = NULL, c0 = NULL){
     stop("Error in auc_inf_oc: 'c0' vectors is NULL")
   }
 
-  if(is.na(kel) || is.na(c0) || is.na(aucinfo)) {
+  if(isTRUE(is.na(kel) || is.na(c0) || is.na(aucinfo))) {
     aucinfoc <- NA
   } else {
     aucinfoc <- aucinfo - (c0/kel)

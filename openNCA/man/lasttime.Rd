@@ -26,7 +26,7 @@ are also of the same length. \cr
 
 \strong{Value} \cr
 \itemize{
- \item LASTTIME: time at last measureable concentration
+ \item LASTTIME: time at last measurable concentration
 }
 }
 
@@ -43,7 +43,7 @@ are also of the same length. \cr
 
 #Data mentioned will be used for the following example
 
-tlast()
+#tlast()
 #Error in tlast: 'conc' and 'time' vectors are NULL
 
 conc_vector <- c(2.89, 2.49, 2.47)

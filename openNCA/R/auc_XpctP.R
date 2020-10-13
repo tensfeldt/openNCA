@@ -44,16 +44,16 @@
 #' @param time The time data (given in a vector form)
 #' @param method The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr
 #' \enumerate{
-#' \item Linear-Log Trapazoidal Rule (default)
-#' \item Linear Trapazoidal Rule
-#' \item Log Trapazoidal Rule
-#' \item Linear Up - Log DownTrapazoidal Rule
+#' \item Linear-Log Trapezoidal Rule (default)
+#' \item Linear Trapezoidal Rule
+#' \item Log Trapezoidal Rule
+#' \item Linear Up - Log Down Trapezoidal Rule
 #' }
 #' Note: check 'Methods' section below for more details \cr
 #'
 #' @param kelflag The KEL exclude flag data (given in a numeric vector)
 #' @param aucflag The AUC exclude flag data (given in a numeric vector)
-#' @param aucinfp The area under the concentration versus time curve from zero time to infinity (Predicted) (numeric value)
+#' @param auc_infp The area under the concentration versus time curve from zero time to infinity (Predicted) (numeric value)
 #' @param auclast The area under the concentration versus time curve from zero time until the time (TLAST) of the last measurable concentration (CLASTi) during the ith dosing interval (numeric value)
 #'
 #' @section Returns:
@@ -149,7 +149,7 @@ auc_XpctP <- function(conc = NULL, time = NULL, method = 1, kelflag = NULL, aucf
       auclast <- auc_last(conc = conc, time = time, method = method, exflag = aucflag)
     }
 
-    if(is.na(auc_infp) || auc_infp == 0 || is.na(auclast)){
+    if(isTRUE(is.na(auc_infp) || auc_infp == 0 || is.na(auclast))){
       auc_xpctp <- NA
       return(auc_xpctp)
     } else {

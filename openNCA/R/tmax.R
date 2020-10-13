@@ -2,7 +2,7 @@
 #'
 #' This function gets the first time at which CMAXi is observed within a dosing interval
 #' and is obtained by the inspection of the data. In the case of multiple dosing, TMAXi is obtained
-#' by inspection of the data during the dose inteval i.
+#' by inspection of the data during the dose interval i.
 #'
 #' @details If all the concentrations are 0's then TMAXi will return NA.
 #' Also the interval must be in the range of the times listed in the data. \cr
@@ -11,6 +11,7 @@
 #'
 #' @param conc The concentration data (given in a vector form)
 #' @param time The time data (given in a vector form)
+#' @param told The time of last dose (given in a numeric value)
 #'
 #' @section Returns:
 #' \strong{Value} \cr
@@ -31,7 +32,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' tmax()
+#' #tmax()
 #' #Error in tmax: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47)

@@ -7,6 +7,8 @@
 tmaxrate(midpt = NULL, rate = NULL)
 }
 \arguments{
+\item{midpt}{The midpoint data (given in a vector form)}
+
 \item{rate}{The rate data (given in a vector form)}
 }
 \description{

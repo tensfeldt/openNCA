@@ -9,6 +9,7 @@
 #' @param conc The concentration data (given in a vector form)
 #' @param time The time data (given in a vector form)
 #' @param dof The duration of infusion data (given as a numeric value)
+#' @param cmax The maximum observed concentration data (numeric value)
 #'
 #' @section Returns:
 #' \strong{Value} \cr
@@ -29,7 +30,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' cendinf()
+#' #cendinf()
 #' #Error in cendinf: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47)
@@ -72,7 +73,7 @@
 #' conc_vector <- c(1.19, 1.23, 1.34, 1.32)
 #' time_vector <- c(0, 1, 2, "None")
 #'
-#' cendinf(conc = conc_vector, time = time_vector)
+#' #cendinf(conc = conc_vector, time = time_vector)
 #' #Error in cendinf: 'time' is not a numeric vector
 #'
 #' @author

@@ -2,10 +2,10 @@
 #'
 #' This function gets the lag time, which is the time before the start of absorption phase
 #' and is directly observed from the concentration-time profile. This time is defined s the sample time
-#' immidiately prior to the first quantifiable concentration.
+#' immediately prior to the first quantifiable concentration.
 #'
 #' @details If all concentrations have a value greater than 0 then TLAG is 0.
-#' You must provide a valid sid with respect to the data. \cr
+#' You must provide a valid SDEID with respect to the data. \cr
 #' The function will ensure that the concentration data and the time data provided are numeric vectors and
 #' are also of the same length. \cr
 #'
@@ -31,7 +31,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' tlag()
+#' #tlag()
 #' #Error in tlag: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47)

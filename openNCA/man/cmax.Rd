@@ -43,7 +43,7 @@ are also of the same length. \cr
 
 #Data mentioned will be used for the following example
 
-cmax()
+#cmax()
 #Error in cmax: 'conc' and 'time' vectors are NULL
 
 conc_vector <- c(2.89, 2.49, 2.47)
@@ -86,7 +86,7 @@ cmax(conc = conc_vector, time = time_vector)
 conc_vector <- c(1.19, 1.23, 1.34, 1.32)
 time_vector <- c(0, 1, 2, "None")
 
-cmax(conc = conc_vector, time = time_vector)
+#cmax(conc = conc_vector, time = time_vector)
 #Error in cmax: 'time' is not a numeric vector
 
 }

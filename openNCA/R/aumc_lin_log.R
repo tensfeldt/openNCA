@@ -8,7 +8,7 @@
 #' @param time The time data (given in a vector form)
 #' @param exflag The exclude flag data (given in a numeric vector)
 #' @param t_max The first time at which CMAXi is observed within the dosing interval (numeric value)
-#' 
+#'
 #! @export
 aumc_lin_log <- function(conc = NULL, time = NULL, exflag = NULL, t_max = NULL){
   if(is.null(conc) && is.null(time)){

@@ -7,9 +7,11 @@
 validate_timeconc_data(map, data, flag, verbose = FALSE)
 }
 \arguments{
-\item{map}{Model Configuration Template (MCT)}
+\item{map}{The dataframe that contains the map data}
 
-\item{data}{input concentration dataset}
+\item{data}{The dataframe that contains the raw data}
+
+\item{flag}{The dataframe that contains the flag data}
 
 \item{verbose}{logs selected time/concentration values and units to stdout}
 }

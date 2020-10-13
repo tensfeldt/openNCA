@@ -1,6 +1,6 @@
-#' Partial Area under the concentration (AUC) versus time cruve from time T1 until time T2
+#' Partial Area under the concentration (AUC) versus time curve from time T1 until time T2
 #'
-#' This function gets the area under the concentration versus time curve from time T1 untill time T2, where
+#' This function gets the area under the concentration versus time curve from time T1 until time T2, where
 #' T1 and T2 are user-specified.
 #'
 #' \strong{Linear Method} \cr
@@ -16,7 +16,7 @@
 #' \strong{Methods:} You can use the following methods to calculate AUC: \cr
 #' \enumerate{
 #'  \item \strong{Linear-Log Trapazoidal Rule}(default method): The linear method is used up to Tmax (the
-#'  first occurance of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
+#'  first occurrence of Cmax) and the log trapezoidal method is used for the remainder of the profile. If
 #'  Ci or Ci+1 is 0 then the linear trapezoidal rule is used.
 #'  \item \strong{Linear Trapazoidal Rule}: The linear method is used for the entire profile.
 #'  \item \strong{Log Trapazoidal Rule}: The log trapezoidal method is used for the entire profile. If
@@ -39,22 +39,29 @@
 #' @param t2 The end time that will be used to calculate AUC
 #' @param method The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr
 #' \enumerate{
-#' \item Linear-Log Trapazoidal Rule (default)
-#' \item Linear Trapazoidal Rule
-#' \item Log Trapazoidal Rule
-#' \item Linear Up - Log DownTrapazoidal Rule
+#' \item Linear-Log Trapezoidal Rule (default)
+#' \item Linear Trapezoidal Rule
+#' \item Log Trapezoidal Rule
+#' \item Linear Up - Log Down Trapezoidal Rule
 #' }
 #' Note: check 'Methods' section below for more details \cr
 #' @param exflag The exclude flag data (given in a numeric vector)
 #' @param t_max The first time at which CMAXi is observed within the dosing interval (numeric value)
+#' @param dose_time The time of last dose (numeric value)
 #' @param interpolate The value to determine whether to interpolate data points (given in a logical form)
 #' @param extrapolate The value to determine whether to extrapolate data points (given in a logical form)
 #' @param model The model specification (either 'M1', 'M2', 'M3', or 'M4')
 #' @param dosing_type The dosing type specification (either 'SD' or 'SS')
+#' @param dosing_interval The current dosing interval (numeric value)
 #' @param told The time of last dose (given as a numeric value)
+#' @param prev_told The time of last dose from previous interval (given in a numeric value)
+#' @param prev_tau The time duration of previous dosing interval (given in a numeric value)
+#' @param last_crit_factor The criteria value for last time acceptance criteria (numeric value)
 #' @param kel The KEL value (given as a numeric)
 #' @param orig_conc The original (full) concentration data (given in a numeric vector)
 #' @param orig_time The original (full) time data (given in a numeric vector)
+#' @param orgtime The original time value from the map data ('nominal' or 'actual')
+#' @param includeNA The value that determines if NA values should be removed from concentration and time data (given in logical value) 
 #' 
 #' @section Returns:
 #' \strong{Value} \cr
@@ -78,7 +85,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' auc_t1_t2()
+#' #auc_t1_t2()
 #' #Error in auc_t1_t2: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28)
@@ -105,7 +112,7 @@
 #' conc_vector <- c(0, 0, 0)
 #' time_vector <- c(0, 1, 2)
 #'
-#' auc_t1_t1(conc = conc_vector, time = time_vector, t1 = 0, t2 = 2)
+#' auc_t1_t2(conc = conc_vector, time = time_vector, t1 = 0, t2 = 2)
 #' #0
 #'
 #' ############
@@ -126,7 +133,7 @@
 #' auc_t1_t2(conc = conc_vector, time = time_vector, t1 = 0, t2 = 1)
 #' #1.21
 #'
-#' auc_t1_t2(conc, time, t1 = 1, t2 = 1)
+#' #auc_t1_t2(conc, time, t1 = 1, t2 = 1)
 #' #Error in auc_t1_t2(conc = conc_vector, time = time_vector, t1 = 1, t2 = 1) :
 #' #  Error in auc_t1_t2: 't1' value is greater than 't2' value
 #'
@@ -137,7 +144,7 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1, exflag = NULL, t_max = NULL, dose_time = NULL, interpolate = NULL, extrapolate = NULL, model = NULL, dosing_type = NULL, told = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL, includeNA = FALSE){
+auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1, exflag = NULL, t_max = NULL, dose_time = NULL, interpolate = NULL, extrapolate = NULL, model = NULL, dosing_type = NULL, dosing_interval = NULL, told = NULL, prev_told = NULL, prev_tau = NULL, last_crit_factor = NULL, kel = NULL, orig_conc = NULL, orig_time = NULL, orgtime = NULL, includeNA = FALSE){
   if(is.null(conc) && is.null(time)){
     stop("Error in auc_t1_t2: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
@@ -217,12 +224,12 @@ auc_t1_t2 <- function(conc = NULL, time = NULL, t1 = NULL, t2 = NULL, method = 1
   }
 
   if(method == 1){
-    return(auc_lin_log(conc = conc, time = time, exflag = exflag, t_max = t_max, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time, includeNA = includeNA))
+    return(auc_lin_log(conc = conc, time = time, exflag = exflag, t_max = t_max, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, dosing_interval = dosing_interval, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time, orgtime = orgtime, includeNA = includeNA))
   } else if(method == 2){
-    return(auc_lin(conc = conc, time = time, exflag = exflag, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time, includeNA = includeNA))
+    return(auc_lin(conc = conc, time = time, exflag = exflag, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, dosing_interval = dosing_interval, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time, orgtime = orgtime, includeNA = includeNA))
   } else if(method == 3){
-    return(auc_log(conc = conc, time = time, exflag = exflag, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time, includeNA = includeNA))
+    return(auc_log(conc = conc, time = time, exflag = exflag, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, dosing_interval = dosing_interval, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time, orgtime = orgtime, includeNA = includeNA))
   } else if(method == 4){
-    return(auc_lin_up_log_down(conc = conc, time = time, exflag = exflag, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time, includeNA = includeNA))
+    return(auc_lin_up_log_down(conc = conc, time = time, exflag = exflag, interpolate = interpolate, extrapolate = extrapolate, model = model, dosing_type = dosing_type, dosing_interval = dosing_interval, told = told, kel = kel, orig_conc = orig_conc, orig_time = orig_time, orgtime = orgtime, includeNA = includeNA))
   }
 }

@@ -12,6 +12,10 @@ ctroughend(conc = NULL, time = NULL, tau = NULL, told = NULL, ctold = NULL)
 \item{time}{The time data (given in a vector form)}
 
 \item{tau}{The tau data (given in a vector form)}
+
+\item{told}{The time of last dose (given in a numeric value)}
+
+\item{ctold}{The concentration at the time of last dose (given in a numeric value)}
 }
 \description{
 This function gets the concentrations at the end of the ith dosing interval, defined as the observed concentration 
@@ -43,7 +47,7 @@ are also of the same length. \cr
 
 #Data mentioned will be used for the following example
 
-ctroughend()
+#ctroughend()
 #Error in ctrough: 'conc' and 'time' vectors are NULL
 
 conc_vector <- c(2.89, 2.49, 2.47)

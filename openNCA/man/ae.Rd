@@ -10,6 +10,8 @@ ae(amt = NULL, time = NULL, orig_time = NULL)
 \item{amt}{The amount data (given in a vector form)}
 
 \item{time}{The time data (given in a vector form)}
+
+\item{orig_time}{The original time data (given in a vector form)}
 }
 \description{
 Total amount of drug recovered unchanged in the urine, from time zero to infinity

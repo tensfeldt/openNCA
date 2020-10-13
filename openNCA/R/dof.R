@@ -2,8 +2,9 @@
 #'
 #' This function returns the duration of infusion 
 #'
-#' @param data input concentration dataset
-#' @param map Model Configuration Template (MCT)
+#' @param data The dataframe that contains the raw data
+#' @param map The dataframe that contains the map data
+#' @param dof_name The name of the DOF column in the map data 
 #' 
 #' @section Returns:
 #' \strong{List} \cr
