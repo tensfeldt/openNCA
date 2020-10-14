@@ -29,7 +29,7 @@
 #'
 #' #Data mentioned will be used for the following example
 #'
-#' cmax()
+#' #cmax()
 #' #Error in cmax: 'conc' and 'time' vectors are NULL
 #'
 #' conc_vector <- c(2.89, 2.49, 2.47)

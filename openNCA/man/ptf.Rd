@@ -36,6 +36,7 @@ Steady-State Equation
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

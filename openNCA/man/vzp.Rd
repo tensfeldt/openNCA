@@ -28,10 +28,6 @@ Single Dose Equation only; not calculated at steady-state (Note that VZ/FP is ca
 \eqn{AUCINFO = Area under the first moment curve from zero time to infinity (Observed)} \cr
 \eqn{Dosei = dose value for drug dosing interval i} \cr
 }
-\section{Additional Details}{
-
-}
-
 \section{Returns}{
 
 \strong{Value} \cr
@@ -41,6 +37,7 @@ Single Dose Equation only; not calculated at steady-state (Note that VZ/FP is ca
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

@@ -45,6 +45,7 @@ last measurable concentration (CLAST).\cr
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

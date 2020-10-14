@@ -61,10 +61,6 @@ Mean residence time from the time of dosing to the last measurable concentration
 \eqn{AUClast = Area under the concentration versus time curve from zero time until the time (Tlast) of the last measurable concentration (CLASTi} \cr
 \eqn{DOF = duration of infusion, used for constant infusion models} \cr
 }
-\section{Additional Details}{
-
-}
-
 \section{Returns}{
 
 \strong{Dataset} \cr
@@ -76,6 +72,7 @@ Mean residence time from the time of dosing to the last measurable concentration
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

@@ -38,6 +38,7 @@ Single Dose Equation only not calculated at steady-state (only VZ/P is calculate
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

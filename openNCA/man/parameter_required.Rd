@@ -27,11 +27,11 @@ OR \cr
 \examples{
 plist <- c("AUC", "RATEN", "RATE1", "abc", "TMAX", "RATE3", "RATEa", "defg")
 
-parameter_required("^RATEN$", display_list, simplify=FALSE)
+parameter_required("^RATEN$", plist, simplify=FALSE)
 #$RATEN
 #[1] TRUE
 
-parameter_required("^RATEN$", display_list, simplify=TRUE)
+parameter_required("^RATEN$", plist, simplify=TRUE)
 #[1] TRUE
 
 parameter_required("^(RATE)([0-9]*?|A|N)$", plist, simplify=FALSE)
@@ -50,7 +50,7 @@ parameter_required("^(RATE)([0-9]*?|A|N)$", plist, simplify=FALSE)
 parameter_required("^(RATE)([0-9]*?|A|N)$", plist, simplify=TRUE)
 #[1] TRUE
 
-parameter_required(c("^(RATE)([0-9]*?|A|N)$", "TMAX", "AUC"), display_list, simplify=FALSE)
+parameter_required(c("^(RATE)([0-9]*?|A|N)$", "TMAX", "AUC"), plist, simplify=FALSE)
 #$RATEN
 #[1] TRUE
 #
@@ -69,13 +69,10 @@ parameter_required(c("^(RATE)([0-9]*?|A|N)$", "TMAX", "AUC"), display_list, simp
 #$AUC
 #[1] TRUE
 #
-parameter_required(c("^(RATE)([0-9]*?|A|N)$", "TMAX", "AUC"), display_list, simplify=TRUE)
+parameter_required(c("^(RATE)([0-9]*?|A|N)$", "TMAX", "AUC"), plist, simplify=TRUE)
 #[1] TRUE
 
-parameter_required("qrx", display_list, simplify=FALSE)
-#[1] FALSE
-
-#> pr("qrx", display_list, simplify=TRUE)
+parameter_required("qrx", plist, simplify=FALSE)
 #[1] FALSE
 
 }

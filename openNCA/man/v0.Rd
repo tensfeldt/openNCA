@@ -32,6 +32,7 @@ Initial Volume of Distribution
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

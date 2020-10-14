@@ -113,6 +113,7 @@
 #' }
 #'
 #' @examples
+#' #No appropriate examples
 #'
 #' @author
 #' \itemize{
@@ -273,9 +274,12 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   est_data <- data.frame(matrix(ncol = length(elist), nrow = 0))
   names(est_data) <- elist
   
-  if("DOSEU" %in% names(map_data)){
-    if(map_data$DOSEU %in% names(data_data)){
-      if(length(grep("/", as.character(unique(data_data[, as.character(map_data$DOSEU)])[1])) > 0)){
+  if(parameter_required("^DOSE(i{1}|[0-9]*?)U$", names(map_data))) {
+    vdoseu <- parameter_indices("^DOSE(i{1}|[0-9]*?)U$", names(map_data))
+    vdoseu <- names(vdoseu)
+    doseu_name <- as.character(map_data[, vdoseu][1])
+    if(doseu_name %in% names(data_data)){
+      if(length(grep("/", as.character(unique(data_data[, doseu_name])[1])) > 0)){
         dose_by_mass <- TRUE
       } else {
         dose_by_mass <- FALSE
@@ -2159,14 +2163,14 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 c_troughendi[[d]] <- ctroughend(conc = tmp_conc_di, time = tmp_nom_time_di, tau = tau[[d]], told = told[[d]], ctold = nxt_ctold_est)
               ###}
               ###if(comp_required[["PTROUGHRENDi"]]){
-                p_troughrendi[[d]] <- ptroughrend(cmax = c_maxi[[d]], ctrough = c_troughendi[[d]])
+                p_troughrendi[[d]] <- ptroughrend(cmax = c_maxi[[d]], ctroughend = c_troughendi[[d]])
               ###}
             } else {
               ###if(comp_required[["CTROUGHENDi"]]){
                 c_troughendi[[d]] <- ctroughend(conc = tmp_conc_di, time = tmp_nom_time_di, tau = tau[[d]], told = told[[d]])
               ###}
               ###if(comp_required[["PTROUGHRENDi"]]){
-                p_troughrendi[[d]] <- ptroughrend(cmax = c_maxi[[d]], ctrough = c_troughendi[[d]])
+                p_troughrendi[[d]] <- ptroughrend(cmax = c_maxi[[d]], ctroughend = c_troughendi[[d]])
               ###}
             }
           } else {
@@ -2174,7 +2178,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               c_troughendi[[d]] <- ctroughend(conc = tmp_conc_di, time = tmp_nom_time_di, tau = tau[[d]], told = told[[d]])
             ###}
             ###if(comp_required[["PTROUGHRENDi"]]){
-              p_troughrendi[[d]] <- ptroughrend(cmax = c_maxi[[d]], ctrough = c_troughendi[[d]])
+              p_troughrendi[[d]] <- ptroughrend(cmax = c_maxi[[d]], ctroughend = c_troughendi[[d]])
             ###}
           }
         }
@@ -2430,42 +2434,37 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
           if(!is.na(last_crit_factor)){
-            if(paste0("TAU",di_col) %in% names(map_data)){
-              if(map_data[, paste0("TAU",di_col)] %in% names(data_data)) {
-                tau_val <- as.numeric(unique(tmp_df[, map_data[, paste0("TAU",di_col)]])[1])
-                if(!is.na(tau_val) && is.numeric(tau_val) && !is.na(last_crit_factor) && is.numeric(last_crit_factor)){
-                  lt_accept_crit <- tau_val * last_crit_factor
-                  kel_val <- ifelse("KEL" %in% names(kel_v), kel_v[["KEL"]], NA)
-                  kel_nopt_val <- ifelse("KELNOPT" %in% names(kel_v), kel_v[["KELNOPT"]], NA)
-                  #FEEDBACK: Commented the code to account for new logic for FLGACCEPTTAU (New scope item)
-                  #computation_df[i, "FLGACCEPTTAU"] <- ifelse(last_time >= lt_accept_crit, 1, 0)
-                  if(isTRUE(last_time >= tau_val)){
+            all_tau <- unlist(tau)
+            all_valid_tau <- all_tau[!is.na(all_tau)]
+            tau_val <- all_valid_tau[length(all_valid_tau)]
+            tau_val <- ifelse(length(tau_val) > 0, tau_val, NA)
+            if(!is.na(tau_val) && is.numeric(tau_val) && !is.na(last_crit_factor) && is.numeric(last_crit_factor)){
+              lt_accept_crit <- tau_val * last_crit_factor
+              kel_val <- ifelse("KEL" %in% names(kel_v), kel_v[["KEL"]], NA)
+              kel_nopt_val <- ifelse("KELNOPT" %in% names(kel_v), kel_v[["KELNOPT"]], NA)
+              #FEEDBACK: Commented the code to account for new logic for FLGACCEPTTAU (New scope item)
+              #computation_df[i, "FLGACCEPTTAU"] <- ifelse(last_time >= lt_accept_crit, 1, 0)
+              if(isTRUE(last_time >= tau_val)){
+                computation_df[i, "FLGACCEPTTAU"] <- 1
+              } else if(isTRUE(last_time < tau_val && last_time >= lt_accept_crit)){
+                if(isTRUE(is.na(kel_val))){
+                  computation_df[i, "FLGACCEPTTAU"] <- 1
+                } else if(isTRUE(is.numeric(kel_val))){
+                  if(isTRUE(kel_nopt_val >= 3 && kel_val > 0)){
                     computation_df[i, "FLGACCEPTTAU"] <- 1
-                  } else if(isTRUE(last_time < tau_val && last_time >= lt_accept_crit)){
-                    if(isTRUE(is.na(kel_val))){
-                      computation_df[i, "FLGACCEPTTAU"] <- 1
-                    } else if(isTRUE(is.numeric(kel_val))){
-                      if(isTRUE(kel_nopt_val >= 3 && kel_val > 0)){
-                        computation_df[i, "FLGACCEPTTAU"] <- 1
-                      } else {
-                        computation_df[i, "FLGACCEPTTAU"] <- 0
-                      }
-                    } else {
-                      computation_df[i, "FLGACCEPTTAU"] <- 0
-                    }
-                  } else if(isTRUE(last_time < lt_accept_crit)){
-                    if(isTRUE(is.na(kel_val))){
-                      computation_df[i, "FLGACCEPTTAU"] <- 0
-                    } else {
-                      computation_df[i, "FLGACCEPTTAU"] <- 1
-                      #The logic for FLGACCEPTTAU with respect to FLGACCEPTKEL 
-                      #will be updated after the main for loops ends (down below)
-                    }
                   } else {
                     computation_df[i, "FLGACCEPTTAU"] <- 0
                   }
                 } else {
                   computation_df[i, "FLGACCEPTTAU"] <- 0
+                }
+              } else if(isTRUE(last_time < lt_accept_crit)){
+                if(isTRUE(is.na(kel_val))){
+                  computation_df[i, "FLGACCEPTTAU"] <- 0
+                } else {
+                  computation_df[i, "FLGACCEPTTAU"] <- 1
+                  #The logic for FLGACCEPTTAU with respect to FLGACCEPTKEL 
+                  #will be updated after the main for loops ends (down below)
                 }
               } else {
                 computation_df[i, "FLGACCEPTTAU"] <- 0

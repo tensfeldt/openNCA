@@ -59,15 +59,18 @@ specific_gravity_adjustment(amt_units="mg")
 specific_gravity_adjustment(amt_units="GM")
 #[1] 1.02
 
+mct <- NULL
 is.element("SPECIFIC_GRAVITY", names(mct))
 #[1] FALSE
-specific_gravity_adjustment(amt_units="GM", map=mct)
+mct$SPECIFIC_GRAVITY <- 1.03
+mct <- as.data.frame(mct)
+#specific_gravity_adjustment(amt_units="GM", map=mct)
 #[1] 1.02
 
-mct$SPECIFIC_GRAVITY <- 1.03
-specific_gravity_adjustment(amt_units="mL", map=mct)
+#mct$SPECIFIC_GRAVITY <- 1.03
+#specific_gravity_adjustment(amt_units="mL", map=mct)
 #[1] 1
-specific_gravity_adjustment(amt_units="gm", map=mct)
+#specific_gravity_adjustment(amt_units="gm", map=mct)
 #[1] 1.03
 
 }

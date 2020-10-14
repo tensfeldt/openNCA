@@ -19,7 +19,8 @@
 #'  \item PTR: peak/trough ratio
 #' }
 #' 
-#' @examples 
+#' @examples
+#' #No appropriate examples
 #'
 #' @author
 #' \itemize{

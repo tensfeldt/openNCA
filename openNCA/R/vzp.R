@@ -12,8 +12,6 @@
 #' \eqn{AUCINFO = Area under the first moment curve from zero time to infinity (Observed)} \cr
 #' \eqn{Dosei = dose value for drug dosing interval i} \cr
 #'
-#' @section Additional Details:
-#'
 #' @param kel The terminal phase rate constant for the concentration-time profile of interest (numeric value)
 #' @param aucinfp The area under the concentration versus time curve from time 0 to infinity (Predicted) (numeric value)
 #' @param dose The dose data (numeric value)
@@ -25,6 +23,7 @@
 #' }
 #'
 #' @examples
+#' #No appropriate examples
 #'
 #' @author
 #' \itemize{

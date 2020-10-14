@@ -9,7 +9,8 @@
 #'  \item MIDPTLAST: last measurable rate
 #' }
 #' 
-#' @examples 
+#' @examples
+#' #No appropriate examples
 #' 
 #' @author
 #' \itemize{

@@ -23,6 +23,7 @@ This function returns the list of parameters based on the unit class specified
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

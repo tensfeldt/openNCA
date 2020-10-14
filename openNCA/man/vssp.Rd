@@ -33,6 +33,7 @@ Steady-state (predicted) volume of distribution for non-steady state or steady s
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

@@ -116,8 +116,6 @@ aepct <- function(a_e = NULL, dose = NULL){
     stop("Error in aepct: 'dose' is not a numeric vector")
   }
 
-  print(dose)
-  print(a_e)
   if(isTRUE(any(is.na(dose)) || (0 %in% dose) || any(is.na(a_e)))) {
     ae_pct <- NA
   } else {

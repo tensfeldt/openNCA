@@ -34,6 +34,7 @@ calculated using the observed value of the last non-zero concentration, divided 
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

@@ -45,6 +45,7 @@ infinity (Predicted).\cr
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

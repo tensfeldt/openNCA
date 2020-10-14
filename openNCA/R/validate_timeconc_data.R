@@ -16,6 +16,7 @@
 #' list with names time, timeu, conc, concu
 #'
 #' @examples
+#' #No appropriate examples
 #'
 #' @author
 #' \itemize{

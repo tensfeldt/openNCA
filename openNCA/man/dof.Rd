@@ -25,6 +25,7 @@ This function returns the duration of infusion
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

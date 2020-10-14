@@ -46,6 +46,8 @@ Percentage of AUCINFP obtained by forward extrapolation.\cr
   \tab \figure{auc_XpctP1.png} \cr
  }
 }
+\eqn{AUCINFP = Area under the concentration versus time curve from zero time to infinity (Predicted)} \cr
+\eqn{AUCLAST = Area under the concentration versus time curve from zero until time of last} \cr
 }
 \section{Additional Details}{
 

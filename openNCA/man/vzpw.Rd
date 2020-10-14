@@ -25,10 +25,6 @@ calculated using the predicted value of the last non-zero concentration, divided
 \eqn{VZP = The volume of distribution associated with the terminal slope following intravascular administration, calculated using the predicted value of the last non-zero concentration} \cr
 \eqn{NORMBS = BW = Body weight} \cr
 }
-\section{Additional Details}{
-
-}
-
 \section{Returns}{
 
 \strong{Value} \cr
@@ -38,6 +34,7 @@ calculated using the predicted value of the last non-zero concentration, divided
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

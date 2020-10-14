@@ -23,6 +23,7 @@ Midpoint of collection interval associated with last measurable (nonzero) rate
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

@@ -55,6 +55,7 @@ This function will compute all the relevant parameters for based specified field
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

@@ -19,8 +19,6 @@
 #' \eqn{AUClast = Area under the concentration versus time curve from zero time until the time (Tlast) of the last measurable concentration (CLASTi} \cr
 #' \eqn{DOF = duration of infusion, used for constant infusion models} \cr
 #'
-#' @section Additional Details:
-#'
 #' @param conc The concentration data (given in a vector form)
 #' @param time The time data (given in a vector form)
 #' @param method The method that will be used to calculate AUC (use either 1, 2, 3, or 4)\cr
@@ -44,7 +42,9 @@
 #'  \item AUMC_PER: percentage of area under the curve
 #'  \item METHOD: method used to calculate AUC
 #' }
+#' 
 #' @examples
+#' #No appropriate examples
 #'
 #' @author
 #' \itemize{

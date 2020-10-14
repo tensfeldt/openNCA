@@ -14,11 +14,11 @@
 #' @examples
 #' plist <- c("AUC", "RATEN", "RATE1", "abc", "TMAX", "RATE3", "RATEa", "defg")
 #' 
-#' parameter_indices("^RATEN$", display_list, simplify=FALSE)
+#' parameter_indices("^RATEN$", plist, simplify=FALSE)
 #' #$RATEN
 #' #[1] 2
 #' #
-#' pi("^RATEN$", display_list, simplify=TRUE)
+#' parameter_indices("^RATEN$", plist, simplify=TRUE)
 #' #RATEN 
 #' #2
 #' 
@@ -39,7 +39,7 @@
 #' #RATEN RATE1 RATE3 RATEa 
 #' #    2     3     6     7 
 #'
-#' parameter_indices(c("^(RATE)([0-9]*?|A|N)$", "TMAX", "AUC"), display_list, simplify=FALSE)
+#' parameter_indices(c("^(RATE)([0-9]*?|A|N)$", "TMAX", "AUC"), plist, simplify=FALSE)
 #' #$RATEN
 #' #[1] 2
 #' #
@@ -58,17 +58,17 @@
 #' #$AUC
 #' #[1] 1
 #' #
-#' #parameter_indices(c("^(RATE)([0-9]*?|A|N)$", "TMAX", "AUC"), display_list, simplify=TRUE)
+#' #parameter_indices(c("^(RATE)([0-9]*?|A|N)$", "TMAX", "AUC"), plist, simplify=TRUE)
 #' #RATEN RATE1 RATE3 RATEa  TMAX   AUC 
 #' #    2     3     6     7     5     1 
 #' 
-#' parameter_indices(c("qrx"), display_list, simplify=FALSE)
+#' parameter_indices(c("qrx"), plist, simplify=FALSE)
 #' #named list()
 #' 
-#' parameter_indices("qrx", display_list, simplify=FALSE)
+#' parameter_indices("qrx", plist, simplify=FALSE)
 #' #named list()
 #' 
-#' parameter_indices("qrx", display_list, simplify=TRUE)
+#' parameter_indices("qrx", plist, simplify=TRUE)
 #' #[1] FALSE
 #' 
 #' @author

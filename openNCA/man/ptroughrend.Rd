@@ -51,14 +51,15 @@ The maximum concentration during a dosing interval divided by the concentration 
 conc_vector <- c(2.89, 2.49, 2.47)
 time_vector <- c(0, 1, 2)
 tau_value <- 2
+told_value <- 0
 
 cmax(conc = conc_vector, time = time_vector)
 #2.89
 
-ctroughend(conc = conc_vector, time = time_vector, tau = tau_value)
+ctroughend(conc = conc_vector, time = time_vector, tau = tau_value, told = told_value)
 #2.47
 
-ptroughend(cmax = 2.89, ctrough = 2.47)
+ptroughrend(cmax = 2.89, ctrough = 2.47)
 #1.17004
 
 ############
@@ -76,14 +77,15 @@ ptroughend(cmax = 2.89, ctrough = 2.47)
 conc_vector <- c(2.23, 2.34, 2.68)
 time_vector <- c(1, 2, 3)
 tau_value <- 4
+told_value <- 1
 
 cmax(conc = conc_vector, time = time_vector)
 #2.68
 
-ctroughend(conc = conc_vector, time = time_vector, tau = tau_value)
+ctroughend(conc = conc_vector, time = time_vector, tau = tau_value, told = told_value)
 #NA
 
-ptroughend(cmax = 2.68, ctrough = NA)
+ptroughrend(cmax = 2.68, ctrough = NA)
 #NA
 
 }

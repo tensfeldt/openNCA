@@ -100,6 +100,7 @@
 #' }
 #'
 #' @examples
+#' #No appropriate examples
 #'
 #' @author
 #' \itemize{
@@ -269,9 +270,12 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   est_data <- data.frame(matrix(ncol = length(elist), nrow = 0))
   names(est_data) <- elist
   
-  if("DOSEU" %in% names(map_data)){
-    if(map_data$DOSEU %in% names(data_data)){
-      if(length(grep("/", as.character(unique(data_data[, as.character(map_data$DOSEU)])[1])) > 0)){
+  if(parameter_required("^DOSE(i{1}|[0-9]*?)U$", names(map_data))) {
+    vdoseu <- parameter_indices("^DOSE(i{1}|[0-9]*?)U$", names(map_data))
+    vdoseu <- names(vdoseu)
+    doseu_name <- as.character(map_data[, vdoseu][1])
+    if(doseu_name %in% names(data_data)){
+      if(length(grep("/", as.character(unique(data_data[, doseu_name])[1])) > 0)){
         dose_by_mass <- TRUE
       } else {
         dose_by_mass <- FALSE
@@ -1220,12 +1224,12 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 kelr_opt <- kel_r(conc = sel_conc, time = sel_time)[["KELRSQ"]]
                 if("AURCXPCTO" %in% flag_df$VAR){
                   span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
-                  aucinfo_opt <- auc_inf_o(conc = rt, time = mid_pt, method = method, auclast = auclast, c_last = c_last, spanratio = span_ratio)
-                  aucxpct_opt <- auc_XpctO(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_info = aucinfo_opt, auclast = auclast, kel = all_kel)
+                  aucinfo_opt <- auc_inf_o(conc = rt, time = mid_pt, method = method, auclast = auclast, c_last = c_last, spanratio = span_ratio, kel = all_kel)
+                  aucxpct_opt <- auc_XpctO(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_info = aucinfo_opt, auclast = auclast)
                 } else if("AURCXPCTP" %in% flag_df$VAR){
                   span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
-                  aucinfp_opt <- auc_inf_p(conc = rt, time = mid_pt, method = method, auclast = auclast, t_last = t_last, spanratio = span_ratio)
-                  aucxpct_opt <- auc_XpctP(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_infp = aucinfp_opt, auclast = auclast, kel = all_kel)
+                  aucinfp_opt <- auc_inf_p(conc = rt, time = mid_pt, method = method, auclast = auclast, t_last = t_last, spanratio = span_ratio, kel = all_kel)
+                  aucxpct_opt <- auc_XpctP(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_infp = aucinfp_opt, auclast = auclast)
                 } else {
                   stop("Error in optimize kel")
                 }

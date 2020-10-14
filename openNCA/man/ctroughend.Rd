@@ -53,8 +53,9 @@ are also of the same length. \cr
 conc_vector <- c(2.89, 2.49, 2.47)
 time_vector <- c(0, 1, 2)
 tau_value <- 2
+told_value <- 0
 
-ctroughend(conc = conc_vector, time = time_vector, tau = tau_value)
+ctroughend(conc = conc_vector, time = time_vector, tau = tau_value, told = told_value)
 #2.47
 
 ############
@@ -72,8 +73,9 @@ ctroughend(conc = conc_vector, time = time_vector, tau = tau_value)
 conc_vector <- c(2.23, 2.34, 2.68)
 time_vector <- c(1, 2, 3)
 tau_value <- 4
+told_value <- 1
 
-ctroughend(conc = conc_vector, time = time_vector, tau = tau_value)
+ctroughend(conc = conc_vector, time = time_vector, tau = tau_value, told = told_value)
 #NA
 
 }

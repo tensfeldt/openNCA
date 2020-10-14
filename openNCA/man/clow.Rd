@@ -39,6 +39,7 @@ of the last non-zero concentration, divided by the weight. \cr
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

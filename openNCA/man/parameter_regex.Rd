@@ -23,13 +23,13 @@ This function returns the regular expression associated to the specified paramet
 }
 
 \examples{
-parameter_regex("CMAX")
+#parameter_regex("CMAX")
 #"^CMAX$"
 
-parameter_regex("TMAX")
+#parameter_regex("TMAX")
 #"^TMAX$"
 
-parameter_regex("AUCT")
+#parameter_regex("AUCT")
 #"^AUC(T|[0-9]+?)$"
 
 }

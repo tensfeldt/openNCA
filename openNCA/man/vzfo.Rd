@@ -38,6 +38,7 @@ Single Dose Equation only; not calculated at steady-state:
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

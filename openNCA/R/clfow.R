@@ -23,7 +23,8 @@
 #' }
 #'
 #' @examples
-#'
+#' #No appropriate examples
+#' 
 #' @author
 #' \itemize{
 #'  \item \strong{Rudraya Technical Team}

@@ -36,14 +36,15 @@
 #' conc_vector <- c(2.89, 2.49, 2.47)
 #' time_vector <- c(0, 1, 2)
 #' tau_value <- 2
+#' told_value <- 0
 #'
 #' cmax(conc = conc_vector, time = time_vector)
 #' #2.89
 #'
-#' ctrough(conc = conc_vector, time = time_vector, tau = tau_value)
+#' ctrough(conc = conc_vector, time = time_vector, tau = tau_value, told = told_value)
 #' #2.89
 #' 
-#' ptrough(cmax = 2.89, ctrough = 2.89)
+#' ptroughr(cmax = 2.89, ctrough = 2.89)
 #' #1
 #' 
 #' ############
@@ -61,14 +62,15 @@
 #' conc_vector <- c(2.23, 2.34, 2.68)
 #' time_vector <- c(1, 2, 3)
 #' tau_value <- 4
+#' told_value <- 1
 #' 
 #' cmax(conc = conc_vector, time = time_vector)
 #' #2.68
 #'
-#' ctrough(conc = conc_vector, time = time_vecto, tau = tau_valuer)
+#' ctrough(conc = conc_vector, time = time_vector, tau = tau_value, told = told_value)
 #' #NA
 #' 
-#' ptrough(cmax = 2.68, ctrough = NA)
+#' ptroughr(cmax = 2.68, ctrough = NA)
 #' #NA
 #'
 #' ############
@@ -87,14 +89,15 @@
 #' conc_vector <- c(NA, 1.23, 1.34, 1.19)
 #' time_vector <- c(0, 1, 2, 3)
 #' tau_value <- 3
+#' told_value <- 0
 #' 
 #' cmax(conc = conc_vector, time = time_vector)
 #' #1.34
 #'
-#' ctrough(conc = conc_vector, time = time_vector, tau = tau_value)
+#' ctrough(conc = conc_vector, time = time_vector, tau = tau_value, told = told_value)
 #' #NA
 #' 
-#' ptrough(cmax = 1.34, ctrough = NA)
+#' ptroughr(cmax = 1.34, ctrough = NA)
 #' #NA
 #'
 #' @author

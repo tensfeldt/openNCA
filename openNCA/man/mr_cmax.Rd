@@ -44,6 +44,7 @@ This function gets derived metabolite of the maximum observed concentration that
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

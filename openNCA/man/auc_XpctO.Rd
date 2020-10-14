@@ -46,6 +46,8 @@ Percentage of AUCINFO obtained by forward extrapolation.\cr
   \tab \figure{auc_XpctO1.png} \cr
  }
 }
+\eqn{AUCINFO = Area under the concentration versus time curve from zero time to infinity (Observed)} \cr
+\eqn{AUCLAST = Area under the concentration versus time curve from zero until time of last} \cr
 }
 \section{Additional Details}{
 

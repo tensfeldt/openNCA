@@ -12,8 +12,6 @@
 #' \eqn{CLTAUi = Total clearance of drug calculated using AUCTAUi from the ith dosing interval} \cr
 #' \eqn{NORMBS = BW = Body weight} \cr
 #'
-#' @section Additional Details:
-#'
 #' @param cltau The total body clearance (numeric value)
 #' @param normbs The dose data (numeric value)
 #'
@@ -24,6 +22,7 @@
 #' }
 #'
 #' @examples
+#' #No appropriate examples
 #'
 #' @author
 #' \itemize{

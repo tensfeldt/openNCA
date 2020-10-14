@@ -23,6 +23,7 @@
 #' }
 #'
 #' @examples
+#' #No appropriate examples
 #'
 #' @author
 #' \itemize{

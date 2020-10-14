@@ -36,8 +36,9 @@
 #' conc_vector <- c(2.89, 2.49, 2.47)
 #' time_vector <- c(0, 1, 2)
 #' tau_value <- 2
+#' told_value <- 0
 #'
-#' ctrough(conc = conc_vector, time = time_vector, tau = tau_value)
+#' ctrough(conc = conc_vector, time = time_vector, tau = tau_value, told = told_value)
 #' #2.89
 #'
 #' ############
@@ -55,8 +56,9 @@
 #' conc_vector <- c(2.23, 2.34, 2.68)
 #' time_vector <- c(1, 2, 3)
 #' tau_value <- 4
+#' told_value <- 1
 #'
-#' ctrough(conc = conc_vector, time = time_vector, tau = tau_value)
+#' ctrough(conc = conc_vector, time = time_vector, tau = tau_value, told = told_value)
 #' #NA
 #'
 #' ############
@@ -75,8 +77,9 @@
 #' conc_vector <- c(NA, 1.23, 1.34, 1.19)
 #' time_vector <- c(0, 1, 2, 3)
 #' tau_value <- 3
+#' told_value <- 0
 #'
-#' ctrough(conc = conc_vector, time = time_vector, tau = tau_value)
+#' ctrough(conc = conc_vector, time = time_vector, tau = tau_value, told = told_value)
 #' #NA
 #'
 #' @author

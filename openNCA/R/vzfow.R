@@ -14,8 +14,6 @@
 #' \eqn{VZFO = The volume of distribution associated with the terminal slope following extravascular administration, calculated using the observed value of the last non-zero concentration} \cr
 #' \eqn{NORMBS = BW = Body weight} \cr
 #'
-#' @section Additional Details:
-#'
 #' @param vzfo The The volume of distribution data (numeric value)
 #' @param normbs The dose data (numeric value)
 #'
@@ -26,6 +24,7 @@
 #' }
 #'
 #' @examples
+#' #No appropriate examples
 #'
 #' @author
 #' \itemize{

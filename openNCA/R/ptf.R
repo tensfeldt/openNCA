@@ -21,7 +21,8 @@
 #'  \item PTF: fluctuation between the peak and trough
 #' }
 #' 
-#' @examples 
+#' @examples
+#' #No appropriate examples
 #' 
 #' @author
 #' \itemize{

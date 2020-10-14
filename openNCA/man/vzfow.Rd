@@ -26,10 +26,6 @@ concentration, divided by the body weight of the subject. \cr
 \eqn{VZFO = The volume of distribution associated with the terminal slope following extravascular administration, calculated using the observed value of the last non-zero concentration} \cr
 \eqn{NORMBS = BW = Body weight} \cr
 }
-\section{Additional Details}{
-
-}
-
 \section{Returns}{
 
 \strong{Value} \cr
@@ -39,6 +35,7 @@ concentration, divided by the body weight of the subject. \cr
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

@@ -9,7 +9,8 @@
 #'   \tab \figure{auc_XpctP1.png} \cr
 #'  }
 #' }
-#' @section Additional Details:
+#' \eqn{AUCINFP = Area under the concentration versus time curve from zero time to infinity (Predicted)} \cr
+#' \eqn{AUCLAST = Area under the concentration versus time curve from zero until time of last} \cr
 #'
 #' @section Note:
 #' \strong{auc_inf_p}: Refer to \code{\link{auc_inf_p}} for more details \cr

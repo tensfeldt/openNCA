@@ -115,7 +115,7 @@ tlag <- function(conc = NULL, time = NULL){
   if(sum(tmp$conc, na.rm=T) == 0){
     return(t_lag)
   }
-  if(all(tmp$conc > 0)){
+  if(isTRUE(all(tmp$conc > 0))){
     return(0)
   }
   tmp <- tmp[order(tmp$time),]

@@ -24,6 +24,7 @@ If all the RATE's are 0's then RATELAST will return 'NA'.
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

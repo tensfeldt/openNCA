@@ -13,8 +13,6 @@
 #' \eqn{VZP = The volume of distribution associated with the terminal slope following intravascular administration, calculated using the predicted value of the last non-zero concentration} \cr
 #' \eqn{NORMBS = BW = Body weight} \cr
 #'
-#' @section Additional Details:
-#'
 #' @param vzp The volume of distribution data (given in a vector form)
 #' @param normbs The dose data (given in a vector form)
 #'
@@ -25,6 +23,7 @@
 #' }
 #'
 #' @examples
+#' #No appropriate examples
 #'
 #' @author
 #' \itemize{

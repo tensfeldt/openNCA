@@ -112,6 +112,7 @@
 #' }
 #'
 #' @examples
+#' #No appropriate examples
 #'
 #' @author
 #' \itemize{
@@ -268,9 +269,12 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   names(est_data) <- elist
   names(tmp_est_data) <- elist
   
-  if("DOSEU" %in% names(map_data)){
-    if(map_data$DOSEU %in% names(data_data)){
-      if(length(grep("/", as.character(unique(data_data[, as.character(map_data$DOSEU)])[1])) > 0)){
+  if(parameter_required("^DOSE(i{1}|[0-9]*?)U$", names(map_data))) {
+    vdoseu <- parameter_indices("^DOSE(i{1}|[0-9]*?)U$", names(map_data))
+    vdoseu <- names(vdoseu)
+    doseu_name <- as.character(map_data[, vdoseu][1])
+    if(doseu_name %in% names(data_data)){
+      if(length(grep("/", as.character(unique(data_data[, doseu_name])[1])) > 0)){
         dose_by_mass <- TRUE
       } else {
         dose_by_mass <- FALSE
@@ -1782,8 +1786,8 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   #}
   if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
     if("FLGACCEPTKEL" %in% names(computation_df)){
-      if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & !is.na(computation_df[,"KEL"]) & is.numeric(computation_df[,"KEL"]),]) > 0){ 
-        computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & !is.na(computation_df[,"KEL"]) & is.numeric(computation_df[,"KEL"]),][,"FLGACCEPTTAU"] <- 0  
+      if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & !is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"]),]) > 0){ 
+        computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & !is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"]),][,"FLGACCEPTTAU"] <- 0  
       }
     }
   }

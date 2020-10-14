@@ -94,13 +94,17 @@ dosec <- function(data = NULL, map = NULL, idose = NULL){
   vlist <- unlist(vlist)
   if(!is.na(xdose) && xdose %in% names(data_data) && length(vlist) > 0){
     data_data <- data_data[!duplicated(data_data[,xdose]), vlist]
+    if(length(grep("/", as.character(unique(data_data[, xdoseu])[1])) > 0)){
+      data_data[, xdoseu] <- as.character(unlist(strsplit(as.character(unique(data_data[, xdoseu])[1]), "/")))[1]
+    }
+    data_data$DOSE <- data_data[, xdose]
 ##  if(!is.null(xdose) && all(xdose %in% names(data_data)) && all(vlist %in% names(data_data))){
 ##    data_data <- data_data[!duplicated(data_data[,xdose]), vlist] 
 ##  } else {
 ##    data_data <- data_data[, vlist]
 ##  }
     df <- unit_conversion(data = data_data, map = map_data, result = data_data, unit_class = "DOSEU", verbose=FALSE)
-    dose_c <- unique(df[,xdose])[1]
+    dose_c <- unique(df$DOSE)[1]
   } else {
     dose_c <- NA
   }

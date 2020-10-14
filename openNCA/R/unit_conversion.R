@@ -17,6 +17,7 @@
 #' }
 #'
 #' @examples
+#' #No appropriate examples
 #'
 #' @author
 #' \itemize{
@@ -264,16 +265,16 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
               outputUnit3 <- NA
               
               if(testunit) {
-                  outputUnit3 <- toupper(as.character(map_data[[outputUnitLabel]]))
-                  outputUnitFormat <- length(outputUnit3)>0 & isTRUE(!is.na(outputUnit3))
-                  if(outputUnitFormat && isTRUE(dose_mass_input)) {
-                    if(length(grep("/", outputUnit3)) > 0) { 
-                      outputUnit3 <- unlist(strsplit(outputUnit3, "/"))
-                      dose_mass_output <- TRUE
-                    } else { 
-                      outputUnitFormat <- FALSE
-                    }
+                outputUnit3 <- toupper(as.character(map_data[[outputUnitLabel]]))
+                outputUnitFormat <- length(outputUnit3)>0 & isTRUE(!is.na(outputUnit3))
+                if(outputUnitFormat && isTRUE(dose_mass_input)) {
+                  if(length(grep("/", outputUnit3)) > 0) { 
+                    outputUnit3 <- unlist(strsplit(outputUnit3, "/"))
+                    dose_mass_output <- TRUE
+                  } else { 
+                    outputUnitFormat <- FALSE
                   }
+                }
               }
               testunit <- testunit && outputUnitFormat
             
@@ -320,7 +321,12 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                           }
                         } else if(i == 2 && isTRUE(DPMcheck) && class[inputMatch3[i]] == c("M", "V")[i] && class[outputMatch3[i]] == c("M", "V")[i]) {
                           doseUScaler[i] <- inputMScale3/outputMScale3
-                        } else if(i == 2 && inputUnit3[i] %in% dose_denominator && outputUnit3[i] %in% dose_denominator) {
+                        } else {
+                          doseUScaler[i] <- 1
+                          warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
+                        }
+                      } else {
+                        if(i == 2 && inputUnit3[i] %in% dose_denominator && outputUnit3[i] %in% dose_denominator) {
                           doseUScaler[i] <- 1
                           if(inputUnit3[i] != outputUnit3[i]){
                             warning("'", inputUnit3[i], "' to '", outputUnit3[i], "' DOSEU conversion is not accounted for unit conversion")
@@ -331,16 +337,13 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                           warning("'", inputUnit3[i], "' to '", outputUnit3[i], "' DOSEU conversion is not accounted for unit conversion")
                         } else {
                           doseUScaler[i] <- 1
-                          warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
-                        }
-                      } else {
-                        if(inputMatch3[i] == missing_idx){
-                          valid_input_unit <- FALSE
-                        }
-                        if(outputMatch3[i] == missing_idx){
-                          valid_output_unit <- FALSE
-                        }
-                        doseUScaler[i] <- 1
+                          if(inputMatch3[i] == missing_idx){
+                            valid_input_unit <- FALSE
+                          }
+                          if(outputMatch3[i] == missing_idx){
+                            valid_output_unit <- FALSE
+                          }
+                        } 
                         warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion")
                       }
                     } else {
@@ -495,7 +498,12 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                         }
                       } else if(i == 2 && isTRUE(DPMcheck) && class[inputMatch3[i]] == c("M", "V")[i] && class[outputMatch3[i]] == c("M", "V")[i]) {
                         doseUScaler[i] <- inputMScale3/outputMScale3
-                      } else if(i == 2 && inputUnit3[i] %in% dose_denominator && outputUnit3[i] %in% dose_denominator) {
+                      } else  {
+                        doseUScaler[i] <- 1
+                        warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
+                      }
+                    } else {
+                      if(i == 2 && inputUnit3[i] %in% dose_denominator && outputUnit3[i] %in% dose_denominator) {
                         doseUScaler[i] <- 1
                         if(inputUnit3[i] != outputUnit3[i]){
                           warning("'", inputUnit3[i], "' to '", outputUnit3[i], "' DOSEU conversion is not accounted for unit conversion")
@@ -506,16 +514,13 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
                         warning("'", inputUnit3[i], "' to '", outputUnit3[i], "' DOSEU conversion is not accounted for unit conversion")
                       } else {
                         doseUScaler[i] <- 1
-                        warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not accounted for unit conversion")
+                        if(inputMatch3[i] == missing_idx){
+                          valid_input_unit <- FALSE
+                        }
+                        if(outputMatch3[i] == missing_idx){
+                          valid_output_unit <- FALSE
+                        }
                       }
-                    } else {
-                      if(inputMatch3[i] == missing_idx){
-                        valid_input_unit <- FALSE
-                      }
-                      if(outputMatch3[i] == missing_idx){
-                        valid_output_unit <- FALSE
-                      }
-                      doseUScaler[i] <- 1
                       warning("'DOSEU' and/or '", outputUnitLabel, "' value provided via 'map' is not valid for unit conversion")
                     }
                   } else {
@@ -1734,7 +1739,6 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
     } else {
       result_data$VOLUMEWU <- NA
       if(length(VOLUMEWUPARAM) > 0){
-        print(VOLUMEWUPARAM)
         result_data[,names(result_data) %in% VOLUMEWUPARAM] <- NA
       }
       if(!("CONCU" %in% names(map_data) && "NORMBSU" %in% names(map_data))) {
@@ -1885,7 +1889,6 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
       } else {
         result_data$CLWU <- NA
         if(length(CLWUPARAM) > 0){
-          print(CLWUPARAM)
           result_data[,names(result_data) %in% CLWUPARAM] <- NA
         }
         if(!(map_data$CONCU %in% names(data_data) && map_data$TIMEU %in% names(data_data) && map_data$NORMBSU %in% names(data_data))) {

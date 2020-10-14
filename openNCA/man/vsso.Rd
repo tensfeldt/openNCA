@@ -33,6 +33,7 @@ Steady-state (observed) volume of distribution for non-steady state or steady st
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

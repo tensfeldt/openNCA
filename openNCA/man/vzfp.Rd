@@ -38,6 +38,7 @@ Single Dose Equation:
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

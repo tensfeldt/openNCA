@@ -4,7 +4,7 @@ Version: 2.0.0
 Authors@R: person("Tom Tensfeldt", "Pfizer", email = "thomas.g.tensfeldt@pfizer.com", role = c("aut", "cre"))
 Description: openNCA provides routines to compute standard non-compartmental pharamacokinetic (PK) parameters. openNCA is based upon the Splus based “eNCA Computation Engine“, which was an existing pharmacokinetic (PK) pharmacokinetic bioanalysis data management repository and analysis system developed internally by Pfizer. openNCA comprises of both a desktop application and an R based computation engine using for basic models of PK parameter generation for NCA: M1 - extravascular dosing administration, M2 - intravascular bolus dosing, M3 - intravascular infusion dosing and M4 - urinary pharmacokinetic analysis.
 Depends: R (>= 3.3.3)
-License: MIT + LICENSE
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1

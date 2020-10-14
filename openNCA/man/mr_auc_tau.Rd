@@ -45,6 +45,7 @@ time point.\cr
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

@@ -21,6 +21,7 @@ This function returns the list of valid model configurations that are supported
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

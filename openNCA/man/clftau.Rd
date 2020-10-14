@@ -52,8 +52,9 @@ Steady-State Equation:
 conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28)
 time_vector <- c(0, 1, 2, 3, 4, 5)
 tau_val <- 5
+told_val <- 0
 
-auc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #12.23956
 
 clftau(auctau = 12.23956, dose = 300)
@@ -74,8 +75,9 @@ clftau(auctau = 12.23956, dose = 300)
 conc_vector <- c(0, 0, 0)
 time_vector <- c(0, 1, 2)
 tau_val <- 2
+told_val <- 0
 
-auc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #0
 
 clftau(auctau = 0, dose = 300)
@@ -96,8 +98,9 @@ clftau(auctau = 0, dose = 300)
 conc_vector <- c(1.19, 1.23, 1.34)
 time_vector <- c(0, 1, 2)
 tau_val <- 2
+told_val <- 0
 
-auc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #2.495
 
 clftau(auctau = 2.495, dose = 300)

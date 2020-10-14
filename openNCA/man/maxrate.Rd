@@ -21,6 +21,7 @@ Maximum observed excretion rate
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{

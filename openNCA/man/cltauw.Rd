@@ -24,10 +24,6 @@ The total body clearance for intravascular administration, calculated using AUCT
 \eqn{CLTAUi = Total clearance of drug calculated using AUCTAUi from the ith dosing interval} \cr
 \eqn{NORMBS = BW = Body weight} \cr
 }
-\section{Additional Details}{
-
-}
-
 \section{Returns}{
 
 \strong{Value} \cr
@@ -37,6 +33,7 @@ The total body clearance for intravascular administration, calculated using AUCT
 }
 
 \examples{
+#No appropriate examples
 
 }
 \author{
