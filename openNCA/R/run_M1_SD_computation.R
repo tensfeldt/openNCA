@@ -1352,7 +1352,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         ###  clf_ow <- clfow(clfo = clf_o, normbs = norm_bs)
         ###}
         if(isTRUE(dose_by_mass)){
-          clf_ow <- clfow(clfo = unique(tmp_df[, dosevar])[1], normbs = aucinf_o)
+          clf_ow <- clfow(clfo = dose_c, normbs = aucinf_o)
         } else {
           clf_ow <- clfow(clfo = clf_o, normbs = norm_bs)
         }
@@ -1368,7 +1368,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         ###  clf_pw <- clfpw(clfp = clf_p, normbs = norm_bs)
         ###}
         if(isTRUE(dose_by_mass)){
-          clf_pw <- clfpw(clfp = unique(tmp_df[, dosevar])[1], normbs = aucinf_p)
+          clf_pw <- clfpw(clfp = dose_c, normbs = aucinf_p)
         } else {
           clf_pw <- clfpw(clfp = clf_p, normbs = norm_bs)
         }
@@ -1386,7 +1386,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         ###}
         if(isTRUE(dose_by_mass)){
           tmp_denom <- kel_v[["KEL"]] * aucinf_o
-          vzf_ow <- vzfow(vzfo = unique(tmp_df[, dosevar])[1], normbs = tmp_denom)
+          vzf_ow <- vzfow(vzfo = dose_c, normbs = tmp_denom)
         } else {
           vzf_ow <- vzfow(vzfo = vzf_o, normbs = norm_bs)
         }
@@ -1404,7 +1404,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         ###}
         if(isTRUE(dose_by_mass)){
           tmp_denom <- kel_v[["KEL"]] * aucinf_p
-          vzf_pw <- vzfpw(vzfp = unique(tmp_df[, dosevar])[1], normbs = tmp_denom)
+          vzf_pw <- vzfpw(vzfp = dose_c, normbs = tmp_denom)
         } else {
           vzf_pw <- vzfpw(vzfp = vzf_p, normbs = norm_bs)
         }
@@ -1785,12 +1785,38 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   #  }
   #}
   if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
-    if("FLGACCEPTKEL" %in% names(computation_df)){
-      if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & !is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"]),]) > 0){ 
-        computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & !is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"]),][,"FLGACCEPTTAU"] <- 0  
+    if(all(c("TAU1", "LASTTIME") %in% names(computation_df))){
+      if(all(c("KEL", "FLGACCEPTKEL") %in% names(computation_df))){
+        if(nrow(computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,"TAU1"])) & !is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),]) > 0){ 
+          if("FLGACCEPTTAU" %in% names(computation_df)){
+            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,"TAU1"])) & !is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),][,"FLGACCEPTTAU"] <- 0  
+          }
+          if(all(c(paste0("AUCTAU",1:di_col)) %in% names(computation_df))){
+            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,"TAU1"])) & !is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),][,paste0("AUCTAU",1:di_col)] <- NA  
+          }
+        } 
+      } else if("KEL" %in% names(computation_df)) {
+        if(nrow(computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,"TAU1"])) & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),]) > 0){ 
+          if("FLGACCEPTTAU" %in% names(computation_df)){
+            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,"TAU1"])) & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),][,"FLGACCEPTTAU"] <- 0  
+          }
+          if(all(c(paste0("AUCTAU",1:di_col)) %in% names(computation_df))){
+            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,"TAU1"])) & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),][,paste0("AUCTAU",1:di_col)] <- NA  
+          }
+        }
+      } else {
+        if(nrow(computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,"TAU1"])),]) > 0){ 
+          if("FLGACCEPTTAU" %in% names(computation_df)){
+            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,"TAU1"])),][,"FLGACCEPTTAU"] <- 0  
+          }
+          if(all(c(paste0("AUCTAU",1:di_col)) %in% names(computation_df))){
+            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])),][,paste0("AUCTAU",1:di_col)] <- NA  
+          }
+        }
       }
     }
   }
+  
   if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
     for(f in 1:length(unique(computation_df[,map_data$SDEID]))){
       tmp_df <- data_data[data_data[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],]

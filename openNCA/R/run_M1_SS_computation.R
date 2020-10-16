@@ -1873,7 +1873,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           ###  clf_tauw[[d]] <- clftauw(clftau = clf_tau[[d]], normbs = norm_bs)
           ###}
           if(isTRUE(dose_by_mass)){
-            clf_tauw[[d]] <- clftauw(clftau = tmp_dose, normbs = auctau[[d]])
+            clf_tauw[[d]] <- clftauw(clftau = dose_ci[[d]], normbs = auctau[[d]])
           } else {
             clf_tauw[[d]] <- clftauw(clftau = clf_tau[[d]], normbs = norm_bs)
           }
@@ -1896,7 +1896,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           ###}
           if(isTRUE(dose_by_mass)){
             tmp_denom <- kel_v[["KEL"]] * auctau[[d]]
-            vzf_tauw[[d]] <- vzftauw(vzftau = tmp_dose, normbs = tmp_denom)
+            vzf_tauw[[d]] <- vzftauw(vzftau = dose_ci[[d]], normbs = tmp_denom)
           } else {
             vzf_tauw[[d]] <- vzftauw(vzftau = vzf_tau[[d]], normbs = norm_bs)
           }  
@@ -2688,10 +2688,34 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   #  }
   #}
   if(disp_required[["FLGACCEPTTAU"]] && "LASTTIMEACCEPTCRIT" %in% names(map_data)) {
-    if("FLGACCEPTKEL" %in% names(computation_df)){
-      if(nrow(computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),]) > 0){ 
-        computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),][,"FLGACCEPTTAU"] <- 0  
-        computation_df[!is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),][,paste0("AUCTAU",1:di_col)] <- NA  
+    if(all(c(paste0("TAU",di_col), "LASTTIME") %in% names(computation_df))){
+      if(all(c("KEL", "FLGACCEPTKEL") %in% names(computation_df))){
+        if(nrow(computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])) & !is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),]) > 0){ 
+          if("FLGACCEPTTAU" %in% names(computation_df)){
+            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])) & !is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),][,"FLGACCEPTTAU"] <- 0  
+          }
+          if(all(c(paste0("AUCTAU",1:di_col)) %in% names(computation_df))){
+            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])) & !is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),][,paste0("AUCTAU",1:di_col)] <- NA  
+          }
+        } 
+      } else if("KEL" %in% names(computation_df)) {
+        if(nrow(computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])) & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),]) > 0){ 
+          if("FLGACCEPTTAU" %in% names(computation_df)){
+            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])) & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),][,"FLGACCEPTTAU"] <- 0  
+          }
+          if(all(c(paste0("AUCTAU",1:di_col)) %in% names(computation_df))){
+            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])) & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),][,paste0("AUCTAU",1:di_col)] <- NA  
+          }
+        }
+      } else {
+        if(nrow(computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])),]) > 0){ 
+          if("FLGACCEPTTAU" %in% names(computation_df)){
+            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])),][,"FLGACCEPTTAU"] <- 0  
+          }
+          if(all(c(paste0("AUCTAU",1:di_col)) %in% names(computation_df))){
+            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])),][,paste0("AUCTAU",1:di_col)] <- NA  
+          }
+        }
       }
     }
   }

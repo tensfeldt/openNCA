@@ -1600,17 +1600,9 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
       doseulist <- names(parameter_indices("^DOSEULIST$", names(map_data), simplify=FALSE))
       doseuvar <- ifelse(!is.null(doseulist), ifelse(!is.null(map_data[,doselist]), unlist(strsplit(map_data[,doseulist], ";")), NA), NA)
       
-      interval_len <- length(dosevar)
-      if(interval_len > 1){
-        if(length(grep("/", as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])) > 0)){
-          vwu_dose_unit_tmp <- as.character(unlist(strsplit(as.character(unique(data_data[, as.character(map_data[,doseuvar[i]])])[1]), "/")))
-          dose_by_weight <- TRUE
-        }
-      } else {
-        if(length(grep("/", as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])) > 0)){
-          vwu_dose_unit_tmp <- as.character(unlist(strsplit(as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1]), "/")))
-          dose_by_weight <- TRUE
-        }
+      if(length(grep("/", as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])) > 0)){
+        vwu_dose_unit_tmp <- as.character(unlist(strsplit(as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1]), "/")))
+        dose_by_weight <- TRUE
       }
     }
     
@@ -1763,17 +1755,9 @@ unit_conversion <- function(data = NULL, map = NULL, result = NULL, unit_class =
       doseulist <- names(parameter_indices("^DOSEULIST$", names(map_data), simplify=FALSE))
       doseuvar <- ifelse(!is.null(doseulist), ifelse(!is.null(map_data[,doselist]), unlist(strsplit(map_data[,doseulist], ";")), NA), NA)
       
-      interval_len <- length(dosevar)
-      if(interval_len > 1){
-        if(length(grep("/", as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])) > 0)){
-          clwu_dose_unit_tmp <- as.character(unlist(strsplit(as.character(unique(data_data[, as.character(map_data[,doseuvar[i]])])[1]), "/")))
-          dose_by_weight <- TRUE
-        }
-      } else {
-        if(length(grep("/", as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])) > 0)){
-          clwu_dose_unit_tmp <- as.character(unlist(strsplit(as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1]), "/")))
-          dose_by_weight <- TRUE
-        }
+      if(length(grep("/", as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1])) > 0)){
+        clwu_dose_unit_tmp <- as.character(unlist(strsplit(as.character(unique(data_data[, as.character(map_data[,doseuvar])])[1]), "/")))
+        dose_by_weight <- TRUE
       }
     }
     
