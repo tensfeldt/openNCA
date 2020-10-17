@@ -1982,12 +1982,24 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   
   if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
     for(f in 1:length(unique(computation_df[,map_data$SDEID]))){
-      tmp_df <- data_data[data_data[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],]
+      curr_sdeid <- unique(computation_df[,map_data$SDEID])[f]
+      tmp_df <- data_data[data_data[,map_data$SDEID] == curr_sdeid,]
       emesis_flag_check <- ifelse(any(as.logical(as.numeric(tmp_df[,map_data$FLGEMESIS]))), TRUE, FALSE)
-      tmp_comp_df <- computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],]
-      if("DOSE" %in% names(computation_df)){
-        test_df_3 <- computation_df[computation_df[,"DOSE"] == tmp_comp_df[,"DOSE"],]
-        tmp_median <- median(as.numeric(test_df_3[,"TMAX"]), na.rm = TRUE) 
+      tmp_comp_df <- computation_df[computation_df[,map_data$SDEID] == curr_sdeid,]
+      if("FLGACCEPTTMAXCRIT" %in% names(map_data)){
+        if(map_data$FLGACCEPTTMAXCRIT %in% names(data_data)){
+          compare_df <- unique(data_data[,c(map_data$SDEID, map_data$FLGACCEPTTMAXCRIT)])
+          compare_val <- as.character(compare_df[map_data$SDEID == curr_sdeid, map_data$FLGACCEPTTMAXCRIT])
+          compare_sdeids <- as.character(compare_df[map_data$FLGACCEPTTMAXCRIT == compare_val, map_data$SDEID])
+          test_df_3 <- computation_df[computation_df[,"SDEID"] %in% compare_sdeids,]
+          if(nrow(test_df_3) > 0){
+            tmp_median <- median(as.numeric(test_df_3[,"TMAX"]), na.rm = TRUE) 
+          } else {
+            tmp_median <- NULL
+          }
+        } else {
+          tmp_median <- NULL
+        }
       } else {
         tmp_median <- NULL
       }
@@ -1996,6 +2008,8 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],"FLGACCEPTTMAX"] != 0){
           computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],"FLGACCEPTTMAX"] <- ifelse((isTRUE(emesis_flag_check) && (tmp_tmax < (2 * tmp_median))), 1, ifelse(!isTRUE(emesis_flag_check), 1 , 0))  
         }
+      } else if(is.null(tmp_median)){
+        computation_df[computation_df[,map_data$SDEID] == unique(computation_df[,map_data$SDEID])[f],"FLGACCEPTTMAX"] <- NA
       }
     }
   }
