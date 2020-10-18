@@ -1897,6 +1897,8 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
   
   if(disp_required[["FLGACCEPTTMAX"]] && "FLGEMESIS" %in% names(map_data) && map_data$FLGEMESIS %in% names(data_data)){
+    flgcrit_missing <- FALSE
+    flgcrit_invalid <- FALSE
     for(f in 1:length(unique(computation_df[,map_data$SDEID]))){
       curr_sdeid <- unique(computation_df[,map_data$SDEID])[f]
       tmp_df <- data_data[data_data[,map_data$SDEID] == curr_sdeid,]
@@ -1905,8 +1907,8 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       if("FLGACCEPTTMAXCRIT" %in% names(map_data)){
         if(map_data$FLGACCEPTTMAXCRIT %in% names(data_data)){
           compare_df <- unique(data_data[,c(map_data$SDEID, map_data$FLGACCEPTTMAXCRIT)])
-          compare_val <- as.character(compare_df[map_data$SDEID == curr_sdeid, map_data$FLGACCEPTTMAXCRIT])
-          compare_sdeids <- as.character(compare_df[map_data$FLGACCEPTTMAXCRIT == compare_val, map_data$SDEID])
+          compare_val <- as.character(compare_df[compare_df[,map_data$SDEID] == curr_sdeid, map_data$FLGACCEPTTMAXCRIT])
+          compare_sdeids <- as.character(compare_df[compare_df[,map_data$FLGACCEPTTMAXCRIT] == compare_val, map_data$SDEID])
           test_df_3 <- computation_df[computation_df[,"SDEID"] %in% compare_sdeids,]
           if(nrow(test_df_3) > 0){
             tmp_median <- median(as.numeric(test_df_3[,"TMAX"]), na.rm = TRUE) 
@@ -1915,9 +1917,17 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           }
         } else {
           tmp_median <- NULL
+          if(!flgcrit_invalid){
+            warning("Flag 'FLGACCEPTTMAXCRIT' value provided via 'map' is not valid! 'FLGACCEPTTMAX' will not be generated!")
+            flgcrit_invalid <- TRUE
+          }
         }
       } else {
         tmp_median <- NULL
+        if(!flgcrit_missing){
+          warning("Flag 'FLGACCEPTTMAXCRIT' is not provided via 'map' does not have a proper format! 'FLGACCEPTTMAX' will not be generated!")
+          flgcrit_missing <- TRUE
+        }
       }
       tmp_tmax <- as.numeric(tmp_comp_df[,"TMAX"])
       if(!is.null(tmp_median) && !is.na(tmp_median) && !is.null(tmp_tmax) && !is.na(tmp_tmax)){
