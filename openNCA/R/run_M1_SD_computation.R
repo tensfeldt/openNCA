@@ -729,7 +729,7 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
   if("OPTIMIZEKEL" %in% names(map_data)){
     if(!(is.na(map_data[,"OPTIMIZEKEL"]))){
-      if(map_data[,"OPTIMIZEKEL"] != 1 && map_data[,"OPTIMIZEKEL"] != 2){
+      if(as.character(map_data[,"OPTIMIZEKEL"]) != "0" && as.character(map_data[,"OPTIMIZEKEL"]) != "1" && as.character(map_data[,"OPTIMIZEKEL"]) != "2"){
         warning("Map 'OPTIMIZEKEL' does not have a valid value! Not using KEL optimization for this computation")
         optimize_kel <- FALSE
         optimize_kel_method <- as.character(as.numeric(map_data[,"OPTIMIZEKEL"]))
@@ -1932,13 +1932,20 @@ run_M1_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               computation_df[computation_df[,map_data$SDEID] == sdeid, "MRCMAX"] <- mr_cmax
             }
           }
-          
           #FEEDBACK: Commented the code to account for exclusion of metabolite exclusion list
           #Based of 3.0a scope item (Based on tc1606_M1SD)
           if(length(exclusion_list) > 0){
-            if(isTRUE(any(names(computation_df) %in% exclusion_list))){
+            exclusion_index <- c()
+            for(i in exclusion_list) {
+              rg <- parameter_regex(i)
+              pi <- parameter_indices(rg, names(computation_df))
+              if(length(pi) > 0){
+                exclusion_index <- c(exclusion_index, as.numeric(pi))
+              }
+            }
+            if(length(exclusion_index) > 0){
               if(isTRUE(curr_pkterm != pkterm_parent)){
-                computation_df[computation_df[,map_data$SDEID] == sdeid, exclusion_list] <- NA
+                computation_df[computation_df[,map_data$SDEID] == sdeid, exclusion_index] <- NA
               }
             }
           }

@@ -124,7 +124,7 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
   }
   if("OPTIMIZEKEL" %in% names(map_data)){
     if(!(is.na(map_data[,"OPTIMIZEKEL"]))){
-      if(map_data[,"OPTIMIZEKEL"] != 1 && map_data[,"OPTIMIZEKEL"] != 2){
+      if(as.character(map_data[,"OPTIMIZEKEL"]) != "0" && as.character(map_data[,"OPTIMIZEKEL"]) != "1" && as.character(map_data[,"OPTIMIZEKEL"]) != "2"){
         warning("Map 'OPTMIZEKEL' does not have a valid value! Not using KEL optmization for this computation")
         optimize_kel <- FALSE
       } else {

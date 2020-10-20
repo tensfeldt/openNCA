@@ -185,20 +185,8 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   regular_int_type <- NULL
   auc_pair_check <- FALSE
 
-  #index1 <- data_data[,map_data$SDEID]
-  #auc_len <- max(tapply(index1, index1, length))-1
-  auc_len <- 0
-  for(i in 1:length(unique(data_data[,map_data$SDEID]))){
-    index_df <- data_data[data_data[,map_data$SDEID] == unique(data_data[,map_data$SDEID])[i],]
-    index_time <- index_df[,map_data$TIME]
-    if(auc_len == 0){
-      auc_len <- length(index_time[index_time >= 0])
-    } else {
-      auc_len <- ifelse(length(index_time[index_time >= 0]) > auc_len, length(index_time[index_time >= 0]), auc_len)
-    }
-  }
-  auc_len <- auc_len - 1
-  auct_count <- auc_len
+  index1 <- data_data[,map_data$SDEID]
+  auc_len <- max(tapply(index1, index1, length))-1
   reg_col <- sum(regular_list %in% parameter_list) + ifelse(any(c("KELRSQ","KELRSQA") %in% parameter_list), 1, 0)
   auc_col <- ifelse(sum(auc_list %in% parameter_list) > 0, sum(auc_list %in% parameter_list)+1, 0)
   interval_col <- sum(interval_list %in% parameter_list)
@@ -556,16 +544,16 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     col_names <- c(col_names, rep(paste0("AUMCLAST",1:di_col)))
     regular_int_type <-  c(regular_int_type, rep(paste0("AUMCLAST",1:di_col)))
   }
-  if(disp_required[["AUCT"]] && auct_count > 1){
-    col_names <- c(col_names, rep(paste0("AUC",1:auct_count)))
-    regular_int_type <- c(regular_int_type, paste0("AUC",1:auct_count))
+  if(disp_required[["AUCT"]] && auc_len > 1){
+    col_names <- c(col_names, rep(paste0("AUC",1:auc_len)))
+    regular_int_type <- c(regular_int_type, paste0("AUC",1:auc_len))
   }
-  if(disp_required[["AUCTDN"]] && auct_count > 1){
-    col_names <- c(col_names, rep(paste0("AUC",1:auct_count,"DN")))
-    regular_int_type <- c(regular_int_type, paste0("AUC",1:auct_count,"DN"))
+  if(disp_required[["AUCTDN"]] && auc_len > 1){
+    col_names <- c(col_names, rep(paste0("AUC",1:auc_len,"DN")))
+    regular_int_type <- c(regular_int_type, paste0("AUC",1:auc_len,"DN"))
   }
-  if((disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) && auct_count > 1){
-    col_names <- c(col_names, rep(paste0("AUCINT",1:auct_count)))
+  if((disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) && auc_len > 1){
+    col_names <- c(col_names, rep(paste0("AUCINT",1:auc_len)))
   }
   if(disp_required[["AUCT1_T2"]] && auc_pair_check){
     col_names <- c(col_names, rep(paste0("AUC", map_data[,rep(paste0("AUC.", 1:auc_par_len, ".T1"))], "_", map_data[,rep(paste0("AUC.", 1:auc_par_len, ".T2"))])))
@@ -873,7 +861,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
   if("OPTIMIZEKEL" %in% names(map_data)){
     if(!(is.na(map_data[,"OPTIMIZEKEL"]))){
-      if(map_data[,"OPTIMIZEKEL"] != 1 && map_data[,"OPTIMIZEKEL"] != 2){
+      if(as.character(map_data[,"OPTIMIZEKEL"]) != "0" && as.character(map_data[,"OPTIMIZEKEL"]) != "1" && as.character(map_data[,"OPTIMIZEKEL"]) != "2"){
         warning("Map 'OPTIMIZEKEL' does not have a valid value! Not using KEL optimization for this computation")
         optimize_kel <- FALSE
         optimize_kel_method <- as.character(as.numeric(map_data[,"OPTIMIZEKEL"]))
@@ -940,7 +928,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   ###  comp_required[["DOSEi"]] <- TRUE
   ###}
 
-  auct_all_time <- c()
   for(i in 1:length(unique(data_data[,map_data$SDEID]))){
     tryCatch({
       dose_inf <- list()
@@ -1319,14 +1306,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           } else {
             nxt_ctold_est <- NA
-            nxt_tmp_told <- NA
-          }
-          if(!isTRUE(ctau_exists) && !is.na(tmp_tau)){
-            if(isTRUE(tmp_tau == nxt_tmp_told) && !is.na(nxt_ctold_est)){
-              tmp_conc_di <- c(tmp_conc_di, nxt_ctold_est)
-              tmp_time_di <- c(tmp_time_di, tmp_tau)
-              tmp_nom_time_di <- c(tmp_nom_time_di, tmp_tau)
-            }
           }
           
           if(d == 1){ 
@@ -1664,13 +1643,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           tmp_di_df <- tmp_di_df[order(tmp_di_df[,map_data$TIME]),]
           norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_di_df), tmp_di_df[,map_data$NORMBS][1], NA), NA)
           tmp_dose <- tmp_di_df[, as.character(map_data[c(paste0("DOSE",d))])][1]
-          auct_time <- sort(tmp_df[,map_data$TIME])
           
-          if(length(auct_all_time) == 0){
-            auct_all_time <- auct_time
-          } else if(any(!auct_time %in% auct_all_time)){
-            auct_all_time <- c(auct_all_time, auct_time[!auct_time %in% auct_all_time])
-          }
           if(d > 1){
             tmp_prev_told <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",d-1))])][1])
             tmp_prev_tau <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TAU",d-1))])][1])
@@ -1707,26 +1680,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             tmp_time_di <- est_tmp[[2]]
             tmp_nom_time_di <- est_tmp[[3]]
             ctold_est[[d]] <- est_tmp[[4]]
-            auct_time <- c(auct_time[auct_time <= tmp_told], tmp_told, auct_time[auct_time > tmp_told])
-            if(!isTRUE(tmp_told %in% auct_all_time)){
-              auct_count <- auct_count + 1
-              computation_df[,paste0("AUC",auct_count)] <- numeric(0)
-              idx_1 <- which(names(computation_df) == paste0("AUC",auct_count))
-              tmp_names <- names(computation_df)[-idx_1]
-              idx1 <- which(tmp_names == paste0("AUC",auct_count-1))
-              computation_df <- computation_df[,c(tmp_names[1:idx1], paste0("AUC",auct_count), tmp_names[(idx1+1):length(tmp_names)])]
-              computation_df[,paste0("AUCINT",auct_count)] <- numeric(0)
-              idx_2 <- which(names(computation_df) == paste0("AUCINT",auct_count))
-              tmp_names <- names(computation_df)[-idx_2]
-              idx2 <- which(tmp_names == paste0("AUCINT",auct_count-1))
-              computation_df <- computation_df[,c(tmp_names[1:idx2], paste0("AUCINT",auct_count), tmp_names[(idx2+1):length(tmp_names)])]
-              computation_df[,paste0("AUC",auct_count,"DN")] <- numeric(0)
-              idx_3 <- which(names(computation_df) == paste0("AUC",auct_count, "DN"))
-              tmp_names <- names(computation_df)[-idx_3]
-              idx3 <- which(tmp_names == paste0("AUC",auct_count-1, "DN"))
-              computation_df <- computation_df[,c(tmp_names[1:idx3], paste0("AUC",auct_count, "DN"), tmp_names[(idx3+1):length(tmp_names)])]
-              auct_all_time <- c(auct_all_time, tmp_told)
-            }
           } else {
             tmp_conc_di <- tmp_di_df[,map_data$CONC]
             tmp_time_di <- tmp_di_df[,map_data$TIME]
@@ -1761,34 +1714,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           } else {
             nxt_ctold_est <- NA
-            nxt_tmp_told <- NA
-          }
-          if(!isTRUE(ctau_exists) && !is.na(tmp_tau)){
-            if(isTRUE(tmp_tau == nxt_tmp_told) && !is.na(nxt_ctold_est)){
-              tmp_conc_di <- c(tmp_conc_di[tmp_time_di <= tmp_tau], nxt_ctold_est, tmp_conc_di[tmp_time_di > tmp_tau])
-              tmp_time_di <- c(tmp_time_di[tmp_time_di <= tmp_tau], tmp_tau, tmp_time_di[tmp_time_di > tmp_tau])
-              tmp_nom_time_di <- c(tmp_nom_time_di[tmp_nom_time_di <= tmp_tau], tmp_tau, tmp_nom_time_di[tmp_nom_time_di > tmp_tau])
-              auct_time <- c(auct_time[auct_time <= tmp_tau], tmp_tau, auct_time[auct_time > tmp_tau])
-              if(!isTRUE(tmp_tau %in% auct_all_time)){
-                auct_count <- auct_count + 1
-                computation_df[,paste0("AUC",auct_count)] <- numeric(0)
-                idx_1 <- which(names(computation_df) == paste0("AUC",auct_count))
-                tmp_names <- names(computation_df)[-idx_1]
-                idx1 <- which(tmp_names == paste0("AUC",auct_count-1))
-                computation_df <- computation_df[,c(tmp_names[1:idx1], paste0("AUC",auct_count), tmp_names[(idx1+1):length(tmp_names)])]
-                computation_df[,paste0("AUCINT",auct_count)] <- numeric(0)
-                idx_2 <- which(names(computation_df) == paste0("AUCINT",auct_count))
-                tmp_names <- names(computation_df)[-idx_2]
-                idx2 <- which(tmp_names == paste0("AUCINT",auct_count-1))
-                computation_df <- computation_df[,c(tmp_names[1:idx2], paste0("AUCINT",auct_count), tmp_names[(idx2+1):length(tmp_names)])]
-                computation_df[,paste0("AUC",auct_count,"DN")] <- numeric(0)
-                idx_3 <- which(names(computation_df) == paste0("AUC",auct_count, "DN"))
-                tmp_names <- names(computation_df)[-idx_3]
-                idx3 <- which(tmp_names == paste0("AUC",auct_count-1, "DN"))
-                computation_df <- computation_df[,c(tmp_names[1:idx3], paste0("AUC",auct_count, "DN"), tmp_names[(idx3+1):length(tmp_names)])]
-                auct_all_time <- c(auct_all_time, tmp_tau)
-              }
-            }
           }
           
           if(d == 1){ 
@@ -1978,32 +1903,28 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             vzf_tauw[[d]] <- vzftauw(vzftau = vzf_tau[[d]], normbs = norm_bs)
           }  
           ###if((comp_required[["AUCT"]] || comp_required[["AUCTDN"]]) && auc_len > 1) {
-          if(auct_count > 1) {
-            ## RD 10/16: Removing observing conc/time for AUCT 
-            ##time <- sort(tmp_df[,map_data$TIME])
-            ##time_di <- sort(tmp_di_df[,map_data$TIME])
-            time_di <- tmp_time_di
+          if(auc_len > 1) {
+            time <- sort(tmp_df[,map_data$TIME])
+            time_di <- sort(tmp_di_df[,map_data$TIME])
             if(d == di_col){
-              if(sum(auct_time > time_di[length(time_di)]) > 0){
-                time_di <- c(time_di, auct_time[auct_time > time_di[length(time_di)]])
+              if(sum(time > time_di[length(time_di)]) > 0){
+                time_di <- c(time_di, time[time > time_di[length(time_di)]])
               }
             }
             prev_na <- FALSE
             prev_auc <- NA
             prev_auc_dn <- NA
 
-            if(length(auct_time) > 1){
-              for(t in 2:(length(auct_time))){
-                if(auct_time[t] %in% time_di[-1]) {
-                  ## RD 10/16: Removing observing conc/time for AUCT 
-                  ##tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], t1 = time_di[1], t2 = time[t], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
-                  tmp <- auc_t1_t2(conc = tmp_conc_di, time = tmp_time_di, t1 = time_di[1], t2 = auct_time[t], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
+            if(length(time) > 1){
+              for(t in 2:(length(time))){
+                if(time[t] %in% time_di[-1]) {
+                  tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], t1 = time_di[1], t2 = time[t], method = method, exflag = auc_flag, t_max = t_maxi[[d]])
                   tmp_dn <- auc_dn(auc = tmp, dose = tmp_dose)
-                  tmp_int <- paste0(auct_time[1], "_", auct_time[t])
+                  tmp_int <- paste0(time[1], "_", time[t])
                 } else {
                   tmp <- NA
                   tmp_dn <- NA
-                  tmp_int <- paste0(auct_time[1], "_", auct_time[t])
+                  tmp_int <- paste0(time[1], "_", time[t])
                 }
 
                 if(d == 1){
@@ -2063,23 +1984,23 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 }
               }
             } else {
-              auct <- rep(NA, auct_count)
-              auctdn <- rep(NA, auct_count)
-              auc_int <- rep(NA, auct_count)
+              auct <- rep(NA, auc_len)
+              auctdn <- rep(NA, auc_len)
+              auc_int <- rep(NA, auc_len)
             }
             if(d == di_col){
               ###if(comp_required[["AUCT"]]){
-                if(length(auct) < auct_count) {
-                    auct <- c(auct, rep(NA, (auct_count - length(auct))))
+                if(length(auct) < auc_len) {
+                    auct <- c(auct, rep(NA, (auc_len - length(auct))))
                 }
               ###}
               ###if(comp_required[["AUCTDN"]]){
-                if(length(auctdn) < auct_count) {
-                  auctdn <- c(auctdn, rep(NA, (auct_count - length(auctdn))))
+                if(length(auctdn) < auc_len) {
+                  auctdn <- c(auctdn, rep(NA, (auc_len - length(auctdn))))
                 }
               ###}
-              if(length(auc_int) < auct_count) {
-                auc_int <- c(auc_int, rep(NA, (auct_count - length(auc_int))))
+              if(length(auc_int) < auc_len) {
+                auc_int <- c(auc_int, rep(NA, (auc_len - length(auc_int))))
               }
             }
           }
@@ -2233,14 +2154,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
           } else {
             nxt_ctold_est <- NA
-            nxt_tmp_told <- NA
-          }
-          if(!isTRUE(ctau_exists) && !is.na(tmp_tau)){
-            if(isTRUE(tmp_tau == nxt_tmp_told) && !is.na(nxt_ctold_est)){
-              tmp_conc_di <- c(tmp_conc_di, nxt_ctold_est)
-              tmp_time_di <- c(tmp_time_di, tmp_tau)
-              tmp_nom_time_di <- c(tmp_nom_time_di, tmp_tau)
-            }
           }
           
           ###if(comp_required[["AUCALLDN"]]){
@@ -2586,14 +2499,14 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         if(disp_required[["AUMCLASTi"]]){
           computation_df[i, paste0("AUMCLAST",1:di_col)] <- unlist(aumclasti)
         }
-        if(disp_required[["AUCT"]] && auct_count > 1){
-          computation_df[i, paste0("AUC",1:auct_count)] <- unlist(auct)
+        if(disp_required[["AUCT"]] && auc_len > 1){
+          computation_df[i, paste0("AUC",1:auc_len)] <- unlist(auct)
         }
-        if(disp_required[["AUCTDN"]] && auct_count > 1){
-          computation_df[i, paste0("AUC",1:auct_count,"DN")] <- unlist(auctdn)
+        if(disp_required[["AUCTDN"]] && auc_len > 1){
+          computation_df[i, paste0("AUC",1:auc_len,"DN")] <- unlist(auctdn)
         }
-        if((disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) && auct_count > 1){
-          computation_df[i, paste0("AUCINT",1:auct_count)] <- unlist(auc_int)
+        if((disp_required[["AUCT"]] || disp_required[["AUCTDN"]]) && auc_len > 1){
+          computation_df[i, paste0("AUCINT",1:auc_len)] <- unlist(auc_int)
         }
         if(disp_required[["AUCT1_T2"]] && auc_pair_check){
           computation_df[i, paste0("AUC", map_data[,rep(paste0("AUC.", 1:auc_par_len, ".T1"))], "_", map_data[,rep(paste0("AUC.", 1:auc_par_len, ".T2"))])] <- unlist(auct1_t2)
@@ -2946,14 +2859,21 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 computation_df[computation_df[,map_data$SDEID] == sdeid, paste0("MRCMAX",d)] <- mr_cmax_i
               }
             }
-            
-            #FEEDBACK: Commented the code to account for exclusion of metabolite exclusion list
-            #Based of 3.0a scope item (Based on tc1606_M1SD)
-            if(length(exclusion_list) > 0){
-              if(isTRUE(any(names(computation_df) %in% exclusion_list))){
-                if(isTRUE(curr_pkterm != pkterm_parent)){
-                  computation_df[computation_df[,map_data$SDEID] == sdeid, exclusion_list] <- NA
-                }
+          }
+          #FEEDBACK: Commented the code to account for exclusion of metabolite exclusion list
+          #Based of 3.0a scope item (Based on tc1606_M1SD)
+          if(length(exclusion_list) > 0){
+            exclusion_index <- c()
+            for(i in exclusion_list) {
+              rg <- parameter_regex(i)
+              pi <- parameter_indices(rg, names(computation_df))
+              if(length(pi) > 0){
+                exclusion_index <- c(exclusion_index, as.numeric(pi))
+              }
+            }
+            if(length(exclusion_index) > 0){
+              if(isTRUE(curr_pkterm != pkterm_parent)){
+                computation_df[computation_df[,map_data$SDEID] == sdeid, exclusion_index] <- NA
               }
             }
           }

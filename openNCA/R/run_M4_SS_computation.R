@@ -538,7 +538,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
   if("OPTIMIZEKEL" %in% names(map_data)){
     if(!(is.na(map_data[,"OPTIMIZEKEL"]))){
-      if(map_data[,"OPTIMIZEKEL"] != 1 && map_data[,"OPTIMIZEKEL"] != 2){
+      if(as.character(map_data[,"OPTIMIZEKEL"]) != "0" && as.character(map_data[,"OPTIMIZEKEL"]) != "1" && as.character(map_data[,"OPTIMIZEKEL"]) != "2"){
         warning("Map 'OPTIMIZEKEL' does not have a valid value! Not using KEL optimization for this computation")
         optimize_kel <- FALSE
         optimize_kel_method <- as.character(as.numeric(map_data[,"OPTIMIZEKEL"]))

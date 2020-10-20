@@ -92,7 +92,7 @@ dosec <- function(data = NULL, map = NULL, idose = NULL){
 ##    vlist <- c(vlist, xdose)
 ##  }
   vlist <- unlist(vlist)
-  if(!is.na(xdose) && xdose %in% names(data_data) && length(vlist) > 0){
+  if(!is.na(xdose) && xdose %in% names(data_data) && !is.na(xdoseu) && xdoseu %in% names(data_data) && length(vlist) > 0){
     data_data <- data_data[!duplicated(data_data[,xdose]), vlist]
     if(length(grep("/", as.character(unique(data_data[, xdoseu])[1])) > 0)){
       data_data[, xdoseu] <- as.character(unlist(strsplit(as.character(unique(data_data[, xdoseu])[1]), "/")))[1]
