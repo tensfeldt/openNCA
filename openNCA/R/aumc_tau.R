@@ -44,11 +44,18 @@
 #' }
 #' Note: check 'Methods' section below for more details \cr
 #' @param exflag The exclude flag data (given in a numeric vector)
+#' @param told The time duration of last dose (numeric value)
 #' @param tau The time duration of dosing interval (numeric value)
 #' @param t_max The first time at which CMAXi us observed within a dosing interval (numeric value)s
 #' @param orig_conc The original (full) concentration data (given in a numeric vector)
 #' @param orig_time The original (full) time data (given in a numeric vector)
-#' @param returnNA Determines if NAs should be returned or not (logical value)
+#' @param last_crit_factor The criteria value for last time acceptance criteria (numeric value)
+#' @param kel The terminal phase rate constant for the concentration-time profile of interest (numeric value)
+#' @param aumclast The area under the concentration versus time curve from zero time until the time (TLAST) of the last measurable concentration (CLASTi) during the ith dosing interval (numeric value)
+#' @param lasttime The time of the last measured concentration point of the profile (numeric value)
+#' @param orgtime The original time value from the map data ('nominal' or 'actual')
+#' @param nom_time The nominal time data (given in a vector form)
+#' @param ctoldest The estimated concentration at the time of last dose (numeric value)
 #' 
 #' @section Returns:
 #' \strong{Value} \cr
@@ -78,19 +85,20 @@
 #' conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28)
 #' time_vector <- c(0, 1, 2, 3, 4, 5)
 #' tau_val <- 5
+#' told_val <- 0
 #'
-#' aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+#' aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #' #29.64777
 #'
 #' tau_val <- 2
 #'
-#' #aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+#' #aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #' #Error in aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val) :
 #' #  Error in aumc_tau: 'orig_conc' and 'orig_time' vectors are NULL, 
 #' #  cannot interpolate data if original data is not provided!
 #'
 #' aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, 
-#'          orig_conc = conc_vector, orig_time = time_vector)
+#'          orig_conc = conc_vector, orig_time = time_vector, told = told_val)
 #' #29.64777
 #'
 #' ############
@@ -108,8 +116,9 @@
 #' conc_vector <- c(0, 0, 0)
 #' time_vector <- c(0, 1, 2)
 #' tau_val <- 2
+#' told_val <- 0
 #'
-#' aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+#' aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #' #0
 #'
 #' ############
@@ -127,8 +136,9 @@
 #' conc_vector <- c(1.19, 1.23, 1.34)
 #' time_vector <- c(0, 1, 2)
 #' tau_val <- 2
+#' told_val <- 0
 #'
-#' aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+#' aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #' #2.57
 #'
 #' @author
@@ -138,13 +148,15 @@
 #'  \item email: \url{support@rudraya.com}
 #' }
 #' @export
-aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = NULL, t_max = NULL, orig_conc = NULL, orig_time = NULL, returnNA = TRUE){
+aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told = NULL, tau = NULL, t_max = NULL, orig_conc = NULL, orig_time = NULL, last_crit_factor = NULL, kel = NULL, aumclast = NULL, lasttime = NULL, orgtime = "nominal", nom_time = NULL, ctoldest = NULL){
   if(is.null(conc) && is.null(time)){
     stop("Error in aumc_tau: 'conc' and 'time' vectors are NULL")
   } else if(is.null(conc)) {
     stop("Error in aumc_tau: 'conc' vector is NULL")
   } else if(is.null(time)) {
     stop("Error in aumc_tau: 'time' vectors is NULL")
+  } else if(is.null(told)){
+    stop("Error in aumc_tau: 'told' value is NULL")
   } else if(is.null(tau)){
     stop("Error in aumc_tau: 'tau' value is NULL")
   } else if(all(is.na(time))) { # 2019-09-11/TGT/
@@ -165,11 +177,71 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = 
   if(method != 1 && method != 2 && method != 3 && method != 4){
     stop("Error in aumc_tau: the value provided for 'method' is not correct")
   }
+  if(!(is.numeric(told) && is.vector(told)) && !is.na(told)){
+    stop("Error in aumc_tau: 'told' is not a numeric vector")
+  }
+  if(!(is.numeric(tau) && is.vector(tau)) && !is.na(tau)){
+    stop("Error in aumc_tau: 'tau' is not a numeric vector")
+  }
+  if(tolower(orgtime) != "nominal" && tolower(orgtime) != "actual"){
+    stop("Error in aumc_tau: 'orgtime' is not 'nominal' or 'actual'")
+  }
   if(length(time) == 0 || length(conc) == 0){
     return(NA)
   }
-
-  if(isTRUE(tau %in% time && time[length(time)] == tau)){
+###  cat('aumc_tau.R: told: ', told, ' tau: ', tau, ' time: ', time, ' nomtime: ', nom_time,' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
+  
+  #Replace the time point closest to TAU if TAU is not present in the dataset
+  curr_tau <- as.numeric(told + tau)
+  time_min_range <- ifelse(!is.null(last_crit_factor), as.numeric(last_crit_factor) * curr_tau, NA)
+  if(tolower(orgtime) == "actual"){
+    if(!isTRUE(curr_tau %in% time)){
+      if(length(which(time == curr_tau)) > 0){
+        tmp_told <- time[which(time == curr_tau)]
+        tmp_ctold <- conc[which(time == tmp_told)]
+      } else if(length(which(time < curr_tau)) > 0){
+        tmp_told <- time[which(time < curr_tau)]
+        tmp_told <- ifelse(isTRUE(length(tmp_told) > 0), tmp_told[length(tmp_told)], NA)
+        tmp_ctold <- conc[which(time == tmp_told)]
+      } else {
+        tmp_told <- curr_tau
+        tmp_ctold <- NA
+      }
+###      cat('aumc_tau.R: tmp_told: ', tmp_told, ' tmp_ctold: ', tmp_ctold, 'time_min_range: ', time_min_range, 'ctoldest: ', ctoldest, '\n')
+      if(!is.na(tmp_ctold)){
+        if(isTRUE(time_min_range <= tmp_told && tmp_told <= curr_tau)){
+          ctold <- ifelse(isTRUE(length(tmp_ctold) > 0), tmp_ctold[length(tmp_ctold)], NA)
+          time[which(time == tmp_told)] <- curr_tau
+        } else {
+          ctold <- ifelse(!is.null(ctoldest), as.numeric(ctoldest), NA)
+          time[length(time)+1] <- curr_tau
+          conc[length(time)] <- ctold
+        }
+      }
+    } 
+  } else {
+    if(length(which(time == curr_tau)) > 0){
+      tmp_told <- time[which(time == curr_tau)]
+      tmp_ctold <- conc[which(time == tmp_told)]
+    } else {
+      tmp_told <- curr_tau
+      tmp_ctold <- NA
+    }
+    if(!is.na(tmp_ctold)){
+      time[which(time == curr_tau)] <- curr_tau
+    }
+  }
+  #Remove any time points that are before TOLD
+  idx <- which(time < told)
+  if(length(idx) > 0){
+    idx <- which(time >= told)
+    time <- time[idx]
+    conc <- conc[idx]
+  }
+  
+###  cat('aumc_tau.R: told: ', told, ' tau: ', tau, ' time: ', time, ' nomtime: ', nom_time,' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' curr_tau: ', curr_tau, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
+  
+  if(isTRUE(curr_tau %in% time && time[length(time)] == curr_tau)){
     if(method == 1){
       return(aumc_lin_log(conc = conc, time = time, exflag = exflag, t_max = t_max))
     } else if(method == 2){
@@ -205,7 +277,9 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = 
       conc_1 <- orig_conc[idx]
       time_2 <- orig_time[idx+1]
       conc_2 <- orig_conc[idx+1]
-
+      
+###      cat('aumc_tau.R: time_1: ', time_1,' conc_1: ', conc_1, ' time_2: ', time_2,' conc_2: ', conc_2, '\n')
+      
       tau_conc <- NA
       if(method == 1){
         if(is.null(t_max)){
@@ -232,6 +306,9 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = 
       index <- which(new_time < tau)
       new_time <- c(new_time[index], tau)
       new_conc <- c(conc[index], tau_conc)
+      
+###      cat('new_conc: ', new_conc, '\n')
+###      cat('new_time: ', new_time, '\n')
 
       if(method == 1){
         return(aumc_lin_log(conc = new_conc, time = new_time, exflag = exflag, t_max = t_max))
@@ -243,19 +320,43 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, tau = 
         return(aumc_lin_up_log_down(conc = new_conc, time = new_time, exflag = exflag))
       }
     } else {
-      if(!isTRUE(returnNA)){
-        if(method == 1){
-          return(aumc_lin_log(conc = conc, time = time, exflag = exflag, t_max = t_max))
-        } else if(method == 2){
-          return(aumc_lin(conc = conc, time = time, exflag = exflag))
-        } else if(method == 3){
-          return(aumc_log(conc = conc, time = time, exflag = exflag))
-        } else if(method == 4){
-          return(aumc_lin_up_log_down(conc = conc, time = time, exflag = exflag))
+###      cat('last_crit_factor: ', last_crit_factor, '\n')
+      time_min_range <- ifelse(!is.null(last_crit_factor), as.numeric(last_crit_factor) * curr_tau, NA)
+###      cat('time_min_range: ', time_min_range, '\n')
+      aumctau <- NA
+      if(!is.na(time_min_range)){
+        if(!is.null(kel) && "KEL" %in% names(kel) && "KELC0" %in% names(kel)){
+          if(!is.na(kel[["KEL"]])){
+            tau_conc <- NA
+            tau_conc <- cest(conc = conc, time = time, t_last = curr_tau, kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
+            new_time <- c(time, curr_tau)
+            new_conc <- c(conc, tau_conc)
+            
+###            cat('new_conc: ', new_conc, '\n')
+###            cat('new_time: ', new_time, '\n')
+            
+            if(method == 1){
+              aumctau <- aumc_lin_log(conc = new_conc, time = new_time, exflag = exflag, t_max = t_max)
+            } else if(method == 2){
+              aumctau <- aumc_lin(conc = new_conc, time = new_time, exflag = exflag)
+            } else if(method == 3){
+              aumctau <- aumc_log(conc = new_conc, time = new_time, exflag = exflag)
+            } else if(method == 4){
+              aumctau <- aumc_lin_up_log_down(conc = new_conc, time = new_time, exflag = exflag)
+            }
+###            cat('aumctau: ', aumctau, '\n')
+          } else if(!is.null(aumclast)){
+###            cat('aumclast: ', aumclast, '\n')
+            aumctau <- aumclast
+          }
         }
-      } else {
-        return(NA) 
+        if(isTRUE(time_min_range <= lasttime)){
+          return(aumctau)
+        } else {
+          aumctau <- ifelse(!is.null(aumclast), ifelse(isTRUE(aumctau <= (as.numeric(aumclast) * 1.20)), aumctau, NA), NA)
+        }
       }
+      return(aumctau)
     }
   }
 }

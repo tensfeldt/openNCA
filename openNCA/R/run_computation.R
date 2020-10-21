@@ -87,7 +87,7 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
 
   if(!is.null(parameterset)){
     if(grep("(PARAMETERLIST|PARAMETERDISPLAYLIST)", parameterset, ignore.case = TRUE, perl=TRUE)!=1) {
-      stop("Invalid value provided for PARAMETERSET argument. This needs to be either 'PARAMETERLIST' or ''")
+      stop("Invalid value provided for PARAMETERSET argument. This needs to be either 'PARAMETERLIST' or 'PARAMETERDISPLAYLIST'")
     }
   }
   
@@ -302,11 +302,13 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
 
   model_regex <- paste0("^", map_data$MODEL, "(", map_data$DOSINGTYPE, ")*?$")
 
-  ###parameter_list <- list()
-  ###if(is.null(map_data$PARAMETERLIST) || is.na(map_data$PARAMETERLIST)) { parameter_list <- model_parameters(model_regex) }
-  ###else { parameter_list <- unlist(strsplit(map_data$PARAMETERLIST, ";")) }
-  
   if(parameterset=="PARAMETERLIST"){
+    if(is.null(map_data$PARAMETERLIST) || is.na(map_data$PARAMETERLIST)) { 
+      parameter_list <- as.list(model_parameters(model_regex))
+    } else { 
+      parameter_list <- as.list(strsplit(map_data$PARAMETERLIST, ";")[[1]]) 
+    }
+    
     if("RETURNCOLS" %in% names(map_data)){
       if(!is.null(map_data$RETURNCOLS) && !is.na(map_data$RETURNCOLS) && map_data$RETURNCOLS != ""){
         return_list <- as.list(strsplit(map_data$RETURNCOLS, ";")[[1]])
@@ -321,6 +323,12 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
   }
   
   if(parameterset=="PARAMETERDISPLAYLIST") { 
+    if(is.null(map_data$PARAMETERDISPLAYLIST) || is.na(map_data$PARAMETERDISPLAYLIST)) { 
+      parameter_list <- as.list(model_parameters(model_regex))
+    } else { 
+      parameter_list <- as.list(strsplit(map_data$PARAMETERDISPLAYLIST, ";")[[1]]) 
+    }
+    
     if("DATADISPLAYLIST" %in% names(map_data)){
       if(!is.null(map_data$DATADISPLAY) && !is.na(map_data$DATADISPLAYLIST) && map_data$DATADISPLAYLIST != ""){
         return_list <- as.list(strsplit(map_data$DATADISPLAYLIST, ";")[[1]])
@@ -391,15 +399,6 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
     results_list$partitioned_data_in <- merged_data
     return(results_list)
   }
-  if(is.null(map_data$PARAMETERDISPLAYLIST) || is.na(map_data$PARAMETERDISPLAYLIST)) { display_list <- model_parameters(model_regex) }
-  else { display_list <- as.list(strsplit(map_data$PARAMETERDISPLAYLIST, ";")[[1]]) }
-  
-  ###if(parameterset=="PARAMETERDISPLAYLIST") { 
-  ###  parameter_list <- display_list
-  ###}
-  
-  parameter_list <- model_parameters(model_regex)
-  parameter_list <- as.list(parameter_list)
   
   if(toupper(map_data$MODEL) == 'M1' && toupper(map_data$DOSINGTYPE) == 'SD'){
     data_out <- run_M1_SD_computation(data = merged_data, map = map_data, method = method, model_regex = model_regex,

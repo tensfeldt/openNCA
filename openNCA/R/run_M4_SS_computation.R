@@ -1178,13 +1178,13 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             if(length(tmp_time) >= kel_n){
               if(isTRUE(optimize_kel_method == "1")){
                 idx <- c(1:length(tmp_time))
-                ulist <- list(idx)
+                ulist <- list(tmp_time[idx])
                 
                 if(length(tmp_time) >= kel_n){
                   for (j in kel_n:(length(tmp_time)-1) ){
                     fit <- lm( tmp_conc[idx] ~ tmp_time[idx] )
                     idx <- idx[-which(abs(residuals(fit)) == max(abs(residuals(fit))))]
-                    ulist <- c(ulist,list(idx))
+                    ulist <- c(ulist,list(tmp_time[idx]))
                   }
                 }
               } else if(isTRUE(optimize_kel_method == "2")){

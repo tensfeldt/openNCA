@@ -211,6 +211,7 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told = 
         tmp_told <- curr_tau
         tmp_ctold <- NA
       }
+###      cat('auc_tau.R: tmp_told: ', tmp_told, ' tmp_ctold: ', tmp_ctold, '\n')
       if(!is.na(tmp_ctold)){
         if(isTRUE(time_min_range <= tmp_told && tmp_told <= curr_tau)){
           ctold <- ifelse(isTRUE(length(tmp_ctold) > 0), tmp_ctold[length(tmp_ctold)], NA)

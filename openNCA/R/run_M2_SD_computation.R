@@ -310,43 +310,46 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     secondary_mappings <- c('PKTERM', 'MW')
     if(!(all(secondary_prereqs %in% names(map_data)))){
       missing_prereqs <- secondary_prereqs[!(secondary_prereqs %in% names(map_data))]
-      if(length(missing_prereqs) > 1){
+      if(length(missing_prereqs) == 1){
         warning(paste0("'", missing_prereqs, "' is not present in the dataset provided via 'map'! Cannot compute secondary parameters!"))
-      } else {
+      } else if(length(missing_prereqs) > 1){
         missing_msg <- ""
-        for(m in 1:length(missing_prereqs)){ 
+        for(m in 1:length(missing_prereqs)){
           if(m == 1){
-            missing_msg <- paste0(missing_msg, "'", missing_prereqs[i], "'")
+            missing_msg <- paste0(missing_msg, "'", missing_prereqs[m], "'")
           } else if(m == length(missing_prereqs)){
-            missing_msg <- paste0(missing_msg, " and '", missing_prereqs[i], "'")
+            missing_msg <- paste0(missing_msg, " and '", missing_prereqs[m], "'")
           } else {
-            missing_msg <- paste0(missing_msg, ", '", missing_prereqs[i], "'")
+            missing_msg <- paste0(missing_msg, ", '", missing_prereqs[m], "'")
           }
         }
         warning(paste0(missing_msg, " are not present in the dataset provided via 'map'! Cannot compute secondary parameters!"))
       }
       secondary <- FALSE
     } 
-    secondary_values <- as.character(map_data[,secondary_mappings])
-    if(!(all(secondary_values %in% names(data_data)))){
-      missing_values <- secondary_values[!(secondary_values %in% names(data_data))]
-      if(length(missing_values) > 1){
-        warning(paste0("'", missing_values, "' is not present in the dataset provided via 'data'! Cannot compute secondary parameters!"))
-      } else {
-        missing_msg <- ""
-        for(m in 1:length(missing_values)){ 
-          if(m == 1){
-            missing_msg <- paste0(missing_msg, "'", missing_values[i], "'")
-          } else if(m == length(missing_values)){
-            missing_msg <- paste0(missing_msg, " and '", missing_values[i], "'")
-          } else {
-            missing_msg <- paste0(missing_msg, ", '", missing_values[i], "'")
+    secondary_valid_mappings <- secondary_mappings[secondary_mappings %in% names(map_data)]
+    if(length(secondary_valid_mappings) > 0){
+      secondary_values <- as.character(map_data[,secondary_valid_mappings])
+      if(!(all(secondary_values %in% names(data_data)))){
+        missing_values <- secondary_values[!(secondary_values %in% names(data_data))]
+        if(length(missing_values) == 1){
+          warning(paste0("'", missing_values, "' is not present in the dataset provided via 'data'! Cannot compute secondary parameters!"))
+        } else if(length(missing_values) > 1){
+          missing_msg <- ""
+          for(m in 1:length(missing_values)){ 
+            if(m == 1){
+              missing_msg <- paste0(missing_msg, "'", missing_values[m], "'")
+            } else if(m == length(missing_values)){
+              missing_msg <- paste0(missing_msg, " and '", missing_values[m], "'")
+            } else {
+              missing_msg <- paste0(missing_msg, ", '", missing_values[m], "'")
+            }
           }
+          warning(paste0(missing_msg, " are not present in the dataset provided via 'data'! Cannot compute secondary parameters!"))
         }
-        warning(paste0(missing_msg, " are not present in the dataset provided via 'data'! Cannot compute secondary parameters!"))
-      }
-      secondary <- FALSE
-    } 
+        secondary <- FALSE
+      } 
+    }
   }
   if(isTRUE(secondary)){
     exclusion_list <- unlist(strsplit(map_data$METABOLITEPARAMETEREXCLUSIONLIST, ";"))
@@ -1132,13 +1135,13 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             if(length(tmp_time) >= kel_n){
               if(isTRUE(optimize_kel_method == "1")){
                 idx <- c(1:length(tmp_time))
-                ulist <- list(idx)
+                ulist <- list(tmp_time[idx])
                 
                 if(length(tmp_time) >= kel_n){
                   for (j in kel_n:(length(tmp_time)-1) ){
                     fit <- lm( tmp_conc[idx] ~ tmp_time[idx] )
                     idx <- idx[-which(abs(residuals(fit)) == max(abs(residuals(fit))))]
-                    ulist <- c(ulist,list(idx))
+                    ulist <- c(ulist,list(tmp_time[idx]))
                   }
                 }
               } else if(isTRUE(optimize_kel_method == "2")){
@@ -1954,26 +1957,17 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if("FLGACCEPTTAU" %in% names(computation_df)){
             computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,"TAU1"])) & !is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),][,"FLGACCEPTTAU"] <- 0  
           }
-          if(all(c(paste0("AUCTAU",1:di_col)) %in% names(computation_df))){
-            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,"TAU1"])) & !is.na(computation_df[,"FLGACCEPTKEL"]) & computation_df[,"FLGACCEPTKEL"] != 1 & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),][,paste0("AUCTAU",1:di_col)] <- NA  
-          }
         } 
       } else if("KEL" %in% names(computation_df)) {
         if(nrow(computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,"TAU1"])) & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),]) > 0){ 
           if("FLGACCEPTTAU" %in% names(computation_df)){
             computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,"TAU1"])) & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),][,"FLGACCEPTTAU"] <- 0  
           }
-          if(all(c(paste0("AUCTAU",1:di_col)) %in% names(computation_df))){
-            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,"TAU1"])) & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),][,paste0("AUCTAU",1:di_col)] <- NA  
-          }
         }
       } else {
         if(nrow(computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,"TAU1"])),]) > 0){ 
           if("FLGACCEPTTAU" %in% names(computation_df)){
             computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,"TAU1"])),][,"FLGACCEPTTAU"] <- 0  
-          }
-          if(all(c(paste0("AUCTAU",1:di_col)) %in% names(computation_df))){
-            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])),][,paste0("AUCTAU",1:di_col)] <- NA  
           }
         }
       }

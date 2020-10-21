@@ -307,43 +307,46 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
     secondary_mappings <- c('PKTERM', 'MW')
     if(!(all(secondary_prereqs %in% names(map_data)))){
       missing_prereqs <- secondary_prereqs[!(secondary_prereqs %in% names(map_data))]
-      if(length(missing_prereqs) > 1){
+      if(length(missing_prereqs) == 1){
         warning(paste0("'", missing_prereqs, "' is not present in the dataset provided via 'map'! Cannot compute secondary parameters!"))
-      } else {
+      } else if(length(missing_prereqs) > 1){
         missing_msg <- ""
-        for(m in 1:length(missing_prereqs)){ 
+        for(m in 1:length(missing_prereqs)){
           if(m == 1){
-            missing_msg <- paste0(missing_msg, "'", missing_prereqs[i], "'")
+            missing_msg <- paste0(missing_msg, "'", missing_prereqs[m], "'")
           } else if(m == length(missing_prereqs)){
-            missing_msg <- paste0(missing_msg, " and '", missing_prereqs[i], "'")
+            missing_msg <- paste0(missing_msg, " and '", missing_prereqs[m], "'")
           } else {
-            missing_msg <- paste0(missing_msg, ", '", missing_prereqs[i], "'")
+            missing_msg <- paste0(missing_msg, ", '", missing_prereqs[m], "'")
           }
         }
         warning(paste0(missing_msg, " are not present in the dataset provided via 'map'! Cannot compute secondary parameters!"))
       }
       secondary <- FALSE
     } 
-    secondary_values <- as.character(map_data[,secondary_mappings])
-    if(!(all(secondary_values %in% names(data_data)))){
-      missing_values <- secondary_values[!(secondary_values %in% names(data_data))]
-      if(length(missing_values) > 1){
-        warning(paste0("'", missing_values, "' is not present in the dataset provided via 'data'! Cannot compute secondary parameters!"))
-      } else {
-        missing_msg <- ""
-        for(m in 1:length(missing_values)){ 
-          if(m == 1){
-            missing_msg <- paste0(missing_msg, "'", missing_values[i], "'")
-          } else if(m == length(missing_values)){
-            missing_msg <- paste0(missing_msg, " and '", missing_values[i], "'")
-          } else {
-            missing_msg <- paste0(missing_msg, ", '", missing_values[i], "'")
+    secondary_valid_mappings <- secondary_mappings[secondary_mappings %in% names(map_data)]
+    if(length(secondary_valid_mappings) > 0){
+      secondary_values <- as.character(map_data[,secondary_valid_mappings])
+      if(!(all(secondary_values %in% names(data_data)))){
+        missing_values <- secondary_values[!(secondary_values %in% names(data_data))]
+        if(length(missing_values) == 1){
+          warning(paste0("'", missing_values, "' is not present in the dataset provided via 'data'! Cannot compute secondary parameters!"))
+        } else if(length(missing_values) > 1){
+          missing_msg <- ""
+          for(m in 1:length(missing_values)){ 
+            if(m == 1){
+              missing_msg <- paste0(missing_msg, "'", missing_values[m], "'")
+            } else if(m == length(missing_values)){
+              missing_msg <- paste0(missing_msg, " and '", missing_values[m], "'")
+            } else {
+              missing_msg <- paste0(missing_msg, ", '", missing_values[m], "'")
+            }
           }
+          warning(paste0(missing_msg, " are not present in the dataset provided via 'data'! Cannot compute secondary parameters!"))
         }
-        warning(paste0(missing_msg, " are not present in the dataset provided via 'data'! Cannot compute secondary parameters!"))
-      }
-      secondary <- FALSE
-    } 
+        secondary <- FALSE
+      } 
+    }
   }
   if(isTRUE(secondary)){
     exclusion_list <- unlist(strsplit(map_data$METABOLITEPARAMETEREXCLUSIONLIST, ";"))
@@ -1378,10 +1381,10 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if(d == 1){ 
             aumc_time <- tmp_time_di
           } else {
-            aumc_told <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",(d-1)))])][1])
-            aumc_tau <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TAU",(d-1)))])][1])
-            if(is.numeric(aumc_told) && !is.na(aumc_told) && is.numeric(aumc_tau) && !is.na(aumc_tau)){
-              aumc_time <- tmp_time_di - (aumc_told + aumc_tau) 
+            aumctold <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",(d-1)))])][1])
+            aumctau <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TAU",(d-1)))])][1])
+            if(is.numeric(aumctold) && !is.na(aumctold) && is.numeric(aumctau) && !is.na(aumctau)){
+              aumc_time <- tmp_time_di - (aumctold + aumctau) 
             } else {
               aumc_time <- tmp_time_di
             }
@@ -1543,13 +1546,13 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             if(length(tmp_time) >= kel_n){
               if(isTRUE(optimize_kel_method == "1")){
                 idx <- c(1:length(tmp_time))
-                ulist <- list(idx)
+                ulist <- list(tmp_time[idx])
                 
                 if(length(tmp_time) >= kel_n){
                   for (j in kel_n:(length(tmp_time)-1) ){
                     fit <- lm( tmp_conc[idx] ~ tmp_time[idx] )
                     idx <- idx[-which(abs(residuals(fit)) == max(abs(residuals(fit))))]
-                    ulist <- c(ulist,list(idx))
+                    ulist <- c(ulist,list(tmp_time[idx]))
                   }
                 }
               } else if(isTRUE(optimize_kel_method == "2")){
@@ -1688,6 +1691,7 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           auct <- list()
           auctdn <- list()
           auc_int <- list()
+          prev_endtime <- NA
         }
         ###if(comp_required[["AUCT1_T2"]] && auc_pair_check) {
         if(auc_pair_check) {
@@ -1880,10 +1884,10 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               if(isTRUE(is.na(auctau[[d]]) || is.null(auctau[[d]]))){
                 aumctaui[[d]] <- NA
               } else {
-                aumctaui[[d]] <- aumc_tau(conc = tmp_conc_di, time = aumc_time, method = method, exflag = auc_flag, tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time, returnNA = FALSE)
+                aumctaui[[d]] <- aumc_tau(conc = tmp_conc_di, time = aumc_time, method = method, exflag = auc_flag, told = told[[d]], tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time, last_crit_factor = last_crit_factor, kel = kel_v, aumclast = aumclasti[[d]], lasttime = last_timei[[d]], orgtime = tolower(map_data$ORGTIME), nom_time = tmp_nom_time_di, ctoldest = nxt_ctold_est)
               }
             } else {
-              aumctaui[[d]] <- aumc_tau(conc = tmp_conc_di, time = aumc_time, method = method, exflag = auc_flag, tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time, returnNA = FALSE)
+              aumctaui[[d]] <- aumc_tau(conc = tmp_conc_di, time = aumc_time, method = method, exflag = auc_flag, told = told[[d]], tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time, last_crit_factor = last_crit_factor, kel = kel_v, aumclast = aumclasti[[d]], lasttime = last_timei[[d]], orgtime = tolower(map_data$ORGTIME), nom_time = tmp_nom_time_di, ctoldest = nxt_ctold_est)
             }
           ###}
           ###if(comp_required[["MRTLASTi"]]) {
@@ -2011,6 +2015,19 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 time_di <- c(time_di, time[time > time_di[length(time_di)]])
               }
             }
+            if(d > 1){
+              if(!is.na(prev_endtime)){
+                if(isTRUE(prev_endtime != time_di[1])){
+                  disconnected_intervals <- TRUE
+                } else {
+                  disconnected_intervals <- FALSE
+                }
+              } else {
+                disconnected_intervals <- FALSE
+              }
+            } else {
+              disconnected_intervals <- FALSE
+            }
             prev_na <- FALSE
             prev_auc <- NA
             prev_auc_dn <- NA
@@ -2019,6 +2036,12 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
               for(t in 2:(length(time))){
                 if(time[t] %in% time_di[-1]) {
                   tmp <- auc_t1_t2(conc = auc_conc, time = auc_time, t1 = time_di[1], t2 = time[t], method = method, exflag = a_auc_flag, t_max = t_maxi[[d]])
+                  tmp_dn <- auc_dn(auc = tmp, dose = tmp_dose)
+                  tmp_int <- paste0(time[1], "_", time[t])
+                  prev_endtime <- time[t]
+                } else if(isTRUE(disconnected_intervals && time[t] == time_di[1])) {
+                  tmp_method <- ifelse(isTRUE(method == 1), 4, method)
+                  tmp <- auc_t1_t2(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], t1 = prev_endtime, t2 = time[t], method = tmp_method, exflag = auc_flag, t_max = t_maxi[[d]])
                   tmp_dn <- auc_dn(auc = tmp, dose = tmp_dose)
                   tmp_int <- paste0(time[1], "_", time[t])
                 } else {
@@ -2036,7 +2059,20 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                   ###}
                   auc_int[[t-1]] <- tmp_int
                 } else {
-                  if(prev_na){
+                  if(isTRUE(disconnected_intervals)){
+                    if(is.numeric(tmp)){
+                      ###if(comp_required[["AUCT"]]){
+                      prev_auc <- unlist(auct[[t-2]])
+                      auct[[t-1]] <- sum(c(prev_auc, tmp), na.rm = TRUE)
+                      ###}
+                    }
+                    if(is.numeric(tmp_dn)){
+                      ###if(comp_required[["AUCTDN"]]){
+                      prev_auc_dn <- unlist(auctdn[[t-2]])
+                      auctdn[[t-1]] <- sum(c(prev_auc_dn, tmp_dn), na.rm = TRUE)
+                      ###}
+                    }
+                  } else if(prev_na){
                     prev_na <- FALSE
                     if(is.numeric(tmp)){
                       ###if(comp_required[["AUCT"]]){
@@ -2078,6 +2114,9 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   
                   if(is.na(tmp)){
                     prev_na <- TRUE
+                  } else if(isTRUE(disconnected_intervals) && is.numeric(tmp)){
+                    prev_na <- TRUE
+                    disconnected_intervals <- FALSE
                   } else {
                     prev_na <- FALSE
                   }
@@ -2832,26 +2871,17 @@ run_M2_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           if("FLGACCEPTTAU" %in% names(computation_df)){
             computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])) & !is.na(computation_df[,"FLGACCEPTKEL"]) & (computation_df[,"FLGACCEPTKEL"] != 1 | (!is.na(computation_df[,"KEL"]) | is.numeric(computation_df[,"KEL"]))),][,"FLGACCEPTTAU"] <- 0  
           }
-          if(all(c(paste0("AUCTAU",1:di_col)) %in% names(computation_df))){
-            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])) & !is.na(computation_df[,"FLGACCEPTKEL"]) & (computation_df[,"FLGACCEPTKEL"] != 1 | (!is.na(computation_df[,"KEL"]) | is.numeric(computation_df[,"KEL"]))),][,paste0("AUCTAU",1:di_col)] <- NA  
-          }
         } 
       } else if("KEL" %in% names(computation_df)) {
         if(nrow(computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])) & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),]) > 0){ 
           if("FLGACCEPTTAU" %in% names(computation_df)){
             computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])) & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),][,"FLGACCEPTTAU"] <- 0  
           }
-          if(all(c(paste0("AUCTAU",1:di_col)) %in% names(computation_df))){
-            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])) & (!is.na(computation_df[,"KEL"]) || is.numeric(computation_df[,"KEL"])),][,paste0("AUCTAU",1:di_col)] <- NA  
-          }
         }
       } else {
         if(nrow(computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])),]) > 0){ 
           if("FLGACCEPTTAU" %in% names(computation_df)){
             computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])),][,"FLGACCEPTTAU"] <- 0  
-          }
-          if(all(c(paste0("AUCTAU",1:di_col)) %in% names(computation_df))){
-            computation_df[!is.na(computation_df[,paste0("TAU",di_col)]) & !is.na(computation_df[,"LASTTIME"]) & !is.na(last_crit_factor) & (computation_df[,"LASTTIME"] < (last_crit_factor * computation_df[,paste0("TAU",di_col)])),][,paste0("AUCTAU",1:di_col)] <- NA  
           }
         }
       }

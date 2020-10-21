@@ -9,11 +9,18 @@ aumc_tau(
   time = NULL,
   method = 1,
   exflag = NULL,
+  told = NULL,
   tau = NULL,
   t_max = NULL,
   orig_conc = NULL,
   orig_time = NULL,
-  returnNA = TRUE
+  last_crit_factor = NULL,
+  kel = NULL,
+  aumclast = NULL,
+  lasttime = NULL,
+  orgtime = "nominal",
+  nom_time = NULL,
+  ctoldest = NULL
 )
 }
 \arguments{
@@ -32,6 +39,8 @@ Note: check 'Methods' section below for more details \cr}
 
 \item{exflag}{The exclude flag data (given in a numeric vector)}
 
+\item{told}{The time duration of last dose (numeric value)}
+
 \item{tau}{The time duration of dosing interval (numeric value)}
 
 \item{t_max}{The first time at which CMAXi us observed within a dosing interval (numeric value)s}
@@ -40,7 +49,19 @@ Note: check 'Methods' section below for more details \cr}
 
 \item{orig_time}{The original (full) time data (given in a numeric vector)}
 
-\item{returnNA}{Determines if NAs should be returned or not (logical value)}
+\item{last_crit_factor}{The criteria value for last time acceptance criteria (numeric value)}
+
+\item{kel}{The terminal phase rate constant for the concentration-time profile of interest (numeric value)}
+
+\item{aumclast}{The area under the concentration versus time curve from zero time until the time (TLAST) of the last measurable concentration (CLASTi) during the ith dosing interval (numeric value)}
+
+\item{lasttime}{The time of the last measured concentration point of the profile (numeric value)}
+
+\item{orgtime}{The original time value from the map data ('nominal' or 'actual')}
+
+\item{nom_time}{The nominal time data (given in a vector form)}
+
+\item{ctoldest}{The estimated concentration at the time of last dose (numeric value)}
 }
 \description{
 This function gets the area under the concentration versus time curve from time 0 until the dosing
@@ -108,19 +129,20 @@ If 'orig_conc' input is optional and is needed to interpolate missing data point
 conc_vector <- c(2.89, 2.49, 2.47, 2.38, 2.32, 2.28)
 time_vector <- c(0, 1, 2, 3, 4, 5)
 tau_val <- 5
+told_val <- 0
 
-aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #29.64777
 
 tau_val <- 2
 
-#aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+#aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #Error in aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val) :
 #  Error in aumc_tau: 'orig_conc' and 'orig_time' vectors are NULL, 
 #  cannot interpolate data if original data is not provided!
 
 aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, 
-         orig_conc = conc_vector, orig_time = time_vector)
+         orig_conc = conc_vector, orig_time = time_vector, told = told_val)
 #29.64777
 
 ############
@@ -138,8 +160,9 @@ aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val,
 conc_vector <- c(0, 0, 0)
 time_vector <- c(0, 1, 2)
 tau_val <- 2
+told_val <- 0
 
-aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #0
 
 ############
@@ -157,8 +180,9 @@ aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
 conc_vector <- c(1.19, 1.23, 1.34)
 time_vector <- c(0, 1, 2)
 tau_val <- 2
+told_val <- 0
 
-aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val)
+aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
 #2.57
 
 }
