@@ -359,7 +359,7 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   }
     
   col_names <- c("SDEID")
-  if(disp_required[["DOSE"]] || disp_required[["DOSEi"]]) {
+  if(disp_required[["DOSE"]]) {
     col_names <- c(col_names, dosenames)
     regular_int_type <- c(regular_int_type, dosenames)
   }
@@ -1606,7 +1606,7 @@ run_M2_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
         }
         
         computation_df[i, "SDEID"] <- unique(data_data[,map_data$SDEID])[i]
-        if(disp_required[["DOSE"]] || disp_required[["DOSEi"]]){
+        if(disp_required[["DOSE"]]){
           if(parameter_required(dosevar, names(data_data))) {
             computation_df[i, dosenames] <- unique(tmp_df[, dosevar])[1]
           }
