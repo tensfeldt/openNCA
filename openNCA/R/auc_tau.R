@@ -308,11 +308,11 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told = 
           tau_conc <- interpolate_log(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = curr_tau)
         }
       }
-      new_time <- c(time, curr_tau)
-      new_time <- sort(new_time)
-      index <- which(new_time < curr_tau)
-      new_time <- c(new_time[index], curr_tau)
-      new_conc <- c(conc[index], tau_conc)
+      tmp_df <- data.frame(conc = conc, time = time)
+      tmp_df <- tmp_df[tmp_df$time < tau,]
+      tmp_df[nrow(tmp_df),] <- c(tau_conc, tau)
+      new_conc <- tmp_df$conc
+      new_time <- tmp_df$time
       
       if(sum(new_conc, na.rm = T) == 0){
         return(0)

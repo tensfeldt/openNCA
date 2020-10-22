@@ -192,58 +192,58 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told =
 ###  cat('aumc_tau.R: told: ', told, ' tau: ', tau, ' time: ', time, ' nomtime: ', nom_time,' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
   
   #Replace the time point closest to TAU if TAU is not present in the dataset
-  curr_tau <- as.numeric(told + tau)
-  time_min_range <- ifelse(!is.null(last_crit_factor), as.numeric(last_crit_factor) * curr_tau, NA)
+  time_min_range <- ifelse(!is.null(last_crit_factor), as.numeric(last_crit_factor) * tau, NA)
   if(tolower(orgtime) == "actual"){
-    if(!isTRUE(curr_tau %in% time)){
-      if(length(which(time == curr_tau)) > 0){
-        tmp_told <- time[which(time == curr_tau)]
+    if(!isTRUE(tau %in% time)){
+      if(length(which(time == tau)) > 0){
+        tmp_told <- time[which(time == tau)]
         tmp_ctold <- conc[which(time == tmp_told)]
-      } else if(length(which(time < curr_tau)) > 0){
-        tmp_told <- time[which(time < curr_tau)]
+      } else if(length(which(time < tau)) > 0){
+        tmp_told <- time[which(time < tau)]
         tmp_told <- ifelse(isTRUE(length(tmp_told) > 0), tmp_told[length(tmp_told)], NA)
         tmp_ctold <- conc[which(time == tmp_told)]
       } else {
-        tmp_told <- curr_tau
+        tmp_told <- tau
         tmp_ctold <- NA
       }
 ###      cat('aumc_tau.R: tmp_told: ', tmp_told, ' tmp_ctold: ', tmp_ctold, 'time_min_range: ', time_min_range, 'ctoldest: ', ctoldest, '\n')
       if(!is.na(tmp_ctold)){
-        if(isTRUE(time_min_range <= tmp_told && tmp_told <= curr_tau)){
+        if(isTRUE(time_min_range <= tmp_told && tmp_told <= tau)){
           ctold <- ifelse(isTRUE(length(tmp_ctold) > 0), tmp_ctold[length(tmp_ctold)], NA)
-          time[which(time == tmp_told)] <- curr_tau
+          time[which(time == tmp_told)] <- tau
         } else {
           ctold <- ifelse(!is.null(ctoldest), as.numeric(ctoldest), NA)
-          time[length(time)+1] <- curr_tau
+          time[length(time)+1] <- tau
           conc[length(time)] <- ctold
         }
       }
     } 
   } else {
-    if(length(which(time == curr_tau)) > 0){
-      tmp_told <- time[which(time == curr_tau)]
+    if(length(which(time == tau)) > 0){
+      tmp_told <- time[which(time == tau)]
       tmp_ctold <- conc[which(time == tmp_told)]
     } else {
-      tmp_told <- curr_tau
+      tmp_told <- tau
       tmp_ctold <- NA
     }
     if(!is.na(tmp_ctold)){
-      time[which(time == curr_tau)] <- curr_tau
+      time[which(time == tau)] <- tau
     }
   }
   #Remove any time points that are before TOLD
-  idx <- which(time < told)
+  tmptold <- 0
+  idx <- which(time < tmptold)
   if(length(idx) > 0){
-    idx <- which(time >= told)
+    idx <- which(time >= tmptold)
     time <- time[idx]
     conc <- conc[idx]
   }
   
-###  cat('aumc_tau.R: told: ', told, ' tau: ', tau, ' time: ', time, ' nomtime: ', nom_time,' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' curr_tau: ', curr_tau, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
-  
-  if(isTRUE(curr_tau %in% time && time[length(time)] == curr_tau)){
+###  cat('aumc_tau.R: told: ', told, ' tau: ', tau, ' time: ', time, ' nomtime: ', nom_time,' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
+  tmp_tmax <- t_max - told
+  if(isTRUE(tau %in% time && time[length(time)] == tau)){
     if(method == 1){
-      return(aumc_lin_log(conc = conc, time = time, exflag = exflag, t_max = t_max))
+      return(aumc_lin_log(conc = conc, time = time, exflag = exflag, t_max = tmp_tmax))
     } else if(method == 2){
       return(aumc_lin(conc = conc, time = time, exflag = exflag))
     } else if(method == 3){
@@ -270,8 +270,9 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told =
       stop("Error in aumc_tau: length of 'orig_time' and 'orig_conc' vectors are not equal")
     }
 
-    if(isTRUE(orig_time[1] < tau && tau < orig_time[length(orig_time)])){
-      idx <- which(orig_time < tau)
+    curr_tau <- as.numeric(told + tau)
+    if(isTRUE(curr_tau < orig_time[length(orig_time)])){
+      idx <- which(orig_time < curr_tau)
       idx <- idx[length(idx)]
       time_1 <- orig_time[idx]
       conc_1 <- orig_conc[idx]
@@ -283,35 +284,35 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told =
       tau_conc <- NA
       if(method == 1){
         if(is.null(t_max)){
-          t_max <- tmax(conc = conc, time = time)
+          tmp_tmax <- tmax(conc = conc, time = time)
         }
-        if(!is.na(t_max) & tau <= t_max){
-          tau_conc <- interpolate_lin(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = tau)
+        if(!is.na(tmp_tmax) & tau <= tmp_tmax){
+          tau_conc <- interpolate_lin(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = curr_tau)
         } else {
-          tau_conc <- interpolate_log(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = tau)
+          tau_conc <- interpolate_log(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = curr_tau)
         }
       } else if(method == 2){
-        tau_conc <- interpolate_lin(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = tau)
+        tau_conc <- interpolate_lin(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = curr_tau)
       } else if(method == 3){
-        tau_conc <- interpolate_log(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = tau)
+        tau_conc <- interpolate_log(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = curr_tau)
       } else if(method == 4){
         if(time_1 <= time_2){
-          tau_conc <- interpolate_lin(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = tau)
+          tau_conc <- interpolate_lin(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = curr_tau)
         } else {
-          tau_conc <- interpolate_log(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = tau)
+          tau_conc <- interpolate_log(conc1 = conc_1, time1 = time_1, conc2 = conc_2, time2 = time_2, est_time = curr_tau)
         }
       }
-      new_time <- c(time, tau)
-      new_time <- sort(new_time)
-      index <- which(new_time < tau)
-      new_time <- c(new_time[index], tau)
-      new_conc <- c(conc[index], tau_conc)
+      tmp_df <- data.frame(conc = conc, time = time)
+      tmp_df <- tmp_df[tmp_df$time < tau,]
+      tmp_df[nrow(tmp_df),] <- c(tau_conc, tau)
+      new_conc <- tmp_df$conc
+      new_time <- tmp_df$time
       
 ###      cat('new_conc: ', new_conc, '\n')
 ###      cat('new_time: ', new_time, '\n')
 
       if(method == 1){
-        return(aumc_lin_log(conc = new_conc, time = new_time, exflag = exflag, t_max = t_max))
+        return(aumc_lin_log(conc = new_conc, time = new_time, exflag = exflag, t_max = tmp_tmax))
       } else if(method == 2){
         return(aumc_lin(conc = new_conc, time = new_time, exflag = exflag))
       } else if(method == 3){
@@ -328,15 +329,15 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told =
         if(!is.null(kel) && "KEL" %in% names(kel) && "KELC0" %in% names(kel)){
           if(!is.na(kel[["KEL"]])){
             tau_conc <- NA
-            tau_conc <- cest(conc = conc, time = time, t_last = curr_tau, kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
-            new_time <- c(time, curr_tau)
+            tau_conc <- cest(conc = conc, time = time, t_last = tau, kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
+            new_time <- c(time, tau)
             new_conc <- c(conc, tau_conc)
             
 ###            cat('new_conc: ', new_conc, '\n')
 ###            cat('new_time: ', new_time, '\n')
             
             if(method == 1){
-              aumctau <- aumc_lin_log(conc = new_conc, time = new_time, exflag = exflag, t_max = t_max)
+              aumctau <- aumc_lin_log(conc = new_conc, time = new_time, exflag = exflag, t_max = tmp_tmax)
             } else if(method == 2){
               aumctau <- aumc_lin(conc = new_conc, time = new_time, exflag = exflag)
             } else if(method == 3){

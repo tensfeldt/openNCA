@@ -223,7 +223,10 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
   all_parameters <- model_parameters("m4ss")
   disp_required <- rep(FALSE, length(all_parameters))
   names(disp_required) <- all_parameters
-  disp_required[names(disp_required) %in% parameter_list] <- TRUE
+  for(i in all_parameters) {
+    param_check <- parameter_required(parameter_regex(i), parameter_list)
+    disp_required[[i]] <- param_check
+  }
   
   if("FLGACCEPTKELCRIT" %in% names(map_data) && (("KEL" %in% parameter_list && "KELNOPT" %in% parameter_list) || "KELRSQ" %in% parameter_list)) {
     if(length(unlist(strsplit(as.character(map_data$FLGACCEPTKELCRIT), ","))) > 0){
@@ -1212,7 +1215,7 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             }
             
             selected_idx <- NA
-            saved_kel_opt <- -1
+            saved_kel_opt <- NA
             first_kel_saved <- FALSE
             if(length(ulist) >= 1){
               for(k in 1:length(ulist)){
@@ -1231,13 +1234,13 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                   aucinfp_opt <- auc_inf_p(conc = rt, time = mid_pt, method = method, auclast = auclast, t_last = t_last, spanratio = span_ratio, kel = all_kel)
                   aucxpct_opt <- auc_XpctP(conc = sel_conc, time = sel_time, method = method, aucflag = auc_flag, auc_infp = aucinfp_opt, auclast = auclast)
                 } else {
-                  stop("Error in optimize kel")
+                  stop("Error in optimize kel! Please specify 'AUCXPCTO' or 'AUXCPCTP' in FLGACCEPTKELCRIT to use KEL optimization!")
                 }
                 
                 if(!is.na(kelr_opt) && !is.na(aucxpct_opt)){
                   kel_opt <- ((kelr_opt - kelr_val)/(1 - kelr_val)) + (length(sel_time)/length(tmp_time)) + ((aucxpct - aucxpct_opt)/aucxpct)
                 } else {
-                  kel_opt <- -1
+                  kel_opt <- NA
                 }
                 if(isTRUE(optimize_kel_debug)){
                   kel_debug[debug_idx,] <- c(unique(data_data[,map_data$SDEID])[i], as.character(paste0(sel_time, sep = ", ", collapse = "")), as.character(paste0(sel_conc, sep = ", ", collapse = "")), kel_tmp, length(sel_time), kelr_opt, aucxpct_opt, ((kelr_opt - kelr_val)/(1 - kelr_val)), (length(sel_time)/length(tmp_time)), ((aucxpct - aucxpct_opt)/aucxpct), kel_opt)
@@ -1245,18 +1248,21 @@ run_M4_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                 }
                 
                 if(!is.na(kel_opt)){
-                  if(kel_opt > saved_kel_opt || (!isTRUE(first_kel_saved) && kel_opt >= saved_kel_opt)){
-                    if(!isTRUE(first_kel_saved) && kel_opt >= saved_kel_opt){
-                      first_kel_saved <- TRUE
-                    }
+                  if(!isTRUE(first_kel_saved) || isTRUE(kel_opt > saved_kel_opt)){
                     if(isTRUE("KEL" %in% flag_df$VAR)){
                       if(isTRUE(kel_tmp > kel_val)){
                         saved_kel_opt <- kel_opt
                         selected_idx <- match(sel_time, orig_time)
+                        if(!isTRUE(first_kel_saved)){
+                          first_kel_saved <- FALSE
+                        }
                       }
                     } else {
                       saved_kel_opt <- kel_opt
-                      selected_idx <- match(sel_time, orig_time) 
+                      selected_idx <- match(sel_time, orig_time)
+                      if(!isTRUE(first_kel_saved)){
+                        first_kel_saved <- FALSE
+                      }
                     }
                   }
                 }

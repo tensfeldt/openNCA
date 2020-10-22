@@ -251,6 +251,8 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
             merged_data[,id] <- rep(NA, nrow(merged_data))
           }
         }
+      } else {
+        imputedtaus <- list()
       }
       if(parameter_required("^IMPUTETOLDS$", names(map_data)) && !isTRUE(valid_tau_told_check)) {
         imputedtolds <- strsplit(map_data$IMPUTETOLDS, ";")
@@ -273,8 +275,15 @@ run_computation <- function(data = NULL, map = NULL, flag = NULL, parameterset =
             merged_data[,id] <- rep(NA, nrow(merged_data))
           }
         }
+      } else {
+        imputedtolds <- list()
       }
-      merged_data <- create_dosing_intervals(merged_data, map_data, flag_data, maxdosingintervals)
+      
+      if(isTRUE("TOLD1" %in% imputedtolds && "TAU1" %in% imputedtaus && length(imputedtolds) == 1 && length(imputedtaus) == 1)){
+        merged_data[["DI1F"]] <- rep(1, nrow(merged_data))
+      } else {
+        merged_data <- create_dosing_intervals(merged_data, map_data, flag_data, maxdosingintervals)
+      }
     }
   } else {
     stop("Dataset provided via 'map' does not contain the 'DOSINGTYPE' column")
