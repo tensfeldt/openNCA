@@ -195,8 +195,7 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told =
   time_min_range <- ifelse(!is.null(last_crit_factor), as.numeric(last_crit_factor) * tau, NA)
   if(tolower(orgtime) == "actual"){
     if(!isTRUE(tau %in% time) && !is.null(nom_time)){
-      tmp_time_df <- data.frame(actual = time, nominal = nom_time)
-      print(tmp_time_df)
+      tmp_time_df <- data.frame(actual = time, nominal = as.numeric(nom_time - told))
       if(length(which(time == tau)) > 0){
         tmp_told <- time[which(time == tau)]
         tmp_ctold <- conc[which(time == tmp_told)]
@@ -211,7 +210,6 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told =
 ###      cat('aumc_tau.R: tmp_told: ', tmp_told, ' tmp_ctold: ', tmp_ctold, 'time_min_range: ', time_min_range, 'ctoldest: ', ctoldest, '\n')
       if(!is.na(tmp_ctold)){
         tmp_told_nomtime <- as.numeric(tmp_time_df[which(tmp_time_df$actual == tmp_told),]$nominal)
-        print(tmp_told_nomtime)
         if(isTRUE(time_min_range <= tmp_told && tmp_told <= tau) && isTRUE(tau == tmp_told_nomtime)){
           ctold <- ifelse(isTRUE(length(tmp_ctold) > 0), tmp_ctold[length(tmp_ctold)], NA)
           time[which(time == tmp_told)] <- tau
