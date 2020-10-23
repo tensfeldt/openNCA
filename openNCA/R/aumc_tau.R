@@ -244,7 +244,11 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told =
   }
   
 ###  cat('aumc_tau.R: told: ', told, ' tau: ', tau, ' time: ', time, ' nomtime: ', nom_time,' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
-  tmp_tmax <- t_max - told
+  if(!is.null(t_max)){
+    tmp_tmax <- t_max - told
+  } else {
+    tmp_tmax <- t_max
+  }
   if(isTRUE(tau %in% time && time[length(time)] == tau) && !is.na(conc[length(time)])){
     if(method == 1){
       return(aumc_lin_log(conc = conc, time = time, exflag = exflag, t_max = tmp_tmax))
