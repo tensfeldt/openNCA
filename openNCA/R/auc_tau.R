@@ -199,7 +199,8 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told = 
   curr_tau <- as.numeric(told + tau)
   time_min_range <- ifelse(!is.null(last_crit_factor), as.numeric(last_crit_factor) * curr_tau, NA)
   if(tolower(orgtime) == "actual"){
-    if(!isTRUE(curr_tau %in% time)){
+    if(!isTRUE(curr_tau %in% time) && !is.null(nom_time)){
+      tmp_time_df <- data.frame(actual = time, nominal = nom_time)
       if(length(which(time == curr_tau)) > 0){
         tmp_told <- time[which(time == curr_tau)]
         tmp_ctold <- conc[which(time == tmp_told)]
@@ -211,15 +212,16 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told = 
         tmp_told <- curr_tau
         tmp_ctold <- NA
       }
-###      cat('auc_tau.R: tmp_told: ', tmp_told, ' tmp_ctold: ', tmp_ctold, '\n')
+###      cat('auc_tau.R: tmp_told: ', tmp_told, ' tmp_ctold: ', tmp_ctold, ' time_min_range: ', time_min_range, ' curr_tau: ', curr_tau, ' ctoldest: ', ctoldest, '\n')
       if(!is.na(tmp_ctold)){
-        if(isTRUE(time_min_range <= tmp_told && tmp_told <= curr_tau)){
+        tmp_told_nomtime <- as.numeric(tmp_time_df[which(tmp_time_df$actual == tmp_told),]$nominal)
+        if(isTRUE(time_min_range <= tmp_told && tmp_told <= curr_tau) && isTRUE(curr_tau == tmp_told_nomtime)){
           ctold <- ifelse(isTRUE(length(tmp_ctold) > 0), tmp_ctold[length(tmp_ctold)], NA)
           time[which(time == tmp_told)] <- curr_tau
         } else {
           ctold <- ifelse(!is.null(ctoldest), as.numeric(ctoldest), NA)
-          time[length(time)+1] <- curr_tau
-          conc[length(time)] <- ctold
+          conc <- c(conc[which(time < curr_tau)], ctold, conc[which(time >= curr_tau)])
+          time <- c(time[which(time < curr_tau)], curr_tau, time[which(time >= curr_tau)])
         }
       }
     } 
@@ -246,7 +248,7 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told = 
 ###
 ###  cat('auc_tau.R: told: ', told, ' tau: ', tau, ' time: ', time, ' nomtime: ', nom_time,' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' curr_tau: ', curr_tau, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
   
-  if(isTRUE(curr_tau %in% time && time[length(time)] == curr_tau)){
+  if(isTRUE(curr_tau %in% time && time[length(time)] == curr_tau) && !is.na(conc[length(time)])){
     if(method == 1){
       return(auc_lin_log(conc = conc, time = time, exflag = exflag, t_max = t_max))
     } else if(method == 2){
@@ -309,8 +311,8 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told = 
         }
       }
       tmp_df <- data.frame(conc = conc, time = time)
-      tmp_df <- tmp_df[tmp_df$time < tau,]
-      tmp_df[nrow(tmp_df),] <- c(tau_conc, tau)
+      tmp_df <- tmp_df[tmp_df$time < curr_tau,]
+      tmp_df[nrow(tmp_df)+1,] <- c(tau_conc, curr_tau)
       new_conc <- tmp_df$conc
       new_time <- tmp_df$time
       
@@ -339,8 +341,11 @@ auc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told = 
           if(!is.na(kel[["KEL"]])){
             tau_conc <- NA
             tau_conc <- cest(conc = conc, time = time, t_last = curr_tau, kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
-            new_time <- c(time, curr_tau)
-            new_conc <- c(conc, tau_conc)
+            tmp_df <- data.frame(conc = conc, time = time)
+            tmp_df <- tmp_df[tmp_df$time < curr_tau,]
+            tmp_df[nrow(tmp_df)+1,] <- c(tau_conc, curr_tau)
+            new_conc <- tmp_df$conc
+            new_time <- tmp_df$time
             
 ###            cat('new_conc: ', new_conc, '\n')
 ###            cat('new_time: ', new_time, '\n')

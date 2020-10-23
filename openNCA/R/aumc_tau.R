@@ -194,7 +194,9 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told =
   #Replace the time point closest to TAU if TAU is not present in the dataset
   time_min_range <- ifelse(!is.null(last_crit_factor), as.numeric(last_crit_factor) * tau, NA)
   if(tolower(orgtime) == "actual"){
-    if(!isTRUE(tau %in% time)){
+    if(!isTRUE(tau %in% time) && !is.null(nom_time)){
+      tmp_time_df <- data.frame(actual = time, nominal = nom_time)
+      print(tmp_time_df)
       if(length(which(time == tau)) > 0){
         tmp_told <- time[which(time == tau)]
         tmp_ctold <- conc[which(time == tmp_told)]
@@ -208,13 +210,15 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told =
       }
 ###      cat('aumc_tau.R: tmp_told: ', tmp_told, ' tmp_ctold: ', tmp_ctold, 'time_min_range: ', time_min_range, 'ctoldest: ', ctoldest, '\n')
       if(!is.na(tmp_ctold)){
-        if(isTRUE(time_min_range <= tmp_told && tmp_told <= tau)){
+        tmp_told_nomtime <- as.numeric(tmp_time_df[which(tmp_time_df$actual == tmp_told),]$nominal)
+        print(tmp_told_nomtime)
+        if(isTRUE(time_min_range <= tmp_told && tmp_told <= tau) && isTRUE(tau == tmp_told_nomtime)){
           ctold <- ifelse(isTRUE(length(tmp_ctold) > 0), tmp_ctold[length(tmp_ctold)], NA)
           time[which(time == tmp_told)] <- tau
         } else {
           ctold <- ifelse(!is.null(ctoldest), as.numeric(ctoldest), NA)
-          time[length(time)+1] <- tau
-          conc[length(time)] <- ctold
+          conc <- c(conc[which(time < tau)], ctold, conc[which(time >= tau)])
+          time <- c(time[which(time < tau)], tau, time[which(time >= tau)])
         }
       }
     } 
@@ -241,7 +245,7 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told =
   
 ###  cat('aumc_tau.R: told: ', told, ' tau: ', tau, ' time: ', time, ' nomtime: ', nom_time,' conc: ', conc, ' method: ', method, ' exflag: ', exflag, ' t_max: ', t_max, ' orig_conc: ', orig_conc, ' orig_time: ', orig_time, '\n')
   tmp_tmax <- t_max - told
-  if(isTRUE(tau %in% time && time[length(time)] == tau)){
+  if(isTRUE(tau %in% time && time[length(time)] == tau) && !is.na(conc[length(time)])){
     if(method == 1){
       return(aumc_lin_log(conc = conc, time = time, exflag = exflag, t_max = tmp_tmax))
     } else if(method == 2){
@@ -304,7 +308,7 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told =
       }
       tmp_df <- data.frame(conc = conc, time = time)
       tmp_df <- tmp_df[tmp_df$time < tau,]
-      tmp_df[nrow(tmp_df),] <- c(tau_conc, tau)
+      tmp_df[nrow(tmp_df)+1,] <- c(tau_conc, tau)
       new_conc <- tmp_df$conc
       new_time <- tmp_df$time
       
@@ -330,8 +334,11 @@ aumc_tau <- function(conc = NULL, time = NULL, method = 1, exflag = NULL, told =
           if(!is.na(kel[["KEL"]])){
             tau_conc <- NA
             tau_conc <- cest(conc = conc, time = time, t_last = tau, kel = kel[["KEL"]], kelc0 = kel[["KELC0"]])
-            new_time <- c(time, tau)
-            new_conc <- c(conc, tau_conc)
+            tmp_df <- data.frame(conc = conc, time = time)
+            tmp_df <- tmp_df[tmp_df$time < tau,]
+            tmp_df[nrow(tmp_df)+1,] <- c(tau_conc, tau)
+            new_conc <- tmp_df$conc
+            new_time <- tmp_df$time
             
 ###            cat('new_conc: ', new_conc, '\n')
 ###            cat('new_time: ', new_time, '\n')

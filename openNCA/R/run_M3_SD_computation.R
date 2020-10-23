@@ -1172,14 +1172,14 @@ run_M3_SD_computation <- function(data = NULL, map = NULL, method = 1, model_reg
                         saved_kel_opt <- kel_opt
                         selected_idx <- match(sel_time, orig_time)
                         if(!isTRUE(first_kel_saved)){
-                          first_kel_saved <- FALSE
+                          first_kel_saved <- TRUE
                         }
                       }
                     } else {
                       saved_kel_opt <- kel_opt
                       selected_idx <- match(sel_time, orig_time)
                       if(!isTRUE(first_kel_saved)){
-                        first_kel_saved <- FALSE
+                        first_kel_saved <- TRUE
                       }
                     }
                   }
