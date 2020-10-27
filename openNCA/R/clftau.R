@@ -43,7 +43,8 @@
 #' tau_val <- 5
 #' told_val <- 0
 #'
-#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
+#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val,
+#'         curr_di = 1, max_di = 2)
 #' #12.23956
 #'
 #' clftau(auctau = 12.23956, dose = 300)
@@ -66,7 +67,8 @@
 #' tau_val <- 2
 #' told_val <- 0
 #'
-#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
+#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val,
+#'         curr_di = 1, max_di = 2)
 #' #0
 #'
 #' clftau(auctau = 0, dose = 300)
@@ -89,7 +91,8 @@
 #' tau_val <- 2
 #' told_val <- 0
 #'
-#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
+#' auc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val,
+#'         curr_di = 1, max_di = 2)
 #' #2.495
 #'
 #' clftau(auctau = 2.495, dose = 300)

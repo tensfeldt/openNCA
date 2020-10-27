@@ -1100,6 +1100,7 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
       tmp_df[,map_data$TIME] <- as.numeric(tmp_df[,map_data$TIME])
       tmp_df <- tmp_df[order(tmp_df[,map_data$TIME]),]
       main_dose <- tmp_df[, as.character(map_data["DOSE1"])][1]
+      max_di <- di_col
       
       if("FLGEXSDE" %in% names(map_data)) {
         if(map_data$FLGEXSDE %in% names(data_data)){
@@ -1236,6 +1237,9 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           tmp_di_df <- tmp_di_df[order(tmp_di_df[,map_data$TIME]),]
           norm_bs <- ifelse("NORMBS" %in% names(map_data), ifelse(map_data$NORMBS %in% names(tmp_di_df), tmp_di_df[,map_data$NORMBS][1], NA), NA)
           tmp_dose <- tmp_di_df[, as.character(map_data[c(paste0("DOSE",d))])][1]
+          if(nrow(tmp_di_df) > 0){
+            max_di <- d
+          }
           
           if(d > 1){
             tmp_prev_told <- as.numeric(tmp_di_df[, as.character(map_data[c(paste0("TOLD",d-1))])][1])
@@ -1618,6 +1622,27 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           span_ratio <- ifelse("SPANRATIOCRIT" %in% names(map_data), suppressWarnings(as.numeric(map_data$SPANRATIOCRIT)), NA)
           c_est <- cest(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], kelflag = kel_flag, t_last = t_last, spanratio = span_ratio, kel = kel_v[["KEL"]])
         ###}
+        ###if(comp_required[["AUCINFO"]]){
+          aucinf_o <- auc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, c_last = c_last, kel = kel_v)
+        ###}
+        ###if(comp_required[["AUCINFP"]]){
+          aucinf_p <- auc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, t_last = t_last, kel = kel_v)
+        ###}
+        ###if(comp_required[["AUCLASTDN"]]){
+          auclastdn <- auc_dn(auc = auclast, dose = main_dose)
+        ###}
+        ###if(comp_required[["AUCXPCTO"]]){
+          aucxpcto <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_info = aucinf_o, auclast = auclast)
+        ###}
+        ###if(comp_required[["AUCXPCTP"]]){
+          aucxpctp <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_infp = aucinf_p, auclast = auclast)
+        ###}
+        ###if(comp_required[["AUCINFODN"]]){
+          aucinf_odn <- auc_dn(auc = aucinf_o, dose = main_dose)
+        ###}
+        ###if(comp_required[["AUCINFPDN"]]){
+          aucinf_pdn <- auc_dn(auc = aucinf_p, dose = main_dose)
+        ###}
         ###if(comp_required[["AUCT"]] && auc_len > 1){
         ###  auct <- list()
         ###}
@@ -1821,32 +1846,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           ###if(comp_required[["AUMCINFPi"]]){
             aumcinfpi[[d]] <- aumc_inf_p(conc = tmp_conc_di, time = aumc_time, method = method, kelflag = kel_flag, aucflag = auc_flag, aumclast = aumclasti[[d]], t_last = t_lasti[[d]], kel = kel_v)
           ###}
-          ###if(comp_required[["AUCTAUi"]]){
-            auctau[[d]] <- auc_tau(conc = tmp_conc_di, time = tmp_time_di, method = method, exflag = auc_flag, told = told[[d]], tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time, last_crit_factor = last_crit_factor, kel = kel_v, auclast = auclasti[[d]], lasttime = last_timei[[d]], orgtime = tolower(map_data$ORGTIME), nom_time = tmp_nom_time_di, ctoldest = nxt_ctold_est)
-          ###}
-          ###if(comp_required[["AUCTAUDNi"]]){
-            auctaudn[[d]] <- auc_dn(auc = auctau[[d]], dose = tmp_dose)
-          ###}
-          ###if(comp_required[["AUMCTAUi"]]){
-            if(isTRUE(exists("auctau"))){
-              if(isTRUE(is.na(auctau[[d]]) || is.null(auctau[[d]]))){
-                aumctaui[[d]] <- NA
-              } else {
-                aumctaui[[d]] <- aumc_tau(conc = tmp_conc_di, time = aumc_time, method = method, exflag = auc_flag, told = told[[d]], tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time, last_crit_factor = last_crit_factor, kel = kel_v, aumclast = aumclasti[[d]], lasttime = last_timei[[d]], orgtime = tolower(map_data$ORGTIME), nom_time = tmp_nom_time_di, ctoldest = nxt_ctold_est)
-              }
-            } else {
-              aumctaui[[d]] <- aumc_tau(conc = tmp_conc_di, time = aumc_time, method = method, exflag = auc_flag, told = told[[d]], tau = tau[[d]], t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time, last_crit_factor = last_crit_factor, kel = kel_v, aumclast = aumclasti[[d]], lasttime = last_timei[[d]], orgtime = tolower(map_data$ORGTIME), nom_time = tmp_nom_time_di, ctoldest = nxt_ctold_est)
-            }
-          ###}
-          ###if(comp_required[["MRTLASTi"]]){
-            mrtlasti[[d]] <- mrt_last(conc = tmp_conc_di, time = aumc_time, method = method, model = "M1", aucflag = auc_flag, dof = dose_inf[[d]], auclast = auclasti[[d]], aumclast = aumclasti[[d]])
-          ###}
-          ###if(comp_required[["MRTEVIFOi"]]){
-            mrtevifoi[[d]] <- mrt_evif_o(conc = tmp_conc_di, time = aumc_time, method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfo = aucinfoi[[d]], aumcinfo = aumcinfoi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
-          ###}
-          ###if(comp_required[["MRTEVIFPi"]]){
-            mrtevifpi[[d]] <- mrt_evif_p(conc = tmp_conc_di, time = aumc_time, method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfp = aucinfpi[[d]], aumcinfp = aumcinfpi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
-          ###}
           ###if(comp_required[["AUCXPCTOi"]]){
             aucxpctoi[[d]] <- auc_XpctO(conc = tmp_conc_di, time = tmp_time_di, method = method, kelflag = kel_flag, aucflag = auc_flag, auc_info = aucinfoi[[d]], auclast = auclasti[[d]])
           ###}
@@ -1858,6 +1857,164 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
           ###}
           ###if(comp_required[["AUMCXPTPi"]]){
             aumcxptpi[[d]] <- aumc_XpctP(conc = tmp_conc_di, time = aumc_time, method = method, kelflag = kel_flag, aucflag = auc_flag, aumcinfp = aumcinfpi[[d]], aumclast = aumclasti[[d]])
+          ###}
+          if(exists("flag_df")){
+            tmp_flag_kel <- TRUE
+            flag_check <- FALSE
+            for(f in 1:length(flag_df$VAR)){
+              flag_param <- flag_df$VAR[f]
+              if(toupper(flag_param) == "KEL"){
+                if(isTRUE(eval(parse(text=paste(kel_v[["KEL"]], flag_df$OPR[f], flag_df$CRIT[f]))))){
+                  if(isTRUE(tmp_flag_kel)){
+                    tmp_flag_kel <- TRUE
+                    flag_check <- TRUE
+                  }
+                } else {
+                  tmp_flag_kel <- FALSE
+                }
+              }
+              if(toupper(flag_param) == "KELCO"){
+                if(isTRUE(eval(parse(text=paste(kel_v[["KELC0"]], flag_df$OPR[f], flag_df$CRIT[f]))))){
+                  if(isTRUE(tmp_flag_kel)){
+                    tmp_flag_kel <- TRUE
+                    flag_check <- TRUE
+                  }
+                } else {
+                  tmp_flag_kel <- FALSE
+                }
+              }
+              if(toupper(flag_param) == "KELTMLO"){
+                if(isTRUE(eval(parse(text=paste(kel_v[["KELTMLO"]], flag_df$OPR[f], flag_df$CRIT[f]))))){
+                  if(isTRUE(tmp_flag_kel)){
+                    tmp_flag_kel <- TRUE
+                    flag_check <- TRUE
+                  }
+                } else {
+                  tmp_flag_kel <- FALSE
+                }
+              }
+              if(toupper(flag_param) == "KELTMHI"){
+                if(isTRUE(eval(parse(text=paste(kel_v[["KELTMHI"]], flag_df$OPR[f], flag_df$CRIT[f]))))){
+                  if(isTRUE(tmp_flag_kel)){
+                    tmp_flag_kel <- TRUE
+                    flag_check <- TRUE
+                  }
+                } else {
+                  tmp_flag_kel <- FALSE
+                }
+              }
+              if(toupper(flag_param) == "KELNOPT"){
+                if(isTRUE(eval(parse(text=paste(kel_v[["KELNOPT"]], flag_df$OPR[f], flag_df$CRIT[f]))))){
+                  if(isTRUE(tmp_flag_kel)){
+                    tmp_flag_kel <- TRUE
+                    flag_check <- TRUE
+                  }
+                } else {
+                  tmp_flag_kel <- FALSE
+                }
+              }
+              if(toupper(flag_param) == "KELR"){
+                if(isTRUE(eval(parse(text=paste(kelr_v[["KELR"]], flag_df$OPR[f], flag_df$CRIT[f]))))){
+                  if(isTRUE(tmp_flag_kel)){
+                    tmp_flag_kel <- TRUE
+                    flag_check <- TRUE
+                  }
+                } else {
+                  tmp_flag_kel <- FALSE
+                }
+              }
+              if(toupper(flag_param) == "KELRSQ"){
+                if(isTRUE(eval(parse(text=paste(kelr_v[["KELRSQ"]], flag_df$OPR[f], flag_df$CRIT[f]))))){
+                  if(isTRUE(tmp_flag_kel)){
+                    tmp_flag_kel <- TRUE
+                    flag_check <- TRUE
+                  }
+                } else {
+                  tmp_flag_kel <- FALSE
+                }
+              }
+              if(toupper(flag_param) == "KELRSQA"){
+                if(isTRUE(eval(parse(text=paste(kelr_v[["KELRSQA"]], flag_df$OPR[f], flag_df$CRIT[f]))))){
+                  if(isTRUE(tmp_flag_kel)){
+                    tmp_flag_kel <- TRUE
+                    flag_check <- TRUE
+                  }
+                } else {
+                  tmp_flag_kel <- FALSE
+                }
+              }
+              if(toupper(flag_param) == "AUCXPCTO"){
+                if(isTRUE(eval(parse(text=paste(aucxpcto, flag_df$OPR[f], flag_df$CRIT[f]))))){
+                  if(isTRUE(tmp_flag_kel)){
+                    tmp_flag_kel <- TRUE
+                    flag_check <- TRUE
+                  }
+                } else {
+                  tmp_flag_kel <- FALSE
+                }
+              }
+              if(toupper(flag_param) == "AUCXPCTOi"){
+                if(isTRUE(eval(parse(text=paste(aucxpctoi[[d]], flag_df$OPR[f], flag_df$CRIT[f]))))){
+                  if(isTRUE(tmp_flag_kel)){
+                    tmp_flag_kel <- TRUE
+                    flag_check <- TRUE
+                  }
+                } else {
+                  tmp_flag_kel <- FALSE
+                }
+              }
+              if(toupper(flag_param) == "AUCXPCTP"){
+                if(isTRUE(eval(parse(text=paste(aucxpctp, flag_df$OPR[f], flag_df$CRIT[f]))))){
+                  if(isTRUE(tmp_flag_kel)){
+                    tmp_flag_kel <- TRUE
+                    flag_check <- TRUE
+                  }
+                } else {
+                  tmp_flag_kel <- FALSE
+                }
+              }
+              if(toupper(flag_param) == "AUCXPCTPi"){
+                if(isTRUE(eval(parse(text=paste(aucxpctpi[[d]], flag_df$OPR[f], flag_df$CRIT[f]))))){
+                  if(isTRUE(tmp_flag_kel)){
+                    tmp_flag_kel <- TRUE
+                    flag_check <- TRUE
+                  }
+                } else {
+                  tmp_flag_kel <- FALSE
+                }
+              }
+            }
+            if(!isTRUE(flag_check)){
+              tmp_flag_kel <- FALSE
+            }
+          } else {
+            tmp_flag_kel <- FALSE
+          }
+          ###if(comp_required[["AUCTAUi"]]){
+            auctau[[d]] <- auc_tau(conc = tmp_conc_di, time = tmp_time_di, method = method, exflag = auc_flag, told = told[[d]], tau = tau[[d]], curr_di = d, max_di = max_di, t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time, last_crit_factor = last_crit_factor, kel = kel_v, auclast = auclasti[[d]], lasttime = last_timei[[d]], orgtime = tolower(map_data$ORGTIME), nom_time = tmp_nom_time_di, ctoldest = nxt_ctold_est, flgacceptkel = tmp_flag_kel)
+          ###}
+          ###if(comp_required[["AUCTAUDNi"]]){
+            auctaudn[[d]] <- auc_dn(auc = auctau[[d]], dose = tmp_dose)
+          ###}
+          ###if(comp_required[["AUMCTAUi"]]){
+            if(isTRUE(exists("auctau"))){
+              if(isTRUE(is.na(auctau[[d]]) || is.null(auctau[[d]]))){
+                aumctaui[[d]] <- NA
+              } else {
+                aumctaui[[d]] <- aumc_tau(conc = tmp_conc_di, time = aumc_time, method = method, exflag = auc_flag, told = told[[d]], tau = tau[[d]], curr_di = d, max_di = max_di, t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time, last_crit_factor = last_crit_factor, kel = kel_v, aumclast = aumclasti[[d]], lasttime = last_timei[[d]], orgtime = tolower(map_data$ORGTIME), nom_time = tmp_nom_time_di, ctoldest = nxt_ctold_est, flgacceptkel = tmp_flag_kel)
+              }
+            } else {
+              aumctaui[[d]] <- aumc_tau(conc = tmp_conc_di, time = aumc_time, method = method, exflag = auc_flag, told = told[[d]], tau = tau[[d]], curr_di = d, max_di = max_di, t_max = t_maxi[[d]], orig_conc = orig_conc, orig_time = orig_time, last_crit_factor = last_crit_factor, kel = kel_v, aumclast = aumclasti[[d]], lasttime = last_timei[[d]], orgtime = tolower(map_data$ORGTIME), nom_time = tmp_nom_time_di, ctoldest = nxt_ctold_est, flgacceptkel = tmp_flag_kel)
+            }
+          ###}
+          ###if(comp_required[["MRTLASTi"]]){
+            mrtlasti[[d]] <- mrt_last(conc = tmp_conc_di, time = aumc_time, method = method, model = "M1", aucflag = auc_flag, dof = dose_inf[[d]], auclast = auclasti[[d]], aumclast = aumclasti[[d]])
+          ###}
+          ###if(comp_required[["MRTEVIFOi"]]){
+            mrtevifoi[[d]] <- mrt_evif_o(conc = tmp_conc_di, time = aumc_time, method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfo = aucinfoi[[d]], aumcinfo = aumcinfoi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
+          ###}
+          ###if(comp_required[["MRTEVIFPi"]]){
+            mrtevifpi[[d]] <- mrt_evif_p(conc = tmp_conc_di, time = aumc_time, method = method, parameter = "SS", kelflag = kel_flag, aucflag = auc_flag, tau = tau[[d]], orig_conc = orig_conc, orig_time = orig_time, aucinfp = aucinfpi[[d]], aumcinfp = aumcinfpi[[d]], auctau = auctau[[d]], aumctau = aumctaui[[d]])
           ###}
           ###if(comp_required[["CAVi"]]){
             ca_v[[d]] <- cav(auctau = auctau[[d]], tau = tau[[d]])
@@ -2228,27 +2385,6 @@ run_M1_SS_computation <- function(data = NULL, map = NULL, method = 1, model_reg
             ###}
           }
         }
-        ###if(comp_required[["AUCINFO"]]){
-          aucinf_o <- auc_inf_o(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, c_last = c_last, kel = kel_v)
-        ###}
-        ###if(comp_required[["AUCINFP"]]){
-          aucinf_p <- auc_inf_p(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auclast = auclast, t_last = t_last, kel = kel_v)
-        ###}
-        ###if(comp_required[["AUCLASTDN"]]){
-          auclastdn <- auc_dn(auc = auclast, dose = main_dose)
-        ###}
-        ###if(comp_required[["AUCXPCTO"]]){
-          aucxpcto <- auc_XpctO(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_info = aucinf_o, auclast = auclast)
-        ###}
-        ###if(comp_required[["AUCXPCTP"]]){
-          aucxpctp <- auc_XpctP(conc = tmp_df[,map_data$CONC], time = tmp_df[,map_data$TIME], method = method, kelflag = kel_flag, aucflag = auc_flag, auc_infp = aucinf_p, auclast = auclast)
-        ###}
-        ###if(comp_required[["AUCINFODN"]]){
-          aucinf_odn <- auc_dn(auc = aucinf_o, dose = main_dose)
-        ###}
-        ###if(comp_required[["AUCINFPDN"]]){
-          aucinf_pdn <- auc_dn(auc = aucinf_p, dose = main_dose)
-        ###}
           
         ####REMOVING AUMC PARAMETERS  
         ####if(comp_required[["AUMCINFO"]]) {

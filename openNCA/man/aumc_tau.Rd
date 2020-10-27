@@ -11,6 +11,8 @@ aumc_tau(
   exflag = NULL,
   told = NULL,
   tau = NULL,
+  curr_di = NULL,
+  max_di = NULL,
   t_max = NULL,
   orig_conc = NULL,
   orig_time = NULL,
@@ -20,7 +22,8 @@ aumc_tau(
   lasttime = NULL,
   orgtime = "nominal",
   nom_time = NULL,
-  ctoldest = NULL
+  ctoldest = NULL,
+  flgacceptkel = TRUE
 )
 }
 \arguments{
@@ -43,7 +46,11 @@ Note: check 'Methods' section below for more details \cr}
 
 \item{tau}{The time duration of dosing interval (numeric value)}
 
-\item{t_max}{The first time at which CMAXi us observed within a dosing interval (numeric value)s}
+\item{curr_di}{The current dosing interval (numeric value)}
+
+\item{max_di}{The total number of intervals with respect to the profile (numeric value)}
+
+\item{t_max}{The first time at which CMAXi us observed within a dosing interval (numeric value)}
 
 \item{orig_conc}{The original (full) concentration data (given in a numeric vector)}
 
@@ -62,6 +69,8 @@ Note: check 'Methods' section below for more details \cr}
 \item{nom_time}{The nominal time data (given in a vector form)}
 
 \item{ctoldest}{The estimated concentration at the time of last dose (numeric value)}
+
+\item{flgacceptkel}{The value that determines if KEL is acceptable (logical value)}
 }
 \description{
 This function gets the area under the concentration versus time curve from time 0 until the dosing
@@ -131,18 +140,20 @@ time_vector <- c(0, 1, 2, 3, 4, 5)
 tau_val <- 5
 told_val <- 0
 
-aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
+aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val, 
+         curr_di = 1, max_di = 2)
 #29.64777
 
 tau_val <- 2
 
-#aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
+#aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val, 
+#          curr_di = 1, max_di = 2)
 #Error in aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val) :
 #  Error in aumc_tau: 'orig_conc' and 'orig_time' vectors are NULL, 
 #  cannot interpolate data if original data is not provided!
 
-aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, 
-         orig_conc = conc_vector, orig_time = time_vector, told = told_val)
+aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val, 
+         orig_conc = conc_vector, orig_time = time_vector, curr_di = 1, max_di = 2)
 #29.64777
 
 ############
@@ -162,7 +173,8 @@ time_vector <- c(0, 1, 2)
 tau_val <- 2
 told_val <- 0
 
-aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
+aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val, 
+         curr_di = 1, max_di = 2)
 #0
 
 ############
@@ -182,7 +194,8 @@ time_vector <- c(0, 1, 2)
 tau_val <- 2
 told_val <- 0
 
-aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val)
+aumc_tau(conc = conc_vector, time = time_vector, tau = tau_val, told = told_val, 
+         curr_di = 1, max_di = 2)
 #2.57
 
 }
