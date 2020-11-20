@@ -49,12 +49,16 @@ dof <- function(data, map, dof_name = "DOF1") {
       dtstime <- as.POSIXct(date_time_str, format="%Y-%m-%d %H:%M")
       if(is.na(dtstime)) {
         dtstime <- as.POSIXct(date_time_str, format="%Y%m%d %H:%M")
-      } 
-      dtstime <- as.POSIXct(date_time_str, format="%Y %m %d %H:%M")
+      }
+      if(is.na(dtstime)) {
+        dtstime <- as.POSIXct(date_time_str, format="%Y %m %d %H:%M")
+      }
       if(is.na(dtstime)) {
         dtstime <- as.POSIXct(date_time_str, format="%Y%m%d %H%M")
       } 
-      dtstime <- as.POSIXct(date_time_str, format="%Y %m %d %H%M")
+      if(is.na(dtstime)) {
+        dtstime <- as.POSIXct(date_time_str, format="%Y %m %d %H%M")
+      }
       if(is.na(dtstime)) {
         dtstime <- as.POSIXct(date_time_str, format="%Y-%m-%d %H%M")
       }
@@ -63,17 +67,21 @@ dof <- function(data, map, dof_name = "DOF1") {
       if(is.na(dtetime)) {
         dtetime <- as.POSIXct(date_time_end, format="%Y%m%d %H:%M")
       } 
-      dtetime <- as.POSIXct(date_time_end, format="%Y %m %d %H:%M")
+      if(is.na(dtetime)) {
+        dtetime <- as.POSIXct(date_time_end, format="%Y %m %d %H:%M")
+      }
       if(is.na(dtetime)) {
         dtetime <- as.POSIXct(date_time_end, format="%Y%m%d %H%M")
       } 
-      dtetime <- as.POSIXct(date_time_end, format="%Y %m %d %H%M")
+      if(is.na(dtetime)) {
+        dtetime <- as.POSIXct(date_time_end, format="%Y %m %d %H%M")
+      }
       if(is.na(dtetime)) {
         dtetime <- as.POSIXct(date_time_end, format="%Y-%m-%d %H%M")
       }
       
       if(!is.na(dtstime) && !is.na(dtetime)) {
-        dose_inf <- round(as.numeric(difftime(datetime1, datetime2, units = "hours"), units="hours"), digits = 2)
+        dose_inf <- round(as.numeric(difftime(dtetime, dtstime, units = "hours")), digits = 2)
       }
     }
   }
