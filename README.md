@@ -16,5 +16,5 @@ openNCA comprises an R based PK NCA computation engine designed for the using fo
 Execution of a model requires provision of a Model Configuration Template (MCT) configuration data structure that provides all of the settings required.
 
 ## openNCA Application
-The openNCA desktop application has been developed as an electron application. **More details coming**
+The [openNCA desktop application](https://github.com/tensfeldt/openNCAapp) has been developed as an electron application. **More details coming** 
 
