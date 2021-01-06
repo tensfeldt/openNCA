@@ -18,3 +18,7 @@ Execution of a model requires provision of a Model Configuration Template (MCT) 
 ## openNCA Application
 The [openNCA desktop application](https://github.com/tensfeldt/openNCAapp) has been developed as an electron application. **More details coming** 
 
+## Presentations
+
+- R/Pharma 2020 Presentation [openNCA Pharmacokinetic Data Repository and Non-compartmental Analysis System](https://www.youtube.com/watch?v=Dw6HrBUdcmU)
+- AAPS 2020 PharmSci 360 Poster Presentation - [openNCA - New Open-Source Non-Compartmental Analysis System and Pharmacokinetic Results Repository](https://posters.aaps.org/pdfviewer/web/viewer.html?file=https%3A//posters.aaps.org/aaps/download/poster%3Fcm_id%3D315419)
