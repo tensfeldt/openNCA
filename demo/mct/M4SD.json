@@ -1,0 +1,852 @@
+[
+  {
+    "parameterName": "MODEL",
+    "parameterDisplayName": "Model",
+    "type": "selection",
+    "datasource": "static",
+    "defaultValue": "M4",
+    "options": [
+      "M4"
+    ]
+  },
+  {
+    "parameterName": "DOSINGTYPE",
+    "parameterDisplayName": "Dosing Type",
+    "type": "selection",
+    "datasource": "static",
+    "defaultValue": "SD",
+    "options": [
+      "SD",
+      "SS"
+    ]
+  },
+  {
+    "parameterName": "AUCMETHOD",
+    "parameterDisplayName": "AUC Method",
+    "type": "selection",
+    "datasource": "static",
+    "defaultValue": "LINLOG",
+    "options": [
+      "LINLOG",
+      "LIN",
+      "LOG",
+      "LINUP-LOGDOWN"
+    ]
+  },
+  {
+    "parameterName": "SDEID",
+    "parameterDisplayName": "SDEID/Profile ID",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "SDEID"
+  },
+  {
+    "parameterName": "PKADT",
+    "parameterDisplayName": "PKADT - Act Date",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKADT"
+  },
+  {
+    "parameterName": "PKATM",
+    "parameterDisplayName": "PKATM - Act Time",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKATM"
+  },
+  {
+    "parameterName": "PKADTE",
+    "parameterDisplayName": "PKADTE - Act End Date",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKADTE"
+  },
+  {
+    "parameterName": "PKATME",
+    "parameterDisplayName": "PKATME - Act End Time",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKATME"
+  },
+  {
+    "parameterName": "DRGDATE",
+    "parameterDisplayName": "DRGDATE - Dose Date",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "DRGDATE"
+  },
+  {
+    "parameterName": "DOSETIM",
+    "parameterDisplayName": "DOSETIM - Dose Time",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "DOSETIME"
+  },
+  {
+    "parameterName": "DRGDATESTOP",
+    "parameterDisplayName": "DRGDATESTOP - Dose Stop Date",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "DRGDATESTOP"
+  },
+  {
+    "parameterName": "DOSETIMESTOP",
+    "parameterDisplayName": "DOSETIMESTOP - Dose Stop Time",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "DOSETIMESTOP"
+  },
+  {
+    "parameterName": "TIME",
+    "parameterDisplayName": "Nominal/Actual Time Selection",
+    "type": "selection",
+    "datasource": "static",
+    "defaultValue": "NOMINAL",
+    "category": "variable",
+    "options": [
+      "NOMINAL",
+      "ACTUAL"
+    ]
+  },
+  {
+    "parameterName": "NOMTIME",
+    "parameterDisplayName": "Nominal Time Source",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKPTMS",
+    "category": "variable",
+    "options": []
+  },
+  {
+    "parameterName": "NOMTIMEU",
+    "parameterDisplayName": "Nominal Time Units",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKPTMU",
+    "category": "variable",
+    "options": []
+  },
+  {
+    "parameterName": "NOMENDTIME",
+    "parameterDisplayName": "Nominal End of Interval Time",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKPTME",
+    "category": "variable",
+    "options": []
+  },
+  {
+    "parameterName": "NOMENDTIMEU",
+    "parameterDisplayName": "Nominal End Time Source Units",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKATPDEU",
+    "category": "variable",
+    "options": [
+      "PKATPDEU",
+      "PKPTMU"
+    ]
+  },
+  {
+    "parameterName": "ACTTIME",
+    "parameterDisplayName": "Actual Time Source",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKATPD",
+    "category": "variable",
+    "options": []
+  },
+  {
+    "parameterName": "ACTTIMEU",
+    "parameterDisplayName": "Actual Time Units",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKATPDU",
+    "category": "variable",
+    "options": []
+  },
+  {
+    "parameterName": "ACTENDDATE",
+    "parameterDisplayName": "Actual End of Interval Date",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKADTE",
+    "category": "variable",
+    "options": []
+  },
+  {
+    "parameterName": "ACTENDTIME",
+    "parameterDisplayName": "Actual End of Interval Time",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKATPDE",
+    "category": "variable",
+    "options": []
+  },
+  {
+    "parameterName": "ACTENDTIMEU",
+    "parameterDisplayName": "Actual End Time Units",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKATPDEU",
+    "category": "variable",
+    "options": [
+      "PKATPDEU",
+      "PKPTMU"
+    ]
+  },
+  {
+    "parameterName": "CONC",
+    "parameterDisplayName": "Concentration Numeric Value",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKCNCN",
+    "category": "variable",
+    "options": []
+  },
+  {
+    "parameterName": "CONCU",
+    "parameterDisplayName": "Concentration Units",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKCNCU",
+    "category": "variable",
+    "options": []
+  },
+  {
+    "parameterName": "CONCRAW",
+    "parameterDisplayName": "Concentration Raw value",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKCNC",
+    "category": "variable",
+    "options": []
+  },
+  {
+    "parameterName": "AMOUNT",
+    "parameterDisplayName": "Amount",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKSMVL",
+    "category": "variable",
+    "options": []
+  },
+  {
+    "parameterName": "AMOUNTU",
+    "parameterDisplayName": "Amount Units",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKSMVLU",
+    "category": "variable",
+    "options": []
+  },
+  {
+    "parameterName": "DOSE",
+    "parameterDisplayName": "Dose1",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "DOSE",
+    "category": "variable",
+    "options": [
+      "DOSE",
+      "DOSE1"
+    ]
+  },
+  {
+    "parameterName": "DOSEU",
+    "parameterDisplayName": "Dose1 Units",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "DOSEUNI",
+    "category": "variable",
+    "options": [
+      "DOSEU",
+      "DOSEUNI",
+      "DOSE1U"
+    ]
+  },
+  {
+    "parameterName": "DOF1",
+    "parameterDisplayName": "Duration of Infusion",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "DOF",
+    "category": "hidden",
+    "options": [
+      "DOF",
+      "DOF1"
+    ]
+  },
+  {
+    "parameterName": "DOF1U",
+    "parameterDisplayName": "Duration of Infusion",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "DOFU",
+    "category": "hidden",
+    "options": [
+      "DOFU",
+      "DOF1U"
+    ]
+  },
+  {
+    "parameterName": "DOF2",
+    "parameterDisplayName": "Duration of Infusion",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "DOF2",
+    "category": "hidden",
+    "options": [
+      "DOF",
+      "DOF1",
+      "DOF2"
+    ]
+  },
+  {
+    "parameterName": "DOF2U",
+    "parameterDisplayName": "Duration of Infusion",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "DOF2U",
+    "category": "hidden",
+    "options": [
+      "DOFU",
+      "DOF1U",
+      "DOF2U"
+    ]
+  },
+  {
+    "parameterName": "FLGACCEPTKELCRIT",
+    "parameterDisplayName": "Accept KEL Criteria",
+    "type": "text",
+    "defaultValue": "KELRSQ>=0.9,KELNOPT>=3,AURCXPCTP<=20.0,KEL>0"
+  },
+  {
+    "parameterName": "LLOQPATTERNS",
+    "parameterDisplayName": "LLOQPATTERNS",
+    "type": "text",
+    "defaultValue": "LLOQ|BLQ|^[<]{1}",
+    "category": "hidden"
+  },
+  {
+    "parameterName": "SAMPLEVOLUME",
+    "parameterDisplayName": "SAMPLEVOLUME",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKSMVL",
+    "category": "variable"
+  },
+  {
+    "parameterName": "SAMPLEVOLUMEU",
+    "parameterDisplayName": "SAMPLEVOLUMEU",
+    "type": "selection",
+    "datasource": "column",
+    "defaultValue": "PKSMVLU",
+    "category": "variable"
+  },
+  {
+    "parameterName": "FLGMERGE",
+    "parameterDisplayName": "FLGMERGE",
+    "type": "selection",
+    "defaultValue": "PKDATAROWID",
+    "datasource": "column"
+  },
+  {
+    "parameterName": "FLGACCEPTTAU",
+    "parameterDisplayName": "Accept Tau (?)",
+    "type": "text",
+    "category": "hidden",
+    "defaultValue": "FLGACCEPTTAU"
+  },
+  {
+    "parameterName": "FLGACCEPTPREDOSECRIT",
+    "parameterDisplayName": "Accept Pre-Dose Criteria",
+    "type": "text",
+    "defaultValue": "0.05"
+  },
+  {
+    "parameterName": "FLGEXKEL",
+    "parameterDisplayName": "FLGEXKEL",
+    "type": "text",
+    "defaultValue": "FLGEXKEL",
+    "category": "kelFlags"
+  },
+  {
+    "parameterName": "FLGEXSDE",
+    "parameterDisplayName": "FLGEXSDE",
+    "type": "text",
+    "defaultValue": "FLGEXSDE",
+    "category": "kelFlags"
+  },
+  {
+    "parameterName": "FLGEXST",
+    "parameterDisplayName": "FLGEXST",
+    "type": "text",
+    "defaultValue": "FLGEXST",
+    "category": "kelFlags"
+  },
+  {
+    "parameterName": "FLGNOCMAX",
+    "parameterDisplayName": "FLGNOCMAX",
+    "type": "selection",
+    "defaultValue": "1",
+    "datasource": "static",
+    "options": [
+      "0",
+      "1"
+    ]
+  },
+  {
+    "parameterName": "MATRIX",
+    "parameterDisplayName": "Sample Matrix",
+    "type": "selection",
+    "defaultValue": "PKBDFLD",
+    "datasource": "column"
+  },
+  {
+    "parameterName": "PKPCOM",
+    "parameterDisplayName": "PKPCOM",
+    "type": "text",
+    "category": "kelFlags",
+    "defaultValue": "PKPCOM"
+  },
+  {
+    "parameterName": "SAMPLETYPE",
+    "parameterDisplayName": "SAMPLETYPE - Point/Interval",
+    "type": "selection",
+    "defaultValue": "PKCOLL",
+    "datasource": "column"
+  },
+  {
+    "parameterName": "FLGEXAUC",
+    "parameterDisplayName": "FLGEXAUC",
+    "type": "text",
+    "defaultValue": "FLGEXAUC",
+    "category": "kelFlags"
+  },
+  {
+    "parameterName": "LASTTIMEACCEPTCRIT",
+    "parameterDisplayName": "LASTTIME Acceptance Limit",
+    "type": "text",
+    "defaultValue": "0.9*TAUi"
+  },
+  {
+    "parameterName": "SPANRATIOCRIT",
+    "parameterDisplayName": "Span Ratio Criteria",
+    "type": "text",
+    "defaultValue": "2"
+  },
+  {
+    "parameterName": "FLGEMESIS",
+    "parameterDisplayName": "Prior Emesis Flag",
+    "type": "selection",
+    "defaultValue": "FLGEMESIS",
+    "datasource": "column"
+  },
+  {
+    "parameterName": "NORMBS",
+    "parameterDisplayName": "NORMBS",
+    "type": "selection",
+    "defaultValue": "WTRAW",
+    "datasource": "column",
+    "options": [
+      "WTRAW",
+      "WT"
+    ]
+  },
+  {
+    "parameterName": "NORMBSU",
+    "parameterDisplayName": "NORMBSU",
+    "type": "selection",
+    "defaultValue": "WTUNI",
+    "datasource": "column",
+    "options": [
+      "WTUNI",
+      "WTU"
+    ]
+  },
+  {
+    "parameterName": "TIMEOUTPUTUNIT",
+    "parameterDisplayName": "Target Time Unit",
+    "type": "text",
+    "defaultValue": "HR",
+    "datasource": "static"
+  },
+  {
+    "parameterName": "AMOUNTOUTPUTUNIT",
+    "parameterDisplayName": "Target Amount Unit",
+    "type": "text",
+    "defaultValue": "MG",
+    "datasource": "static"
+  },
+  {
+    "parameterName": "DOSEOUTPUTUNIT",
+    "parameterDisplayName": "Target Dose Unit",
+    "type": "text",
+    "defaultValue": "MG",
+    "datasource": "static"
+  },
+  {
+    "parameterName": "VOLUMEOUTPUTUNIT",
+    "parameterDisplayName": "Target Volume Unit",
+    "type": "text",
+    "defaultValue": "L",
+    "datasource": "static"
+  },
+  {
+    "parameterName": "CONCOUTPUTUNIT",
+    "parameterDisplayName": "Target Concentration Unit",
+    "type": "text",
+    "defaultValue": "NG/ML",
+    "datasource": "static"
+  },
+  {
+    "parameterName": "KELOUTPUTUNIT",
+    "parameterDisplayName": "Target KEL Unit",
+    "type": "text",
+    "defaultValue": "1/HR",
+    "datasource": "static"
+  },
+  {
+    "parameterName": "CLOUTPUTUNIT",
+    "parameterDisplayName": "Target Clearance Unit",
+    "type": "text",
+    "datasource": "static",
+    "defaultValue": "L/HR"
+  },
+  {
+    "parameterName": "AUCOUTPUTUNIT",
+    "parameterDisplayName": "Target AUC Unit",
+    "type": "text",
+    "datasource": "static",
+    "defaultValue": "NG.HR/ML"
+  },
+  {
+    "parameterName": "AUMCOUTPUTUNIT",
+    "parameterDisplayName": "Target AUMC Unit",
+    "type": "text",
+    "datasource": "static",
+    "defaultValue": "NG.HR.HR/ML"
+  },
+  {
+    "parameterName": "AUCNORMOUTPUTUNIT",
+    "parameterDisplayName": "Target AUC Normalized Unit",
+    "type": "text",
+    "datasource": "static",
+    "defaultValue": "NG.HR/ML/MG"
+  },
+  {
+    "parameterName": "AUROUTPUTUNIT",
+    "parameterDisplayName": "Target AURC Unit",
+    "type": "text",
+    "datasource": "static",
+    "defaultValue": "ML.UG/ML"
+  },
+  {
+    "parameterName": "RATEOUTPUTUNIT",
+    "parameterDisplayName": "Target RATE Unit",
+    "type": "text",
+    "datasource": "static",
+    "defaultValue": "UG/HR"
+  },
+  {
+    "parameterName": "CONCNORMOUTPUTUNIT",
+    "parameterDisplayName": "Target Concentration Normalized Unit",
+    "type": "text",
+    "datasource": "static",
+    "defaultValue": "NG/ML/MG"
+  },
+  {
+    "parameterName": "VOLUMENORMOUTPUTUNIT",
+    "parameterDisplayName": "Target Volume Normalized Unit",
+    "type": "text",
+    "datasource": "static",
+    "defaultValue": "L/KG"
+  },
+  {
+    "parameterName": "CLNORMOUTPUTUNIT",
+    "parameterDisplayName": "Target Clearance Normalized Unit",
+    "type": "text",
+    "datasource": "static",
+    "defaultValue": "L/HR/KG"
+  },
+  {
+    "parameterName": "PKTERMPARENT",
+    "parameterDisplayName": "PKTERMPARENT",
+    "type": "text",
+    "defaultValue": "",
+    "datasource": "column",
+    "category": "hidden"
+  },
+  {
+    "parameterName": "DP.DEFAULT",
+    "parameterDisplayName": "DP.DEFAULT",
+    "type": "text",
+    "defaultValue": "3",
+    "category": "variable"
+  },
+  {
+    "parameterName": "SF.DEFAULT",
+    "parameterDisplayName": "SF.DEFAULT",
+    "type": "text",
+    "defaultValue": "3",
+    "category": "variable"
+  },
+  {
+    "parameterName": "PARAMETERLIST",
+    "parameterDisplayName": "PARAMETERLIST",
+    "type": "multi-selection",
+    "defaultValue": [
+      "AE",
+      "AEPCT",
+      "AET",
+      "AT",
+      "AETAUi",
+      "AETAUPTi",
+      "AETPCT",
+      "AURCALL",
+      "AURCINFO",
+      "AURCINFP",
+      "AURCLAST",
+      "AURCT",
+      "AURCT1_T2",
+      "AURCXPCTO",
+      "AURCXPCTP",
+      "CLR",
+      "CLRT",
+      "CLRTAU",
+      "DOSE",
+      "DOSEi",
+      "DOSEC",
+      "DOSECi",
+      "FA",
+      "MAXRATE",
+      "MAXRATEi",
+      "MIDPT",
+      "MIDPTA",
+      "MIDPTN",
+      "MIDPTLAST",
+      "MIDPTLASTi",
+      "RATELAST",
+      "RATELASTi",
+      "RATE",
+      "RATEi",
+      "RATEA",
+      "RATEAi",
+      "RATEN",
+      "RATENi",
+      "TAU",
+      "TAUi",
+      "TLAG",
+      "TMAXRATE",
+      "TMAXRATEi",
+      "TOLD",
+      "TOLDi",
+      "VOLSUM",
+      "FLGACCEPTPREDOSE",
+      "FLGACCEPTTMAX",
+      "FLGACCEPTKEL",
+      "FLGACCEPTTAU"
+    ],
+    "datasource": "static",
+    "category": "params-multi",
+    "options": [
+      "AE",
+      "AEPCT",
+      "AET",
+      "AT",
+      "AETAUi",
+      "AETAUPTi",
+      "AETPCT",
+      "AURCALL",
+      "AURCINFO",
+      "AURCINFP",
+      "AURCLAST",
+      "AURCT",
+      "AURCT1_T2",
+      "AURCXPCTO",
+      "AURCXPCTP",
+      "CLR",
+      "CLRT",
+      "CLRTAU",
+      "DOSE",
+      "DOSEi",
+      "DOSEC",
+      "DOSECi",
+      "FA",
+      "MAXRATE",
+      "MAXRATEi",
+      "MIDPT",
+      "MIDPTA",
+      "MIDPTN",
+      "MIDPTLAST",
+      "MIDPTLASTi",
+      "RATELAST",
+      "RATELASTi",
+      "RATE",
+      "RATEi",
+      "RATEA",
+      "RATEAi",
+      "RATEN",
+      "RATENi",
+      "TAU",
+      "TAUi",
+      "TLAG",
+      "TMAXRATE",
+      "TMAXRATEi",
+      "TOLD",
+      "TOLDi",
+      "VOLSUM",
+      "FLGACCEPTPREDOSE",
+      "FLGACCEPTTMAX",
+      "FLGACCEPTKEL",
+      "FLGACCEPTTAU"
+    ]
+  },
+  {
+    "parameterName": "PARAMETERDISPLAYLIST",
+    "parameterDisplayName": "PARAMETERDISPLAYLIST",
+    "type": "multi-selection",
+    "defaultValue": [
+      "AE",
+      "AEPCT"
+    ],
+    "datasource": "static",
+    "category": "params-multi",
+    "options": []
+  },
+  {
+    "parameterName": "DATADISPLAYLIST",
+    "parameterDisplayName": "DATADISPLAYLIST",
+    "type": "multi-selection",
+    "defaultValue": [
+      "SDEID",
+      "STUDY",
+      "SITEID",
+      "SUBJID",
+      "RAND",
+      "TREATXT",
+      "TRTCD",
+      "PKCOLL",
+      "PKBDFLD",
+      "PKTERM",
+      "PERIODU",
+      "PERIOD",
+      "VISITU",
+      "VISIT",
+      "PHASE",
+      "PCANMETH",
+      "PCMETHOD",
+      "PCNAM",
+      "PCLLOQ",
+      "PCSTRESU",
+      "DOSE",
+      "DOSEU",
+      "DOSEUNI",
+      "ACTTRT"
+    ],
+    "datasource": "column",
+    "category": "params-multi",
+    "options": []
+  },
+  {
+    "parameterName": "RETURNCOLS",
+    "parameterDisplayName": "RETURNCOLS",
+    "type": "multi-selection",
+    "category": "variable",
+    "defaultValue": [
+      "UDSDEID",
+      "SDEID",
+      "STUDY",
+      "SITEID",
+      "SUBJID",
+      "RAND",
+      "TREATXT",
+      "TRTCD",
+      "PKCOLL",
+      "PKBDFLD",
+      "PKTERM",
+      "PERIODU",
+      "PERIOD",
+      "VISITU",
+      "VISIT",
+      "PHASE",
+      "PCANMETH",
+      "HT",
+      "WT",
+      "AGEDERU",
+      "AGEDER",
+      "WTUNI",
+      "WTRAW",
+      "HTUNI",
+      "HTRAW",
+      "RACEOTH",
+      "RACES",
+      "SEX",
+      "RACIALD",
+      "ETHNIC",
+      "DOSEP",
+      "DOSPND",
+      "DOSEPUNI",
+      "DOSPTM",
+      "DOSE",
+      "DOSEU",
+      "ACTTRT",
+      "ACTTRTC",
+      "ACTTRTS",
+      "TREATSEQ",
+      "FLGEMESIS",
+      "FU",
+      "DATASTATUS",
+      "PKPCOM",
+      "PKSIGFIG",
+      "PKDECPL",
+      "DATABLINDSTATUS",
+      "PCLLOQ",
+      "PCSTRESU",
+      "PCNAM",
+      "ROUTE"
+    ],
+    "datasource": "column"
+  },
+  {
+    "parameterName": "AUCNPAIR",
+    "parameterDisplayName": "AUCNPAIR",
+    "type": "text",
+    "defaultValue": "0",
+    "category": "hidden"
+  },
+  {
+    "parameterName": "OPTIMIZEKEL",
+    "parameterDisplayName": "OPTIMIZEKEL",
+    "type": "selection",
+    "defaultValue": "0",
+    "datasource": "static",
+    "options": [
+      "0",
+      "1"
+    ]
+  },
+  {
+    "parameterName": "INCLUDEINTERPOLATION",
+    "parameterDisplayName": "INCLUDEINTERPOLATION",
+    "type": "selection",
+    "defaultValue": "1",
+    "datasource": "static",
+    "options": [
+      "0",
+      "1"
+    ]
+  },
+  {
+    "parameterName": "INCLUDEEXTRAPOLATION",
+    "parameterDisplayName": "INCLUDEEXTRAPOLATION",
+    "type": "selection",
+    "defaultValue": "1",
+    "datasource": "static",
+    "options": [
+      "0",
+      "1"
+    ]
+  }
+]
