@@ -6,8 +6,13 @@ library(devtools)
 library(curl)
 
 ### Remove any prior installation
-detach('package:openNCA', unload=TRUE)
-remove.packages("openNCA")
+if(interactive()) { 
+    if("openNCA" %in% rownames(installed.packages())) { 
+        detach('package:openNCA', unload=TRUE)
+        remove.packages("openNCA")
+    }
+}
+
 ### Download and install the interim version of *openNCAreport*  
 commit <- "c3d3f48"
 ### Commit dir
