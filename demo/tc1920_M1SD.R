@@ -4,6 +4,7 @@
 # Setup -------------------------------------------------------------------
 library(readr)
 library(tidyverse)
+library(openNCA)
 
 setwd("./demo")
 
