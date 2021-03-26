@@ -1,42 +1,42 @@
 
 # Table of Contents
 
--   [Installation from source using the pre-built package](#orgff60bf6)
-    -   [Demonstration Installation](#org2b8a163)
-    -   [Open R or RStudio](#org3201277)
-    -   [Set your default folder for installation in the R session](#org2bcba53)
-    -   [Download Testcase scripts, data, and installation files to your default folder](#org23cee21)
-    -   [Execute the installation script to install openNCA Computation Engine package library from source](#orgb1ce526)
--   [Installation and building package from source using **devtools**](#org9cacfd5)
-    -   [Dependencies for installation and building from source using **devtools**](#orgb920650)
-        -   [devtools: Tools to Make Developing R Packages Easier](#org2e9a026)
-        -   [curl: A Modern and Flexible Web Client for R](#org0c055ad)
-    -   [Demonstration Installation](#orgf738eb9)
-    -   [Open R or RStudio](#org7ac88d4)
-    -   [Set your default folder for installation in the R session](#org09ba9e8)
-    -   [Download Testcase scripts, data, and installation files to your default folder](#org01fed3b)
-    -   [Execute the installation script to build the openNCA Computation Engine package library](#org6e44ea9)
+-   [Installation from source using the pre-built package](#orgb21de6b)
+    -   [Demonstration Installation](#org4b7ea5e)
+    -   [Open R or RStudio](#org0b1f5d9)
+    -   [Set your default folder for installation in the R session](#org2ab74f1)
+    -   [Download Testcase scripts, data, and installation files to your default folder](#org9c3405f)
+    -   [Execute the installation script to install openNCA Computation Engine package library from source](#orgf59bd0c)
+-   [Installation and building package from source using **devtools**](#org3b43c81)
+    -   [Dependencies for installation and building from source using **devtools**](#org128ea0a)
+        -   [devtools: Tools to Make Developing R Packages Easier](#org1cacf6c)
+        -   [curl: A Modern and Flexible Web Client for R](#org9736814)
+    -   [Demonstration Installation](#org062913c)
+    -   [Open R or RStudio](#org6892319)
+    -   [Set your default folder for installation in the R session](#org73debfc)
+    -   [Download Testcase scripts, data, and installation files to your default folder](#org20aca40)
+    -   [Execute the installation script to build the openNCA Computation Engine package library](#org98ce135)
 
 These instructions provide brief installation and testcase execution
 guidance.
 
 There are two approaches presented:
 
--   [Installation from source using the pre-built package](#org7c906cc)
--   [Installation and building package from source using **devtools**](#org0855cb0)
+-   [Installation from source using the pre-built package](#orge9c42b2)
+-   [Installation and building package from source using **devtools**](#org62324d9)
 
 
-<a id="orgff60bf6"></a>
+<a id="orgb21de6b"></a>
 
-# <a id="org7c906cc"></a>Installation from source using the pre-built package
+# <a id="orge9c42b2"></a>Installation from source using the pre-built package
 
 
-<a id="org2b8a163"></a>
+<a id="org4b7ea5e"></a>
 
 ## Demonstration Installation
 
 
-<a id="org3201277"></a>
+<a id="org0b1f5d9"></a>
 
 ## Open R or RStudio
 
@@ -44,7 +44,7 @@ openNCA Computation Engine v3.0 (commit c3d3f48) has been qualified with R-3.5.1
 So, at the moment, consider R-3.5.1 as a minimum installation requirement.
 
 
-<a id="org2bcba53"></a>
+<a id="org2ab74f1"></a>
 
 ## Set your default folder for installation in the R session
 
@@ -53,18 +53,18 @@ The default folder will then have a child "demo" folder containing the sources f
 installation and testcase files for demonstration use.
 
 
-<a id="org23cee21"></a>
+<a id="org9c3405f"></a>
 
 ## Download Testcase scripts, data, and installation files to your default folder
 
 <https://github.com/tensfeldt/openNCA/raw/master/demo/demo.zip>
 
 
-<a id="orgb1ce526"></a>
+<a id="orgf59bd0c"></a>
 
 ## Execute the installation script to install openNCA Computation Engine package library from source
 
-Load ../demo/install/openNCA<sub>install</sub><sub>package.R</sub> and
+Load ./demo/install/openNCA<sub>install</sub><sub>package.R</sub> and
 execute all of the lines. Alternatively, source the openNCA<sub>install</sub><sub>package.R</sub> file.
 This script will directly download and install the openNCA library package from source.
 
@@ -79,32 +79,32 @@ R script:
     source("./demo/install/openNCA_install_package.R")
 
 
-<a id="org9cacfd5"></a>
+<a id="org3b43c81"></a>
 
-# <a id="org0855cb0"></a>Installation and building package from source using **devtools**
+# <a id="org62324d9"></a>Installation and building package from source using **devtools**
 
 
-<a id="orgb920650"></a>
+<a id="org128ea0a"></a>
 
 ## Dependencies for installation and building from source using **devtools**
 
 
-<a id="org2e9a026"></a>
+<a id="org1cacf6c"></a>
 
 ### [devtools: Tools to Make Developing R Packages Easier](https://CRAN.R-project.org/package=devtools)
 
 
-<a id="org0c055ad"></a>
+<a id="org9736814"></a>
 
 ### [curl: A Modern and Flexible Web Client for R](https://CRAN.R-project.org/package=curl)
 
 
-<a id="orgf738eb9"></a>
+<a id="org062913c"></a>
 
 ## Demonstration Installation
 
 
-<a id="org7ac88d4"></a>
+<a id="org6892319"></a>
 
 ## Open R or RStudio
 
@@ -112,7 +112,7 @@ openNCA Computation Engine v3.0 (commit c3d3f48) has been qualified with R-3.5.1
 So, at the moment, consider R-3.5.1 as a minimum installation requirement.
 
 
-<a id="org09ba9e8"></a>
+<a id="org73debfc"></a>
 
 ## Set your default folder for installation in the R session
 
@@ -121,18 +121,18 @@ The default folder will then have a child "demo" folder containing the sources f
 installation and testcase files for demonstration use.
 
 
-<a id="org01fed3b"></a>
+<a id="org20aca40"></a>
 
 ## Download Testcase scripts, data, and installation files to your default folder
 
 <https://github.com/tensfeldt/openNCA/raw/master/demo/demo.zip>
 
 
-<a id="org6e44ea9"></a>
+<a id="org98ce135"></a>
 
 ## Execute the installation script to build the openNCA Computation Engine package library
 
-Load ../demo/install/openNCA<sub>build</sub><sub>package.R</sub> and
+Load ./demo/install/openNCA<sub>build</sub><sub>package.R</sub> and
 execute all of the lines. Alternatively, source the openNCA<sub>build</sub><sub>package.R</sub> file.
 This script will build the openNCA library package from source.
 
