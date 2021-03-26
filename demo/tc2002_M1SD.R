@@ -1,4 +1,4 @@
-# tc1920_M1SD
+# tc2002_M1SD
 ### openNCA computation engine Model M1 Single Dose Demonstation Example  
 
 # Setup -------------------------------------------------------------------
@@ -12,11 +12,11 @@ setwd("./demo")
 rm(list=ls())
 
 params <- c()
-params["testcase.id"] = "tc1905"
-params["tcpath"] = "./testcases/DEMO1002_M1SD"
-params["INPUT1"] = "DEMO1002-DT.csv"
-params["map"] = "DEMO1002-MCT.csv"
-params["flags"] = "DEMO1002-KEL.csv"
+params["testcase.id"] = "tc2002"
+params["tcpath"] = "./testcases/DEMO1001_M1SD"
+params["INPUT1"] = "DEMO1001-DT.csv"
+params["map"] = "DEMO1001-MCT.csv"
+params["flags"] = "DEMO1001-KEL.csv"
 
 ### Read Input Concentration data  
 conc <- read.csv(file=file.path(params["tcpath"], params["INPUT1"]), header=TRUE, sep=",", as.is=TRUE)

@@ -1,4 +1,4 @@
-### tc1921_M2SD
+### tc2004_M2SD
 ### openNCA computation engine Model M2 Single Dose Demonstation Example  
 
 ### Setup -------------------------------------------------------------------
@@ -12,7 +12,7 @@ setwd("./demo")
 rm(list=ls())
 
 params <- c()
-params["testcase.id"] = "tc1921"
+params["testcase.id"] = "tc2004"
 params["tcpath"] = "./testcases/DEMO1003_M2SD"
 params["INPUT1"] = "DEMO1003-DT.csv"
 params["map"] = "DEMO1003-MCT.csv"

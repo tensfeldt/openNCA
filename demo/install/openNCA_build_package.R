@@ -1,5 +1,7 @@
 ### Installation of openNCA v3.0 specific commit c3d3f48
+###  This is the installation procedure to install from github source
 ### 2021-03-19/TGT/ First Version
+### 2021-03-26/TGT/ Updated description
 
 ### Installation Tools Required
 library(devtools)

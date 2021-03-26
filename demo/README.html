@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-03-19 Fri 14:19 -->
+<!-- 2021-03-26 Fri 11:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>openNCA Computation Engine Demonstration Installation and Test Cases</title>
@@ -229,16 +229,30 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org2e67b37">Dependencies for installation</a>
+<li><a href="#orgcd1b58b">Installation from source using the pre-built package</a>
 <ul>
-<li><a href="#orgf01bbc0">devtools: Tools to Make Developing R Packages Easier</a></li>
-<li><a href="#orgbe12859">curl: A Modern and Flexible Web Client for R</a></li>
+<li><a href="#org4839d6d">Demonstration Installation</a></li>
+<li><a href="#orgd0b299a">Open R or RStudio</a></li>
+<li><a href="#org6c4ca17">Set your default folder for installation in the R session</a></li>
+<li><a href="#orgfbffe65">Download Testcase scripts, data, and installation files to your default folder</a></li>
+<li><a href="#org4c05807">Execute the installation script to install openNCA Computation Engine package library from source</a></li>
 </ul>
 </li>
-<li><a href="#org4580ac0">Download Testcase scripts and data</a></li>
-<li><a href="#org819f19d">Open R or RStudio</a></li>
-<li><a href="#org1af87d6">Set your default folder in the R session</a></li>
-<li><a href="#orge046c89">Execute the installation script  openNCA Computation Engine package library</a></li>
+<li><a href="#org0e2f2b2">Installation and building package from source using <b>devtools</b></a>
+<ul>
+<li><a href="#orgad331bc">Dependencies for installation and building from source using <b>devtools</b></a>
+<ul>
+<li><a href="#org35b2191">devtools: Tools to Make Developing R Packages Easier</a></li>
+<li><a href="#org85e7555">curl: A Modern and Flexible Web Client for R</a></li>
+</ul>
+</li>
+<li><a href="#org3b90ce0">Demonstration Installation</a></li>
+<li><a href="#org3224f3e">Open R or RStudio</a></li>
+<li><a href="#org103a133">Set your default folder for installation in the R session</a></li>
+<li><a href="#orgb2e2a0e">Download Testcase scripts, data, and installation files to your default folder</a></li>
+<li><a href="#orgdc1ad88">Execute the installation script to build the openNCA Computation Engine package library</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -247,57 +261,65 @@ These instructions provide brief installation and testcase execution
 guidance.
 </p>
 
-<div id="outline-container-org2e67b37" class="outline-2">
-<h2 id="org2e67b37">Dependencies for installation</h2>
-<div class="outline-text-2" id="text-org2e67b37">
-</div>
-<div id="outline-container-orgf01bbc0" class="outline-3">
-<h3 id="orgf01bbc0"><a href="https://cran.r-project.org/package=devtools">devtools: Tools to Make Developing R Packages Easier</a></h3>
-</div>
-<div id="outline-container-orgbe12859" class="outline-3">
-<h3 id="orgbe12859"><a href="https://cran.r-project.org/package=curl">curl: A Modern and Flexible Web Client for R</a></h3>
-</div>
-</div>
-
-<div id="outline-container-org4580ac0" class="outline-2">
-<h2 id="org4580ac0">Download Testcase scripts and data</h2>
-<div class="outline-text-2" id="text-org4580ac0">
 <p>
-<a href="https://github.com/tensfeldt/openNCA/blob/master/demo/demo.zip">https://github.com/tensfeldt/openNCA/blob/master/demo/demo.zip</a>* Demonstration Installation
+There are two approaches presented:
 </p>
+
+<ul class="org-ul">
+<li><a href="#org2f0185f">Installation from source using the pre-built package</a></li>
+<li><a href="#orgcf75598">Installation and building package from source using <b>devtools</b></a></li>
+</ul>
+
+<div id="outline-container-orgcd1b58b" class="outline-2">
+<h2 id="orgcd1b58b"><a id="org2f0185f"></a>Installation from source using the pre-built package</h2>
+<div class="outline-text-2" id="text-orgcd1b58b">
 </div>
+<div id="outline-container-org4839d6d" class="outline-3">
+<h3 id="org4839d6d">Demonstration Installation</h3>
 </div>
 
-<div id="outline-container-org819f19d" class="outline-2">
-<h2 id="org819f19d">Open R or RStudio</h2>
-<div class="outline-text-2" id="text-org819f19d">
+<div id="outline-container-orgd0b299a" class="outline-3">
+<h3 id="orgd0b299a">Open R or RStudio</h3>
+<div class="outline-text-3" id="text-orgd0b299a">
 <p>
 openNCA Computation Engine v3.0 (commit c3d3f48) has been qualified with R-3.5.1.
-So consider R-3.5.1 as a minimum installation requirement.
+So, at the moment, consider R-3.5.1 as a minimum installation requirement.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org1af87d6" class="outline-2">
-<h2 id="org1af87d6">Set your default folder in the R session</h2>
-<div class="outline-text-2" id="text-org1af87d6">
+<div id="outline-container-org6c4ca17" class="outline-3">
+<h3 id="org6c4ca17">Set your default folder for installation in the R session</h3>
+<div class="outline-text-3" id="text-org6c4ca17">
 <p>
-This should be the folder <b>above</b> the "demo" folder that you downloaded
+In the next step you will download a zip file from GitHub and extract to this folder.
+The default folder will then have a child "demo" folder containing the sources for
+installation and testcase files for demonstration use.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orge046c89" class="outline-2">
-<h2 id="orge046c89">Execute the installation script  openNCA Computation Engine package library</h2>
-<div class="outline-text-2" id="text-orge046c89">
+<div id="outline-container-orgfbffe65" class="outline-3">
+<h3 id="orgfbffe65">Download Testcase scripts, data, and installation files to your default folder</h3>
+<div class="outline-text-3" id="text-orgfbffe65">
 <p>
-Load ../demo/install/openNCA<sub>commit</sub><sub>installation.R</sub> and
-execute all of the lines.
+<a href="https://github.com/tensfeldt/openNCA/raw/master/demo/demo.zip">https://github.com/tensfeldt/openNCA/raw/master/demo/demo.zip</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4c05807" class="outline-3">
+<h3 id="org4c05807">Execute the installation script to install openNCA Computation Engine package library from source</h3>
+<div class="outline-text-3" id="text-org4c05807">
+<p>
+Load ../demo/install/openNCA<sub>install</sub><sub>package.R</sub> and
+execute all of the lines. Alternatively, source the openNCA<sub>install</sub><sub>package.R</sub> file.
+This script will directly download and install the openNCA library package from source.
 </p>
 
 <p>
-Alternatively, source the file. 
-For example, if you've downloaded demo.zip and unzipped to your Downloads folder:
+The following illustrates downloading demo.zip and unzipping to your Downloads folder using an
+R script:
 </p>
 
 <div class="org-src-container">
@@ -306,15 +328,94 @@ For example, if you've downloaded demo.zip and unzipped to your Downloads folder
 getwd()
 unzip(<span style="color: #61CE3C;">"demo.zip"</span>)
 list.files(<span style="color: #61CE3C;">"./demo"</span>)
-<span style="color: #D8FA3C;">source</span>(<span style="color: #61CE3C;">"./demo/install/openNCA_commit_installation.R"</span>)
+<span style="color: #D8FA3C;">source</span>(<span style="color: #61CE3C;">"./demo/install/openNCA_install_package.R"</span>)
 </pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0e2f2b2" class="outline-2">
+<h2 id="org0e2f2b2"><a id="orgcf75598"></a>Installation and building package from source using <b>devtools</b></h2>
+<div class="outline-text-2" id="text-org0e2f2b2">
+</div>
+<div id="outline-container-orgad331bc" class="outline-3">
+<h3 id="orgad331bc">Dependencies for installation and building from source using <b>devtools</b></h3>
+<div class="outline-text-3" id="text-orgad331bc">
+</div>
+<div id="outline-container-org35b2191" class="outline-4">
+<h4 id="org35b2191"><a href="https://cran.r-project.org/package=devtools">devtools: Tools to Make Developing R Packages Easier</a></h4>
+</div>
+<div id="outline-container-org85e7555" class="outline-4">
+<h4 id="org85e7555"><a href="https://cran.r-project.org/package=curl">curl: A Modern and Flexible Web Client for R</a></h4>
+</div>
+</div>
+
+
+<div id="outline-container-org3b90ce0" class="outline-3">
+<h3 id="org3b90ce0">Demonstration Installation</h3>
+</div>
+
+<div id="outline-container-org3224f3e" class="outline-3">
+<h3 id="org3224f3e">Open R or RStudio</h3>
+<div class="outline-text-3" id="text-org3224f3e">
+<p>
+openNCA Computation Engine v3.0 (commit c3d3f48) has been qualified with R-3.5.1.
+So, at the moment, consider R-3.5.1 as a minimum installation requirement.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org103a133" class="outline-3">
+<h3 id="org103a133">Set your default folder for installation in the R session</h3>
+<div class="outline-text-3" id="text-org103a133">
+<p>
+In the next step you will download a zip file from GitHub and extract to this folder.
+The default folder will then have a child "demo" folder containing the sources for
+installation and testcase files for demonstration use.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb2e2a0e" class="outline-3">
+<h3 id="orgb2e2a0e">Download Testcase scripts, data, and installation files to your default folder</h3>
+<div class="outline-text-3" id="text-orgb2e2a0e">
+<p>
+<a href="https://github.com/tensfeldt/openNCA/raw/master/demo/demo.zip">https://github.com/tensfeldt/openNCA/raw/master/demo/demo.zip</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgdc1ad88" class="outline-3">
+<h3 id="orgdc1ad88">Execute the installation script to build the openNCA Computation Engine package library</h3>
+<div class="outline-text-3" id="text-orgdc1ad88">
+<p>
+Load ../demo/install/openNCA<sub>build</sub><sub>package.R</sub> and
+execute all of the lines. Alternatively, source the openNCA<sub>build</sub><sub>package.R</sub> file.
+This script will build the openNCA library package from source.
+</p>
+
+<p>
+The following illustrates downloading demo.zip and unzipping to your Downloads folder using an
+R script:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-R">home <span style="color: #D8FA3C;">&lt;-</span> Sys.getenv(<span style="color: #61CE3C;">"HOMEPATH"</span>)
+<span style="color: #D8FA3C;">setwd</span>(file.path(home, <span style="color: #61CE3C;">"Downloads"</span>))
+getwd()
+unzip(<span style="color: #61CE3C;">"demo.zip"</span>)
+list.files(<span style="color: #61CE3C;">"./demo"</span>)
+<span style="color: #D8FA3C;">source</span>(<span style="color: #61CE3C;">"./demo/install/openNCA_build_package.R"</span>)
+</pre>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Tom Tensfeldt</p>
-<p class="date">Created: 2021-03-19 Fri 14:19</p>
+<p class="date">Created: 2021-03-26 Fri 11:49</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
