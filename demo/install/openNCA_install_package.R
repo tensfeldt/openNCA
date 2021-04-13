@@ -15,7 +15,7 @@ if(interactive()) {
 }
 
 ### commit_zip
-zipfile <- "demo2.zip"
+zipfile <- "demo.zip"
 ### Download https://github.com/tensfeldt/openNCA/raw/master/demo/demo.zip
 curl_download("https://github.com/tensfeldt/openNCA/raw/master/demo/demo.zip", destfile=zipfile)
 ### unzip the install file  
