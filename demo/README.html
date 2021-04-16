@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-03-26 Fri 14:03 -->
+<!-- 2021-04-16 Fri 12:13 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>openNCA Computation Engine Demonstration Installation and Test Cases</title>
@@ -229,30 +229,30 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org1278d76">Installation from source using the pre-built package</a>
+<li><a href="#org43314c0">Installation using the pre-built package</a>
 <ul>
-<li><a href="#orgae36d52">Demonstration Installation</a></li>
-<li><a href="#org4cf2479">Open R or RStudio</a></li>
-<li><a href="#orgdfdd353">Set your default folder for installation in the R session</a></li>
-<li><a href="#org5dcd678">Download Testcase scripts, data, and installation files to your default folder</a></li>
-<li><a href="#orgc6f886e">Execute the installation script to install openNCA Computation Engine package library from source</a></li>
+<li><a href="#org1c27753">Open R or RStudio</a></li>
+<li><a href="#org8ffd340">Set your default folder for installation in the R session</a></li>
+<li><a href="#org9da5c6f">Download Testcase scripts, data, and installation files to a folder of your choice</a></li>
+<li><a href="#orgb54dda6">Execute the installation script to install openNCA Computation Engine package library from source</a></li>
 </ul>
 </li>
-<li><a href="#orgd0a1199">Installation and building package from source using <b>devtools</b></a>
+<li><a href="#orgb674379">Installation and building package from source using <b>devtools</b></a>
 <ul>
-<li><a href="#org3d0b05c">Dependencies for installation and building from source using <b>devtools</b></a>
+<li><a href="#orgf6e4c21">Dependencies for installation and building from source</a>
 <ul>
-<li><a href="#org70f56f6">devtools: Tools to Make Developing R Packages Easier</a></li>
-<li><a href="#orga150732">curl: A Modern and Flexible Web Client for R</a></li>
+<li><a href="#org610980b">devtools: Tools to Make Developing R Packages Easier</a></li>
+<li><a href="#orgee8ad7b">curl: A Modern and Flexible Web Client for R</a></li>
 </ul>
 </li>
-<li><a href="#orgf26ede6">Demonstration Installation</a></li>
-<li><a href="#org9037829">Open R or RStudio</a></li>
-<li><a href="#orgff24fc2">Set your default folder for installation in the R session</a></li>
-<li><a href="#org52bef1f">Download Testcase scripts, data, and installation files to your default folder</a></li>
-<li><a href="#org1678887">Execute the installation script to build the openNCA Computation Engine package library</a></li>
+<li><a href="#org217cb24">Open R or RStudio</a></li>
+<li><a href="#org8eb9530">Create/Set up a folder for installation in the R session</a></li>
+<li><a href="#orgc70bf22">Download Testcase scripts, data, and installation files to the install folder</a></li>
+<li><a href="#orga945267">Download the build package script from Github</a></li>
+<li><a href="#orga825bce">Execute the installation script to build the openNCA Computation Engine package library</a></li>
 </ul>
 </li>
+<li><a href="#org148bd66">Execute Model 1 Single Dose Extravascular Example Testcase</a></li>
 </ul>
 </div>
 </div>
@@ -266,31 +266,29 @@ There are two approaches presented:
 </p>
 
 <ul class="org-ul">
-<li><a href="#org74b1432">Installation from source using the pre-built package</a></li>
-<li><a href="#orgf055bec">Installation and building package from source using <b>devtools</b></a></li>
+<li><a href="#org15580f6">Installation using the pre-built package</a> - <b>Recommended</b></li>
+<li><a href="#org5512c41">Installation and building package from source using <b>devtools</b></a></li>
+<li><a href="#org5532771">Execute Model 1 Single Dose Extravascular Example Testcase</a></li>
 </ul>
 
-<div id="outline-container-org1278d76" class="outline-2">
-<h2 id="org1278d76"><a id="org74b1432"></a>Installation from source using the pre-built package</h2>
-<div class="outline-text-2" id="text-org1278d76">
+<div id="outline-container-org43314c0" class="outline-2">
+<h2 id="org43314c0"><a id="org15580f6"></a>Installation using the pre-built package</h2>
+<div class="outline-text-2" id="text-org43314c0">
 </div>
-<div id="outline-container-orgae36d52" class="outline-3">
-<h3 id="orgae36d52">Demonstration Installation</h3>
-</div>
-
-<div id="outline-container-org4cf2479" class="outline-3">
-<h3 id="org4cf2479">Open R or RStudio</h3>
-<div class="outline-text-3" id="text-org4cf2479">
+<div id="outline-container-org1c27753" class="outline-3">
+<h3 id="org1c27753">Open R or RStudio</h3>
+<div class="outline-text-3" id="text-org1c27753">
 <p>
 openNCA Computation Engine v3.0 (commit c3d3f48) has been qualified with R-3.5.1.
 So, at the moment, consider R-3.5.1 as a minimum installation requirement.
+openNCA CE is being used in a Production Qualified Environment with R-4.0.3.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgdfdd353" class="outline-3">
-<h3 id="orgdfdd353">Set your default folder for installation in the R session</h3>
-<div class="outline-text-3" id="text-orgdfdd353">
+<div id="outline-container-org8ffd340" class="outline-3">
+<h3 id="org8ffd340">Set your default folder for installation in the R session</h3>
+<div class="outline-text-3" id="text-org8ffd340">
 <p>
 In the next step you will download a zip file from GitHub and extract to this folder.
 The default folder will then have a child "demo" folder containing the sources for
@@ -299,123 +297,555 @@ installation and testcase files for demonstration use.
 </div>
 </div>
 
-<div id="outline-container-org5dcd678" class="outline-3">
-<h3 id="org5dcd678">Download Testcase scripts, data, and installation files to your default folder</h3>
-<div class="outline-text-3" id="text-org5dcd678">
+<div id="outline-container-org9da5c6f" class="outline-3">
+<h3 id="org9da5c6f">Download Testcase scripts, data, and installation files to a folder of your choice</h3>
+<div class="outline-text-3" id="text-org9da5c6f">
 <p>
 <a href="https://github.com/tensfeldt/openNCA/raw/master/demo/demo.zip">https://github.com/tensfeldt/openNCA/raw/master/demo/demo.zip</a>
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgc6f886e" class="outline-3">
-<h3 id="orgc6f886e">Execute the installation script to install openNCA Computation Engine package library from source</h3>
-<div class="outline-text-3" id="text-orgc6f886e">
+<div id="outline-container-orgb54dda6" class="outline-3">
+<h3 id="orgb54dda6">Execute the installation script to install openNCA Computation Engine package library from source</h3>
+<div class="outline-text-3" id="text-orgb54dda6">
 <p>
-Load ./demo/install/openNCA<sub>install</sub><sub>package.R</sub> and
-execute all of the lines. Alternatively, source the openNCA<sub>install</sub><sub>package.R</sub> file.
-This script will directly download and install the openNCA library package from source.
+Source or load and execute all of the lines for the ./demo/install/openNCA_install_package.R script.
+This script will install the openNCA library package from source.
 </p>
 
 <p>
-The following illustrates downloading demo.zip and unzipping to your Downloads folder using an
-R script:
+If you do have the package <b>curl</b> installed, the following illustrates downloading demo.zip and
+unzipping to your Downloads folder using an R script:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-R">home <span style="color: #D8FA3C;">&lt;-</span> Sys.getenv(<span style="color: #61CE3C;">"HOMEPATH"</span>)
-<span style="color: #D8FA3C;">setwd</span>(file.path(home, <span style="color: #61CE3C;">"Downloads"</span>))
-getwd()
-unzip(<span style="color: #61CE3C;">"demo.zip"</span>)
-list.files(<span style="color: #61CE3C;">"./demo"</span>)
-<span style="color: #D8FA3C;">source</span>(<span style="color: #61CE3C;">"./demo/install/openNCA_install_package.R"</span>)
+<pre class="src src-R" id="orge205551">home <span style="color: #D8FA3C;">&lt;-</span> Sys.getenv(<span style="color: #61CE3C;">"HOMEPATH"</span>)
+<span style="color: #D8FA3C;">setwd</span>(file.path(home, <span style="color: #61CE3C;">"Downloads/demonstration"</span>))
+zipfile <span style="color: #D8FA3C;">&lt;-</span> <span style="color: #61CE3C;">"demo.zip"</span>
+curl::curl_download(<span style="color: #61CE3C;">"https://github.com/tensfeldt/openNCA/raw/master/demo/demo.zip"</span>, destfile=zipfile)
+unzip(zipfile, exdir=getwd())
+list.files(recursive=<span style="color: #8DA6CE;">TRUE</span>)
+<span style="color: #D8FA3C;">source</span>(<span style="color: #61CE3C;">"./install/openNCA_install_package.R"</span>)
+<span style="color: #D8FA3C;">library</span>(openNCA)
+</pre>
+</div>
+
+<pre class="example" id="orgb5ffdad">
+
+R version 3.5.1 Patched (2018-11-18 r75627) -- "Feather Spray"
+Copyright (C) 2018 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+&gt; home &lt;- Sys.getenv("HOMEPATH")
+&gt; setwd(file.path(home, "Downloads/demonstration"))
+&gt; zipfile &lt;- "demo.zip"
+&gt; curl::curl_download("https://github.com/tensfeldt/openNCA/raw/master/demo/demo.zip", destfile=zipfile)
+&gt; unzip(zipfile, exdir=getwd())
+&gt; list.files(recursive=TRUE)
+ [1] "demo.zip"                                                                
+ [2] "install/openNCA_build_package.R"                                         
+ [3] "install/openNCA_download_demo.R"                                         
+ [4] "install/openNCA_install_package.R"                                       
+ [5] "openNCA Computation Engine Demonstration Installation and Test Cases.pdf"
+ [6] "README.html"                                                             
+ [7] "README.md"                                                               
+ [8] "release_files/openNCA_c3d3f48_3.0.0.tar.gz"                              
+ [9] "tc2001_M1SD.R"                                                           
+[10] "tc2002_M1SD.R"                                                           
+[11] "tc2003_M1SS.R"                                                           
+[12] "tc2004_M2SD.R"                                                           
+[13] "tc2005_M2SS.R"                                                           
+[14] "tc2006_M3SD.R"                                                           
+[15] "tc2008_M4SD.R"                                                           
+[16] "tc2009_M4SS.R"                                                           
+[17] "testcases/DEMO1001_M1SD/DEMO1001-CEST.csv"                               
+[18] "testcases/DEMO1001_M1SD/DEMO1001-DT.csv"                                 
+[19] "testcases/DEMO1001_M1SD/DEMO1001-KEL.csv"                                
+[20] "testcases/DEMO1001_M1SD/DEMO1001-MCT.csv"                                
+[21] "testcases/DEMO1001_M1SD/DEMO1001-PPRM.csv"                               
+[22] "testcases/DEMO1002_M1SS/DEMO1002-CEST.csv"                               
+[23] "testcases/DEMO1002_M1SS/DEMO1002-DT.csv"                                 
+[24] "testcases/DEMO1002_M1SS/DEMO1002-KEL.csv"                                
+[25] "testcases/DEMO1002_M1SS/DEMO1002-MCT.csv"                                
+[26] "testcases/DEMO1002_M1SS/DEMO1002-PPRM.csv"                               
+[27] "testcases/DEMO1003_M2SD/DEMO1003-CEST.csv"                               
+[28] "testcases/DEMO1003_M2SD/DEMO1003-DT.csv"                                 
+[29] "testcases/DEMO1003_M2SD/DEMO1003-KEL.csv"                                
+[30] "testcases/DEMO1003_M2SD/DEMO1003-MCT.csv"                                
+[31] "testcases/DEMO1003_M2SD/DEMO1003-PPRM.csv"                               
+[32] "testcases/DEMO1004_M2SS/DEMO1004-DT.csv"                                 
+[33] "testcases/DEMO1004_M2SS/DEMO1004-KEL.csv"                                
+[34] "testcases/DEMO1004_M2SS/DEMO1004-MCT.csv"                                
+[35] "testcases/DEMO1004_M2SS/DEMO1004-REF.csv"                                
+[36] "testcases/DEMO1005_M3SD/DEMO1005-DT.csv"                                 
+[37] "testcases/DEMO1005_M3SD/DEMO1005-KEL.csv"                                
+[38] "testcases/DEMO1005_M3SD/DEMO1005-MCT.csv"                                
+[39] "testcases/DEMO1005_M3SD/DEMO1005-REF.csv"                                
+[40] "testcases/DEMO1007_M4SD/DEMO1007-DT.csv"                                 
+[41] "testcases/DEMO1007_M4SD/DEMO1007-KEL.csv"                                
+[42] "testcases/DEMO1007_M4SD/DEMO1007-MCT.csv"                                
+[43] "testcases/DEMO1007_M4SD/DEMO1007-REF.csv"                                
+[44] "testcases/DEMO1008_M4SS/DEMO1008-DT.csv"                                 
+[45] "testcases/DEMO1008_M4SS/DEMO1008-KEL.csv"                                
+[46] "testcases/DEMO1008_M4SS/DEMO1008-MCT.csv"                                
+[47] "testcases/DEMO1008_M4SS/DEMO1008-REF.csv"                                
+&gt; source("./install/openNCA_install_package.R")
+  converting help for package 'openNCA'
+    ae                                      html  
+    aepct                                   html  
+    aet                                     html  
+    aetau                                   html  
+    aetpct                                  html  
+    at                                      html  
+    auc_XbpctO                              html  
+    auc_XbpctP                              html  
+    auc_XpctO                               html  
+    auc_XpctP                               html  
+    auc_all                                 html  
+    auc_dn                                  html  
+    auc_inf_o                               html  
+    auc_inf_oc                              html  
+    auc_inf_p                               html  
+    auc_inf_pc                              html  
+    auc_last                                html  
+    auc_lastc                               html  
+    auc_lin                                 html  
+    auc_lin_log                             html  
+    auc_lin_up_log_down                     html  
+    auc_log                                 html  
+    auc_t                                   html  
+    auc_t1_t2                               html  
+    auc_tau                                 html  
+    aumc_XpctO                              html  
+    aumc_XpctP                              html  
+    aumc_inf_o                              html  
+    aumc_inf_p                              html  
+    aumc_last                               html  
+    aumc_lin                                html  
+    aumc_lin_log                            html  
+    aumc_lin_up_log_down                    html  
+    aumc_log                                html  
+    aumc_tau                                html  
+    aurc_all                                html  
+    c0                                      html  
+    cav                                     html  
+    cendinf                                 html  
+    cendinf_dn                              html  
+    cest                                    html  
+    clast                                   html  
+    clfo                                    html  
+    clfow                                   html  
+    clfp                                    html  
+    clfpw                                   html  
+    clftau                                  html  
+    clftauw                                 html  
+    clo                                     html  
+    clow                                    html  
+    clp                                     html  
+    clpw                                    html  
+    clr                                     html  
+    clrt                                    html  
+    clrtau                                  html  
+    cltau                                   html  
+    cltauw                                  html  
+    cmax                                    html  
+    cmax_dn                                 html  
+    cmaxc                                   html  
+    cmin                                    html  
+    cmin_dn                                 html  
+    create_dependency_list                  html  
+    create_dosing_intervals                 html  
+    ctrough                                 html  
+    ctroughend                              html  
+    dependent_parameters                    html  
+    dof                                     html  
+    dosec                                   html  
+    est_c0                                  html  
+    estimate_concentration                  html  
+    estimate_missing_concentration          html  
+    estimate_told_concentration             html  
+    get_told_concentration                  html  
+    interpolate_lin                         html  
+    interpolate_log                         html  
+    kel                                     html  
+    kel_r                                   html  
+    lasttime                                html  
+    makenumeric                             html  
+    maxrate                                 html  
+    midptlast                               html  
+    model_display_parameters                html  
+    model_parameters                        html  
+    model_spec                              html  
+    mr_auc_inf_o                            html  
+    mr_auc_inf_p                            html  
+    mr_auc_last                             html  
+    mr_auc_tau                              html  
+    mr_cmax                                 html  
+    mrt_evif_o                              html  
+    mrt_evif_p                              html  
+    mrt_ivif_o                              html  
+    mrt_ivif_p                              html  
+    mrt_last                                html  
+    opennca_version                         html  
+    parameter_indices                       html  
+    parameter_regex                         html  
+    parameter_required                      html  
+    parameters_by_class                     html  
+    parse.reg                               html  
+    ptf                                     html  
+    ptr                                     html  
+    ptroughr                                html  
+    ptroughrend                             html  
+    rate                                    html  
+    ratelast                                html  
+    rmempty                                 html  
+    run_M1_SD_computation                   html  
+    run_M1_SS_computation                   html  
+    run_M2_SD_computation                   html  
+    run_M2_SS_computation                   html  
+    run_M3_SD_computation                   html  
+    run_M3_SS_computation                   html  
+    run_M4_SD_computation                   html  
+    run_M4_SS_computation                   html  
+    run_computation                         html  
+    specific_gravity_adjustment             html  
+    tendinf                                 html  
+    tlag                                    html  
+    tlast                                   html  
+    tmax                                    html  
+    tmaxrate                                html  
+    tmin                                    html  
+    unit_conversion                         html  
+    unitclass_parameters                    html  
+    update_mct_data                         html  
+    v0                                      html  
+    valid_models                            html  
+    validate_timeconc_data                  html  
+    vol_sum                                 html  
+    vsso                                    html  
+    vssow                                   html  
+    vssp                                    html  
+    vsspw                                   html  
+    vzfo                                    html  
+    vzfow                                   html  
+    vzfp                                    html  
+    vzfpw                                   html  
+    vzftau                                  html  
+    vzftauw                                 html  
+    vzo                                     html  
+    vzow                                    html  
+    vzp                                     html  
+    vzpw                                    html  
+&gt; 
 </pre>
 </div>
 </div>
 </div>
-</div>
-
-<div id="outline-container-orgd0a1199" class="outline-2">
-<h2 id="orgd0a1199"><a id="orgf055bec"></a>Installation and building package from source using <b>devtools</b></h2>
-<div class="outline-text-2" id="text-orgd0a1199">
-</div>
-<div id="outline-container-org3d0b05c" class="outline-3">
-<h3 id="org3d0b05c">Dependencies for installation and building from source using <b>devtools</b></h3>
-<div class="outline-text-3" id="text-org3d0b05c">
-</div>
-<div id="outline-container-org70f56f6" class="outline-4">
-<h4 id="org70f56f6"><a href="https://cran.r-project.org/package=devtools">devtools: Tools to Make Developing R Packages Easier</a></h4>
-</div>
-<div id="outline-container-orga150732" class="outline-4">
-<h4 id="orga150732"><a href="https://cran.r-project.org/package=curl">curl: A Modern and Flexible Web Client for R</a></h4>
-</div>
-</div>
 
 
-<div id="outline-container-orgf26ede6" class="outline-3">
-<h3 id="orgf26ede6">Demonstration Installation</h3>
+<div id="outline-container-orgb674379" class="outline-2">
+<h2 id="orgb674379"><a id="org5512c41"></a>Installation and building package from source using <b>devtools</b></h2>
+<div class="outline-text-2" id="text-orgb674379">
+</div>
+<div id="outline-container-orgf6e4c21" class="outline-3">
+<h3 id="orgf6e4c21">Dependencies for installation and building from source</h3>
+<div class="outline-text-3" id="text-orgf6e4c21">
+</div>
+<div id="outline-container-org610980b" class="outline-4">
+<h4 id="org610980b"><a href="https://cran.r-project.org/package=devtools">devtools: Tools to Make Developing R Packages Easier</a></h4>
+</div>
+<div id="outline-container-orgee8ad7b" class="outline-4">
+<h4 id="orgee8ad7b"><a href="https://cran.r-project.org/package=curl">curl: A Modern and Flexible Web Client for R</a></h4>
+</div>
 </div>
 
-<div id="outline-container-org9037829" class="outline-3">
-<h3 id="org9037829">Open R or RStudio</h3>
-<div class="outline-text-3" id="text-org9037829">
+<div id="outline-container-org217cb24" class="outline-3">
+<h3 id="org217cb24">Open R or RStudio</h3>
+<div class="outline-text-3" id="text-org217cb24">
 <p>
 openNCA Computation Engine v3.0 (commit c3d3f48) has been qualified with R-3.5.1.
 So, at the moment, consider R-3.5.1 as a minimum installation requirement.
+openNCA CE is being used in a Production Qualified Environment with R-4.0.3.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgff24fc2" class="outline-3">
-<h3 id="orgff24fc2">Set your default folder for installation in the R session</h3>
-<div class="outline-text-3" id="text-orgff24fc2">
+<div id="outline-container-org8eb9530" class="outline-3">
+<h3 id="org8eb9530">Create/Set up a folder for installation in the R session</h3>
+<div class="outline-text-3" id="text-org8eb9530">
 <p>
-In the next step you will download a zip file from GitHub and extract to this folder.
-The default folder will then have a child "demo" folder containing the sources for
-installation and testcase files for demonstration use.
+In the next steps you will download files from GitHub and extract to the installation folder.
+Once complete, this folder will have a child "demo" folder containing the sources for
+installation and R and testcase dataset files for demonstration use.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org52bef1f" class="outline-3">
-<h3 id="org52bef1f">Download Testcase scripts, data, and installation files to your default folder</h3>
-<div class="outline-text-3" id="text-org52bef1f">
+<div id="outline-container-orgc70bf22" class="outline-3">
+<h3 id="orgc70bf22">Download Testcase scripts, data, and installation files to the install folder</h3>
+<div class="outline-text-3" id="text-orgc70bf22">
 <p>
 <a href="https://github.com/tensfeldt/openNCA/raw/master/demo/demo.zip">https://github.com/tensfeldt/openNCA/raw/master/demo/demo.zip</a>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org1678887" class="outline-3">
-<h3 id="org1678887">Execute the installation script to build the openNCA Computation Engine package library</h3>
-<div class="outline-text-3" id="text-org1678887">
+<div id="outline-container-orga945267" class="outline-3">
+<h3 id="orga945267">Download the build package script from Github</h3>
+<div class="outline-text-3" id="text-orga945267">
 <p>
-Load ./demo/install/openNCA<sub>build</sub><sub>package.R</sub> and
-execute all of the lines. Alternatively, source the openNCA<sub>build</sub><sub>package.R</sub> file.
+Download from <a href="https://github.com/tensfeldt/openNCA/blob/master/demo/install/openNCA_build_package.R">https://github.com/tensfeldt/openNCA/blob/master/demo/install/openNCA_build_package.R</a> and
+store in your installation folder
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga825bce" class="outline-3">
+<h3 id="orga825bce">Execute the installation script to build the openNCA Computation Engine package library</h3>
+<div class="outline-text-3" id="text-orga825bce">
+<p>
+Source or load and execute all of the lines for the ./demo/install/openNCA_build_package.R script.
 This script will build the openNCA library package from source.
 </p>
 
 <p>
-The following illustrates downloading demo.zip and unzipping to your Downloads folder using an
-R script:
+The following illustrates downloading demo.zip, extracting all the files, and executing the
+openNCA_build_package.R script within in the installation <b>Downloads/demonstration</b> folder using an R script:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-R">home <span style="color: #D8FA3C;">&lt;-</span> Sys.getenv(<span style="color: #61CE3C;">"HOMEPATH"</span>)
-<span style="color: #D8FA3C;">setwd</span>(file.path(home, <span style="color: #61CE3C;">"Downloads"</span>))
-getwd()
-unzip(<span style="color: #61CE3C;">"demo.zip"</span>)
-list.files(<span style="color: #61CE3C;">"./demo"</span>)
-<span style="color: #D8FA3C;">source</span>(<span style="color: #61CE3C;">"./demo/install/openNCA_build_package.R"</span>)
+<pre class="src src-R" id="org6f071cf"><span style="color: #D8FA3C;">library</span>(curl)
+home <span style="color: #D8FA3C;">&lt;-</span> Sys.getenv(<span style="color: #61CE3C;">"HOMEPATH"</span>)
+<span style="color: #D8FA3C;">setwd</span>(file.path(home, <span style="color: #61CE3C;">"Downloads/demonstration"</span>))
+curl_download(<span style="color: #61CE3C;">"https://github.com/tensfeldt/openNCA/raw/master/demo/install/openNCA_download_demo.R"</span>, destfile=<span style="color: #61CE3C;">"openNCA_download_demo.R"</span>)
+<span style="color: #D8FA3C;">source</span>(<span style="color: #61CE3C;">"openNCA_download_demo.R"</span>)
+unlink(<span style="color: #61CE3C;">"openNCA_download_demo.R"</span>)
+curl_download(<span style="color: #61CE3C;">"https://github.com/tensfeldt/openNCA/raw/master/demo/install/openNCA_build_package.R"</span>, destfile=<span style="color: #61CE3C;">"openNCA_build_package.R"</span>)
+<span style="color: #D8FA3C;">source</span>(<span style="color: #61CE3C;">"openNCA_build_package.R"</span>)
+unlink(<span style="color: #61CE3C;">"openNCA_build_package.R"</span>)
+<span style="color: #D8FA3C;">library</span>(openNCA)
 </pre>
 </div>
+
+<pre class="example" id="org1861a51">
+
+R version 3.5.1 Patched (2018-11-18 r75627) -- "Feather Spray"
+Copyright (C) 2018 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+&gt; library(curl)
+&gt; home &lt;- Sys.getenv("HOMEPATH")
+&gt; setwd(file.path(home, "Downloads/demonstration"))
+&gt; curl_download("https://github.com/tensfeldt/openNCA/raw/master/demo/install/openNCA_download_demo.R", destfile="openNCA_download_demo.R")
+&gt; source("openNCA_download_demo.R")
+  converting help for package 'openNCA'
+    ae                                      html  
+    aepct                                   html  
+    aet                                     html  
+    aetau                                   html  
+    aetpct                                  html  
+    at                                      html  
+    auc_XbpctO                              html  
+    auc_XbpctP                              html  
+    auc_XpctO                               html  
+    auc_XpctP                               html  
+    auc_all                                 html  
+    auc_dn                                  html  
+    auc_inf_o                               html  
+    auc_inf_oc                              html  
+    auc_inf_p                               html  
+    auc_inf_pc                              html  
+    auc_last                                html  
+    auc_lastc                               html  
+    auc_lin                                 html  
+    auc_lin_log                             html  
+    auc_lin_up_log_down                     html  
+    auc_log                                 html  
+    auc_t                                   html  
+    auc_t1_t2                               html  
+    auc_tau                                 html  
+    aumc_XpctO                              html  
+    aumc_XpctP                              html  
+    aumc_inf_o                              html  
+    aumc_inf_p                              html  
+    aumc_last                               html  
+    aumc_lin                                html  
+    aumc_lin_log                            html  
+    aumc_lin_up_log_down                    html  
+    aumc_log                                html  
+    aumc_tau                                html  
+    aurc_all                                html  
+    c0                                      html  
+    cav                                     html  
+    cendinf                                 html  
+    cendinf_dn                              html  
+    cest                                    html  
+    clast                                   html  
+    clfo                                    html  
+    clfow                                   html  
+    clfp                                    html  
+    clfpw                                   html  
+    clftau                                  html  
+    clftauw                                 html  
+    clo                                     html  
+    clow                                    html  
+    clp                                     html  
+    clpw                                    html  
+    clr                                     html  
+    clrt                                    html  
+    clrtau                                  html  
+    cltau                                   html  
+    cltauw                                  html  
+    cmax                                    html  
+    cmax_dn                                 html  
+    cmaxc                                   html  
+    cmin                                    html  
+    cmin_dn                                 html  
+    create_dependency_list                  html  
+    create_dosing_intervals                 html  
+    ctrough                                 html  
+    ctroughend                              html  
+    dependent_parameters                    html  
+    dof                                     html  
+    dosec                                   html  
+    est_c0                                  html  
+    estimate_concentration                  html  
+    estimate_missing_concentration          html  
+    estimate_told_concentration             html  
+    get_told_concentration                  html  
+    interpolate_lin                         html  
+    interpolate_log                         html  
+    kel                                     html  
+    kel_r                                   html  
+    lasttime                                html  
+    makenumeric                             html  
+    maxrate                                 html  
+    midptlast                               html  
+    model_display_parameters                html  
+    model_parameters                        html  
+    model_spec                              html  
+    mr_auc_inf_o                            html  
+    mr_auc_inf_p                            html  
+    mr_auc_last                             html  
+    mr_auc_tau                              html  
+    mr_cmax                                 html  
+    mrt_evif_o                              html  
+    mrt_evif_p                              html  
+    mrt_ivif_o                              html  
+    mrt_ivif_p                              html  
+    mrt_last                                html  
+    opennca_version                         html  
+    parameter_indices                       html  
+    parameter_regex                         html  
+    parameter_required                      html  
+    parameters_by_class                     html  
+    parse.reg                               html  
+    ptf                                     html  
+    ptr                                     html  
+    ptroughr                                html  
+    ptroughrend                             html  
+    rate                                    html  
+    ratelast                                html  
+    rmempty                                 html  
+    run_M1_SD_computation                   html  
+    run_M1_SS_computation                   html  
+    run_M2_SD_computation                   html  
+    run_M2_SS_computation                   html  
+    run_M3_SD_computation                   html  
+    run_M3_SS_computation                   html  
+    run_M4_SD_computation                   html  
+    run_M4_SS_computation                   html  
+    run_computation                         html  
+    specific_gravity_adjustment             html  
+    tendinf                                 html  
+    tlag                                    html  
+    tlast                                   html  
+    tmax                                    html  
+    tmaxrate                                html  
+    tmin                                    html  
+    unit_conversion                         html  
+    unitclass_parameters                    html  
+    update_mct_data                         html  
+    v0                                      html  
+    valid_models                            html  
+    validate_timeconc_data                  html  
+    vol_sum                                 html  
+    vsso                                    html  
+    vssow                                   html  
+    vssp                                    html  
+    vsspw                                   html  
+    vzfo                                    html  
+    vzfow                                   html  
+    vzfp                                    html  
+    vzfpw                                   html  
+    vzftau                                  html  
+    vzftauw                                 html  
+    vzo                                     html  
+    vzow                                    html  
+    vzp                                     html  
+    vzpw                                    html  
+&gt; unlink("openNCA_download_demo.R")
+&gt; curl_download("https://github.com/tensfeldt/openNCA/raw/master/demo/install/openNCA_build_package.R", destfile="openNCA_build_package.R")
+&gt; source("openNCA_build_package.R")
+&gt; unlink("openNCA_build_package.R")
+&gt; library(openNCA)
+&gt; 
+</pre>
+</div>
+</div>
+</div>
+
+
+
+<div id="outline-container-org148bd66" class="outline-2">
+<h2 id="org148bd66"><a id="org5532771"></a>Execute Model 1 Single Dose Extravascular Example Testcase</h2>
+<div class="outline-text-2" id="text-org148bd66">
+<p>
+Once installation is complete, test installation with a sample execution. Note that
+this example assumes that the tidyverse package is installed.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-R" id="org7cf7cd9">home <span style="color: #D8FA3C;">&lt;-</span> Sys.getenv(<span style="color: #61CE3C;">"HOMEPATH"</span>)
+<span style="color: #D8FA3C;">setwd</span>(file.path(home, <span style="color: #61CE3C;">"Downloads/demonstration"</span>))
+<span style="color: #D8FA3C;">source</span>(<span style="color: #61CE3C;">"tc2001_M1SD.R"</span>)
+</pre>
 </div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Tom Tensfeldt</p>
-<p class="date">Created: 2021-03-26 Fri 14:03</p>
+<p class="date">Created: 2021-04-16 Fri 12:13</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
