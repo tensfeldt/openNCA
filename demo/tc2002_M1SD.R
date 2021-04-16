@@ -6,8 +6,6 @@ library(readr)
 library(tidyverse)
 library(openNCA)
 
-setwd("./demo")
-
 # Prepare Data for test execution
 rm(list=ls())
 
