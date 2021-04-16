@@ -22,8 +22,8 @@ curl_download("https://github.com/tensfeldt/openNCA/raw/master/demo/demo.zip", d
 unzip(zipfile, exdir=getwd())
 list.files()
 ### find unzipped directory
-install_taz <- list.files(path=file.path(getwd(), "demo"), pattern="*.tar.gz")
+install_taz <- list.files(path=file.path(getwd(), "release_files"), pattern="*.tar.gz")
 ### Install Package  
-install.packages(file.path(getwd(), "demo", install_taz), repos = NULL, type="source")
+install.packages(file.path(getwd(), "release_files", install_taz), repos = NULL, type="source")
 ### Load Package
 library(openNCA)
