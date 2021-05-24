@@ -4,10 +4,12 @@
 
 ### Remove any prior installation
 if(interactive()) { 
-    if("openNCA" %in% rownames(installed.packages())) { 
-        detach('package:openNCA', unload=TRUE)
-        remove.packages("openNCA")
-    }
+  if("openNCA" %in% loadedNamespaces()) { 
+    detach('package:openNCA', unload=TRUE)
+  }
+  if("openNCA" %in% rownames(installed.packages())) { 
+    remove.packages("openNCA")
+  }
 }
 
 ### find package file in the *release\under{}files* directory
